@@ -1,9 +1,0 @@
-streamlit
-pandas
-requests
-openpyxl
-lxml
-html5lib
-beautifulsoup4
-gspread
-google-auth
