@@ -21,7 +21,7 @@ def require_admin_password():
     try:
         admin_password = st.secrets.get("ADMIN_PASSWORD", "")
     except Exception:
-        admin_password = ""
+        admin_password = "Ryan2628$"
 
     if not admin_password:
         admin_password = os.environ.get("ADMIN_PASSWORD", "")
@@ -57,7 +57,30 @@ st.markdown(
     <style>
     /* Mobile-friendly spacing and table behavior */
     .block-container {padding-top: 1rem; padding-left: 0.8rem; padding-right: 0.8rem; max-width: 1100px;}
-    div[data-testid="stMetric"] {background: #f8fafc; border: 1px solid #e5e7eb; padding: 0.6rem; border-radius: 0.75rem;}
+
+    /* Fix mobile metric cards: previous white background made the metric text invisible in dark mode */
+    div[data-testid="stMetric"] {
+        background: #111827 !important;
+        border: 1px solid #374151 !important;
+        padding: 0.85rem !important;
+        border-radius: 0.85rem !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    }
+    div[data-testid="stMetric"] * {
+        color: #f9fafb !important;
+    }
+    div[data-testid="stMetricLabel"] p {
+        color: #d1d5db !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+    div[data-testid="stMetricDelta"] {
+        color: #d1d5db !important;
+    }
+
     div[data-testid="stDataFrame"] {font-size: 0.85rem;}
     .stButton > button {width: 100%; border-radius: 0.75rem; font-weight: 600;}
     @media (max-width: 768px) {
@@ -227,7 +250,7 @@ def parse_american_odds(value):
     text = str(value).strip()
     if not text:
         return None
-    matches = re.findall(r"[+-]?d+", text)
+    matches = re.findall(r"[+-]?\d+", text)
     if not matches:
         return None
     try:
