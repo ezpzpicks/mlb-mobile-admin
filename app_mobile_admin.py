@@ -935,6 +935,7 @@ SLATE_COLUMNS = [
     "Home Pitcher K + Grade",
     "Home Pitcher K Score",
     "Favorite Pick",
+    "Handpicked Record",
     "Favorite Rank",
     "Favorite Tag",
     "Favorite Notes"
