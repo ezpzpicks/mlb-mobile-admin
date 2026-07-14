@@ -1,9 +1,5 @@
-streamlit
-pandas
-requests
-openpyxl
-lxml
-html5lib
-beautifulsoup4
-gspread
-google-auth
+streamlit>=1.40
+pandas>=2.0
+requests>=2.31
+gspread>=6.0
+google-auth>=2.0
