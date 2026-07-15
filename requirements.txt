@@ -1,0 +1,8 @@
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+requests>=2.31
+gspread>=6.0
+google-auth>=2.0
+nflreadpy>=0.1.5
+polars>=1.0
