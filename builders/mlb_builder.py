@@ -1555,6 +1555,17 @@ def get_pitcher_recent_form_summary(pitcher, lookback=5):
 
     out["Projection Miss"] = pd.to_numeric(out["Projection Miss"], errors="coerce")
     out["Actual Ks"] = pd.to_numeric(out["Actual Ks"], errors="coerce")
+    # Older/partially backfilled rows can contain the completed pitching line
+    # without a saved Projection Miss. Reconstruct it from the best projection
+    # snapshot available so real starts do not incorrectly display No History.
+    projection_for_miss = pd.Series(index=out.index, dtype=float)
+    for projection_col in ["Projection", "Global Calibrated Projection", "Raw Projection"]:
+        if projection_col in out.columns:
+            projection_for_miss = projection_for_miss.fillna(
+                pd.to_numeric(out[projection_col], errors="coerce")
+            )
+    derived_miss = out["Actual Ks"] - projection_for_miss
+    out["Projection Miss"] = out["Projection Miss"].fillna(derived_miss)
     out["_date"] = pd.to_datetime(out["Date"], errors="coerce")
 
     # Render can run in UTC. Use Eastern date so evening app sessions do not
@@ -2083,7 +2094,17 @@ def maybe_auto_update_pitcher_recent_form():
     key = f"recent_form_auto_update_done_{recent_form_today}"
     if st.session_state.get(key):
         return
-    st.session_state[key] = True
+    # A failed first request used to mark the whole day complete before any work
+    # ran. Keep failed or partially resolved jobs eligible for a throttled retry.
+    attempt_key = f"recent_form_auto_update_last_attempt_{recent_form_today}"
+    now_ts = time.time()
+    try:
+        last_attempt = float(st.session_state.get(attempt_key, 0.0) or 0.0)
+    except Exception:
+        last_attempt = 0.0
+    if last_attempt and (now_ts - last_attempt) < 120.0:
+        return
+    st.session_state[attempt_key] = now_ts
 
     errors = []
     result = {"updated": 0, "message": ""}
@@ -2103,12 +2124,34 @@ def maybe_auto_update_pitcher_recent_form():
 
     if result.get("updated", 0) > 0:
         st.success(result.get("message", "Pitcher history updated."))
+        # Re-read the repaired rows during this same builder run instead of
+        # waiting for Streamlit's workload/calibration caches to expire.
+        for cached_name in ["_v16_historical_workload_profile", "get_global_k_calibration"]:
+            cached_func = globals().get(cached_name)
+            clear_func = getattr(cached_func, "clear", None)
+            if callable(clear_func):
+                try:
+                    clear_func()
+                except Exception:
+                    pass
     if game_result.get("updated", 0) > 0:
         st.success(f"Updated {game_result.get('updated')} completed game projection rows.")
+
+    checked = int(result.get("checked", 0) or 0)
+    updated = int(result.get("updated", 0) or 0)
+    unresolved = max(0, checked - updated)
+    if unresolved:
+        errors.append(
+            f"Pitcher tracking: {unresolved} prior row(s) remain unresolved; automatic retry stays enabled."
+        )
     if errors:
         # Keep the builder usable, but retain the reason instead of silently
         # discarding it. The manual tracking button surfaces these details.
         st.session_state["tracking_update_errors"] = errors
+        st.session_state.pop(key, None)
+    else:
+        st.session_state[key] = True
+        st.session_state.pop("tracking_update_errors", None)
 
 
 
@@ -3875,7 +3918,7 @@ def render_matchup_details():
                 st.error(f"Why this is a Pass: {pdata.get('grade_restriction_reason', '')}")
             elif pdata.get("grade_diagnostic", ""):
                 st.info(pdata.get("grade_diagnostic", ""))
-            _detail_metric("K Score", pdata.get("k_score", ""))
+            _detail_metric("Raw K Score", pdata.get("k_score", ""))
 
             arsenal = pdata.get("arsenal", {}) if isinstance(pdata.get("arsenal", {}), dict) else {}
             if arsenal:
@@ -13141,6 +13184,42 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
     home_under_loss_cushion = strikeout_under_first_loss_cushion(home_k, home_k_line)
     away_under_loss_cushion = strikeout_under_first_loss_cushion(away_k, away_k_line)
 
+    def _builder_k_pass_reason(final_grade, publication_note, selected_side, selected_probability, price_edge, odds):
+        """Explain a builder Pass without changing its probability or grade."""
+        if str(final_grade or "").upper().strip() != "PASS":
+            return ""
+        restriction = str(publication_note or "").strip()
+        if restriction:
+            return restriction
+        reasons = []
+        try:
+            probability = float(selected_probability)
+            if probability < 0.60:
+                reasons.append(
+                    f"{str(selected_side or 'selected side').title()} probability "
+                    f"{probability * 100:.1f}% is below 60.0%"
+                )
+        except Exception:
+            reasons.append("selected-side probability is unavailable")
+        try:
+            advantage = float(price_edge)
+            if advantage < 0.025:
+                reasons.append(
+                    f"price edge {advantage * 100:+.1f}% is below +2.5% at odds {odds}"
+                )
+        except Exception:
+            reasons.append("price edge is unavailable")
+        return "; ".join(reasons) if reasons else "The selected side did not qualify under the active K-grade thresholds."
+
+    home_k_pass_reason = _builder_k_pass_reason(
+        home_k_grade, home_v15_5_note, home_selected_side,
+        home_selected_prob, home_k_price_edge, home_k_odds,
+    )
+    away_k_pass_reason = _builder_k_pass_reason(
+        away_k_grade, away_v15_5_note, away_selected_side,
+        away_selected_prob, away_k_price_edge, away_k_odds,
+    )
+
     st.divider()
     st.subheader("Strikeout Projections")
     col3, col4 = st.columns(2)
@@ -13172,8 +13251,13 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "Env K Adj", "value": f"{home_k_context.get('k_projection_adjustment', 0):+.2f}"},
             {"label": "Early Hook Risk", "value": home_k_context.get("early_hook_risk", "Low")},
             {"label": "Bet Grade", "value": home_k_grade, "wide": True, "big": True},
-            {"label": "K Score", "value": home_k_score, "big": True},
+            {"label": "Raw K Score", "value": home_k_score, "big": True},
         ])
+        if home_k_pass_reason:
+            with st.container():
+                st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
+                st.error(f"Why this is a Pass: {home_k_pass_reason}")
+                st.markdown('</div>', unsafe_allow_html=True)
         if home_recent_form_note:
             with st.container():
                 st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
@@ -13227,8 +13311,13 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "Env K Adj", "value": f"{away_k_context.get('k_projection_adjustment', 0):+.2f}"},
             {"label": "Early Hook Risk", "value": away_k_context.get("early_hook_risk", "Low")},
             {"label": "Bet Grade", "value": away_k_grade, "wide": True, "big": True},
-            {"label": "K Score", "value": away_k_score, "big": True},
+            {"label": "Raw K Score", "value": away_k_score, "big": True},
         ])
+        if away_k_pass_reason:
+            with st.container():
+                st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
+                st.error(f"Why this is a Pass: {away_k_pass_reason}")
+                st.markdown('</div>', unsafe_allow_html=True)
         if away_recent_form_note:
             with st.container():
                 st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
@@ -18226,7 +18315,10 @@ def update_pitcher_recent_form_actuals(auto_only=True):
 
         actual_k_rate = round(ks / actual_bf, 4) if actual_bf and actual_bf > 0 else ""
         projection = _num(row.get("Projection"))
+        global_projection = _num(row.get("Global Calibrated Projection"))
         raw_projection = _num(row.get("Raw Projection"))
+        if projection is None:
+            projection = global_projection if global_projection is not None else raw_projection
         projected_bf = _num(row.get("Projected Batters Faced"))
         projected_k_rate = _num(row.get("Projected K Rate"))
         projected_ip = _num(row.get("Projected IP"))
@@ -19337,15 +19429,23 @@ def _v162_workload_from_components(
         normal_pitches = normal_bf * ppbf
     elif previous_start_pitches is not None and average_bf_l5 and average_bf_l5 > 0:
         normal_pitches = previous_start_pitches * normal_bf / average_bf_l5
+    normal_pitch_cap_applied = bool(normal_pitches is not None and normal_pitches > 115.0)
+    if normal_pitches is not None:
+        normal_pitches = max(0.0, min(115.0, normal_pitches))
     early_pitches = _safe_float_or_none(history.get("early_pitches"))
     if early_pitches is None and ppbf is not None:
         early_pitches = early_bf * ppbf
     elif early_pitches is None and normal_pitches is not None and normal_bf > 0:
         early_pitches = normal_pitches * early_bf / normal_bf
+    if early_pitches is not None:
+        early_pitches = max(0.0, min(85.0, early_pitches))
     projected_pitches = (
         (1.0 - early_probability) * normal_pitches + early_probability * early_pitches
         if normal_pitches is not None and early_pitches is not None else None
     )
+    projected_pitch_cap_applied = bool(projected_pitches is not None and projected_pitches > 115.0)
+    if projected_pitches is not None:
+        projected_pitches = max(0.0, min(115.0, projected_pitches))
     projected_ppbf = projected_pitches / expected_bf if projected_pitches is not None and expected_bf > 0 else None
 
     historical_normal_sd = _v162_first_observed(history.get("normal_bf_sd"), 3.2)
@@ -19378,6 +19478,8 @@ def _v162_workload_from_components(
         "lineup_pitches_per_pa": round(observed_lineup_pppa, 3) if observed_lineup_pppa is not None else "",
         "lineup_pitches_pa_source": pp_source,
         "projected_pitches_per_bf": round(projected_ppbf, 3) if projected_ppbf is not None else "",
+        "pitch_cap": 115.0,
+        "pitch_cap_applied": bool(normal_pitch_cap_applied or projected_pitch_cap_applied),
         "third_time_probability": round(tto3, 4),
         "workload_pressure_score": round(early_probability / 0.09, 2),
         "bf_std": round(bf_std, 2), "bf_volatility_l8": round(volatility_sd, 3),
