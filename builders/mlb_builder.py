@@ -2568,18 +2568,64 @@ def get_best_play_category(play):
     """Return a strict category so handpicked matching cannot cross markets."""
     play_type = str(play.get("Play Type", "")).strip().upper()
     play_text = str(play.get("Play", "")).strip().upper()
+    market = str(play.get("Market", "")).strip().upper()
 
-    if "PITCHER" in play_type and ("K" in play_type or "STRIKEOUT" in play_type):
+    if (
+        market in {"PITCHER STRIKEOUTS", "PITCHER K", "PITCHER KS"}
+        or "STRIKEOUT" in market
+        or "PITCHER K" in market
+        or ("PITCHER" in play_type and ("K" in play_type or "STRIKEOUT" in play_type))
+    ):
         return "PITCHER_K"
     if play_type == "PITCHER K" or play_type == "PITCHER STRIKEOUTS":
         return "PITCHER_K"
-    if "MONEYLINE" in play_type:
+    if market == "MONEYLINE" or "MONEYLINE" in play_type:
         return "MONEYLINE"
-    if play_type.startswith("TOTAL ") or play_type in {"GAME TOTAL", "TOTAL"}:
+    if market in {"GAME TOTAL", "TOTAL"} or play_type.startswith("TOTAL ") or play_type in {"GAME TOTAL", "TOTAL"}:
         return "TOTAL"
-    if "NRFI" in play_type or "YRFI" in play_type or "NRFI" in play_text or "YRFI" in play_text:
+    if market in {"NRFI/YRFI", "NRFI", "YRFI"} or "NRFI" in play_type or "YRFI" in play_type or "NRFI" in play_text or "YRFI" in play_text:
         return "NRFI_YRFI"
     return "OTHER"
+
+
+def _handpick_play_side(play, category=None):
+    """Return the exact side represented by a handpick candidate."""
+    import re
+
+    category = category or get_best_play_category(play)
+    text = " ".join(
+        str(play.get(field, "") or "")
+        for field in ["Play Type", "Bet Type", "Side", "Play", "Selection"]
+    ).upper()
+
+    if category == "NRFI_YRFI":
+        if re.search(r"\bNRFI\b", text):
+            return "NRFI"
+        if re.search(r"\bYRFI\b", text):
+            return "YRFI"
+        return ""
+
+    if re.search(r"\bUNDER\b", text):
+        return "UNDER"
+    if re.search(r"\bOVER\b", text):
+        return "OVER"
+    return ""
+
+
+def _moneyline_selection_from_play(play):
+    """Return a clean team selection instead of a display string with %/grade tags."""
+    import re
+
+    for field in ["Team", "Selection", "Better ML Team", "Better Team"]:
+        value = str(play.get(field, "") or "").strip()
+        if value:
+            return value
+
+    value = str(play.get("Play", "") or "").strip()
+    value = re.sub(r"\s*\([^)]*%[^)]*\)\s*", " ", value)
+    value = re.sub(r"\s*\[[AB]\]\s*$", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\s+MONEYLINE\s*$", "", value, flags=re.IGNORECASE)
+    return value.strip()
 
 
 def _normalized_team_aliases_for_match(team):
@@ -2610,8 +2656,13 @@ def _normalized_team_aliases_for_match(team):
 
 
 def tracker_row_matches_best_play(row, play):
-    today = today_et_string()
-    if str(row.get("Date", "")).strip() != today:
+    play_date = str(play.get("Date", "") or "").strip() or today_et_string()
+    if str(row.get("Date", "")).strip() != play_date:
+        return False
+
+    row_game_key = str(row.get("Game Key", "") or "").strip()
+    play_game_key = str(play.get("Game Key", "") or "").strip()
+    if row_game_key and play_game_key and row_game_key != play_game_key:
         return False
 
     bet_type = str(row.get("Bet Type", "")).strip().upper()
@@ -2640,16 +2691,7 @@ def tracker_row_matches_best_play(row, play):
         if not row_is_moneyline or row_is_nrfi or row_is_pitcher_k or not selection_norm:
             return False
 
-        candidate_values = [
-            play_text,
-            play.get("Team", ""),
-            play.get("Selection", ""),
-            play.get("Better ML", ""),
-            play.get("Better ML Team", ""),
-            play.get("Better Team", ""),
-            play.get("Away Team", ""),
-            play.get("Home Team", ""),
-        ]
+        candidate_values = [_moneyline_selection_from_play(play)]
 
         candidate_aliases = set()
         for value in candidate_values:
@@ -2670,19 +2712,25 @@ def tracker_row_matches_best_play(row, play):
     if category == "TOTAL":
         if not row_is_total or row_is_nrfi or row_is_pitcher_k:
             return False
-        play_side = "OVER" if "OVER" in str(play.get("Play Type", "")).upper() else "UNDER" if "UNDER" in str(play.get("Play Type", "")).upper() else ""
+        play_side = _handpick_play_side(play, category)
         row_side = "OVER" if "OVER" in bet_type else "UNDER" if "UNDER" in bet_type else ""
         same_game = bool(selection_norm and game_norm and (selection_norm == game_norm or selection_norm in game_norm or game_norm in selection_norm))
-        return same_game and (not play_side or not row_side or play_side == row_side)
+        row_line = _handpick_line_value(row.get("Odds/Line", ""))
+        play_line = _handpick_line_value(play.get("Odds/Line", ""))
+        same_line = row_line is None or play_line is None or abs(row_line - play_line) < 1e-9
+        return same_game and same_line and (not play_side or not row_side or play_side == row_side)
 
     # NRFI/YRFI rows must match the game and must NEVER match a pitcher prop row.
     if category == "NRFI_YRFI":
+        play_side = _handpick_play_side(play, category)
+        row_side = "NRFI" if "NRFI" in bet_type else "YRFI" if "YRFI" in bet_type else ""
         return (
             row_is_nrfi
             and not row_is_pitcher_k
             and selection_norm
             and game_norm
             and (selection_norm == game_norm or selection_norm in game_norm or game_norm in selection_norm)
+            and (not play_side or not row_side or play_side == row_side)
         )
 
     # Pitcher K rows must match ONLY pitcher-strikeout tracker rows.
@@ -2696,6 +2744,15 @@ def tracker_row_matches_best_play(row, play):
         if not pitcher:
             return False
 
+        play_side = _handpick_play_side(play, category)
+        row_side = "UNDER" if "UNDER" in bet_type else "OVER" if "OVER" in bet_type else ""
+        if play_side and row_side and play_side != row_side:
+            return False
+        row_line = _handpick_line_value(row.get("Odds/Line", ""))
+        play_line = _handpick_line_value(play.get("Odds/Line", ""))
+        if row_line is not None and play_line is not None and abs(row_line - play_line) >= 1e-9:
+            return False
+
         # Match both "Last, First" and "First Last" and allow saved tracker rows
         # like "Joey Cantillo 4.5 / -110" or "Cantillo, Joey 3.69 (lean under)".
         return (
@@ -2705,6 +2762,20 @@ def tracker_row_matches_best_play(row, play):
             or loose_name_match(selection, play_text)
         )
 
+    return False
+
+
+def handpick_play_is_already_selected(play, tracker_df):
+    """Return True when this exact pending play already has today's handpicked flag."""
+    if tracker_df is None or tracker_df.empty:
+        return False
+    for _, row in tracker_df.iterrows():
+        if not tracker_row_matches_best_play(row, play):
+            continue
+        result = str(row.get("Result", "") or "").strip().upper()
+        favorite = str(row.get("Favorite Pick", "") or "").strip().upper()
+        if result in {"", "PENDING"} and favorite == "TRUE":
+            return True
     return False
 
 
@@ -2727,11 +2798,106 @@ def best_play_is_open_for_handpick(play, tracker_df):
     return any(result in {"", "PENDING"} for result in matches)
 
 
+def _tracker_row_from_handpick_play(play, favorite_rank="", favorite_tag="", favorite_notes=""):
+    """Convert any saved-slate candidate into a complete bet_tracker row."""
+    category = get_best_play_category(play)
+    play_text = str(play.get("Play", "") or "").strip()
+    game = str(play.get("Game", "") or play.get("Selection", "") or "").strip()
+    play_type = str(play.get("Bet Type", "") or play.get("Play Type", "") or "").strip()
+    side = _handpick_play_side(play, category)
+
+    if category == "PITCHER_K":
+        normalized_type = normalize_bet_type_text(play_type) or normalize_bet_type_text(play_text)
+        if normalized_type in {"STRONG OVER", "OVER", "LEAN OVER", "LEAN UNDER", "UNDER", "STRONG UNDER"}:
+            play_type = normalized_type.title()
+        elif side:
+            play_type = side.title()
+        else:
+            play_type = "Pitcher K"
+        pitcher = str(play.get("Pitcher", "") or play.get("Selection", "") or extract_pitcher_from_k_play(play_text)).strip()
+        selection = f"{pitcher} {play_type}".strip()
+        market = "Pitcher Strikeouts"
+    elif category == "MONEYLINE":
+        selection = _moneyline_selection_from_play(play)
+        market = "Moneyline"
+        if "MONEYLINE" not in play_type.upper():
+            play_type = "Moneyline"
+    elif category == "NRFI_YRFI":
+        selection = game or play_text
+        market = "NRFI/YRFI"
+        if side and side not in play_type.upper():
+            play_type = side
+    elif category == "TOTAL":
+        selection = game or play_text
+        market = "Game Total"
+        play_type = f"TOTAL {side}" if side else (play_type or "Game Total")
+    else:
+        selection = str(play.get("Selection", "") or play_text).strip()
+        market = str(play.get("Market", "") or play_type or "Handpicked").strip()
+        play_type = play_type or "Handpicked"
+
+    model_pct = str(
+        play.get("Model %", "")
+        or play.get("Selected Probability", "")
+        or play.get("Score", "")
+        or ""
+    ).strip()
+    metadata = {
+        "raw_projection": play.get("Raw Projection", ""),
+        "calibrated_projection": play.get("Calibrated Projection", ""),
+        "reliability_score": play.get("Reliability Score", ""),
+        "expected_std_dev": play.get("Expected Std Dev", ""),
+        "selected_probability": play.get("Selected Probability", "") or model_pct,
+        "model_version": play.get("Model Version", "") or MODEL_VERSION,
+        "game_key": play.get("Game Key", ""),
+        "team": play.get("Team", "") or selection,
+        "opponent": play.get("Opponent", ""),
+        "role": play.get("Pitcher Role", "") or play.get("Role", ""),
+        "public_bets_pct": play.get("Public Bets %", ""),
+        "public_money_pct": play.get("Public Money %", ""),
+        "public_gap_pct": play.get("Public Gap %", ""),
+        "public_warning": play.get("Public Warning", ""),
+        "public_warning_negative": play.get("Public Warning Negative", ""),
+        "public_split_source": play.get("Public Split Source", ""),
+        "public_split_market": play.get("Public Split Market", "") or market,
+        "public_split_selection": play.get("Public Split Selection", ""),
+        "public_split_line": play.get("Public Split Line", ""),
+        "public_split_odds": play.get("Public Split Odds", ""),
+        "public_split_match_confidence": play.get("Public Split Match Confidence", ""),
+        "public_split_snapshot_time": play.get("Public Split Snapshot Time", ""),
+        "most_bet_prop": play.get("Most Bet Prop", ""),
+        "most_bet_prop_rank": play.get("Most Bet Prop Rank", ""),
+        "prop_popularity_market": play.get("Prop Popularity Market", ""),
+        "prop_popularity_line": play.get("Prop Popularity Line", ""),
+        "prop_popularity_odds": play.get("Prop Popularity Odds", ""),
+        "prop_popularity_source": play.get("Prop Popularity Source", ""),
+        "prop_popularity_match_confidence": play.get("Prop Popularity Match Confidence", ""),
+        "prop_popularity_snapshot_time": play.get("Prop Popularity Snapshot Time", ""),
+    }
+    row = _bet_tracker_row(
+        play_type,
+        selection,
+        market,
+        str(play.get("Odds/Line", "") or "").strip(),
+        model_pct,
+        str(play.get("Implied %", "") or "").strip(),
+        str(play.get("Edge %", "") or "").strip(),
+        metadata=metadata,
+    )
+    row["Date"] = str(play.get("Date", "") or "").strip() or today_et_string()
+    row["Favorite Pick"] = "TRUE"
+    row["Handpicked Record"] = "TRUE"
+    row["Favorite Rank"] = str(favorite_rank).strip()
+    row["Favorite Tag"] = str(favorite_tag).strip().upper()
+    row["Favorite Notes"] = str(favorite_notes).strip()
+    return row
+
+
 def mark_best_play_as_handpicked(play, favorite_rank="", favorite_tag="", favorite_notes=""):
-    """Mark the matching bet_tracker row as handpicked for the public website."""
+    """Mark any best-play or full-slate candidate as handpicked for the public website."""
     tracker_df = load_tracker()
-    if tracker_df.empty:
-        return False, "No bet tracker rows found. Save the matchup bets first."
+    if tracker_df is None or tracker_df.empty:
+        tracker_df = pd.DataFrame(columns=TRACKER_COLUMNS)
 
     for col in ["Favorite Pick", "Handpicked Record", "Favorite Rank", "Favorite Tag", "Favorite Notes"]:
         if col not in tracker_df.columns:
@@ -2743,62 +2909,15 @@ def mark_best_play_as_handpicked(play, favorite_rank="", favorite_tag="", favori
             matches.append(idx)
 
     if not matches:
-        # If the slate play exists but the exact tracker row was never saved,
-        # create a safe bet_tracker row and mark it. This fixes the old dead-end
-        # where Best Plays could be shown but the Handpicked button could not
-        # find a matching saved row.
-        play_type = str(play.get("Play Type", "Handpicked")).strip() or "Handpicked"
-        play_text = str(play.get("Play", "")).strip()
-        category = get_best_play_category(play)
-        if category == "PITCHER_K":
-            selection = extract_pitcher_from_k_play(play_text) or play_text
-            market = "Pitcher Strikeouts"
-        elif category == "MONEYLINE":
-            selection = play_text
-            market = "Moneyline"
-        elif category == "NRFI_YRFI":
-            selection = str(play.get("Game", play_text)).strip()
-            market = "NRFI/YRFI"
-        else:
-            selection = play_text
-            market = play_type
-
-        new_row = {
-            "Date": today_et_string(),
-            "Bet Type": play_type,
-            "Selection": selection,
-            "Market": market,
-            "Odds/Line": str(play.get("Odds/Line", "")).strip(),
-            "Model %": str(play.get("Score", "")).strip(),
-            "Implied %": "",
-            "Edge %": "",
-            "Result": "Pending",
-            "Public Bets %": play.get("Public Bets %", ""),
-            "Public Money %": play.get("Public Money %", ""),
-            "Public Gap %": play.get("Public Gap %", ""),
-            "Public Warning": play.get("Public Warning", ""),
-            "Public Warning Negative": play.get("Public Warning Negative", ""),
-            "Public Split Source": play.get("Public Split Source", ""),
-            "Public Split Market": play.get("Public Split Market", ""),
-            "Public Split Selection": play.get("Public Split Selection", ""),
-            "Public Split Line": play.get("Public Split Line", ""),
-            "Public Split Odds": play.get("Public Split Odds", ""),
-            "Public Split Match Confidence": play.get("Public Split Match Confidence", ""),
-            "Public Split Snapshot Time": play.get("Public Split Snapshot Time", ""),
-            "Most Bet Prop": play.get("Most Bet Prop", ""),
-            "Most Bet Prop Rank": play.get("Most Bet Prop Rank", ""),
-            "Prop Popularity Market": play.get("Prop Popularity Market", ""),
-            "Prop Popularity Line": play.get("Prop Popularity Line", ""),
-            "Prop Popularity Odds": play.get("Prop Popularity Odds", ""),
-            "Prop Popularity Source": play.get("Prop Popularity Source", ""),
-            "Prop Popularity Match Confidence": play.get("Prop Popularity Match Confidence", ""),
-            "Prop Popularity Snapshot Time": play.get("Prop Popularity Snapshot Time", ""),
-            "Favorite Pick": "TRUE",
-            "Handpicked Record": "TRUE",
-            "Favorite Rank": str(favorite_rank).strip(),
-            "Favorite Tag": str(favorite_tag).strip().upper(),
-            "Favorite Notes": str(favorite_notes).strip(),
-        }
+        # Full-slate candidates may not have qualified for automatic Bet Tracker
+        # insertion. Create their complete tracker row at the moment they are
+        # handpicked so non-Best Plays can still post and grade normally.
+        new_row = _tracker_row_from_handpick_play(
+            play,
+            favorite_rank=favorite_rank,
+            favorite_tag=favorite_tag,
+            favorite_notes=favorite_notes,
+        )
         tracker_df = pd.concat([tracker_df, pd.DataFrame([new_row])], ignore_index=True)
         if save_tracker(tracker_df):
             return True, "Created the tracker row and added it to EZPZ Handpicked Plays."
@@ -8222,6 +8341,393 @@ def build_best_plays(today_slate):
     return pd.DataFrame(best_rows).sort_values(by="Score", ascending=False).reset_index(drop=True)
 
 
+def _handpick_text(value):
+    """Normalize sheet scalar values without displaying pandas/Sheets null markers."""
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+    text = str(value or "").strip()
+    return "" if text.lower() in {"nan", "none", "<na>"} else text
+
+
+def _handpick_number(value):
+    try:
+        text = _handpick_text(value).replace("%", "").replace("+", "")
+        return float(text)
+    except Exception:
+        return None
+
+
+def _handpick_line_value(value):
+    """Read the market line (not the American price) from an Odds/Line string."""
+    import re
+
+    text = _handpick_text(value).upper().replace("LINE", " ")
+    match = re.search(r"(?<![\d+-])(\d+(?:\.\d+)?)(?!\d)", text)
+    if not match:
+        return None
+    try:
+        return float(match.group(1))
+    except Exception:
+        return None
+
+
+def _handpick_candidate_key(play):
+    """Stable exact-bet key used to merge full-slate and tracker candidates."""
+    category = get_best_play_category(play)
+    game_key = _handpick_text(play.get("Game Key", ""))
+    game = normalize_match_text(play.get("Game", ""))
+    game_part = game_key or game
+    side = _handpick_play_side(play, category)
+    line = _handpick_line_value(play.get("Odds/Line", ""))
+    line_part = "" if line is None else f"{line:g}"
+
+    if category == "MONEYLINE":
+        selection = normalize_match_text(_moneyline_selection_from_play(play))
+    elif category == "PITCHER_K":
+        selection = normalize_match_text(
+            play.get("Pitcher", "")
+            or play.get("Selection", "")
+            or extract_pitcher_from_k_play(play.get("Play", ""))
+        )
+    else:
+        selection = normalize_match_text(play.get("Selection", ""))
+
+    return "|".join([
+        _handpick_text(play.get("Date", "")),
+        game_part,
+        category,
+        selection,
+        side,
+        line_part,
+    ])
+
+
+def _handpick_public_fields(row, prefix=""):
+    """Copy public split context from either all_game_trends or Daily Slate."""
+    field_map = {
+        "Public Bets %": "Public Bets %",
+        "Public Money %": "Public Money %",
+        "Public Gap %": "Public Gap %",
+        "Public Warning": "Public Warning",
+        "Public Warning Negative": "Public Warning Negative",
+        "Public Split Source": "Public Split Source",
+        "Public Split Selection": "Public Split Selection",
+        "Public Split Line": "Public Split Line",
+        "Public Split Odds": "Public Split Odds",
+        "Public Split Match Confidence": "Public Split Match Confidence",
+        "Public Split Snapshot Time": "Public Split Snapshot Time",
+    }
+    result = {}
+    for destination, source in field_map.items():
+        if prefix:
+            source = f"{prefix} {source}"
+            if destination == "Public Split Snapshot Time":
+                source = "Public Data Updated"
+        result[destination] = row.get(source, "")
+    return result
+
+
+def build_handpickable_plays(today_slate, all_game_trends=None):
+    """Build every selectable bet from saved games, not only automatic Best Plays.
+
+    Both moneyline teams and both total directions come from all_game_trends.
+    First-inning plays and every starter/bulk K projection come from Daily Slate.
+    PASS K projections remain selectable by their model direction and are clearly
+    labeled as model passes; handpicking one is an explicit manual override.
+    """
+    columns = [
+        "Date", "Game Key", "Game", "Away Team", "Home Team", "Play Type",
+        "Market", "Play", "Selection", "Team", "Opponent", "Pitcher",
+        "Pitcher Role", "Odds/Line", "Model %", "Implied %", "Edge %",
+        "Score", "Reliability Score", "Selected Probability", "Model Version",
+        "Model Status", "Qualified", "Source", "Candidate Key",
+    ]
+    if today_slate is None or today_slate.empty:
+        return pd.DataFrame(columns=columns)
+
+    candidates = []
+    seen = {}
+
+    def add_candidate(candidate):
+        candidate = dict(candidate or {})
+        candidate["Date"] = _handpick_text(candidate.get("Date", "")) or today_et_string()
+        candidate["Game"] = _handpick_text(candidate.get("Game", ""))
+        candidate["Game Key"] = _handpick_text(candidate.get("Game Key", ""))
+        candidate["Play"] = _handpick_text(candidate.get("Play", ""))
+        candidate["Selection"] = _handpick_text(candidate.get("Selection", ""))
+        candidate["Odds/Line"] = _handpick_text(candidate.get("Odds/Line", ""))
+        key = _handpick_candidate_key(candidate)
+        if not key:
+            return
+        if key in seen:
+            existing = candidates[seen[key]]
+            for field, value in candidate.items():
+                if not _handpick_text(existing.get(field, "")) and _handpick_text(value):
+                    existing[field] = value
+            return
+        seen[key] = len(candidates)
+        candidate["Candidate Key"] = key
+        candidates.append(candidate)
+
+    slate_dates = {
+        _handpick_text(value) for value in today_slate.get("Date", pd.Series(dtype=object)).tolist()
+        if _handpick_text(value)
+    }
+    slate_game_keys = {
+        _handpick_text(value) for value in today_slate.get("Game Key", pd.Series(dtype=object)).tolist()
+        if _handpick_text(value)
+    }
+    slate_game_labels = {
+        normalize_match_text(value) for value in today_slate.get("Game Label", pd.Series(dtype=object)).tolist()
+        if _handpick_text(value)
+    }
+
+    # The research table contains both ML teams and both total sides, including
+    # non-edge/research-only rows that never enter automatic Bet Tracker.
+    if all_game_trends is not None and not all_game_trends.empty:
+        for _, trend in all_game_trends.iterrows():
+            trend_date = _handpick_text(trend.get("Date", ""))
+            trend_game_key = _handpick_text(trend.get("Game Key", ""))
+            trend_game = _handpick_text(trend.get("Game", ""))
+            if slate_dates and trend_date not in slate_dates:
+                continue
+            if slate_game_keys and trend_game_key:
+                if trend_game_key not in slate_game_keys:
+                    continue
+            elif slate_game_labels and normalize_match_text(trend_game) not in slate_game_labels:
+                continue
+
+            market = _handpick_text(trend.get("Market", "")).upper()
+            base = {
+                "Date": trend_date,
+                "Game Key": trend_game_key,
+                "Game": trend_game,
+                "Away Team": trend.get("Away Team", ""),
+                "Home Team": trend.get("Home Team", ""),
+                "Model %": trend.get("Model %", ""),
+                "Selected Probability": trend.get("Model %", ""),
+                "Implied %": trend.get("Implied %", ""),
+                "Edge %": trend.get("Edge %", ""),
+                "Model Version": trend.get("Model Version", ""),
+                "Model Status": trend.get("Model Grade", ""),
+                "Qualified": trend.get("Qualified", ""),
+                "Source": "Full Slate",
+                **_handpick_public_fields(trend),
+            }
+
+            if market == "MONEYLINE":
+                team = _handpick_text(trend.get("Selection", ""))
+                odds = _handpick_text(trend.get("Odds/Line", "") or trend.get("Odds", ""))
+                if not team or not odds:
+                    continue
+                grade = _handpick_text(trend.get("Model Grade", "")) or "Non-Edge Moneyline"
+                if "MONEYLINE" not in grade.upper():
+                    grade = "Non-Edge Moneyline"
+                opponent = ""
+                away_team = _handpick_text(trend.get("Away Team", ""))
+                home_team = _handpick_text(trend.get("Home Team", ""))
+                if normalize_match_text(team) == normalize_match_text(away_team):
+                    opponent = home_team
+                elif normalize_match_text(team) == normalize_match_text(home_team):
+                    opponent = away_team
+                add_candidate({
+                    **base,
+                    "Play Type": grade,
+                    "Market": "Moneyline",
+                    "Play": team,
+                    "Selection": team,
+                    "Team": team,
+                    "Opponent": opponent,
+                    "Odds/Line": odds,
+                })
+
+            elif market in {"TOTAL", "GAME TOTAL"}:
+                side = _handpick_text(trend.get("Side", "")).upper()
+                if side not in {"OVER", "UNDER"}:
+                    selection_upper = _handpick_text(trend.get("Selection", "")).upper()
+                    side = "OVER" if "OVER" in selection_upper else "UNDER" if "UNDER" in selection_upper else ""
+                line = _handpick_text(trend.get("Line", ""))
+                odds = _handpick_text(trend.get("Odds", ""))
+                odds_line = _handpick_text(trend.get("Odds/Line", ""))
+                if not odds_line and line:
+                    odds_line = f"{line} / {odds}".strip(" /")
+                if side not in {"OVER", "UNDER"} or not line or not odds_line:
+                    continue
+                add_candidate({
+                    **base,
+                    "Play Type": f"TOTAL {side}",
+                    "Market": "Game Total",
+                    "Play": f"{trend_game} {side.title()} {line}".strip(),
+                    "Selection": trend_game,
+                    "Team": trend_game,
+                    "Odds/Line": odds_line,
+                })
+
+    for _, row in today_slate.iterrows():
+        slate_date = _handpick_text(row.get("Date", "")) or today_et_string()
+        game_key = _handpick_text(row.get("Game Key", ""))
+        away_team = _handpick_text(row.get("Away Team", ""))
+        home_team = _handpick_text(row.get("Home Team", ""))
+        game = _handpick_text(row.get("Game Label", "")) or f"{away_team} at {home_team}"
+        model_version = _handpick_text(row.get("Model Version", "")) or MODEL_VERSION
+        base = {
+            "Date": slate_date,
+            "Game Key": game_key,
+            "Game": game,
+            "Away Team": away_team,
+            "Home Team": home_team,
+            "Model Version": model_version,
+            "Source": "Daily Slate",
+        }
+
+        # Fallback for older games whose all_game_trends rows predate the
+        # both-team research table.
+        better_ml = _handpick_text(row.get("Better ML", ""))
+        ml_team = _moneyline_selection_from_play({"Play": better_ml})
+        for team_name in [away_team, home_team]:
+            aliases = _normalized_team_aliases_for_match(team_name)
+            better_norm = normalize_match_text(better_ml)
+            if any(better_norm == alias or better_norm.startswith(alias + " ") for alias in aliases):
+                ml_team = team_name
+                break
+        ml_odds = _handpick_text(row.get("ML Odds", ""))
+        if ml_team and ml_odds:
+            import re
+            pct_match = re.search(r"(\d+(?:\.\d+)?)%", better_ml)
+            model_pct = f"{pct_match.group(1)}%" if pct_match else ""
+            ml_grade = _handpick_text(row.get("ML Grade", "")) or "Non-Edge Moneyline"
+            add_candidate({
+                **base,
+                "Play Type": ml_grade,
+                "Market": "Moneyline",
+                "Play": ml_team,
+                "Selection": ml_team,
+                "Team": ml_team,
+                "Opponent": home_team if normalize_match_text(ml_team) == normalize_match_text(away_team) else away_team,
+                "Odds/Line": ml_odds,
+                "Model %": model_pct,
+                "Selected Probability": model_pct,
+                "Model Status": ml_grade,
+                "Qualified": "TRUE" if ml_grade in {"A Moneyline", "B Moneyline"} else "FALSE",
+                **_handpick_public_fields(row, "ML"),
+            })
+
+        total_grade = _handpick_text(row.get("Total Runs Grade", "")).upper()
+        total_side = "OVER" if "OVER" in total_grade else "UNDER" if "UNDER" in total_grade else ""
+        total_projection = _handpick_number(row.get("Total Runs Projection", ""))
+        total_line_number = _handpick_number(row.get("Total Runs Line", ""))
+        if not total_side and total_projection is not None and total_line_number is not None:
+            total_side = "OVER" if total_projection > total_line_number else "UNDER" if total_projection < total_line_number else ""
+        total_line = _handpick_text(row.get("Total Runs Line", ""))
+        total_odds = _handpick_text(row.get("Total Runs Odds", ""))
+        if total_side and total_line and total_odds:
+            add_candidate({
+                **base,
+                "Play Type": f"TOTAL {total_side}",
+                "Market": "Game Total",
+                "Play": f"{game} {total_side.title()} {total_line}",
+                "Selection": game,
+                "Team": game,
+                "Odds/Line": f"{total_line} / {total_odds}",
+                "Model %": row.get("Total Selected Probability", ""),
+                "Selected Probability": row.get("Total Selected Probability", ""),
+                "Score": row.get("Total Runs Projection", ""),
+                "Reliability Score": row.get("Total Reliability", ""),
+                "Model Status": total_grade or "PASS",
+                "Qualified": "TRUE" if total_grade in {"TOTAL OVER", "TOTAL UNDER"} else "FALSE",
+                **_handpick_public_fields(row, "Total"),
+            })
+
+        first_grade = _handpick_text(row.get("NRFI Grade", "")).upper()
+        first_side = "NRFI" if "NRFI" in first_grade else "YRFI" if "YRFI" in first_grade else ""
+        if first_side:
+            score_col = "NRFI Score" if first_side == "NRFI" else "YRFI Score"
+            probability_col = "NRFI Probability" if first_side == "NRFI" else "YRFI Probability"
+            odds_col = "NRFI Odds" if first_side == "NRFI" else "YRFI Odds"
+            first_odds = _handpick_text(row.get(odds_col, ""))
+            if first_odds:
+                add_candidate({
+                    **base,
+                    "Play Type": first_grade,
+                    "Market": "NRFI/YRFI",
+                    "Play": first_side,
+                    "Selection": game,
+                    "Team": game,
+                    "Odds/Line": first_odds,
+                    "Model %": row.get(probability_col, ""),
+                    "Selected Probability": row.get(probability_col, ""),
+                    "Score": row.get(score_col, ""),
+                    "Model Status": first_grade,
+                    "Qualified": "TRUE" if first_grade in {"ELITE NRFI", "ELITE YRFI", "YRFI"} else "FALSE",
+                })
+
+        pitcher_columns = [
+            ("Away Pitcher K + Grade", "Away Pitcher K Score", "Away Pitcher K Reliability", "Away Pitcher K Probability", away_team, home_team, "Starter", "Away Pitcher"),
+            ("Home Pitcher K + Grade", "Home Pitcher K Score", "Home Pitcher K Reliability", "Home Pitcher K Probability", home_team, away_team, "Starter", "Home Pitcher"),
+            ("Away Bulk Pitcher K + Grade", "Away Bulk Pitcher K Score", "Away Bulk Pitcher K Reliability", "", away_team, home_team, "Bulk", "Away Bulk"),
+            ("Home Bulk Pitcher K + Grade", "Home Bulk Pitcher K Score", "Home Bulk Pitcher K Reliability", "", home_team, away_team, "Bulk", "Home Bulk"),
+        ]
+        for summary_col, score_col, reliability_col, probability_col, team, opponent, role, prop_prefix in pitcher_columns:
+            summary = _handpick_text(row.get(summary_col, ""))
+            if not summary:
+                continue
+            info = parse_k_summary_for_best_play_filters(summary)
+            pitcher = extract_pitcher_from_k_play(summary)
+            side = _handpick_text(info.get("side", "")).upper()
+            if not side and info.get("projection") is not None and info.get("line") is not None:
+                side = "OVER" if info["projection"] > info["line"] else "UNDER" if info["projection"] < info["line"] else ""
+            if not pitcher or side not in {"OVER", "UNDER"} or info.get("line") is None:
+                continue
+            normalized_grade = normalize_bet_type_text(summary)
+            bet_type = normalized_grade.title() if normalized_grade else side.title()
+            odds = info.get("odds")
+            odds_line = f"{info['line']:g}"
+            if odds is not None:
+                odds_line += f" / {odds:+d}" if odds > 0 else f" / {odds}"
+            model_status = normalized_grade or "PASS"
+            add_candidate({
+                **base,
+                "Play Type": bet_type,
+                "Market": "Pitcher Strikeouts",
+                "Play": summary,
+                "Selection": pitcher,
+                "Pitcher": pitcher,
+                "Team": team,
+                "Opponent": opponent,
+                "Pitcher Role": role,
+                "Odds/Line": odds_line,
+                "Model %": row.get(probability_col, "") if probability_col else "",
+                "Selected Probability": row.get(probability_col, "") if probability_col else "",
+                "Score": row.get(score_col, ""),
+                "Reliability Score": row.get(reliability_col, ""),
+                "Model Status": model_status,
+                "Qualified": "FALSE" if model_status == "PASS" else "TRUE",
+                "Most Bet Prop": row.get(f"{prop_prefix} Prop Popularity Flag", ""),
+                "Most Bet Prop Rank": row.get(f"{prop_prefix} Prop Popularity Rank", ""),
+                "Prop Popularity Market": row.get(f"{prop_prefix} Prop Popularity Market", ""),
+                "Prop Popularity Line": row.get(f"{prop_prefix} Prop Popularity Line", ""),
+                "Prop Popularity Odds": row.get(f"{prop_prefix} Prop Popularity Odds", ""),
+                "Prop Popularity Source": row.get(f"{prop_prefix} Prop Popularity Source", ""),
+                "Prop Popularity Match Confidence": row.get(f"{prop_prefix} Prop Popularity Match Confidence", ""),
+                "Prop Popularity Snapshot Time": row.get(f"{prop_prefix} Prop Popularity Updated", ""),
+            })
+
+    if not candidates:
+        return pd.DataFrame(columns=columns)
+
+    result = pd.DataFrame(candidates)
+    for column in columns:
+        if column not in result.columns:
+            result[column] = ""
+    market_order = {"Moneyline": 0, "Game Total": 1, "NRFI/YRFI": 2, "Pitcher Strikeouts": 3}
+    result["_market_order"] = result["Market"].map(market_order).fillna(9)
+    result = result.sort_values(["Game", "_market_order", "Play Type"], kind="stable").drop(columns=["_market_order"])
+    return result.reset_index(drop=True)
+
+
 def sync_daily_yrfi_tracker_limit(slate_date=None, max_plays=None):
     """Deprecated compatibility wrapper. Elite YRFI has no daily ranking cap.
 
@@ -8337,65 +8843,161 @@ def render_daily_slate():
                     st.divider()
 
     elif view == "Handpick Any":
-        st.subheader("Handpick Any Saved Bet")
-        st.caption("Use this for plays you personally like, especially Lean Unders, even if they did not qualify for Best Plays. Save the bet first, then tap Add to Handpicked here.")
+        st.subheader("Handpick Any Bet")
+        st.caption(
+            "Choose any saved game, then any available market. This includes both moneyline teams, "
+            "both total directions, first-inning plays, and every starter/bulk pitcher-K projection — "
+            "even when it did not qualify for Best Plays."
+        )
 
         if tracker_df is not None and not tracker_df.empty:
             date_mask = tracker_df["Date"].astype(str).str.strip() == today
             result_mask = tracker_df["Result"].astype(str).str.strip().str.upper().isin(["", "PENDING"])
             today_tracker = tracker_df[date_mask & result_mask].copy()
         else:
-            today_tracker = pd.DataFrame()
-        if today_tracker.empty:
-            st.info("No open saved bets found for today. Completed bets are removed from the handpick list automatically.")
-        else:
-            if "Favorite Pick" not in today_tracker.columns:
-                today_tracker["Favorite Pick"] = ""
-            fav_col = today_tracker["Favorite Pick"].astype(str).str.upper()
-            handpicked_now = today_tracker[fav_col == "TRUE"].copy()
-            available = today_tracker[fav_col != "TRUE"].copy()
+            today_tracker = pd.DataFrame(columns=TRACKER_COLUMNS)
 
-            if not handpicked_now.empty:
-                st.markdown("**Already handpicked today**")
-                for idx, bet in handpicked_now.iterrows():
-                    st.markdown(f'''
-                    <div class="ez-card ez-card-green">
-                        <div class="ez-title">{esc(str(bet.get("Bet Type", "")).upper())}</div>
-                        <div class="ez-sub">{esc(bet.get("Selection", ""))}</div>
-                        <span class="ez-chip ez-chip-green">HANDPICKED</span>
-                        <div class="ez-kv"><span>Market</span><span>{esc(bet.get("Market", ""))}</span></div>
-                        <div class="ez-kv"><span>Odds / Line</span><span>{esc(bet.get("Odds/Line", ""))}</span></div>
-                    </div>
-                    ''', unsafe_allow_html=True)
-                    if st.button("Remove today's badge", key=f"unhandpick_any_{idx}"):
-                        ok, message = unmark_tracker_row_as_handpicked(idx)
-                        if ok:
-                            st.success(message)
-                            st.rerun()
-                        else:
-                            st.error(message)
+        if "Favorite Pick" not in today_tracker.columns:
+            today_tracker["Favorite Pick"] = ""
+        favorite_flags = today_tracker["Favorite Pick"].astype(str).str.strip().str.upper()
+        handpicked_now = today_tracker[favorite_flags == "TRUE"].copy()
+
+        if not handpicked_now.empty:
+            st.markdown("**Already handpicked today**")
+            for idx, bet in handpicked_now.iterrows():
+                st.markdown(f'''
+                <div class="ez-card ez-card-green">
+                    <div class="ez-title">{esc(str(bet.get("Bet Type", "")).upper())}</div>
+                    <div class="ez-sub">{esc(bet.get("Selection", ""))}</div>
+                    <span class="ez-chip ez-chip-green">HANDPICKED</span>
+                    <div class="ez-kv"><span>Market</span><span>{esc(bet.get("Market", ""))}</span></div>
+                    <div class="ez-kv"><span>Odds / Line</span><span>{esc(bet.get("Odds/Line", ""))}</span></div>
+                </div>
+                ''', unsafe_allow_html=True)
+                if st.button("Remove today's badge", key=f"unhandpick_any_{idx}"):
+                    ok, message = unmark_tracker_row_as_handpicked(idx)
+                    if ok:
+                        st.success(message)
+                        st.rerun()
+                    else:
+                        st.error(message)
+            st.divider()
+
+        trend_rows = load_all_game_trends() if not today_slate.empty else pd.DataFrame()
+        handpickable = build_handpickable_plays(today_slate, trend_rows)
+        if not handpickable.empty:
+            candidate_mask = handpickable.apply(
+                lambda play: (
+                    best_play_is_open_for_handpick(play, tracker_df)
+                    and not handpick_play_is_already_selected(play, tracker_df)
+                ),
+                axis=1,
+            )
+            available_candidates = handpickable[candidate_mask].copy()
+        else:
+            available_candidates = pd.DataFrame(columns=handpickable.columns)
+
+        if not available_candidates.empty:
+            st.markdown("**Available full-slate bets**")
+            game_options = list(dict.fromkeys(
+                (str(play.get("Game", "")), str(play.get("Game Key", "")))
+                for _, play in available_candidates.iterrows()
+            ))
+            label_counts = {}
+            for game_label, _ in game_options:
+                label_counts[game_label] = label_counts.get(game_label, 0) + 1
+
+            def _format_handpick_game(option):
+                game_label, game_key = option
+                if label_counts.get(game_label, 0) > 1 and game_key:
+                    return f"{game_label} • {game_key}"
+                return game_label
+
+            selected_game, selected_game_key = st.selectbox(
+                "Choose game",
+                game_options,
+                format_func=_format_handpick_game,
+                key="handpick_any_game",
+            )
+            game_mask = available_candidates["Game"].astype(str).eq(selected_game)
+            if selected_game_key:
+                game_mask &= available_candidates["Game Key"].astype(str).eq(selected_game_key)
+            selected_candidates = available_candidates[game_mask].copy()
+
+            market_options = ["All markets"] + list(dict.fromkeys(selected_candidates["Market"].astype(str).tolist()))
+            selected_market = st.selectbox("Choose market", market_options, key="handpick_any_market")
+            if selected_market != "All markets":
+                selected_candidates = selected_candidates[selected_candidates["Market"].astype(str) == selected_market]
+
+            for play_idx, play in selected_candidates.iterrows():
+                model_status = _handpick_text(play.get("Model Status", "")) or "MANUAL"
+                qualified = _truthy_flag(play.get("Qualified", ""))
+                if model_status.upper() == "PASS":
+                    status_chip = '<span class="ez-chip ez-chip-yellow">MODEL PASS — MANUAL OVERRIDE</span>'
+                elif model_status.upper() == "RESEARCH ONLY":
+                    status_chip = '<span class="ez-chip ez-chip-yellow">RESEARCH SIDE</span>'
+                elif not qualified:
+                    status_chip = f'<span class="ez-chip ez-chip-yellow">{esc(model_status.upper())}</span>'
+                else:
+                    status_chip = f'<span class="ez-chip ez-chip-green">{esc(model_status.upper())}</span>'
+
+                detail_rows = ""
+                for label, field in [
+                    ("Odds / Line", "Odds/Line"),
+                    ("Model", "Model %"),
+                    ("Edge", "Edge %"),
+                    ("EZPZ Score", "Score"),
+                    ("Reliability", "Reliability Score"),
+                ]:
+                    value = _handpick_text(play.get(field, ""))
+                    if value:
+                        detail_rows += f'<div class="ez-kv"><span>{esc(label)}</span><span>{esc(value)}</span></div>'
+
+                st.markdown(f'''
+                <div class="ez-card">
+                    <div class="ez-title">{esc(str(play.get("Play Type", "")).upper())}</div>
+                    <div class="ez-sub">{esc(play.get("Play", "") or play.get("Selection", ""))}</div>
+                    {status_chip}
+                    <div class="ez-kv"><span>Market</span><span>{esc(play.get("Market", ""))}</span></div>
+                    {detail_rows}
+                </div>
+                ''', unsafe_allow_html=True)
+                candidate_key = _handpick_text(play.get("Candidate Key", "")) or str(play_idx)
+                if st.button("⭐ Add to Handpicked", key=f"handpick_slate_{candidate_key}"):
+                    ok, message = mark_best_play_as_handpicked(play)
+                    if ok:
+                        st.success(message)
+                        st.rerun()
+                    else:
+                        st.error(message)
                 st.divider()
 
-            st.markdown("**Available saved bets**")
-            if available.empty:
-                st.info("Every saved bet today is already marked handpicked.")
-            else:
-                for idx, bet in available.iterrows():
-                    bet_type = str(bet.get("Bet Type", "")).upper()
-                    is_lean_under = "LEAN UNDER" in bet_type or "LEAN UNDER" in str(bet.get("Selection", "")).upper()
-                    klass = "ez-card-green" if is_lean_under else ""
-                    chip = '<span class="ez-chip ez-chip-green">LEAN UNDER</span>' if is_lean_under else ''
+        # Preserve access to legacy/custom tracker rows that cannot be rebuilt
+        # from the current Daily Slate schema.
+        available_saved = today_tracker[favorite_flags != "TRUE"].copy()
+        if not available_saved.empty and not handpickable.empty:
+            unmatched_indices = []
+            for idx, bet in available_saved.iterrows():
+                if not any(
+                    tracker_row_matches_best_play(bet, play)
+                    for _, play in handpickable.iterrows()
+                ):
+                    unmatched_indices.append(idx)
+            available_saved = available_saved.loc[unmatched_indices].copy()
+
+        if not available_saved.empty:
+            with st.expander("Other saved tracker bets", expanded=available_candidates.empty):
+                st.caption("Legacy or custom pending bets that are not represented by the current full-slate fields.")
+                for idx, bet in available_saved.iterrows():
                     st.markdown(f'''
-                    <div class="ez-card {klass}">
-                        <div class="ez-title">{esc(bet_type)}</div>
+                    <div class="ez-card">
+                        <div class="ez-title">{esc(str(bet.get("Bet Type", "")).upper())}</div>
                         <div class="ez-sub">{esc(bet.get("Selection", ""))}</div>
-                        {chip}
                         <div class="ez-kv"><span>Market</span><span>{esc(bet.get("Market", ""))}</span></div>
                         <div class="ez-kv"><span>Odds / Line</span><span>{esc(bet.get("Odds/Line", ""))}</span></div>
-                        <div class="ez-kv"><span>Model</span><span>{esc(bet.get("Model %", ""))}</span></div>
                     </div>
                     ''', unsafe_allow_html=True)
-                    if st.button("⭐ Add to Handpicked", key=f"handpick_any_{idx}"):
+                    if st.button("⭐ Add to Handpicked", key=f"handpick_saved_{idx}"):
                         ok, message = mark_tracker_row_as_handpicked(idx)
                         if ok:
                             st.success(message)
@@ -8403,6 +9005,14 @@ def render_daily_slate():
                         else:
                             st.error(message)
                     st.divider()
+
+        if available_candidates.empty and available_saved.empty:
+            if today_slate.empty:
+                st.info("No games have been saved for today yet.")
+            elif not handpicked_now.empty:
+                st.info("Every open bet from today's saved games is already handpicked.")
+            else:
+                st.info("No open bets are available to handpick. Completed bets stay hidden.")
 
     elif view == "By Date":
         st.subheader("View Saved Slate by Date")
