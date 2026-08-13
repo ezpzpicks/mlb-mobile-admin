@@ -2354,6 +2354,30 @@ def parse_american_odds(value):
     return odds
 
 
+def format_american_odds(value):
+    """Return a normalized American price, including the leading plus sign."""
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+
+    text = str(value).strip()
+    if not text:
+        return ""
+
+    try:
+        odds = float(text.replace(",", ""))
+    except Exception:
+        return text
+
+    if not math.isfinite(odds) or abs(odds) < 100:
+        return text
+    if odds.is_integer():
+        return f"{int(odds):+d}"
+    return f"{odds:+g}"
+
+
 def profit_units_from_american_odds(odds, result):
     """Assumes 1 unit risked per tracked bet."""
     if result == "Push":
@@ -8076,7 +8100,8 @@ def k_summary_text(pitcher, projection, grade, line, odds=None):
     else:
         side = "pass"
 
-    odds_text = "" if odds in [None, ""] else f" / {odds}"
+    formatted_odds = format_american_odds(odds)
+    odds_text = f" / {formatted_odds}" if formatted_odds else ""
     return f"{pitcher} {projection:.2f} ({side}) Line {line}{odds_text}"
 
 
@@ -14846,7 +14871,7 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
                 home_k_grade,
                 f"{home_pitcher} {home_k_grade}",
                 "Pitcher Strikeouts",
-                f"{home_k_line} / {home_k_odds}",
+                f"{home_k_line} / {format_american_odds(home_k_odds)}",
                 f"{home_selected_prob*100:.1f}%",
                 f"{american_odds_to_implied_prob(home_k_odds)*100:.1f}%",
                 f"{home_k_price_edge*100:+.1f}%",
@@ -14857,7 +14882,7 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
                 away_k_grade,
                 f"{away_pitcher} {away_k_grade}",
                 "Pitcher Strikeouts",
-                f"{away_k_line} / {away_k_odds}",
+                f"{away_k_line} / {format_american_odds(away_k_odds)}",
                 f"{away_selected_prob*100:.1f}%",
                 f"{american_odds_to_implied_prob(away_k_odds)*100:.1f}%",
                 f"{away_k_price_edge*100:+.1f}%",
@@ -14868,7 +14893,7 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             if (not correlation_block) and pdata and pdata.get("grade") != "PASS":
                 queue_bet(tracker_bet_batch,
                     pdata["grade"], f"{pdata['pitcher']} {pdata['grade']}", "Pitcher Strikeouts",
-                    f"{pdata['line']} / {pdata['odds']}", f"{pdata['projection']:.2f}", "", f"{pdata['edge']:.2f}",
+                    f"{pdata['line']} / {format_american_odds(pdata['odds'])}", f"{pdata['projection']:.2f}", "", f"{pdata['edge']:.2f}",
                     metadata={"raw_projection":round(pdata['raw_projection'],2),"calibrated_projection":round(pdata['projection'],2),"reliability_score":pdata['calibration']['reliability']['score'],"expected_std_dev":pdata['calibration']['expected_std'],"selected_probability":f"{pdata['selected_probability']*100:.1f}%","model_version":K_MODEL_VERSION,"game_key":game_key,"team":pdata['team'],"opponent":pdata['opponent'],"role":"Bulk"}
                 )
 
