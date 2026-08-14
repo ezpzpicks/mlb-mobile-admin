@@ -78,7 +78,7 @@ if selected_sport not in valid_sports:
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v1.2-free-no-key-score-distribution-2026-07-18",
-    "NFL": "nfl-v3.1-auto-hfa-fixed-prop-tiles-2026-07-17",
+    "NFL": "nfl-v3.3-qb-passing-yards-regression-2026-08-13",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":
