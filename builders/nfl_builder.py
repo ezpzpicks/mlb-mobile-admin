@@ -1,8 +1,8 @@
 """EZPZ Picks NFL model builder.
 
-Version 3.2 replaces the fixed venue-adjustment cap with confidence-weighted
-sample-size shrinkage, while preserving the full opportunity/efficiency prop
-engine, current-role transitions, matchup layers, and residual calibration.
+Version 3.3 adds the validated QB passing-yards regression layer: calibrated
+attempts multiplied by calibrated YPA, with a capped pregame implied-team-total
+adjustment. Other player-prop markets retain their v3.2 formulas.
 
 Primary data source: nflverse through nflreadpy.
 """
@@ -49,7 +49,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v3.2-confidence-weighted-hfa-2026-07-17"
+MODEL_VERSION = "nfl-v3.3-qb-passing-yards-regression-2026-08-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 HOME_FIELD_LOOKBACK_SEASONS = 5
@@ -59,6 +59,16 @@ HOME_FIELD_VENUE_REGRESSION_GAMES = 40.0
 HOME_FIELD_VENUE_EMERGENCY_LIMIT = 1.25
 HOME_FIELD_TOTAL_MIN = -0.5
 HOME_FIELD_TOTAL_MAX = 4.5
+
+# Locked from the 2023 discovery / 2024 confirmation analysis and validated on
+# the untouched 2025 holdout. These coefficients apply only to QB passing yards.
+QB_PASSING_ATTEMPT_CALIBRATION_INTERCEPT = 18.848437
+QB_PASSING_ATTEMPT_CALIBRATION_SLOPE = 0.405922
+QB_PASSING_YPA_CALIBRATION_INTERCEPT = 4.186061
+QB_PASSING_YPA_CALIBRATION_SLOPE = 0.413749
+QB_PASSING_YPA_TEAM_TOTAL_BASELINE = 22.5
+QB_PASSING_YPA_TEAM_TOTAL_COEFFICIENT = 0.12
+QB_PASSING_YPA_TEAM_TOTAL_ADJUSTMENT_CAP = 0.75
 
 RATINGS_TAB = "nfl_team_ratings"
 SLATE_TAB = "nfl_daily_slate"
@@ -3150,6 +3160,57 @@ def _regressed_rate(raw: float, volume: float, prior: float, prior_volume: float
     return (raw * volume + prior * prior_volume) / max(volume + prior_volume, 1.0)
 
 
+def _pregame_implied_team_total(
+    home_away: str,
+    market_total: float | None,
+    home_spread: float | None,
+    fallback_team_score: float,
+) -> tuple[float, str]:
+    """Return the publication-time team total used by the QB YPA layer."""
+    total = _num(market_total, np.nan)
+    spread = _num(home_spread, np.nan)
+    if math.isfinite(total) and 25.0 <= total <= 75.0 and math.isfinite(spread) and abs(spread) <= 31.0:
+        implied = (total - spread) / 2.0 if home_away == "Home" else (total + spread) / 2.0
+        return float(clamp(implied, 6.0, 48.0)), "pregame market"
+    return float(clamp(_num(fallback_team_score, QB_PASSING_YPA_TEAM_TOTAL_BASELINE), 6.0, 48.0)), "EZPZ score fallback"
+
+
+def _qb_passing_yards_regression_layer(
+    raw_pass_attempts: float,
+    raw_adjusted_ypa: float,
+    play_probability: float,
+    pregame_team_total: float,
+) -> dict[str, float]:
+    """Calibrate the two passing-yards components without changing other markets."""
+    availability = clamp(_num(play_probability, 0.0), 0.0, 1.0)
+    if availability > 0:
+        active_raw_attempts = max(0.0, _num(raw_pass_attempts, 0.0)) / availability
+        calibrated_attempts = (
+            QB_PASSING_ATTEMPT_CALIBRATION_INTERCEPT
+            + QB_PASSING_ATTEMPT_CALIBRATION_SLOPE * active_raw_attempts
+        ) * availability
+    else:
+        calibrated_attempts = 0.0
+
+    calibrated_base_ypa = (
+        QB_PASSING_YPA_CALIBRATION_INTERCEPT
+        + QB_PASSING_YPA_CALIBRATION_SLOPE * _num(raw_adjusted_ypa, 7.05)
+    )
+    scoring_adjustment = clamp(
+        QB_PASSING_YPA_TEAM_TOTAL_COEFFICIENT
+        * (_num(pregame_team_total, QB_PASSING_YPA_TEAM_TOTAL_BASELINE) - QB_PASSING_YPA_TEAM_TOTAL_BASELINE),
+        -QB_PASSING_YPA_TEAM_TOTAL_ADJUSTMENT_CAP,
+        QB_PASSING_YPA_TEAM_TOTAL_ADJUSTMENT_CAP,
+    )
+    calibrated_ypa = clamp(calibrated_base_ypa + scoring_adjustment, 5.0, 9.6)
+    return {
+        "attempts": float(max(0.0, calibrated_attempts)),
+        "ypa": float(calibrated_ypa),
+        "base_ypa": float(calibrated_base_ypa),
+        "scoring_adjustment": float(scoring_adjustment),
+    }
+
+
 
 def _prop_sd(market: str, projection: float, reliability: float) -> float:
     base = {"Passing Attempts": 5.2, "Passing Completions": 4.2, "Passing Yards": 55.0, "Passing TDs": 1.0, "Interceptions": 0.68, "Rushing Attempts": 4.0, "Rushing Yards": 23.0, "Targets": 2.5, "Receptions": 1.9, "Receiving Yards": 25.0}.get(market, max(1.0, projection * 0.32))
@@ -3314,6 +3375,8 @@ def _project_player_markets(
     team_rating: dict[str, Any], opponent_rating: dict[str, Any], game_projection: dict[str, float],
     weather_adjustment: float, market_lines: dict[tuple[str, str], dict[str, Any]],
     role_context: dict[str, dict[str, Any]] | None = None,
+    pregame_team_total: float | None = None,
+    pregame_team_total_source: str = "EZPZ score fallback",
 ) -> list[dict[str, Any]]:
     profile = _profile_lookup(profiles, player)
     pos = _position_group(position or profile.get("position", ""))
@@ -3327,6 +3390,9 @@ def _project_player_markets(
     context = _team_usage_context(profiles, team, team_rating)
     team_score = game_projection["home_score"] if home_away == "Home" else game_projection["away_score"]
     opponent_score = game_projection["away_score"] if home_away == "Home" else game_projection["home_score"]
+    if pregame_team_total is None or not math.isfinite(_num(pregame_team_total, np.nan)):
+        pregame_team_total = team_score
+        pregame_team_total_source = "EZPZ score fallback"
     margin = team_score - opponent_score
     plays = clamp(context["plays"] + (game_projection["total"] - 45.0) * 0.10, 55, 74)
     weather_pass_penalty = min(0.04, max(0.0, -weather_adjustment) * 0.0055)
@@ -3394,8 +3460,14 @@ def _project_player_markets(
         depth_index = deep_rate * _num(defense.get("deep_pass_index", 1.0), 1.0) + (1 - deep_rate) * _num(defense.get("short_pass_index", 1.0), 1.0)
         pass_yards_index = _num(defense.get("passing_yards_index", 1.0), 1.0)
         adjusted_ypa = clamp(pass_ypa * pass_matchup_factor * pressure_efficiency_factor * (0.58 + 0.22 * pass_yards_index + 0.20 * depth_index) * weather_factor, 5.0, 9.6)
+        passing_yards_layer = _qb_passing_yards_regression_layer(
+            pass_attempts, adjusted_ypa, play_probability, pregame_team_total
+        )
+        passing_yards_attempts = passing_yards_layer["attempts"]
+        passing_yards_ypa = passing_yards_layer["ypa"]
+        legacy_pass_yards = pass_attempts * adjusted_ypa
         completions = pass_attempts * completion_rate
-        pass_yards = pass_attempts * adjusted_ypa
+        pass_yards = passing_yards_attempts * passing_yards_ypa
         pass_td_rate = _regressed_rate(_num(profile.get("pass_td_rate", 0.045), 0.045), _num(profile.get("attempts", 0)), 0.045, 270)
         passing_tds = pass_attempts * pass_td_rate * clamp(team_score / 22.5, 0.68, 1.42)
         int_rate = _regressed_rate(_num(profile.get("interception_rate", 0.024), 0.024), _num(profile.get("attempts", 0)), 0.024, 290)
@@ -3410,7 +3482,17 @@ def _project_player_markets(
         qb_rush_ypc = clamp(qb_ypc * rush_matchup_factor * (0.76 + 0.24 * rush_index), 2.2, 7.5)
         add_market("Passing Attempts", pass_attempts, _num(defense.get("attempts_index", 1.0), 1.0), attempts=pass_attempts, efficiency=1.0, reason="Projected dropbacks minus sacks • game script • weather • starter probability")
         add_market("Passing Completions", completions, _num(defense.get("attempts_index", 1.0), 1.0), attempts=pass_attempts, completions=completions, efficiency=completion_rate, reason="Attempts × charting/coverage-adjusted completion probability")
-        add_market("Passing Yards", pass_yards, pass_yards_index, attempts=pass_attempts, efficiency=adjusted_ypa, coverage_matchup=depth_index, reason="Attempts × adjusted YPA • pressure/front matchup • depth profile • weather")
+        add_market(
+            "Passing Yards", pass_yards, pass_yards_index,
+            attempts=passing_yards_attempts, efficiency=passing_yards_ypa, coverage_matchup=depth_index,
+            reason=(
+                f"Regression-calibrated attempts {pass_attempts:.1f}→{passing_yards_attempts:.1f} × "
+                f"YPA {adjusted_ypa:.2f}→{passing_yards_ypa:.2f} • "
+                f"{pregame_team_total_source} {pregame_team_total:.1f} "
+                f"({passing_yards_layer['scoring_adjustment']:+.2f} YPA) • "
+                f"v3.2 shadow {legacy_pass_yards:.1f} yards"
+            ),
+        )
         add_market("Passing TDs", passing_tds, pass_yards_index, attempts=pass_attempts, efficiency=pass_td_rate, reason="Pass volume • scoring environment • regressed TD rate")
         add_market("Interceptions", interceptions, _num(opponent_rating.get("Takeaway Rate", 0.024), 0.024) / 0.024, attempts=pass_attempts, efficiency=blended_int_rate, reason="Attempts • INT-worthy charting • opponent takeaways")
         add_market("Rushing Attempts", rush_attempts, rush_index, attempts=rush_attempts, efficiency=1.0, reason="Designed usage • pressure/scramble environment • game script")
@@ -3615,6 +3697,7 @@ def _build_game_prop_rows(
     profiles: pd.DataFrame, defense_profiles: pd.DataFrame, away_rating: dict[str, Any],
     home_rating: dict[str, Any], projection: dict[str, float], weather_adjustment: float,
     market_lines: dict[tuple[str, str], dict[str, Any]],
+    market_total: float | None = None, home_spread: float | None = None,
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     away_roles = _expected_lineup_roles(away_lineup, profiles, away_team)
@@ -3628,11 +3711,17 @@ def _build_game_prop_rows(
             & (lineup["Slot"].astype(str).isin(["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"]))
             & (~lineup["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]))
         ] if lineup is not None and not lineup.empty else pd.DataFrame()
+        fallback_team_score = projection["home_score"] if home_away == "Home" else projection["away_score"]
+        pregame_team_total, pregame_team_total_source = _pregame_implied_team_total(
+            home_away, market_total, home_spread, fallback_team_score
+        )
         for _, player_row in skill.iterrows():
             rows.extend(_project_player_markets(
                 _safe_text(player_row.get("Player", "")), _safe_text(player_row.get("Position", "")),
                 _safe_text(player_row.get("Slot", "")), team, opponent, home_away, lineup, profiles,
                 defense_profiles, rating, opponent_rating, projection, weather_adjustment, market_lines, team_roles,
+                pregame_team_total=pregame_team_total,
+                pregame_team_total_source=pregame_team_total_source,
             ))
     return pd.DataFrame(rows)
 
@@ -4219,6 +4308,7 @@ def _render_build() -> None:
     prop_base = _build_game_prop_rows(
         away_team, home_team, away_lineup, home_lineup, profiles, defense_profiles,
         away_rating, home_rating, projection, weather_total_adjustment, market_lines,
+        market_total=market_total, home_spread=home_spread,
     )
     evaluated_props = pd.DataFrame()
     if prop_base.empty:
@@ -4414,7 +4504,7 @@ def _table(tab: str, columns: list[str], title: str) -> None:
 
 
 def render() -> None:
-    st.caption("NFL v3.2 automated slate • confidence-weighted home field • in-depth QB/RB/WR/TE props")
+    st.caption("NFL v3.3 automated slate • regression-calibrated QB passing yards • in-depth QB/RB/WR/TE props")
     page = st.radio(
         "NFL section",
         ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],
