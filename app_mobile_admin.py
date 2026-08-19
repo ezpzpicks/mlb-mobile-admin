@@ -38,89 +38,6 @@ def _set_sport(sport: str) -> None:
         pass
 
 
-def _run_mlb_builder_fast(builder_path: Path) -> None:
-    """Run MLB with small performance-only patches applied in memory.
-
-    The production MLB builder is intentionally kept intact. These patches avoid
-    repeated Google Sheet downloads on every Streamlit widget rerun and stop the
-    Handpick Any candidate matcher from rescanning historical tracker rows.
-    """
-    source = builder_path.read_text(encoding="utf-8")
-
-    # Streamlit reruns the whole Slate page whenever game/market selectors change.
-    # Cache Sheet reads briefly so those UI-only reruns do not redownload the same
-    # tabs. Any successful write clears the cache immediately below.
-    read_marker = "\ndef read_sheet(tab_name, columns):\n"
-    cached_read = "\n@st.cache_data(ttl=20, show_spinner=False)\ndef read_sheet(tab_name, columns):\n"
-    if read_marker in source and "@st.cache_data(ttl=20, show_spinner=False)\ndef read_sheet" not in source:
-        source = source.replace(read_marker, cached_read, 1)
-
-    write_marker = "        worksheet.update(values)\n        return True\n"
-    write_with_invalidation = (
-        "        worksheet.update(values)\n"
-        "        try:\n"
-        "            read_sheet.clear()\n"
-        "        except Exception:\n"
-        "            pass\n"
-        "        return True\n"
-    )
-    if write_marker in source and "read_sheet.clear()" not in source:
-        source = source.replace(write_marker, write_with_invalidation, 1)
-
-    # Candidate construction is pure for a given saved slate/research table, so
-    # market/game selector reruns can reuse it instead of reparsing every play.
-    build_marker = "\ndef build_handpickable_plays(today_slate, all_game_trends=None):\n"
-    cached_build = (
-        "\n@st.cache_data(ttl=20, show_spinner=False)\n"
-        "def build_handpickable_plays(today_slate, all_game_trends=None):\n"
-    )
-    if build_marker in source and "@st.cache_data(ttl=20, show_spinner=False)\ndef build_handpickable_plays" not in source:
-        source = source.replace(build_marker, cached_build, 1)
-
-    # Keep completed-bet filtering correct, but only scan today's tracker rows.
-    # Previously every candidate scanned the entire historical tracker twice.
-    tracker_marker = (
-        "            date_mask = tracker_df[\"Date\"].astype(str).str.strip() == today\n"
-        "            result_mask = tracker_df[\"Result\"].astype(str).str.strip().str.upper().isin([\"\", \"PENDING\"])\n"
-        "            today_tracker = tracker_df[date_mask & result_mask].copy()\n"
-    )
-    tracker_fast = (
-        "            date_mask = tracker_df[\"Date\"].astype(str).str.strip() == today\n"
-        "            today_all_tracker = tracker_df[date_mask].copy()\n"
-        "            result_mask = tracker_df[\"Result\"].astype(str).str.strip().str.upper().isin([\"\", \"PENDING\"])\n"
-        "            today_tracker = tracker_df[date_mask & result_mask].copy()\n"
-    )
-    if tracker_marker in source:
-        source = source.replace(tracker_marker, tracker_fast, 1)
-
-    empty_tracker_marker = "            today_tracker = pd.DataFrame(columns=TRACKER_COLUMNS)\n\n        if \"Favorite Pick\" not in today_tracker.columns:\n"
-    empty_tracker_fast = (
-        "            today_tracker = pd.DataFrame(columns=TRACKER_COLUMNS)\n"
-        "            today_all_tracker = today_tracker.copy()\n\n"
-        "        if \"Favorite Pick\" not in today_tracker.columns:\n"
-    )
-    if empty_tracker_marker in source:
-        source = source.replace(empty_tracker_marker, empty_tracker_fast, 1)
-
-    candidate_marker = (
-        "                    best_play_is_open_for_handpick(play, tracker_df)\n"
-        "                    and not handpick_play_is_already_selected(play, tracker_df)\n"
-    )
-    candidate_fast = (
-        "                    best_play_is_open_for_handpick(play, today_all_tracker)\n"
-        "                    and not handpick_play_is_already_selected(play, today_all_tracker)\n"
-    )
-    if candidate_marker in source:
-        source = source.replace(candidate_marker, candidate_fast, 1)
-
-    namespace = {
-        "__name__": "__main__",
-        "__file__": str(builder_path),
-        "__package__": None,
-    }
-    exec(compile(source, str(builder_path), "exec"), namespace)
-
-
 valid_sports = set(SPORT_META)
 selected_sport = str(st.session_state.get("selected_sport", "") or "").upper()
 query_sport = _query_sport()
@@ -180,8 +97,8 @@ else:
     render_sport_header(selected_sport, versions[selected_sport])
 
 if selected_sport == "MLB":
-    # Execute MLB only after selection, with performance-only runtime patches.
-    _run_mlb_builder_fast(ROOT / "builders" / "mlb_builder.py")
+    # Execute the preserved MLB production builder only after MLB is selected.
+    runpy.run_path(str(ROOT / "builders" / "mlb_builder.py"), run_name="__main__")
 elif selected_sport == "CFB":
     from builders.cfb_builder import render
     render()
