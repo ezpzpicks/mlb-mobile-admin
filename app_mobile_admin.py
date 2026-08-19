@@ -1,4 +1,6 @@
+import copy
 import runpy
+import time
 from pathlib import Path
 
 import streamlit as st
@@ -38,6 +40,127 @@ def _set_sport(sport: str) -> None:
         pass
 
 
+def _install_mlb_sheet_read_cache() -> None:
+    """Briefly reuse MLB slate Sheet reads across Streamlit widget reruns.
+
+    The production MLB builder stays untouched. Only reads for the three tabs
+    used by Daily Slate / Handpick Any are cached, and any normal Sheet write
+    clears that worksheet's cached reads immediately.
+    """
+    try:
+        import gspread
+    except Exception:
+        return
+
+    worksheet_cls = gspread.Worksheet
+    if getattr(worksheet_cls, "_ezpz_mlb_read_cache_installed", False):
+        return
+
+    target_tabs = {"daily_slate", "bet_tracker", "all_game_trends"}
+    cache_state_key = "_ezpz_mlb_sheet_read_cache_v1"
+    ttl_seconds = 20.0
+
+    original_get_all_records = worksheet_cls.get_all_records
+    original_get_all_values = worksheet_cls.get_all_values
+    original_clear = worksheet_cls.clear
+    original_update = worksheet_cls.update
+
+    def _cache_enabled(worksheet) -> bool:
+        return (
+            str(st.session_state.get("selected_sport", "") or "").upper() == "MLB"
+            and str(getattr(worksheet, "title", "") or "") in target_tabs
+        )
+
+    def _worksheet_identity(worksheet):
+        spreadsheet_id = str(getattr(worksheet, "spreadsheet_id", "") or "")
+        if not spreadsheet_id:
+            spreadsheet = getattr(worksheet, "spreadsheet", None)
+            spreadsheet_id = str(getattr(spreadsheet, "id", "") or "")
+        return spreadsheet_id, str(getattr(worksheet, "title", "") or "")
+
+    def _cache_key(worksheet, method_name, args, kwargs):
+        spreadsheet_id, title = _worksheet_identity(worksheet)
+        try:
+            kwargs_key = repr(sorted(kwargs.items(), key=lambda item: item[0]))
+        except Exception:
+            kwargs_key = repr(kwargs)
+        return spreadsheet_id, title, method_name, repr(args), kwargs_key
+
+    def _cache_store():
+        cache = st.session_state.get(cache_state_key)
+        if not isinstance(cache, dict):
+            cache = {}
+            st.session_state[cache_state_key] = cache
+        return cache
+
+    def _cached_read(worksheet, method_name, original_method, args, kwargs):
+        if not _cache_enabled(worksheet):
+            return original_method(worksheet, *args, **kwargs)
+
+        cache = _cache_store()
+        key = _cache_key(worksheet, method_name, args, kwargs)
+        now = time.monotonic()
+        cached = cache.get(key)
+        if cached is not None:
+            cached_at, cached_value = cached
+            if now - cached_at <= ttl_seconds:
+                return copy.deepcopy(cached_value)
+            cache.pop(key, None)
+
+        value = original_method(worksheet, *args, **kwargs)
+        cache[key] = (now, copy.deepcopy(value))
+        return value
+
+    def _invalidate_worksheet(worksheet) -> None:
+        try:
+            cache = st.session_state.get(cache_state_key, {})
+            if not isinstance(cache, dict) or not cache:
+                return
+            spreadsheet_id, title = _worksheet_identity(worksheet)
+            stale_keys = [
+                key for key in list(cache)
+                if len(key) >= 2 and key[0] == spreadsheet_id and key[1] == title
+            ]
+            for key in stale_keys:
+                cache.pop(key, None)
+        except Exception:
+            pass
+
+    def _get_all_records_cached(worksheet, *args, **kwargs):
+        return _cached_read(
+            worksheet,
+            "get_all_records",
+            original_get_all_records,
+            args,
+            kwargs,
+        )
+
+    def _get_all_values_cached(worksheet, *args, **kwargs):
+        return _cached_read(
+            worksheet,
+            "get_all_values",
+            original_get_all_values,
+            args,
+            kwargs,
+        )
+
+    def _clear_and_invalidate(worksheet, *args, **kwargs):
+        result = original_clear(worksheet, *args, **kwargs)
+        _invalidate_worksheet(worksheet)
+        return result
+
+    def _update_and_invalidate(worksheet, *args, **kwargs):
+        result = original_update(worksheet, *args, **kwargs)
+        _invalidate_worksheet(worksheet)
+        return result
+
+    worksheet_cls.get_all_records = _get_all_records_cached
+    worksheet_cls.get_all_values = _get_all_values_cached
+    worksheet_cls.clear = _clear_and_invalidate
+    worksheet_cls.update = _update_and_invalidate
+    worksheet_cls._ezpz_mlb_read_cache_installed = True
+
+
 valid_sports = set(SPORT_META)
 selected_sport = str(st.session_state.get("selected_sport", "") or "").upper()
 query_sport = _query_sport()
@@ -72,7 +195,7 @@ if selected_sport not in valid_sports:
                     _set_sport(sport)
                     st.rerun()
 
-    st.caption("MLB remains the production engine. NFL now includes the automated slate, lineup-aware game engine, and in-depth calibrated QB/RB/WR/TE prop model. CFB now automatically loads the slate, free public data, available markets, environment, and spread/moneyline/totals projections with no setup sequence or sports-data API key. CBB remains a foundation model for setup and shadow testing.")
+    st.caption("MLB remains the production engine. NFL now includes the automated slate, lineup-aware game engine, and in-depth calibrated QB/RB/WR/TE prop model. CFB now automatically loads the slate, free public data, available markets, environment, spread/moneyline/totals projections with no setup sequence or sports-data API key. CBB remains a foundation model for setup and shadow testing.")
     st.stop()
 
 versions = {
@@ -97,7 +220,9 @@ else:
     render_sport_header(selected_sport, versions[selected_sport])
 
 if selected_sport == "MLB":
-    # Execute the preserved MLB production builder only after MLB is selected.
+    # Keep the production builder itself unchanged; only avoid redundant Sheet
+    # downloads while Streamlit reruns the same Slate controls.
+    _install_mlb_sheet_read_cache()
     runpy.run_path(str(ROOT / "builders" / "mlb_builder.py"), run_name="__main__")
 elif selected_sport == "CFB":
     from builders.cfb_builder import render
