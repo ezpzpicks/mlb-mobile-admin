@@ -40,11 +40,10 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           path = Path('research/cfb_team_score_regression_v2.py')
-          text = path.read_text()
-          old = '        + 1.5 * out["home_indicator"]\n    }\n    return to_games(out, "baseline")'
-          new = '        + 1.5 * out["home_indicator"]\n    )\n    return to_games(out, "baseline")'
-          if old in text:
-              path.write_text(text.replace(old, new, 1))
+          lines = path.read_text().splitlines()
+          if len(lines) >= 409 and lines[408].strip() == '}':
+              lines[408] = '    )'
+          path.write_text('\n'.join(lines) + '\n')
           PY
       - name: Compile research
         run: python -m py_compile research/cfb_team_score_regression_v2.py builders/cfb_builder.py
