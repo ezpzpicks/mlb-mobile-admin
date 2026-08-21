@@ -231,8 +231,10 @@ elif selected_sport == "NFL":
     from builders import nfl_builder
     from builders.nfl_game_regression import install_regression_layer
     from builders.nfl_skill_prop_regression import install_skill_prop_regression
+    from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
     install_regression_layer(nfl_builder)
     install_skill_prop_regression(nfl_builder)
+    install_skill_prop_consistency(nfl_builder)
     nfl_builder.render()
 elif selected_sport == "CBB":
     from builders.cbb_builder import render
