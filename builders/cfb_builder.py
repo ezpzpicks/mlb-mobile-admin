@@ -28,7 +28,11 @@ import requests
 import streamlit as st
 
 from shared.modeling import american_implied_probability, clamp, expected_value_per_unit
-from shared.storage import read_sheet, sheets_ready, write_sheet
+from shared.storage import get_or_create_worksheet, read_sheet, sheets_ready, write_sheet
+from shared.public_contract import (
+    ALL_GAME_TRENDS_COLUMNS, ALL_GAME_TRENDS_TAB, ODDS_SNAPSHOT_COLUMNS,
+    ODDS_SNAPSHOT_TAB, PUBLIC_SPLIT_COLUMNS, PUBLIC_SPLIT_TAB,
+)
 
 MODEL_VERSION = "cfb-v1.5-market-dtype-fix-no-key-2026-07-18"
 DEFAULT_SEASON = 2026
@@ -51,13 +55,15 @@ _OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ezpz
 _OPEN_DATA_JOBS: dict[str, Any] = {}
 _OPEN_DATA_JOB_LOCK = threading.Lock()
 
-RATINGS_TAB = "cfb_team_ratings"
-SLATE_TAB = "cfb_daily_slate"
-TRACKER_TAB = "cfb_bet_tracker"
-SCHEDULE_TAB = "cfb_schedule"
-PERSONNEL_TAB = "cfb_personnel_snapshots"
-CALIBRATION_TAB = "cfb_calibration"
-MODEL_LOG_TAB = "cfb_model_change_log"
+# This model now owns a dedicated CFB workbook. Within that database, public
+# tab names mirror MLB so the public site can use one sport-agnostic contract.
+RATINGS_TAB = "team_ratings"
+SLATE_TAB = "daily_slate"
+TRACKER_TAB = "bet_tracker"
+SCHEDULE_TAB = "schedule"
+PERSONNEL_TAB = "personnel_snapshots"
+CALIBRATION_TAB = "calibration"
+MODEL_LOG_TAB = "model_change_log"
 
 RATING_COLUMNS = [
     "Team", "Conference", "Classification", "Season", "Projection Week",
@@ -3325,7 +3331,22 @@ def _render_setup() -> None:
     )
 
 
+def _ensure_public_database_contract() -> None:
+    """Create the uniform public tabs in the CFB database on first use."""
+    if not sheets_ready():
+        return
+    for tab, columns in [
+        (SLATE_TAB, SLATE_COLUMNS),
+        (TRACKER_TAB, TRACKER_COLUMNS),
+        (ALL_GAME_TRENDS_TAB, ALL_GAME_TRENDS_COLUMNS),
+        (PUBLIC_SPLIT_TAB, PUBLIC_SPLIT_COLUMNS),
+        (ODDS_SNAPSHOT_TAB, ODDS_SNAPSHOT_COLUMNS),
+    ]:
+        get_or_create_worksheet(tab, columns)
+
+
 def render() -> None:
+    _ensure_public_database_contract()
     _inject_styles()
     page = st.sidebar.radio("College Football", ["Build", "Slate", "Tracker", "Team Ratings", "Schedule", "Personnel", "Calibration", "Automation"], key="cfb_page")
     st.caption(f"{MODEL_VERSION} • Fast automatic spread, moneyline, and totals score distribution")

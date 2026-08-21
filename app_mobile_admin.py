@@ -6,6 +6,7 @@ from pathlib import Path
 import streamlit as st
 
 from shared.auth import require_admin_password
+from shared.storage import set_storage_sport, storage_database_name
 from shared.ui import SPORT_META, apply_global_styles, render_brand_header, render_sport_header
 
 ROOT = Path(__file__).resolve().parent
@@ -219,12 +220,16 @@ if selected_sport == "NFL":
 else:
     render_sport_header(selected_sport, versions[selected_sport])
 
+if selected_sport != "MLB":
+    st.caption(f"Database: {storage_database_name(selected_sport)}")
+
 if selected_sport == "MLB":
     # Keep the production builder itself unchanged; only avoid redundant Sheet
     # downloads while Streamlit reruns the same Slate controls.
     _install_mlb_sheet_read_cache()
     runpy.run_path(str(ROOT / "builders" / "mlb_builder.py"), run_name="__main__")
 elif selected_sport == "CFB":
+    set_storage_sport("CFB")
     from builders import cfb_builder
     from builders.cfb_game_regression import install_regression_layer
     from builders.cfb_market_calibration import install_market_calibration
@@ -233,6 +238,7 @@ elif selected_sport == "CFB":
     cfb_builder.MODEL_VERSION = "cfb-v2.1-calibrated-pricing-2026-08-21"
     cfb_builder.render()
 elif selected_sport == "NFL":
+    set_storage_sport("NFL")
     from builders import nfl_builder
     from builders.nfl_game_regression import install_regression_layer
     from builders.nfl_skill_prop_regression import install_skill_prop_regression
@@ -243,5 +249,6 @@ elif selected_sport == "NFL":
     nfl_builder.MODEL_VERSION = "nfl-v4.2-price-aware-odds-2026-08-21"
     nfl_builder.render()
 elif selected_sport == "CBB":
+    set_storage_sport("CBB")
     from builders.cbb_builder import render
     render()
