@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
 
+# This workflow materializes the reviewed exact-source patch onto the feature branch.
 jobs:
   patch-and-test:
     runs-on: ubuntu-latest
