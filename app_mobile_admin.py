@@ -6,7 +6,11 @@ from pathlib import Path
 import streamlit as st
 
 from shared.auth import require_admin_password
-from shared.storage import set_storage_sport, storage_database_name
+from shared.storage import (
+    initialize_sport_workbooks,
+    set_storage_sport,
+    storage_database_name,
+)
 from shared.ui import SPORT_META, apply_global_styles, render_brand_header, render_sport_header
 
 ROOT = Path(__file__).resolve().parent
@@ -20,6 +24,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 apply_global_styles()
+
+# Bootstrap the dedicated football workbooks before the password gate. This is
+# cached by shared.storage, so a normal Render wake-up is enough to create the
+# databases once without requiring a manual NFL/CFB navigation step.
+try:
+    initialize_sport_workbooks(("NFL", "CFB"))
+except Exception as exc:
+    print(f"Sport workbook bootstrap failed: {exc}")
+
 require_admin_password(LOGO_FILE)
 
 
