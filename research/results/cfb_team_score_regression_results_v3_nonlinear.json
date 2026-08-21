@@ -1,0 +1,409 @@
+{
+  "chosen_feature": null,
+  "chosen_features": [
+    "prior_own_ppg",
+    "prior_opp_papg",
+    "prior_power_gap",
+    "current_own_scoring_delta",
+    "current_opp_allowed_delta",
+    "current_power_delta",
+    "home_indicator"
+  ],
+  "design": {
+    "base_features": [
+      "prior_own_ppg",
+      "prior_opp_papg",
+      "prior_power_gap",
+      "current_own_scoring_delta",
+      "current_opp_allowed_delta",
+      "current_power_delta",
+      "home_indicator"
+    ],
+    "confirmation": "2024 only; nonlinear form chosen before holdout",
+    "data": "SportsDataverse/cfbfastR reconstructed games",
+    "discovery": "2021-2023",
+    "holdout": "2025 untouched until form selection",
+    "market_used_as_predictor": false,
+    "nonlinear_candidates": [
+      "prior_power_gap_signed_square",
+      "prior_power_gap_tail_q70",
+      "prior_power_gap_tail_q80",
+      "prior_power_gap_tail_q90"
+    ],
+    "selection_rule": "discovery p<=0.05 + same coefficient sign in 2024; choose lowest 2024 margin MAE; linear base always eligible",
+    "thresholds_learned_from": "absolute prior_power_gap quantiles in 2021-2023 discovery only"
+  },
+  "favorite_side_bias_base_linear": {
+    "mean_actual_favorite_margin": 13.239283429302624,
+    "mean_actual_minus_market": 0.6343570057581573,
+    "mean_market_favorite_margin": 12.604926423544466,
+    "mean_model_favorite_margin": 9.988384977872014,
+    "mean_model_minus_market": -2.616541445672451,
+    "n": 1563
+  },
+  "favorite_side_bias_chosen": {
+    "mean_actual_favorite_margin": 13.239283429302624,
+    "mean_actual_minus_market": 0.6343570057581573,
+    "mean_market_favorite_margin": 12.604926423544466,
+    "mean_model_favorite_margin": 9.988384977872014,
+    "mean_model_minus_market": -2.616541445672451,
+    "n": 1563
+  },
+  "favorite_size_buckets_base_linear": {
+    "0-6.5": {
+      "actual_mean_abs_margin": 11.974402730375427,
+      "ats_direction_accuracy": 0.5008605851979346,
+      "margin_mae": 12.357949987340556,
+      "margin_rmse": 15.952914210519538,
+      "market_margin_mae": 11.468430034129693,
+      "market_mean_abs_spread": 3.6715017064846416,
+      "model_mean_abs_margin": 5.159123279610433,
+      "n": 586,
+      "total_mae": 13.318199304732712
+    },
+    "14-20.5": {
+      "actual_mean_abs_margin": 18.4625,
+      "ats_direction_accuracy": 0.497907949790795,
+      "margin_mae": 12.552109574117951,
+      "margin_rmse": 15.24260824384923,
+      "market_margin_mae": 11.697916666666666,
+      "market_mean_abs_spread": 16.64375,
+      "model_mean_abs_margin": 13.897403646461461,
+      "n": 240,
+      "total_mae": 13.137798636255095
+    },
+    "21-27.5": {
+      "actual_mean_abs_margin": 26.736842105263158,
+      "ats_direction_accuracy": 0.42953020134228187,
+      "margin_mae": 15.635218071456686,
+      "margin_rmse": 18.83727596156434,
+      "market_margin_mae": 12.944078947368421,
+      "market_mean_abs_spread": 23.8125,
+      "model_mean_abs_margin": 18.32342789999448,
+      "n": 152,
+      "total_mae": 12.815237179674707
+    },
+    "28+": {
+      "actual_mean_abs_margin": 37.64150943396226,
+      "ats_direction_accuracy": 0.5094339622641509,
+      "margin_mae": 15.566991842837913,
+      "margin_rmse": 19.937849925828207,
+      "market_margin_mae": 12.09433962264151,
+      "market_mean_abs_spread": 36.100628930817614,
+      "model_mean_abs_margin": 26.85563954256007,
+      "n": 159,
+      "total_mae": 11.723312515270505
+    },
+    "7-13.5": {
+      "actual_mean_abs_margin": 14.624413145539906,
+      "ats_direction_accuracy": 0.4987951807228916,
+      "margin_mae": 12.588384343813106,
+      "margin_rmse": 15.787318528600691,
+      "market_margin_mae": 11.960093896713616,
+      "market_mean_abs_spread": 9.849765258215962,
+      "model_mean_abs_margin": 9.064836639866654,
+      "n": 426,
+      "total_mae": 12.165415384848782
+    }
+  },
+  "favorite_size_buckets_chosen": {
+    "0-6.5": {
+      "actual_mean_abs_margin": 11.974402730375427,
+      "ats_direction_accuracy": 0.5008605851979346,
+      "margin_mae": 12.357949987340556,
+      "margin_rmse": 15.952914210519538,
+      "market_margin_mae": 11.468430034129693,
+      "market_mean_abs_spread": 3.6715017064846416,
+      "model_mean_abs_margin": 5.159123279610433,
+      "n": 586,
+      "total_mae": 13.318199304732712
+    },
+    "14-20.5": {
+      "actual_mean_abs_margin": 18.4625,
+      "ats_direction_accuracy": 0.497907949790795,
+      "margin_mae": 12.552109574117951,
+      "margin_rmse": 15.24260824384923,
+      "market_margin_mae": 11.697916666666666,
+      "market_mean_abs_spread": 16.64375,
+      "model_mean_abs_margin": 13.897403646461461,
+      "n": 240,
+      "total_mae": 13.137798636255095
+    },
+    "21-27.5": {
+      "actual_mean_abs_margin": 26.736842105263158,
+      "ats_direction_accuracy": 0.42953020134228187,
+      "margin_mae": 15.635218071456686,
+      "margin_rmse": 18.83727596156434,
+      "market_margin_mae": 12.944078947368421,
+      "market_mean_abs_spread": 23.8125,
+      "model_mean_abs_margin": 18.32342789999448,
+      "n": 152,
+      "total_mae": 12.815237179674707
+    },
+    "28+": {
+      "actual_mean_abs_margin": 37.64150943396226,
+      "ats_direction_accuracy": 0.5094339622641509,
+      "margin_mae": 15.566991842837913,
+      "margin_rmse": 19.937849925828207,
+      "market_margin_mae": 12.09433962264151,
+      "market_mean_abs_spread": 36.100628930817614,
+      "model_mean_abs_margin": 26.85563954256007,
+      "n": 159,
+      "total_mae": 11.723312515270505
+    },
+    "7-13.5": {
+      "actual_mean_abs_margin": 14.624413145539906,
+      "ats_direction_accuracy": 0.4987951807228916,
+      "margin_mae": 12.588384343813106,
+      "margin_rmse": 15.787318528600691,
+      "market_margin_mae": 11.960093896713616,
+      "market_mean_abs_spread": 9.849765258215962,
+      "model_mean_abs_margin": 9.064836639866654,
+      "n": 426,
+      "total_mae": 12.165415384848782
+    }
+  },
+  "final_coefficients": {
+    "const": 11.240443677221451,
+    "current_opp_allowed_delta": 0.2716376410485099,
+    "current_own_scoring_delta": 0.38741952777838656,
+    "current_power_delta": 0.3569282298069327,
+    "home_indicator": 4.804668259201711,
+    "prior_opp_papg": 0.22597582571150315,
+    "prior_own_ppg": 0.26670808584236927,
+    "prior_power_gap": 0.3024181814544948
+  },
+  "final_p_values": {
+    "const": 4.147544068390134e-30,
+    "current_opp_allowed_delta": 2.873144005433152e-15,
+    "current_own_scoring_delta": 1.4991850360152464e-30,
+    "current_power_delta": 1.0906675515531097e-72,
+    "home_indicator": 1.227423465867645e-82,
+    "prior_opp_papg": 5.060175656025919e-28,
+    "prior_own_ppg": 1.5030657631215181e-36,
+    "prior_power_gap": 1.7264801157337874e-167
+  },
+  "holdout_base_linear": {
+    "margin_bias": -0.819513998544633,
+    "margin_mae": 13.60198063639121,
+    "margin_rmse": 17.60781730016111,
+    "n": 1657,
+    "total_bias": 0.15389833879510967,
+    "total_mae": 12.895795263130914,
+    "total_rmse": 16.075168685943602
+  },
+  "holdout_chosen": {
+    "margin_bias": -0.819513998544633,
+    "margin_mae": 13.60198063639121,
+    "margin_rmse": 17.60781730016111,
+    "n": 1657,
+    "total_bias": 0.15389833879510967,
+    "total_mae": 12.895795263130914,
+    "total_rmse": 16.075168685943602
+  },
+  "holdout_improvement_vs_v2_linear": {
+    "margin_mae_pct": 0.0,
+    "margin_rmse_pct": 0.0,
+    "total_mae_pct": 0.0,
+    "total_rmse_pct": 0.0
+  },
+  "research_version": "cfb-team-score-regression-v3-nonlinear-2026-08-21",
+  "thresholds": {
+    "q70": 18.066181087156473,
+    "q80": 22.410856530651778,
+    "q90": 29.449257706765355
+  },
+  "usc_san_jose_state_base_linear": [
+    {
+      "away_team": "San Jos\u00e9 State",
+      "home_team": "USC",
+      "note": "Prior-only sanity case using 2025 performance; no 2026 roster/portal/injury overlay.",
+      "projected_away": 12.522991252260406,
+      "projected_home": 42.68951797360008,
+      "projected_home_margin": 30.16652672133968,
+      "projected_total": 55.21250922586049
+    }
+  ],
+  "usc_san_jose_state_chosen": [
+    {
+      "away_team": "San Jos\u00e9 State",
+      "home_team": "USC",
+      "note": "Prior-only sanity case using 2025 performance; no 2026 roster/portal/injury overlay.",
+      "projected_away": 12.522991252260406,
+      "projected_home": 42.68951797360008,
+      "projected_home_margin": 30.16652672133968,
+      "projected_total": 55.21250922586049
+    }
+  ],
+  "variant_confirmation_results": [
+    {
+      "confirmation_28_plus": {
+        "actual_mean_abs_margin": 38.93798449612403,
+        "ats_direction_accuracy": 0.4496124031007752,
+        "margin_mae": 16.937011165142625,
+        "margin_rmse": 20.78769406304112,
+        "market_margin_mae": 11.837209302325581,
+        "market_mean_abs_spread": 36.093023255813954,
+        "model_mean_abs_margin": 25.823120019446847,
+        "n": 129,
+        "total_mae": 12.39724098272381
+      },
+      "confirmation_coefficient": null,
+      "confirmation_margin_mae": 13.848583636075878,
+      "confirmation_margin_rmse": 17.79451860424058,
+      "confirmation_p": null,
+      "confirmation_total_mae": 13.513923634868359,
+      "discovery_coefficient": null,
+      "discovery_margin_mae": 14.291458793926628,
+      "discovery_p": null,
+      "eligible": true,
+      "feature": null,
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator"
+      ],
+      "same_sign": true
+    },
+    {
+      "confirmation_28_plus": {
+        "actual_mean_abs_margin": 38.93798449612403,
+        "ats_direction_accuracy": 0.4573643410852713,
+        "margin_mae": 17.036963925538707,
+        "margin_rmse": 20.845378403782256,
+        "market_margin_mae": 11.837209302325581,
+        "market_mean_abs_spread": 36.093023255813954,
+        "model_mean_abs_margin": 25.716372155431912,
+        "n": 129,
+        "total_mae": 12.39753337758076
+      },
+      "confirmation_coefficient": 0.023664763518716023,
+      "confirmation_margin_mae": 13.861102947624424,
+      "confirmation_margin_rmse": 17.801578764320034,
+      "confirmation_p": 0.026062946333376795,
+      "confirmation_total_mae": 13.514231974256871,
+      "discovery_coefficient": -0.004328279995306841,
+      "discovery_margin_mae": 14.287884989341274,
+      "discovery_p": 0.47987991147912695,
+      "eligible": false,
+      "feature": "prior_power_gap_signed_square",
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator",
+        "prior_power_gap_signed_square"
+      ],
+      "same_sign": false
+    },
+    {
+      "confirmation_28_plus": {
+        "actual_mean_abs_margin": 38.93798449612403,
+        "ats_direction_accuracy": 0.4496124031007752,
+        "margin_mae": 16.991638794416303,
+        "margin_rmse": 20.827960229784264,
+        "market_margin_mae": 11.837209302325581,
+        "market_mean_abs_spread": 36.093023255813954,
+        "model_mean_abs_margin": 25.751335136371054,
+        "n": 129,
+        "total_mae": 12.397394060158703
+      },
+      "confirmation_coefficient": 0.11274055869046995,
+      "confirmation_margin_mae": 13.85509225734308,
+      "confirmation_margin_rmse": 17.797961358784068,
+      "confirmation_p": 0.05345210347449432,
+      "confirmation_total_mae": 13.51409559397705,
+      "discovery_coefficient": -0.014315929321793479,
+      "discovery_margin_mae": 14.28976087061117,
+      "discovery_p": 0.684643308171598,
+      "eligible": false,
+      "feature": "prior_power_gap_tail_q70",
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator",
+        "prior_power_gap_tail_q70"
+      ],
+      "same_sign": false
+    },
+    {
+      "confirmation_28_plus": {
+        "actual_mean_abs_margin": 38.93798449612403,
+        "ats_direction_accuracy": 0.4496124031007752,
+        "margin_mae": 16.95833206255652,
+        "margin_rmse": 20.800311245593907,
+        "market_margin_mae": 11.837209302325581,
+        "market_mean_abs_spread": 36.093023255813954,
+        "model_mean_abs_margin": 25.79793601297392,
+        "n": 129,
+        "total_mae": 12.397313679746805
+      },
+      "confirmation_coefficient": 0.14660386650400728,
+      "confirmation_margin_mae": 13.851315577428357,
+      "confirmation_margin_rmse": 17.79611749736927,
+      "confirmation_p": 0.026669134088156705,
+      "confirmation_total_mae": 13.513993757291841,
+      "discovery_coefficient": -0.0065224088381982265,
+      "discovery_margin_mae": 14.290864604051539,
+      "discovery_p": 0.8657506546211149,
+      "eligible": false,
+      "feature": "prior_power_gap_tail_q80",
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator",
+        "prior_power_gap_tail_q80"
+      ],
+      "same_sign": false
+    },
+    {
+      "confirmation_28_plus": {
+        "actual_mean_abs_margin": 38.93798449612403,
+        "ats_direction_accuracy": 0.4496124031007752,
+        "margin_mae": 16.981853122947175,
+        "margin_rmse": 20.801972033824434,
+        "market_margin_mae": 11.837209302325581,
+        "market_mean_abs_spread": 36.093023255813954,
+        "model_mean_abs_margin": 25.7885863597806,
+        "n": 129,
+        "total_mae": 12.397401889565757
+      },
+      "confirmation_coefficient": 0.2060629661515925,
+      "confirmation_margin_mae": 13.854836887179369,
+      "confirmation_margin_rmse": 17.798053710945844,
+      "confirmation_p": 0.023116284129181604,
+      "confirmation_total_mae": 13.514116539607546,
+      "discovery_coefficient": -0.019119046390503325,
+      "discovery_margin_mae": 14.289626148387688,
+      "discovery_p": 0.7073181074497181,
+      "eligible": false,
+      "feature": "prior_power_gap_tail_q90",
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator",
+        "prior_power_gap_tail_q90"
+      ],
+      "same_sign": false
+    }
+  ]
+}
