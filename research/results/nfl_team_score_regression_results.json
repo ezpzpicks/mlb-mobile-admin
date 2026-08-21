@@ -1,0 +1,161 @@
+{
+  "coefficients": {
+    "scoring_matchup": 0.8206113159895836,
+    "success_matchup": 22.97227990680213,
+    "weather_adjustment": 1.2968981090090854
+  },
+  "confirmation_coefficients": {
+    "const": -9.895884990662744,
+    "scoring_matchup": 0.9986446811738319,
+    "success_matchup": 25.390185378973367,
+    "weather_adjustment": 0.8539494089471682
+  },
+  "discovery_coefficients": {
+    "const": -5.741214033430453,
+    "scoring_matchup": 0.7746434248562711,
+    "success_matchup": 24.280596428362188,
+    "weather_adjustment": 1.3161484164523187
+  },
+  "discovery_pvalues": {
+    "const": 0.04073030635444552,
+    "scoring_matchup": 2.0014375629544503e-08,
+    "success_matchup": 0.00993781969992775,
+    "weather_adjustment": 0.020587607074398776
+  },
+  "edge_accuracy": {
+    "spread_1.5": {
+      "accuracy": 0.483695652173913,
+      "n": 184
+    },
+    "spread_2.5": {
+      "accuracy": 0.46511627906976744,
+      "n": 129
+    },
+    "spread_3.5": {
+      "accuracy": 0.4606741573033708,
+      "n": 89
+    },
+    "total_1.75": {
+      "accuracy": 0.524822695035461,
+      "n": 141
+    },
+    "total_3.0": {
+      "accuracy": 0.5483870967741935,
+      "n": 62
+    },
+    "total_4.0": {
+      "accuracy": 0.5666666666666667,
+      "n": 30
+    }
+  },
+  "existing_edge_accuracy": {
+    "spread_1.5": {
+      "accuracy": 0.4321608040201005,
+      "n": 199
+    },
+    "spread_2.5": {
+      "accuracy": 0.42953020134228187,
+      "n": 149
+    },
+    "spread_3.5": {
+      "accuracy": 0.39090909090909093,
+      "n": 110
+    },
+    "total_1.75": {
+      "accuracy": 0.5027027027027027,
+      "n": 185
+    },
+    "total_3.0": {
+      "accuracy": 0.5136986301369864,
+      "n": 146
+    },
+    "total_4.0": {
+      "accuracy": 0.5428571428571428,
+      "n": 105
+    }
+  },
+  "existing_model_baseline": {
+    "margin": {
+      "bias": -0.3011397058823531,
+      "mae": 10.674154411764706,
+      "n": 272,
+      "r2": 0.09686964182915869,
+      "rmse": 13.448323629950401
+    },
+    "total": {
+      "bias": 1.2288602941176467,
+      "mae": 10.884595588235294,
+      "n": 272,
+      "r2": 0.01585857507138788,
+      "rmse": 13.678920088201838
+    }
+  },
+  "holdout": {
+    "margin": {
+      "bias": -0.2757554314750453,
+      "mae": 10.33701090053224,
+      "n": 272,
+      "r2": 0.1259537969099409,
+      "rmse": 13.230008599166933
+    },
+    "total": {
+      "bias": -0.39326853776124165,
+      "mae": 10.510507292847098,
+      "n": 272,
+      "r2": 0.06687098839770556,
+      "rmse": 13.319683402239836
+    }
+  },
+  "intercept": -5.882194264664658,
+  "method": "Pregame team-score OLS; rolling HFA as offset; 2021-23 p<0.05 selection; 2024 sign confirmation; refit 2021-24; 2025 out-of-sample evaluation; no market predictors",
+  "removed": [
+    {
+      "feature": "sack_pressure",
+      "p_value": 0.7318934367205441
+    },
+    {
+      "feature": "red_zone_matchup",
+      "p_value": 0.679794616316822
+    },
+    {
+      "feature": "pass_matchup",
+      "p_value": 0.5911250724087196
+    },
+    {
+      "feature": "turnover_pressure",
+      "p_value": 0.6201288490174004
+    },
+    {
+      "feature": "rest_score_offset",
+      "p_value": 0.46183170076830926
+    },
+    {
+      "feature": "pace_mean",
+      "p_value": 0.3458748308716658
+    },
+    {
+      "feature": "rush_matchup",
+      "p_value": 0.27656320074394924
+    },
+    {
+      "feature": "explosive_matchup",
+      "p_value": 0.3062735616594242
+    }
+  ],
+  "research_version": "nfl-team-score-regression-2026-08-20",
+  "residual_distribution": {
+    "correlation": -0.029638453063268923,
+    "margin_sd": 13.251516312525167,
+    "total_sd": 13.338418166050308
+  },
+  "selected_features": [
+    "scoring_matchup",
+    "success_matchup",
+    "weather_adjustment"
+  ],
+  "sign_stability": {
+    "scoring_matchup": true,
+    "success_matchup": true,
+    "weather_adjustment": true
+  }
+}
