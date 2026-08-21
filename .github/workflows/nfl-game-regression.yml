@@ -1,0 +1,38 @@
+name: NFL game regression research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nfl-game-regression-v4
+    paths:
+      - research/nfl_game_regression.py
+      - .github/workflows/nfl-game-regression.yml
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy requests pyarrow scipy statsmodels
+      - name: Run historical NFL game regression
+        run: |
+          python research/nfl_game_regression.py --output-dir artifacts/nfl_game_regression
+      - name: Upload regression outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfl-game-regression-results
+          path: artifacts/nfl_game_regression/
+          if-no-files-found: error
+          retention-days: 14
