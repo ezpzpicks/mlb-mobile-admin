@@ -2924,7 +2924,9 @@ def _auto_save_selected_projection(result: dict[str, Any]) -> None:
         row = slate_row(result)
         fingerprint_fields = [
             result["game"].get("Game ID"), result["game"].get("Home Spread"),
-            result["game"].get("Total"), result["game"].get("Away ML"),
+            result["game"].get("Total"), result["game"].get("Home Spread Odds"),
+            result["game"].get("Away Spread Odds"), result["game"].get("Total Over Odds"),
+            result["game"].get("Total Under Odds"), result["game"].get("Away ML"),
             result["game"].get("Home ML"), result["reliability"], MODEL_VERSION,
         ]
         fingerprint = hashlib.sha1(repr(fingerprint_fields).encode()).hexdigest()[:16]
@@ -3080,16 +3082,30 @@ def _render_build() -> None:
     game = day_schedule.iloc[labels.index(selected_label)].copy()
     st.markdown(f"**{len(day_schedule)} game{'s' if len(day_schedule) != 1 else ''} on this slate** • Week {week}")
 
-    c1, c2, c3, c4 = st.columns(4)
     spread_default = _num(game.get("Home Spread"), 0.0)
     total_default = _num(game.get("Total"), 56.0)
     if not math.isfinite(spread_default): spread_default = 0.0
     if not math.isfinite(total_default): total_default = 56.0
     market_key = _text(game.get("Game ID"), f"{season}_{week}_{game['Away Team']}_{game['Home Team']}")
-    with c1: market_spread = st.number_input("Home spread", -60.0, 60.0, float(spread_default), 0.5, key=f"spread_{market_key}")
-    with c2: market_total = st.number_input("Total", 20.0, 120.0, float(total_default), 0.5, key=f"total_{market_key}")
-    with c3: away_ml = st.number_input("Away moneyline", -5000.0, 5000.0, float(_num(game.get("Away ML"), 0.0)), 5.0, key=f"aml_{market_key}")
-    with c4: home_ml = st.number_input("Home moneyline", -5000.0, 5000.0, float(_num(game.get("Home ML"), 0.0)), 5.0, key=f"hml_{market_key}")
+
+    st.markdown("### Sportsbook lines and prices")
+    spread_col, total_col = st.columns(2)
+    with spread_col:
+        market_spread = st.number_input("Home spread line", -60.0, 60.0, float(spread_default), 0.5, key=f"spread_{market_key}")
+        home_spread_odds = int(st.number_input(f"{game['Home Team']} spread odds", -5000, 5000, -110, 5, key=f"home_spread_odds_{market_key}"))
+        away_spread_odds = int(st.number_input(f"{game['Away Team']} spread odds", -5000, 5000, -110, 5, key=f"away_spread_odds_{market_key}"))
+    with total_col:
+        market_total = st.number_input("Game total line", 20.0, 120.0, float(total_default), 0.5, key=f"total_{market_key}")
+        total_over_odds = int(st.number_input("Over odds", -5000, 5000, -110, 5, key=f"total_over_odds_{market_key}"))
+        total_under_odds = int(st.number_input("Under odds", -5000, 5000, -110, 5, key=f"total_under_odds_{market_key}"))
+    st.caption("Spread and total grades use the entered side prices, no-vig implied probability, model probability, and EV. The sportsbook line itself is never a regression predictor.")
+
+    with st.expander("Moneyline (optional / shadow testing)", expanded=False):
+        c3, c4 = st.columns(2)
+        with c3:
+            away_ml = st.number_input("Away moneyline", -5000.0, 5000.0, float(_num(game.get("Away ML"), 0.0)), 5.0, key=f"aml_{market_key}")
+        with c4:
+            home_ml = st.number_input("Home moneyline", -5000.0, 5000.0, float(_num(game.get("Home ML"), 0.0)), 5.0, key=f"hml_{market_key}")
 
     roof_options = ["Outdoor/Unknown", "Retractable roof open", "Retractable roof closed", "Indoor/Dome"]
     auto_roof = _text(game.get("Roof"), "Outdoor/Unknown")
@@ -3130,7 +3146,11 @@ def _render_build() -> None:
         result = evaluate_game(
             game, ratings, away_personnel, home_personnel, environment,
             market_spread, market_total, away_ml, home_ml,
-            {"spread": spread_available, "total": total_available, "moneyline": moneyline_available},
+            market_availability={"spread": spread_available, "total": total_available, "moneyline": moneyline_available},
+            home_spread_odds=home_spread_odds,
+            away_spread_odds=away_spread_odds,
+            total_over_odds=total_over_odds,
+            total_under_odds=total_under_odds,
         )
     st.session_state["cfb_last_result"] = result
     st.session_state["cfb_last_game_id"] = game["Game ID"]
