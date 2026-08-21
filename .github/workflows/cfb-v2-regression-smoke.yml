@@ -1,0 +1,38 @@
+name: CFB v2 regression smoke
+
+on:
+  push:
+    branches:
+      - cfb-v2-team-score-regression
+    paths:
+      - builders/cfb_game_regression.py
+      - app_mobile_admin.py
+      - research/test_cfb_game_regression_layer.py
+      - .github/workflows/cfb-v2-regression-smoke.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - builders/cfb_game_regression.py
+      - app_mobile_admin.py
+      - research/test_cfb_game_regression_layer.py
+      - .github/workflows/cfb-v2-regression-smoke.yml
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Compile CFB regression integration
+        run: python -m py_compile builders/cfb_game_regression.py app_mobile_admin.py research/test_cfb_game_regression_layer.py
+      - name: Run CFB regression smoke test
+        run: python -m research.test_cfb_game_regression_layer
