@@ -1,0 +1,50 @@
+name: NFL v4 smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nfl-game-regression-v4
+    paths:
+      - app_mobile_admin.py
+      - builders/nfl_game_regression.py
+      - builders/nfl_game_regression_coefficients.py
+      - research/test_nfl_regression_layer.py
+      - .github/workflows/nfl-v4-smoke.yml
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nfl-game-regression-v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install production dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Compile NFL v4 integration
+        run: |
+          python -m py_compile app_mobile_admin.py builders/nfl_game_regression.py builders/nfl_game_regression_coefficients.py research/test_nfl_regression_layer.py
+      - name: Run NFL v4 regression smoke test
+        run: |
+          python -m research.test_nfl_regression_layer
+      - name: Record passing smoke test
+        run: |
+          mkdir -p research/results
+          printf 'NFL v4 regression smoke test passed\nbranch: nfl-game-regression-v4\nsource_commit: %s\n' "$GITHUB_SHA" > research/results/nfl_v4_smoke_passed.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/results/nfl_v4_smoke_passed.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record NFL v4 smoke pass"
+            git push origin HEAD:nfl-game-regression-v4
+          fi
