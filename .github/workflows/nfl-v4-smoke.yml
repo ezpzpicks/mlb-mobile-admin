@@ -10,6 +10,7 @@ on:
       - builders/nfl_game_regression.py
       - builders/nfl_game_regression_coefficients.py
       - research/test_nfl_regression_layer.py
+      - research/NFL_GAME_REGRESSION.md
       - .github/workflows/nfl-v4-smoke.yml
 
 permissions:
@@ -46,5 +47,6 @@ jobs:
           git add -- research/results/nfl_v4_smoke_passed.txt
           if ! git diff --cached --quiet; then
             git commit -m "Record NFL v4 smoke pass"
+            git pull --rebase origin nfl-game-regression-v4
             git push origin HEAD:nfl-game-regression-v4
           fi
