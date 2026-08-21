@@ -41,7 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install statsmodels pyarrow
-      - name: Repair legacy research source typo
+      - name: Repair research sources for exact historical reconstruction
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -51,6 +51,15 @@ jobs:
           new = '"total_rmse": float(np.sqrt(np.mean(np.square(te)))),'
           if old in text:
               path.write_text(text.replace(old, new, 1))
+
+          path = Path('research/cfb_v2_calibration_and_team_residual.py')
+          text = path.read_text()
+          old_import = 'from research import cfb_team_score_regression_v2 as base\n'
+          new_import = old_import + 'from research import cfb_team_score_regression_runner as exact\n'
+          if 'cfb_team_score_regression_runner as exact' not in text:
+              text = text.replace(old_import, new_import, 1)
+          text = text.replace('base.games_from_pbp(season)', 'exact.games_from_pbp_exact(season)')
+          path.write_text(text)
           PY
       - name: Compile research
         run: python -m py_compile research/cfb_team_score_regression_v2.py research/cfb_team_score_regression_runner.py research/cfb_team_score_regression_v3_nonlinear.py research/cfb_v2_calibration_and_team_residual.py builders/cfb_builder.py
