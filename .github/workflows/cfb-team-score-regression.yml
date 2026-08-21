@@ -43,12 +43,32 @@ jobs:
           text = path.read_text()
           old = '"total_rmse": float(np.sqrt(np.mean(np.square(te))),'
           new = '"total_rmse": float(np.sqrt(np.mean(np.square(te)))),'
-          if old not in text:
-              raise SystemExit('expected RMSE typo not found')
-          path.write_text(text.replace(old, new, 1))
+          if old in text:
+              path.write_text(text.replace(old, new, 1))
           PY
       - name: Compile research
         run: python -m py_compile research/cfb_team_score_regression_v2.py builders/cfb_builder.py
+      - name: Inspect downloaded SportsDataverse schema
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+        run: |
+          python - <<'PY'
+          from builders import cfb_builder as cfb
+          import pyarrow.parquet as pq
+          import pandas as pd
+          for season in (2020, 2025):
+              path = cfb._download_open_asset('cfbfastR_cfb_pbp', season, ('play_by_play', 'pbp'))
+              print(f'SCHEMA_PATH {season}: {path}')
+              names = pq.read_schema(path).names
+              print(f'SCHEMA_ALL {season}: ' + ' | '.join(names))
+              keys = [n for n in names if any(t in n.lower() for t in ('game','week','home','away','score','spread','over','under','total','neutral','season'))]
+              print(f'SCHEMA_RELEVANT {season}: ' + ' | '.join(keys))
+              sample_cols = keys[:40]
+              if sample_cols:
+                  sample = pd.read_parquet(path, columns=sample_cols).head(3)
+                  print(f'SAMPLE {season}:')
+                  print(sample.to_string(index=False))
+          PY
       - name: Run leakage-safe CFB regression v2
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
