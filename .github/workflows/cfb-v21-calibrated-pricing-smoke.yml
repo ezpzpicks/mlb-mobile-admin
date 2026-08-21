@@ -42,10 +42,15 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Generate calibrated pricing integration
         run: python research/apply_cfb_v21_calibrated_pricing.py
-      - name: Compile integration
-        run: python -m py_compile builders/cfb_market_calibration.py builders/cfb_builder.py app_mobile_admin.py research/test_cfb_v21_market_calibration.py
-      - name: Run calibrated pricing smoke tests
+      - name: Compile integration and cross-sport smoke tests
+        run: |
+          python -m py_compile builders/cfb_market_calibration.py builders/cfb_builder.py app_mobile_admin.py research/test_cfb_v21_market_calibration.py research/test_cfb_game_regression_layer.py research/test_nfl_skill_prop_regression.py
+      - name: Run CFB v2.1 calibrated pricing smoke tests
         run: python -m research.test_cfb_v21_market_calibration
+      - name: Re-run underlying CFB v2 regression smoke test
+        run: python -m research.test_cfb_game_regression_layer
+      - name: Re-run NFL regression smoke test on this branch
+        run: python -m research.test_nfl_skill_prop_regression
       - name: Check generated diff
         run: git diff --check
       - name: Record generated production source
