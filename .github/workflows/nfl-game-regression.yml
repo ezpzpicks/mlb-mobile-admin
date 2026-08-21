@@ -31,7 +31,7 @@ jobs:
           python -m pip install pyarrow scipy statsmodels
       - name: Run historical NFL game regression
         run: |
-          python research/nfl_game_regression.py --output-dir artifacts/nfl_game_regression
+          python -m research.nfl_game_regression --output-dir artifacts/nfl_game_regression
       - name: Save auditable regression results to branch
         run: |
           mkdir -p research/results
