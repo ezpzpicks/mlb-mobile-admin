@@ -1,0 +1,190 @@
+{
+  "edge_accuracy": {
+    "spread_1.5": {
+      "accuracy": 0.4508670520231214,
+      "n": 173
+    },
+    "spread_2.5": {
+      "accuracy": 0.41379310344827586,
+      "n": 116
+    },
+    "spread_3.5": {
+      "accuracy": 0.475,
+      "n": 80
+    },
+    "total_1.75": {
+      "accuracy": 0.51875,
+      "n": 160
+    },
+    "total_3.0": {
+      "accuracy": 0.5181818181818182,
+      "n": 110
+    },
+    "total_4.0": {
+      "accuracy": 0.4794520547945205,
+      "n": 73
+    }
+  },
+  "margin": {
+    "coefficients": {
+      "home_field": -0.5124955701411572,
+      "point_diff_strength_diff": 0.4016695804108764,
+      "scoring_matchup_diff": 0.20083479020552983,
+      "success_matchup_diff": 36.00977038772853
+    },
+    "confirmation_coefficients": {
+      "const": 8.396423343952604,
+      "home_field": -6.666424698826445,
+      "point_diff_strength_diff": 0.524786131719255,
+      "scoring_matchup_diff": 0.26239306585992983,
+      "success_matchup_diff": 23.267123582688214
+    },
+    "discovery_coefficients": {
+      "const": 0.4926556421308045,
+      "home_field": 1.708520514404015,
+      "point_diff_strength_diff": 0.36003016647028363,
+      "scoring_matchup_diff": 0.1800150832352601,
+      "success_matchup_diff": 40.62433104840955
+    },
+    "discovery_pvalues": {
+      "const": 0.8929579730088348,
+      "home_field": 0.6435363741002922,
+      "point_diff_strength_diff": 1.5127051099581686e-05,
+      "scoring_matchup_diff": 1.5127051099143608e-05,
+      "success_matchup_diff": 0.0059991274820957695
+    },
+    "holdout_metrics": {
+      "bias": -0.10691365217193383,
+      "mae": 10.316367017521182,
+      "n": 272,
+      "r2": 0.13899766017488113,
+      "rmse": 13.130918235056896
+    },
+    "intercept": 2.600363873738686,
+    "removed": [
+      {
+        "feature": "turnover_pressure_diff",
+        "p_value": 0.8419697758055047
+      },
+      {
+        "feature": "red_zone_matchup_diff",
+        "p_value": 0.5786329452813767
+      },
+      {
+        "feature": "explosive_matchup_diff",
+        "p_value": 0.5100565922365172
+      },
+      {
+        "feature": "sack_pressure_diff",
+        "p_value": 0.47236746400487073
+      },
+      {
+        "feature": "rest_edge",
+        "p_value": 0.45785253076057564
+      },
+      {
+        "feature": "pass_matchup_diff",
+        "p_value": 0.13875615653073645
+      },
+      {
+        "feature": "rush_matchup_diff",
+        "p_value": 0.4336978624040959
+      }
+    ],
+    "selected_features": [
+      "scoring_matchup_diff",
+      "point_diff_strength_diff",
+      "success_matchup_diff",
+      "home_field"
+    ],
+    "sign_stability": {
+      "home_field": false,
+      "point_diff_strength_diff": true,
+      "scoring_matchup_diff": true,
+      "success_matchup_diff": true
+    }
+  },
+  "method": "Production nflverse metrics; 2021-23 HC3 OLS backward selection p<0.05; 2024 confirmation; final refit 2021-24; untouched 2025 holdout; no market predictors",
+  "research_version": "nfl-game-regression-2026-08-20",
+  "residual_distribution": {
+    "correlation": -0.05525130849377974,
+    "margin_sd": 13.154686651174607,
+    "total_sd": 13.546938144100693
+  },
+  "rows": {
+    "confirmation": 272,
+    "discovery": 815,
+    "holdout": 272
+  },
+  "total": {
+    "coefficients": {
+      "pace_mean": 0.17353773133226874,
+      "red_zone_matchup_sum": 12.064644049832529
+    },
+    "confirmation_coefficients": {
+      "const": 80.3533060852243,
+      "pace_mean": -0.8577989685403516,
+      "red_zone_matchup_sum": 17.462322567250727
+    },
+    "discovery_coefficients": {
+      "const": -3.5790645525873246,
+      "pace_mean": 0.5466364755069595,
+      "red_zone_matchup_sum": 11.619570992665839
+    },
+    "discovery_pvalues": {
+      "const": 0.8276704951698328,
+      "pace_mean": 0.039335347992142396,
+      "red_zone_matchup_sum": 8.868614873885966e-05
+    },
+    "holdout_metrics": {
+      "bias": -1.3652561836028752,
+      "mae": 10.756721081662823,
+      "n": 272,
+      "r2": 0.02850322098927982,
+      "rmse": 13.5907598522386
+    },
+    "intercept": 20.170572498482876,
+    "removed": [
+      {
+        "feature": "turnover_pressure_sum",
+        "p_value": 0.8913318147405711
+      },
+      {
+        "feature": "pass_matchup_sum",
+        "p_value": 0.7130432634773494
+      },
+      {
+        "feature": "sack_pressure_sum",
+        "p_value": 0.6438199582062797
+      },
+      {
+        "feature": "scoring_matchup_sum",
+        "p_value": 0.6723360742036444
+      },
+      {
+        "feature": "rush_matchup_sum",
+        "p_value": 0.13560853603770875
+      },
+      {
+        "feature": "explosive_matchup_sum",
+        "p_value": 0.26238112310191997
+      },
+      {
+        "feature": "success_matchup_sum",
+        "p_value": 0.06874777016478341
+      },
+      {
+        "feature": "weather_adjustment",
+        "p_value": 0.068942926266826
+      }
+    ],
+    "selected_features": [
+      "red_zone_matchup_sum",
+      "pace_mean"
+    ],
+    "sign_stability": {
+      "pace_mean": false,
+      "red_zone_matchup_sum": true
+    }
+  }
+}
