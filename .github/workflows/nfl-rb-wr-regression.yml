@@ -1,0 +1,53 @@
+name: NFL RB WR prop regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nfl-rb-wr-regression-v1
+    paths:
+      - research/nfl_rb_wr_prop_regression.py
+      - .github/workflows/nfl-rb-wr-regression.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nfl-rb-wr-regression-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install scipy statsmodels pyarrow
+      - name: Compile research script
+        run: python -m py_compile research/nfl_rb_wr_prop_regression.py
+      - name: Run historical regression
+        run: python -m research.nfl_rb_wr_prop_regression --output-dir artifacts/nfl_rb_wr_prop_regression
+      - name: Save auditable results
+        run: |
+          mkdir -p research/results
+          cp artifacts/nfl_rb_wr_prop_regression/nfl_rb_wr_prop_regression_results.json research/results/nfl_rb_wr_prop_regression_results.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/nfl_rb_wr_prop_regression_results.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record RB WR prop regression results"
+            git pull --rebase origin nfl-rb-wr-regression-v1
+            git push origin HEAD:nfl-rb-wr-regression-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nfl-rb-wr-prop-regression
+          path: artifacts/nfl_rb_wr_prop_regression/
+          if-no-files-found: error
+          retention-days: 14
