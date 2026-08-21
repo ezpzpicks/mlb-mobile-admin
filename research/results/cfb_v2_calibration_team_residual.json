@@ -1,0 +1,629 @@
+{
+  "base_benchmarks": {
+    "2024": {
+      "bias": -1.2020409736683417,
+      "mae": 13.848583636075878,
+      "n": 1609,
+      "rmse": 17.79451860424058
+    },
+    "2025": {
+      "bias": -0.819513998544633,
+      "mae": 13.60198063639121,
+      "n": 1657,
+      "rmse": 17.60781730016111
+    }
+  },
+  "calibration": {
+    "2024_probability_bins": [
+      {
+        "mean_model_probability": 0.5125342045994378,
+        "mean_point_edge": 0.5581582823782615,
+        "n": 231,
+        "range": "0.500-0.525",
+        "win_rate": 0.4935064935064935
+      },
+      {
+        "mean_model_probability": 0.5384095619555573,
+        "mean_point_edge": 1.7127723477917423,
+        "n": 223,
+        "range": "0.525-0.550",
+        "win_rate": 0.4663677130044843
+      },
+      {
+        "mean_model_probability": 0.561596906914648,
+        "mean_point_edge": 2.7535222395960575,
+        "n": 202,
+        "range": "0.550-0.575",
+        "win_rate": 0.5
+      },
+      {
+        "mean_model_probability": 0.5878184314525289,
+        "mean_point_edge": 3.942166983395502,
+        "n": 193,
+        "range": "0.575-0.600",
+        "win_rate": 0.5077720207253886
+      },
+      {
+        "mean_model_probability": 0.6240652901966014,
+        "mean_point_edge": 5.6192931544651294,
+        "n": 257,
+        "range": "0.600-0.650",
+        "win_rate": 0.5291828793774319
+      },
+      {
+        "mean_model_probability": 0.7300695252922977,
+        "mean_point_edge": 11.212061349074611,
+        "n": 383,
+        "range": "0.650-1.010",
+        "win_rate": 0.4908616187989556
+      }
+    ],
+    "2025_benchmark_probability_bins": [
+      {
+        "mean_model_probability": 0.5126107037484051,
+        "mean_point_edge": 0.5615597559092307,
+        "n": 229,
+        "range": "0.500-0.525",
+        "win_rate": 0.4410480349344978
+      },
+      {
+        "mean_model_probability": 0.5377153309691138,
+        "mean_point_edge": 1.6817090497892206,
+        "n": 221,
+        "range": "0.525-0.550",
+        "win_rate": 0.5203619909502263
+      },
+      {
+        "mean_model_probability": 0.5619945562629213,
+        "mean_point_edge": 2.77143426312373,
+        "n": 233,
+        "range": "0.550-0.575",
+        "win_rate": 0.5021459227467812
+      },
+      {
+        "mean_model_probability": 0.5876736640311039,
+        "mean_point_edge": 3.9356439725852206,
+        "n": 180,
+        "range": "0.575-0.600",
+        "win_rate": 0.5388888888888889
+      },
+      {
+        "mean_model_probability": 0.6242014149490027,
+        "mean_point_edge": 5.625611323838094,
+        "n": 275,
+        "range": "0.600-0.650",
+        "win_rate": 0.4690909090909091
+      },
+      {
+        "mean_model_probability": 0.7299608996404432,
+        "mean_point_edge": 11.220647205111662,
+        "n": 405,
+        "range": "0.650-1.010",
+        "win_rate": 0.5012345679012346
+      }
+    ],
+    "margin_residual_mean": 1.2020409736683417,
+    "margin_residual_sd": 17.75939215594032,
+    "margin_robust_sigma_mad": 16.871932143212987,
+    "probability_model": "Normal CDF of absolute spread point edge / calibrated residual SD",
+    "source": "2024 out-of-sample residuals from 2021-23 trained base CFB v2"
+  },
+  "grading": {
+    "2024_selected_gate_results": {
+      "A": {
+        "mean_point_edge": 8.40966824185623,
+        "mean_probability": 0.6765393619509278,
+        "n": 726,
+        "win_rate": 0.509641873278237
+      },
+      "B": {
+        "mean_point_edge": 7.09055613447462,
+        "mean_probability": 0.6499584777196349,
+        "n": 975,
+        "win_rate": 0.5056410256410256
+      }
+    },
+    "2025_benchmark_gate_results": {
+      "A": {
+        "mean_point_edge": 8.454263258076324,
+        "mean_probability": 0.6772871342048179,
+        "n": 762,
+        "win_rate": 0.49081364829396323
+      },
+      "B": {
+        "mean_point_edge": 7.057230182351581,
+        "mean_probability": 0.6491390735248056,
+        "n": 1036,
+        "win_rate": 0.4980694980694981
+      }
+    },
+    "grid": [
+      {
+        "n": 1258,
+        "point_edge": 1.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.48035796390411634,
+        "win_rate": 0.4984101748807631,
+        "wins": 627
+      },
+      {
+        "n": 1089,
+        "point_edge": 2.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.4865583486124762,
+        "win_rate": 0.5059687786960514,
+        "wins": 551
+      },
+      {
+        "n": 975,
+        "point_edge": 2.5,
+        "probability": 0.525,
+        "wilson80_lower": 0.48512885561619284,
+        "win_rate": 0.5056410256410256,
+        "wins": 493
+      },
+      {
+        "n": 890,
+        "point_edge": 3.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.48078420582718895,
+        "win_rate": 0.5022471910112359,
+        "wins": 447
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.525,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 1140,
+        "point_edge": 1.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.48979774016638067,
+        "win_rate": 0.5087719298245614,
+        "wins": 580
+      },
+      {
+        "n": 1089,
+        "point_edge": 2.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.4865583486124762,
+        "win_rate": 0.5059687786960514,
+        "wins": 551
+      },
+      {
+        "n": 975,
+        "point_edge": 2.5,
+        "probability": 0.54,
+        "wilson80_lower": 0.48512885561619284,
+        "win_rate": 0.5056410256410256,
+        "wins": 493
+      },
+      {
+        "n": 890,
+        "point_edge": 3.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.48078420582718895,
+        "win_rate": 0.5022471910112359,
+        "wins": 447
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.54,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 1035,
+        "point_edge": 1.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.4854049470187495,
+        "win_rate": 0.5053140096618357,
+        "wins": 523
+      },
+      {
+        "n": 1035,
+        "point_edge": 2.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.4854049470187495,
+        "win_rate": 0.5053140096618357,
+        "wins": 523
+      },
+      {
+        "n": 975,
+        "point_edge": 2.5,
+        "probability": 0.55,
+        "wilson80_lower": 0.48512885561619284,
+        "win_rate": 0.5056410256410256,
+        "wins": 493
+      },
+      {
+        "n": 890,
+        "point_edge": 3.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.48078420582718895,
+        "win_rate": 0.5022471910112359,
+        "wins": 447
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.55,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 946,
+        "point_edge": 1.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.48446205650576557,
+        "win_rate": 0.5052854122621564,
+        "wins": 478
+      },
+      {
+        "n": 946,
+        "point_edge": 2.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.48446205650576557,
+        "win_rate": 0.5052854122621564,
+        "wins": 478
+      },
+      {
+        "n": 946,
+        "point_edge": 2.5,
+        "probability": 0.56,
+        "wilson80_lower": 0.48446205650576557,
+        "win_rate": 0.5052854122621564,
+        "wins": 478
+      },
+      {
+        "n": 890,
+        "point_edge": 3.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.48078420582718895,
+        "win_rate": 0.5022471910112359,
+        "wins": 447
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.56,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 867,
+        "point_edge": 1.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.48113711147866495,
+        "win_rate": 0.5028835063437139,
+        "wins": 436
+      },
+      {
+        "n": 867,
+        "point_edge": 2.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.48113711147866495,
+        "win_rate": 0.5028835063437139,
+        "wins": 436
+      },
+      {
+        "n": 867,
+        "point_edge": 2.5,
+        "probability": 0.57,
+        "wilson80_lower": 0.48113711147866495,
+        "win_rate": 0.5028835063437139,
+        "wins": 436
+      },
+      {
+        "n": 867,
+        "point_edge": 3.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.48113711147866495,
+        "win_rate": 0.5028835063437139,
+        "wins": 436
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.57,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 794,
+        "point_edge": 1.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.4873425727685206,
+        "win_rate": 0.5100755667506297,
+        "wins": 405
+      },
+      {
+        "n": 794,
+        "point_edge": 2.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.4873425727685206,
+        "win_rate": 0.5100755667506297,
+        "wins": 405
+      },
+      {
+        "n": 794,
+        "point_edge": 2.5,
+        "probability": 0.58,
+        "wilson80_lower": 0.4873425727685206,
+        "win_rate": 0.5100755667506297,
+        "wins": 405
+      },
+      {
+        "n": 794,
+        "point_edge": 3.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.4873425727685206,
+        "win_rate": 0.5100755667506297,
+        "wins": 405
+      },
+      {
+        "n": 726,
+        "point_edge": 4.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.48586995168112307,
+        "win_rate": 0.509641873278237,
+        "wins": 370
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.58,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      },
+      {
+        "n": 640,
+        "point_edge": 1.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.48093952396074835,
+        "win_rate": 0.50625,
+        "wins": 324
+      },
+      {
+        "n": 640,
+        "point_edge": 2.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.48093952396074835,
+        "win_rate": 0.50625,
+        "wins": 324
+      },
+      {
+        "n": 640,
+        "point_edge": 2.5,
+        "probability": 0.6,
+        "wilson80_lower": 0.48093952396074835,
+        "win_rate": 0.50625,
+        "wins": 324
+      },
+      {
+        "n": 640,
+        "point_edge": 3.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.48093952396074835,
+        "win_rate": 0.50625,
+        "wins": 324
+      },
+      {
+        "n": 640,
+        "point_edge": 4.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.48093952396074835,
+        "win_rate": 0.50625,
+        "wins": 324
+      },
+      {
+        "n": 582,
+        "point_edge": 5.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.47518992119648573,
+        "win_rate": 0.5017182130584192,
+        "wins": 292
+      },
+      {
+        "n": 470,
+        "point_edge": 6.0,
+        "probability": 0.6,
+        "wilson80_lower": 0.4620179814611421,
+        "win_rate": 0.49148936170212765,
+        "wins": 231
+      }
+    ],
+    "selection_season": 2024,
+    "thresholds": {
+      "A": {
+        "point_edge": 4.0,
+        "probability": 0.58,
+        "source": "conservative fallback; no 2024 candidate met stability gate"
+      },
+      "B": {
+        "point_edge": 2.5,
+        "probability": 0.55,
+        "source": "conservative fallback; no 2024 candidate met stability gate"
+      }
+    }
+  },
+  "research_version": "cfb-v2-calibration-team-residual-2026-08-21",
+  "team_specific_residual": {
+    "2024_base": {
+      "bias": -1.2020409736683417,
+      "mae": 13.848583636075878,
+      "n": 1609,
+      "rmse": 17.79451860424058
+    },
+    "2024_mae_improvement_pct": 0.0,
+    "2024_with_confirmed_overlay": {
+      "bias": -1.2020409736683417,
+      "mae": 13.848583636075878,
+      "n": 1609,
+      "rmse": 17.79451860424058
+    },
+    "2025_base_benchmark": {
+      "bias": -0.819513998544633,
+      "mae": 13.60198063639121,
+      "n": 1657,
+      "rmse": 17.60781730016111
+    },
+    "2025_with_overlay_benchmark": {
+      "bias": -0.819513998544633,
+      "mae": 13.60198063639121,
+      "n": 1657,
+      "rmse": 17.60781730016111
+    },
+    "adjustment_cap_points": 6.0,
+    "candidate_factor_coverage": {
+      "2021": {
+        "portal_gap": 0.0,
+        "qb_continuity_gap": 0.0,
+        "recruiting_gap": 0.0,
+        "returning_production_gap": 0.0,
+        "returning_receiving_gap": 0.0,
+        "returning_rushing_gap": 0.0,
+        "talent_gap": 0.0
+      },
+      "2022": {
+        "portal_gap": 0.0,
+        "qb_continuity_gap": 0.0,
+        "recruiting_gap": 0.0,
+        "returning_production_gap": 0.0,
+        "returning_receiving_gap": 0.0,
+        "returning_rushing_gap": 0.0,
+        "talent_gap": 0.0
+      },
+      "2023": {
+        "portal_gap": 0.0,
+        "qb_continuity_gap": 0.0,
+        "recruiting_gap": 0.0,
+        "returning_production_gap": 0.0,
+        "returning_receiving_gap": 0.0,
+        "returning_rushing_gap": 0.0,
+        "talent_gap": 0.0
+      },
+      "2024": {
+        "portal_gap": 0.0,
+        "qb_continuity_gap": 0.0,
+        "recruiting_gap": 0.0,
+        "returning_production_gap": 0.0,
+        "returning_receiving_gap": 0.0,
+        "returning_rushing_gap": 0.0,
+        "talent_gap": 0.0
+      },
+      "2025": {
+        "portal_gap": 0.0,
+        "qb_continuity_gap": 0.0,
+        "recruiting_gap": 0.0,
+        "returning_production_gap": 0.0,
+        "returning_receiving_gap": 0.0,
+        "returning_rushing_gap": 0.0,
+        "talent_gap": 0.0
+      }
+    },
+    "candidates_after_coverage": [],
+    "production_coefficients": {},
+    "selected_features": [],
+    "selection_history": [],
+    "sign_confirmation": []
+  }
+}

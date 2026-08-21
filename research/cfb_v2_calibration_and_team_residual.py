@@ -21,6 +21,7 @@ import statsmodels.api as sm
 
 from builders import cfb_builder as cfb
 from research import cfb_team_score_regression_v2 as base
+from research import cfb_team_score_regression_runner as exact
 
 RESULT_DIR = Path("research/results")
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
@@ -273,7 +274,7 @@ def _merge_factors(predictions: dict[int, pd.DataFrame], season_games: dict[int,
 
 
 def main() -> None:
-    seasons = {season: base.games_from_pbp(season) for season in range(2020, 2026)}
+    seasons = {season: exact.games_from_pbp_exact(season) for season in range(2020, 2026)}
     team_rows = pd.concat([base.build_team_rows(season, seasons) for season in range(2021, 2026)], ignore_index=True)
 
     # Out-of-fold discovery predictions avoid fitting the residual layer to the
