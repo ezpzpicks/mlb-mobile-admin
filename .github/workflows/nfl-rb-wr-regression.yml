@@ -8,6 +8,12 @@ on:
     paths:
       - research/nfl_rb_wr_prop_regression.py
       - .github/workflows/nfl-rb-wr-regression.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - research/nfl_rb_wr_prop_regression.py
+      - .github/workflows/nfl-rb-wr-regression.yml
 
 permissions:
   contents: write
@@ -34,6 +40,7 @@ jobs:
       - name: Run historical regression
         run: python -m research.nfl_rb_wr_prop_regression --output-dir artifacts/nfl_rb_wr_prop_regression
       - name: Save auditable results
+        if: github.event_name != 'pull_request'
         run: |
           mkdir -p research/results
           cp artifacts/nfl_rb_wr_prop_regression/nfl_rb_wr_prop_regression_results.json research/results/nfl_rb_wr_prop_regression_results.json
