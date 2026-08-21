@@ -8,6 +8,7 @@ on:
     paths:
       - research/cfb_team_score_regression_v2.py
       - research/cfb_team_score_regression_runner.py
+      - research/cfb_team_score_regression_v3_nonlinear.py
       - .github/workflows/cfb-team-score-regression.yml
   pull_request:
     branches:
@@ -15,6 +16,7 @@ on:
     paths:
       - research/cfb_team_score_regression_v2.py
       - research/cfb_team_score_regression_runner.py
+      - research/cfb_team_score_regression_v3_nonlinear.py
       - .github/workflows/cfb-team-score-regression.yml
 
 permissions:
@@ -49,20 +51,20 @@ jobs:
               path.write_text(text.replace(old, new, 1))
           PY
       - name: Compile research
-        run: python -m py_compile research/cfb_team_score_regression_v2.py research/cfb_team_score_regression_runner.py builders/cfb_builder.py
-      - name: Run leakage-safe CFB regression v2
+        run: python -m py_compile research/cfb_team_score_regression_v2.py research/cfb_team_score_regression_runner.py research/cfb_team_score_regression_v3_nonlinear.py builders/cfb_builder.py
+      - name: Run nonlinear CFB regression refinement
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
           EZPZ_CFB_CACHE_SECONDS: '86400'
-        run: python -m research.cfb_team_score_regression_runner
-      - name: Record regression results and repaired source
+        run: python -m research.cfb_team_score_regression_v3_nonlinear
+      - name: Record nonlinear regression results
         if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- research/cfb_team_score_regression_v2.py research/cfb_team_score_regression_runner.py research/results/cfb_team_score_regression_results_v2.json research/results/cfb_team_score_regression_summary_v2.md
+          git add -- research/cfb_team_score_regression_v3_nonlinear.py research/results/cfb_team_score_regression_results_v3_nonlinear.json research/results/cfb_team_score_regression_summary_v3_nonlinear.md
           if ! git diff --cached --quiet; then
-            git commit -m "Record CFB team score regression v2 results"
+            git commit -m "Record nonlinear CFB regression results"
             git pull --rebase origin cfb-regression-v2-research
             git push origin HEAD:cfb-regression-v2-research
           fi
