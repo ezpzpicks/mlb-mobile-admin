@@ -1,0 +1,38 @@
+"""Validated coefficients for the EZPZ NFL team-score regression.
+
+Generated from the historical research pipeline on 2026-08-20. The production
+model intentionally keeps these coefficients frozen until the research pipeline
+is rerun and revalidated.
+"""
+
+MODEL_RESEARCH_VERSION = "nfl-team-score-regression-2026-08-20"
+TEAM_SCORE_INTERCEPT = -5.882194264664658
+TEAM_SCORE_COEFFICIENTS = {
+    "scoring_matchup": 0.8206113159895836,
+    "success_matchup": 22.97227990680213,
+    "weather_adjustment": 1.2968981090090854,
+}
+MARGIN_RESIDUAL_SD = 13.251516312525167
+TOTAL_RESIDUAL_SD = 13.338418166050308
+MARGIN_TOTAL_RESIDUAL_CORRELATION = -0.029638453063268923
+
+HOLDOUT_METRICS = {
+    "margin_mae": 10.33701090053224,
+    "margin_rmse": 13.230008599166933,
+    "total_mae": 10.510507292847098,
+    "total_rmse": 13.319683402239836,
+}
+EXISTING_MODEL_BASELINE = {
+    "margin_mae": 10.674154411764706,
+    "margin_rmse": 13.448323629950401,
+    "total_mae": 10.884595588235294,
+    "total_rmse": 13.678920088201838,
+}
+HOLDOUT_EDGE_SUMMARY = {
+    "spread_1.5": {"n": 184, "accuracy": 0.483695652173913},
+    "spread_2.5": {"n": 129, "accuracy": 0.46511627906976744},
+    "spread_3.5": {"n": 89, "accuracy": 0.4606741573033708},
+    "total_1.75": {"n": 141, "accuracy": 0.524822695035461},
+    "total_3.0": {"n": 62, "accuracy": 0.5483870967741935},
+    "total_4.0": {"n": 30, "accuracy": 0.5666666666666667},
+}
