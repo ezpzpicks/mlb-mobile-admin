@@ -6,13 +6,13 @@ on:
     branches:
       - cfb-regression-v2-research
     paths:
-      - research/cfb_team_score_regression.py
+      - research/cfb_team_score_regression_v2.py
       - .github/workflows/cfb-team-score-regression.yml
   pull_request:
     branches:
       - main
     paths:
-      - research/cfb_team_score_regression.py
+      - research/cfb_team_score_regression_v2.py
       - .github/workflows/cfb-team-score-regression.yml
 
 permissions:
@@ -36,20 +36,20 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install statsmodels pyarrow
       - name: Compile research
-        run: python -m py_compile research/cfb_team_score_regression.py builders/cfb_builder.py
-      - name: Run leakage-safe CFB regression
+        run: python -m py_compile research/cfb_team_score_regression_v2.py builders/cfb_builder.py
+      - name: Run leakage-safe CFB regression v2
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
           EZPZ_CFB_CACHE_SECONDS: '86400'
-        run: python -m research.cfb_team_score_regression
+        run: python -m research.cfb_team_score_regression_v2
       - name: Record regression results
         if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- research/results/cfb_team_score_regression_results.json research/results/cfb_team_score_regression_summary.md
+          git add -- research/results/cfb_team_score_regression_results_v2.json research/results/cfb_team_score_regression_summary_v2.md
           if ! git diff --cached --quiet; then
-            git commit -m "Record CFB team score regression results"
+            git commit -m "Record CFB team score regression v2 results"
             git pull --rebase origin cfb-regression-v2-research
             git push origin HEAD:cfb-regression-v2-research
           fi
