@@ -9,110 +9,110 @@
     },
     "efficiency_model": {
       "coefficients": {
-        "raw_ypt": 0.10575900595918927
+        "raw_ypt": 0.10575900595918893
       },
       "confirmation_coefficients": {
         "const": 5.9524193867724975,
         "raw_ypt": 0.041841643001689896
       },
       "discovery_coefficients": {
-        "const": 4.907580945016241,
-        "raw_ypt": 0.11215173461016567
+        "const": 4.90758094501624,
+        "raw_ypt": 0.11215173461016581
       },
       "discovery_pvalues": {
         "const": 2.1331139713862645e-48,
-        "raw_ypt": 0.04055299813592527
+        "raw_ypt": 0.040552998135924945
       },
       "features": [
         "raw_ypt"
       ],
-      "intercept": 5.084057746644786,
+      "intercept": 5.084057746644785,
       "removed": [
         {
           "feature": "yac_per_reception8",
-          "p_value": 0.9762871483725122,
+          "p_value": 0.9762871483725062,
           "reason": "p>0.05"
         },
         {
           "feature": "home",
-          "p_value": 0.7801551210937974,
+          "p_value": 0.7801551210937931,
           "reason": "p>0.05"
         },
         {
           "feature": "air_yards_per_target8",
-          "p_value": 0.4528396921713058,
+          "p_value": 0.45283969217130615,
           "reason": "p>0.05"
         },
         {
           "feature": "opp_ypt8",
-          "p_value": 0.2957509566198969,
+          "p_value": 0.29575095661989603,
           "reason": "p>0.05"
         },
         {
           "feature": "ypt8",
-          "p_value": 0.2195332664771248,
+          "p_value": 0.21953326647712668,
           "reason": "p>0.05"
         },
         {
           "feature": "rec_epa_per_target8",
-          "p_value": 0.3662513667876097,
+          "p_value": 0.36625136678760883,
           "reason": "p>0.05"
         },
         {
           "feature": "team_total",
-          "p_value": 0.2832155129492844,
+          "p_value": 0.2832155129492834,
           "reason": "p>0.05"
         },
         {
           "feature": "team_spread",
-          "p_value": 0.3879585540169589,
+          "p_value": 0.38795855401695356,
           "reason": "p>0.05"
         }
       ]
     },
     "holdout_component_metrics": {
       "efficiency_on_volume_games": {
-        "bias": -0.13373396370630744,
+        "bias": -0.1337339637063104,
         "mae": 3.8004545304364554,
         "n": 708,
         "rmse": 5.3368162633947875
       },
       "opportunity": {
-        "bias": -0.047077937938848284,
-        "mae": 1.5945017059519366,
+        "bias": -0.04707793793884414,
+        "mae": 1.5945017059519369,
         "n": 807,
         "rmse": 2.0610691711021802
       }
     },
     "kind": "receive",
-    "mae_improvement_pct": 7.863818749237389,
+    "mae_improvement_pct": 7.863818749237364,
     "opportunity_model": {
       "coefficients": {
-        "opp_targets_avg8": 0.08760464015650735,
-        "raw_targets": 0.547853393829317,
-        "targets_avg3": 0.21309421154633576,
-        "team_targets_avg8": -0.027965748045495623
+        "opp_targets_avg8": 0.08760464015650729,
+        "raw_targets": 0.5478533938293169,
+        "targets_avg3": 0.21309421154633607,
+        "team_targets_avg8": -0.0279657480454956
       },
       "confirmation_coefficients": {
-        "const": 1.896665223482985,
-        "opp_targets_avg8": 0.08436165098534598,
-        "raw_targets": 0.40916437047069754,
-        "targets_avg3": 0.26747138303799867,
-        "team_targets_avg8": -0.05045252954039824
+        "const": 1.8966652234829828,
+        "opp_targets_avg8": 0.08436165098534586,
+        "raw_targets": 0.4091643704706971,
+        "targets_avg3": 0.267471383037999,
+        "team_targets_avg8": -0.05045252954039813
       },
       "discovery_coefficients": {
-        "const": 0.7121977307226218,
-        "opp_targets_avg8": 0.08739179907480006,
+        "const": 0.7121977307226223,
+        "opp_targets_avg8": 0.08739179907479999,
         "raw_targets": 0.5834669228848656,
-        "targets_avg3": 0.1970155133064314,
-        "team_targets_avg8": -0.02365454596751552
+        "targets_avg3": 0.19701551330643127,
+        "team_targets_avg8": -0.02365454596751546
       },
       "discovery_pvalues": {
-        "const": 0.08219161636749657,
-        "opp_targets_avg8": 0.005527194681525429,
-        "raw_targets": 5.249183229582045e-24,
-        "targets_avg3": 6.518840567668707e-06,
-        "team_targets_avg8": 0.03539658758205832
+        "const": 0.08219161636749629,
+        "opp_targets_avg8": 0.005527194681525471,
+        "raw_targets": 5.249183229582158e-24,
+        "targets_avg3": 6.518840567668776e-06,
+        "team_targets_avg8": 0.035396587582058776
       },
       "features": [
         "raw_targets",
@@ -120,26 +120,26 @@
         "team_targets_avg8",
         "opp_targets_avg8"
       ],
-      "intercept": 0.9138126685782093,
+      "intercept": 0.9138126685782124,
       "removed": [
         {
           "feature": "target_share_avg8",
-          "p_value": 0.7821958321189264,
+          "p_value": 0.7821958321189236,
           "reason": "p>0.05"
         },
         {
           "feature": "team_targets_avg3",
-          "p_value": 0.7201341940775954,
+          "p_value": 0.7201341940775929,
           "reason": "p>0.05"
         },
         {
           "feature": "targets_avg8",
-          "p_value": 0.7443362083167813,
+          "p_value": 0.7443362083167834,
           "reason": "p>0.05"
         },
         {
           "feature": "team_spread",
-          "p_value": 0.4333287799279968,
+          "p_value": 0.4333287799280393,
           "reason": "p>0.05"
         },
         {
@@ -149,12 +149,12 @@
         },
         {
           "feature": "target_share_avg3",
-          "p_value": 0.3295416120950997,
+          "p_value": 0.32954161209510213,
           "reason": "p>0.05"
         },
         {
           "feature": "home",
-          "p_value": 0.3209533004852545,
+          "p_value": 0.3209533004852585,
           "reason": "p>0.05"
         }
       ]
@@ -162,10 +162,10 @@
     "position": "RB",
     "recommended": true,
     "regression_yards_metrics": {
-      "bias": -0.9384789905941532,
-      "mae": 13.30773051846806,
+      "bias": -0.9384789905941382,
+      "mae": 13.307730518468064,
       "n": 807,
-      "rmse": 18.383825294609856
+      "rmse": 18.383825294609853
     },
     "rows": {
       "confirmation": 797,
@@ -182,108 +182,108 @@
     },
     "efficiency_model": {
       "coefficients": {
-        "raw_rb_ypc": 0.19228512390779248,
-        "team_spread": 0.045128674315713845,
-        "team_total": 0.04725670066213353
+        "raw_rb_ypc": 0.1922851239077925,
+        "team_spread": 0.04512867431571379,
+        "team_total": 0.04725670066213345
       },
       "confirmation_coefficients": {
-        "const": 2.1934543805768096,
-        "raw_rb_ypc": 0.032486631612766284,
-        "team_spread": 0.08448926346984145,
+        "const": 2.193454380576811,
+        "raw_rb_ypc": 0.032486631612766236,
+        "team_spread": 0.0844892634698417,
         "team_total": 0.08498119455107123
       },
       "discovery_coefficients": {
-        "const": 2.3470333751384325,
-        "raw_rb_ypc": 0.23128842527914076,
-        "team_spread": 0.035683918054778115,
-        "team_total": 0.03806638458643927
+        "const": 2.347033375138433,
+        "raw_rb_ypc": 0.23128842527914084,
+        "team_spread": 0.035683918054777976,
+        "team_total": 0.03806638458643921
       },
       "discovery_pvalues": {
         "const": 2.2557453517921686e-09,
         "raw_rb_ypc": 8.319349959436554e-07,
-        "team_spread": 0.0007570548846189834,
-        "team_total": 0.0300864961221897
+        "team_spread": 0.0007570548846190234,
+        "team_total": 0.03008649612219003
       },
       "features": [
         "raw_rb_ypc",
         "team_total",
         "team_spread"
       ],
-      "intercept": 2.3170834243044025,
+      "intercept": 2.317083424304403,
       "removed": [
         {
           "feature": "home",
-          "p_value": 0.9614438866595385,
+          "p_value": 0.9614438866595371,
           "reason": "p>0.05"
         },
         {
           "feature": "rush_epa_per_carry8",
-          "p_value": 0.4498981535520419,
+          "p_value": 0.44989815355204166,
           "reason": "p>0.05"
         },
         {
           "feature": "opp_ypc8",
-          "p_value": 0.13214910544593222,
+          "p_value": 0.13214910544593308,
           "reason": "p>0.05"
         },
         {
           "feature": "ypc8",
-          "p_value": 0.2795133092967179,
+          "p_value": 0.27951330929681717,
           "reason": "p>0.05"
         }
       ]
     },
     "holdout_component_metrics": {
       "efficiency_on_volume_games": {
-        "bias": -0.07857757568704674,
-        "mae": 1.492667139800998,
+        "bias": -0.07857757568704785,
+        "mae": 1.4926671398009979,
         "n": 907,
         "rmse": 2.1589341679002994
       },
       "opportunity": {
-        "bias": -0.048640717823386484,
+        "bias": -0.048640717823385055,
         "mae": 3.9571242242814644,
         "n": 1068,
         "rmse": 5.089012050910745
       }
     },
     "kind": "rush",
-    "mae_improvement_pct": 5.467138671489853,
+    "mae_improvement_pct": 5.467138671489839,
     "opportunity_model": {
       "coefficients": {
-        "carries_avg3": 0.3118522121861481,
-        "carry_share_avg3": 6.315645312414877,
-        "opp_carries_avg8": 0.14015700893849362,
-        "raw_rb_carries": 0.342097086484109,
-        "team_rush_avg8": -0.09056666705251831,
-        "team_total": -0.06578821795950278
+        "carries_avg3": 0.31185221218615017,
+        "carry_share_avg3": 6.315645312414826,
+        "opp_carries_avg8": 0.1401570089384924,
+        "raw_rb_carries": 0.3420970864841083,
+        "team_rush_avg8": -0.09056666705251858,
+        "team_total": -0.06578821795950289
       },
       "confirmation_coefficients": {
-        "carries_avg3": 0.45082404639963697,
-        "carry_share_avg3": 0.7791328730348676,
-        "const": 3.552315240026397,
-        "opp_carries_avg8": 0.15431109023256145,
-        "raw_rb_carries": 0.42691363413713224,
-        "team_rush_avg8": -0.14278795425486476,
-        "team_total": -0.10465088603896266
+        "carries_avg3": 0.4508240463996376,
+        "carry_share_avg3": 0.7791328730348654,
+        "const": 3.552315240026443,
+        "opp_carries_avg8": 0.1543110902325602,
+        "raw_rb_carries": 0.42691363413713146,
+        "team_rush_avg8": -0.14278795425486512,
+        "team_total": -0.10465088603896289
       },
       "discovery_coefficients": {
-        "carries_avg3": 0.26442152806957475,
-        "carry_share_avg3": 8.155127317862313,
-        "const": 1.2899190598880061,
-        "opp_carries_avg8": 0.13352090680717968,
-        "raw_rb_carries": 0.31272204145761656,
-        "team_rush_avg8": -0.07467878736616819,
-        "team_total": -0.05793855354722011
+        "carries_avg3": 0.2644215280695764,
+        "carry_share_avg3": 8.15512731786222,
+        "const": 1.2899190598880355,
+        "opp_carries_avg8": 0.1335209068071796,
+        "raw_rb_carries": 0.31272204145761856,
+        "team_rush_avg8": -0.07467878736616937,
+        "team_total": -0.057938553547220155
       },
       "discovery_pvalues": {
-        "carries_avg3": 7.189511886709156e-06,
-        "carry_share_avg3": 6.246169023475715e-06,
-        "const": 0.3855282024678607,
-        "opp_carries_avg8": 7.88964008308625e-05,
-        "raw_rb_carries": 2.042262460423264e-12,
-        "team_rush_avg8": 0.02113873405110066,
-        "team_total": 0.02292943859941867
+        "carries_avg3": 7.189511886707369e-06,
+        "carry_share_avg3": 6.246169023475657e-06,
+        "const": 0.385528202467849,
+        "opp_carries_avg8": 7.889640083086356e-05,
+        "raw_rb_carries": 2.042262460422177e-12,
+        "team_rush_avg8": 0.0211387340510975,
+        "team_total": 0.02292943859941917
       },
       "features": [
         "raw_rb_carries",
@@ -293,26 +293,26 @@
         "opp_carries_avg8",
         "team_total"
       ],
-      "intercept": 1.6934778404401407,
+      "intercept": 1.693477840440184,
       "removed": [
         {
           "feature": "carry_share_avg8",
-          "p_value": 0.9696497034812223,
+          "p_value": 0.9696497034812096,
           "reason": "p>0.05"
         },
         {
           "feature": "team_rush_avg3",
-          "p_value": 0.6665653872729658,
+          "p_value": 0.6665653872729702,
           "reason": "p>0.05"
         },
         {
           "feature": "carries_avg8",
-          "p_value": 0.2650899219590569,
+          "p_value": 0.2650899219590692,
           "reason": "p>0.05"
         },
         {
           "feature": "home",
-          "p_value": 0.19548406851030797,
+          "p_value": 0.1954840685103132,
           "reason": "p>0.05"
         },
         {
@@ -324,8 +324,8 @@
     "position": "RB",
     "recommended": true,
     "regression_yards_metrics": {
-      "bias": -1.6832372924218855,
-      "mae": 23.857519496695403,
+      "bias": -1.6832372924218917,
+      "mae": 23.857519496695407,
       "n": 1068,
       "rmse": 32.581673413149744
     },
@@ -345,35 +345,35 @@
     },
     "efficiency_model": {
       "coefficients": {
-        "air_yards_per_target8": 0.05749478767487837,
-        "home": 0.43298975092446274,
-        "raw_ypt": 0.14895607849862744,
-        "team_spread": 0.11061710650626522,
-        "team_total": 0.09775151359040112
+        "air_yards_per_target8": 0.05749478767487923,
+        "home": 0.4329897509244627,
+        "raw_ypt": 0.14895607849862652,
+        "team_spread": 0.11061710650626506,
+        "team_total": 0.09775151359040113
       },
       "confirmation_coefficients": {
-        "air_yards_per_target8": 0.05541688121895716,
-        "const": 4.423428103319651,
-        "home": 0.28803657154000706,
-        "raw_ypt": 0.13691097450702444,
-        "team_spread": 0.12586690063750344,
-        "team_total": 0.08231210178969874
+        "air_yards_per_target8": 0.05541688121895679,
+        "const": 4.423428103319655,
+        "home": 0.28803657154000745,
+        "raw_ypt": 0.13691097450702583,
+        "team_spread": 0.12586690063750272,
+        "team_total": 0.08231210178969811
       },
       "discovery_coefficients": {
-        "air_yards_per_target8": 0.05786612210834594,
-        "const": 3.6386310572871174,
-        "home": 0.4773860391329054,
-        "raw_ypt": 0.1526923325621191,
-        "team_spread": 0.10727932474824887,
-        "team_total": 0.10281871343975783
+        "air_yards_per_target8": 0.05786612210834596,
+        "const": 3.6386310572871086,
+        "home": 0.4773860391329064,
+        "raw_ypt": 0.15269233256211828,
+        "team_spread": 0.10727932474824885,
+        "team_total": 0.10281871343975858
       },
       "discovery_pvalues": {
-        "air_yards_per_target8": 0.03724697892383554,
-        "const": 2.4676815153731274e-05,
-        "home": 0.0032585228303638135,
-        "raw_ypt": 0.0003700747869561008,
-        "team_spread": 2.669712913028227e-06,
-        "team_total": 0.0045208517609375285
+        "air_yards_per_target8": 0.0372469789238355,
+        "const": 2.4676815153731125e-05,
+        "home": 0.003258522830363775,
+        "raw_ypt": 0.0003700747869561317,
+        "team_spread": 2.6697129130281517e-06,
+        "team_total": 0.004520851760937072
       },
       "features": [
         "raw_ypt",
@@ -382,73 +382,73 @@
         "team_spread",
         "home"
       ],
-      "intercept": 3.827430151250454,
+      "intercept": 3.827430151250453,
       "removed": [
         {
           "feature": "opp_ypt8",
-          "p_value": 0.4528627218001958,
+          "p_value": 0.4528627218001997,
           "reason": "p>0.05"
         },
         {
           "feature": "ypt8",
-          "p_value": 0.6707472571233009,
+          "p_value": 0.670747257123309,
           "reason": "p>0.05"
         },
         {
           "feature": "yac_per_reception8",
-          "p_value": 0.17600035225346355,
+          "p_value": 0.17600035225346522,
           "reason": "p>0.05"
         },
         {
           "feature": "rec_epa_per_target8",
-          "p_value": 0.22422851028673318,
+          "p_value": 0.2242285102867344,
           "reason": "p>0.05"
         }
       ]
     },
     "holdout_component_metrics": {
       "efficiency_on_volume_games": {
-        "bias": 0.07799075399003494,
-        "mae": 3.7786814979052767,
+        "bias": 0.07799075399003641,
+        "mae": 3.7786814979052776,
         "n": 1355,
-        "rmse": 4.995641846152115
+        "rmse": 4.9956418461521155
       },
       "opportunity": {
-        "bias": 0.25573452560575366,
+        "bias": 0.25573452560575544,
         "mae": 2.218974673936869,
         "n": 1552,
         "rmse": 2.7833988304852397
       }
     },
     "kind": "receive",
-    "mae_improvement_pct": 3.821622490431716,
+    "mae_improvement_pct": 3.821622490431676,
     "opportunity_model": {
       "coefficients": {
-        "raw_targets": 0.197192355940755,
-        "target_share_avg3": 7.823119777439491,
-        "targets_avg8": 0.45273761653622924,
-        "team_total": 0.02608707180789477
+        "raw_targets": 0.19719235594075482,
+        "target_share_avg3": 7.8231197774395,
+        "targets_avg8": 0.4527376165362298,
+        "team_total": 0.026087071807894636
       },
       "confirmation_coefficients": {
         "const": -0.39889150149107294,
-        "raw_targets": 0.479068933385781,
-        "target_share_avg3": 9.497006326570165,
-        "targets_avg8": 0.10371061355396123,
-        "team_total": 0.04202354786453828
+        "raw_targets": 0.47906893338577927,
+        "target_share_avg3": 9.497006326570164,
+        "targets_avg8": 0.10371061355396231,
+        "team_total": 0.04202354786453847
       },
       "discovery_coefficients": {
-        "const": -0.1071764852604585,
-        "raw_targets": 0.11100576776528442,
-        "target_share_avg3": 7.215216001491621,
-        "targets_avg8": 0.5618328563353822,
-        "team_total": 0.0221364805351758
+        "const": -0.10717648526045691,
+        "raw_targets": 0.11100576776528366,
+        "target_share_avg3": 7.215216001491616,
+        "targets_avg8": 0.5618328563353836,
+        "team_total": 0.022136480535175643
       },
       "discovery_pvalues": {
-        "const": 0.6738215008778208,
-        "raw_targets": 0.3006708469113838,
-        "target_share_avg3": 2.4264156383730812e-14,
-        "targets_avg8": 1.364646803102609e-07,
-        "team_total": 0.03153824136432099
+        "const": 0.6738215008778254,
+        "raw_targets": 0.30067084691138746,
+        "target_share_avg3": 2.4264156383731513e-14,
+        "targets_avg8": 1.3646468031025816e-07,
+        "team_total": 0.03153824136432251
       },
       "features": [
         "raw_targets",
@@ -456,36 +456,36 @@
         "target_share_avg3",
         "team_total"
       ],
-      "intercept": -0.15535316389900333,
+      "intercept": -0.1553531638990025,
       "removed": [
         {
           "feature": "target_share_avg8",
-          "p_value": 0.8296774051517085,
+          "p_value": 0.8296774051517048,
           "reason": "p>0.05"
         },
         {
           "feature": "team_targets_avg3",
-          "p_value": 0.5386577242534959,
+          "p_value": 0.5386577242534931,
           "reason": "p>0.05"
         },
         {
           "feature": "opp_targets_avg8",
-          "p_value": 0.26297384294286286,
+          "p_value": 0.26297384294286963,
           "reason": "p>0.05"
         },
         {
           "feature": "targets_avg3",
-          "p_value": 0.18629014766413587,
+          "p_value": 0.18629014766414542,
           "reason": "p>0.05"
         },
         {
           "feature": "team_targets_avg8",
-          "p_value": 0.5033269102088405,
+          "p_value": 0.5033269102087929,
           "reason": "p>0.05"
         },
         {
           "feature": "home",
-          "p_value": 0.1546171332955289,
+          "p_value": 0.15461713329552274,
           "reason": "p>0.05"
         },
         {
@@ -497,8 +497,8 @@
     "position": "WR",
     "recommended": true,
     "regression_yards_metrics": {
-      "bias": 2.6242965836983676,
-      "mae": 25.31105105565945,
+      "bias": 2.6242965836983894,
+      "mae": 25.311051055659462,
       "n": 1552,
       "rmse": 32.296539386258985
     },
