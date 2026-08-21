@@ -1,0 +1,44 @@
+name: NFL v4.1 RB WR regression smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nfl-rb-wr-regression-v1
+    paths:
+      - app_mobile_admin.py
+      - builders/nfl_skill_prop_regression.py
+      - builders/nfl_skill_prop_consistency.py
+      - research/test_nfl_skill_prop_regression.py
+      - .github/workflows/nfl-rb-wr-v41-smoke.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - app_mobile_admin.py
+      - builders/nfl_skill_prop_regression.py
+      - builders/nfl_skill_prop_consistency.py
+      - research/test_nfl_skill_prop_regression.py
+      - .github/workflows/nfl-rb-wr-v41-smoke.yml
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nfl-rb-wr-regression-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install production dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Compile integration
+        run: |
+          python -m py_compile app_mobile_admin.py builders/nfl_skill_prop_regression.py builders/nfl_skill_prop_consistency.py research/test_nfl_skill_prop_regression.py
+      - name: Run regression smoke test
+        run: python -m research.test_nfl_skill_prop_regression

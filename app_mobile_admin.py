@@ -195,13 +195,13 @@ if selected_sport not in valid_sports:
                     _set_sport(sport)
                     st.rerun()
 
-    st.caption("MLB remains the production engine. NFL now includes the automated slate, lineup-aware regression game engine, and in-depth calibrated QB/RB/WR/TE prop model. CFB now automatically loads the slate, free public data, available markets, environment, spread/moneyline/totals projections with no setup sequence or sports-data API key. CBB remains a foundation model for setup and shadow testing.")
+    st.caption("MLB remains the production engine. NFL now includes the regression game engine plus regression-calibrated QB, RB, and WR yardage models with live lineup/injury overlays. CFB now automatically loads the slate, free public data, available markets, environment, spread/moneyline/totals projections with no setup sequence or sports-data API key. CBB remains a foundation model for setup and shadow testing.")
     st.stop()
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v1.2-free-no-key-score-distribution-2026-07-18",
-    "NFL": "nfl-v4.0-team-score-regression-2026-08-20",
+    "NFL": "nfl-v4.1-rb-wr-regression-2026-08-20",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":
@@ -230,7 +230,11 @@ elif selected_sport == "CFB":
 elif selected_sport == "NFL":
     from builders import nfl_builder
     from builders.nfl_game_regression import install_regression_layer
+    from builders.nfl_skill_prop_regression import install_skill_prop_regression
+    from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
     install_regression_layer(nfl_builder)
+    install_skill_prop_regression(nfl_builder)
+    install_skill_prop_consistency(nfl_builder)
     nfl_builder.render()
 elif selected_sport == "CBB":
     from builders.cbb_builder import render
