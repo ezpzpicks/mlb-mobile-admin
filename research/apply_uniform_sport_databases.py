@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
-    if new in text and old not in text:
+    if new in text:
         return text
     count = text.count(old)
     if count != 1:
@@ -170,8 +170,6 @@ def patch_admin() -> None:
 ''',
         "admin CBB database selection",
     )
-    # Surface the database identity in the admin without changing MLB's direct
-    # storage path. This makes accidental cross-sport writes obvious.
     text = replace_once(
         text,
         '''if selected_sport == "MLB":
