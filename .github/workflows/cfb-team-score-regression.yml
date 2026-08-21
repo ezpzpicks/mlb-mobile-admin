@@ -8,6 +8,12 @@ on:
     paths:
       - research/cfb_team_score_regression.py
       - .github/workflows/cfb-team-score-regression.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - research/cfb_team_score_regression.py
+      - .github/workflows/cfb-team-score-regression.yml
 
 permissions:
   contents: write
@@ -37,6 +43,7 @@ jobs:
           EZPZ_CFB_CACHE_SECONDS: '86400'
         run: python -m research.cfb_team_score_regression
       - name: Record regression results
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
