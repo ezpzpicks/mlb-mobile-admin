@@ -5,6 +5,7 @@ import math
 
 from builders import nfl_builder
 import builders.nfl_skill_prop_regression as skill
+import builders.nfl_skill_prop_consistency as consistency
 
 
 def _context(position: str) -> dict[str, float]:
@@ -46,10 +47,12 @@ def _fake_original(player, position, slot, *args, **kwargs):
             {"Market": "Rushing Attempts", "Raw Projection": 15.0, "Calibration Adjustment": 0.0, "Projection": 15.0, "Projected Player Attempts": 15.0, "Reliability": 76.0},
             {"Market": "Rushing Yards", "Raw Projection": 64.5, "Calibration Adjustment": 0.0, "Projection": 64.5, "Projected Player Attempts": 15.0, "Efficiency": 4.3, "Reliability": 76.0, "Confluence": "legacy"},
             {"Market": "Targets", "Raw Projection": 5.0, "Calibration Adjustment": 0.0, "Projection": 5.0, "Projected Targets": 5.0, "Reliability": 74.0},
-            {"Market": "Receiving Yards", "Raw Projection": 31.0, "Calibration Adjustment": 0.0, "Projection": 31.0, "Projected Targets": 5.0, "Efficiency": 6.2, "Reliability": 74.0, "Confluence": "legacy"},
+            {"Market": "Receptions", "Raw Projection": 3.8, "Calibration Adjustment": 0.0, "Projection": 3.8, "Projected Targets": 5.0, "Projected Receptions": 3.8, "Reliability": 74.0},
+            {"Market": "Receiving Yards", "Raw Projection": 31.0, "Calibration Adjustment": 0.0, "Projection": 31.0, "Projected Targets": 5.0, "Projected Receptions": 3.8, "Efficiency": 6.2, "Reliability": 74.0, "Confluence": "legacy"},
         ]
     return [
         {"Market": "Targets", "Raw Projection": 7.5, "Calibration Adjustment": 0.0, "Projection": 7.5, "Projected Targets": 7.5, "Reliability": 77.0},
+        {"Market": "Receptions", "Raw Projection": 5.0, "Calibration Adjustment": 0.0, "Projection": 5.0, "Projected Targets": 7.5, "Projected Receptions": 5.0, "Reliability": 77.0},
         {"Market": "Receiving Yards", "Raw Projection": 65.0, "Calibration Adjustment": 0.0, "Projection": 65.0, "Projected Targets": 7.5, "Projected Receptions": 5.0, "Efficiency": 8.67, "Reliability": 77.0, "Confluence": "legacy"},
     ]
 
@@ -64,10 +67,15 @@ def main() -> None:
 
     nfl_builder._project_player_markets = _fake_original
     skill._CONTEXT_CACHE.clear()
+    consistency._STATS_CACHE.clear()
     skill._live_history_context = lambda nflb, season, projection_week, player, team, opponent, position, team_total, home_away: _context(str(position).upper())
-    if hasattr(nfl_builder, "_SKILL_PROP_REGRESSION_INSTALLED"):
-        delattr(nfl_builder, "_SKILL_PROP_REGRESSION_INSTALLED")
+    for flag in ["_SKILL_PROP_REGRESSION_INSTALLED", "_SKILL_PROP_CONSISTENCY_INSTALLED"]:
+        if hasattr(nfl_builder, flag):
+            delattr(nfl_builder, flag)
+    if hasattr(skill, "_NORMALIZED_STATS_CACHE_INSTALLED"):
+        delattr(skill, "_NORMALIZED_STATS_CACHE_INSTALLED")
     skill.install_skill_prop_regression(nfl_builder)
+    consistency.install_skill_prop_consistency(nfl_builder)
     assert nfl_builder.MODEL_VERSION == skill.MODEL_VERSION
 
     rating = {"Season": 2026, "Projection Week": 1}
@@ -85,6 +93,13 @@ def main() -> None:
     for row in [rb_rush, rb_rec, wr_rec]:
         assert math.isfinite(float(row["Projection"])) and float(row["Projection"]) >= 0
         assert "v4.1 regression" in str(row["Confluence"])
+
+    # Receiving-yard simulations need a catch count that matches the newly
+    # regressed target count. Preserve the live model's catch probability.
+    assert math.isclose(float(rb_rec["Projected Receptions"]) / float(rb_rec["Projected Targets"]), 3.8 / 5.0, rel_tol=0.02)
+    assert math.isclose(float(wr_rec["Projected Receptions"]) / float(wr_rec["Projected Targets"]), 5.0 / 7.5, rel_tol=0.02)
+    assert "live catch-rate" in str(rb_rec["Confluence"])
+    assert "live catch-rate" in str(wr_rec["Confluence"])
     print("NFL v4.1 RB/WR regression smoke test passed")
 
 
