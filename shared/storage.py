@@ -7,6 +7,17 @@ import pandas as pd
 import streamlit as st
 from google.oauth2.service_account import Credentials
 
+from shared.public_contract import (
+    ALL_GAME_TRENDS_COLUMNS,
+    ALL_GAME_TRENDS_TAB,
+    ODDS_SNAPSHOT_COLUMNS,
+    ODDS_SNAPSHOT_TAB,
+    PUBLIC_SLATE_TAB,
+    PUBLIC_SPLIT_COLUMNS,
+    PUBLIC_SPLIT_TAB,
+    PUBLIC_TRACKER_TAB,
+)
+
 
 _ACTIVE_SPORT = ""
 _DEFAULT_DATABASE_NAMES = {
@@ -15,6 +26,18 @@ _DEFAULT_DATABASE_NAMES = {
     "NCAAF": "CFB Model Database",
     "CBB": "CBB Model Database",
     "NCAAM": "CBB Model Database",
+}
+
+# Create a small, MLB-compatible public contract immediately when a new sport
+# workbook is first created. The full builder headers replace/expand the slate
+# and tracker rows when that model saves its first slate, while the trend/split
+# tables already use their final shared schemas from day one.
+_BOOTSTRAP_PUBLIC_TABS = {
+    PUBLIC_SLATE_TAB: ["Date", "Game", "Away Team", "Home Team"],
+    PUBLIC_TRACKER_TAB: ["Date", "Game", "Bet Type", "Selection", "Odds/Line", "Result"],
+    ALL_GAME_TRENDS_TAB: ALL_GAME_TRENDS_COLUMNS,
+    PUBLIC_SPLIT_TAB: PUBLIC_SPLIT_COLUMNS,
+    ODDS_SNAPSHOT_TAB: ODDS_SNAPSHOT_COLUMNS,
 }
 
 
@@ -105,6 +128,74 @@ def _authorized_client(credentials_json: str):
         ],
     )
     return gspread.authorize(credentials)
+
+
+@st.cache_resource(show_spinner=False)
+def _initialize_sport_workbooks_cached(
+    credentials_json: str,
+    configurations: tuple[tuple[str, str, str], ...],
+):
+    """Create sport workbooks/public tabs once per running admin process."""
+    client = _authorized_client(credentials_json)
+    initialized: dict[str, str] = {}
+
+    for sport, sheet_id, sheet_name in configurations:
+        if sheet_id:
+            workbook = client.open_by_key(sheet_id)
+        else:
+            try:
+                workbook = client.open(sheet_name)
+            except gspread.SpreadsheetNotFound:
+                workbook = client.create(sheet_name)
+
+        for tab_name, columns in _BOOTSTRAP_PUBLIC_TABS.items():
+            try:
+                worksheet = workbook.worksheet(tab_name)
+            except gspread.WorksheetNotFound:
+                worksheet = workbook.add_worksheet(
+                    title=tab_name,
+                    rows=2000,
+                    cols=max(20, len(columns) + 5),
+                )
+            if columns:
+                values = worksheet.get_all_values()
+                if not values:
+                    worksheet.update([list(columns)])
+
+        initialized[sport] = str(getattr(workbook, "id", "") or sheet_id or sheet_name)
+
+    return initialized
+
+
+def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[str, str]:
+    """Ensure dedicated sport databases exist before any sport page is opened.
+
+    This is deliberately independent of ``_ACTIVE_SPORT`` so startup can create
+    NFL and CFB safely without changing which model the current admin session is
+    viewing. It also means the public Vercel service never needs permission to
+    create Drive files; it only reads/writes these already-owned spreadsheets.
+    """
+    credentials_json = _secret_or_env("GOOGLE_CREDENTIALS")
+    if not credentials_json:
+        return {}
+
+    configurations: list[tuple[str, str, str]] = []
+    for sport in sports:
+        config = storage_database_config(sport)
+        if config["sport"] not in {"NFL", "CFB", "CBB"}:
+            continue
+        if not (config["sheet_id"] or config["sheet_name"]):
+            continue
+        configurations.append(
+            (config["sport"], config["sheet_id"], config["sheet_name"])
+        )
+
+    if not configurations:
+        return {}
+    return _initialize_sport_workbooks_cached(
+        credentials_json,
+        tuple(configurations),
+    )
 
 
 @st.cache_resource(show_spinner=False)
