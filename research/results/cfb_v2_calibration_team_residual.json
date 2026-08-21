@@ -575,22 +575,22 @@
     "adjustment_cap_points": 6.0,
     "candidate_factor_coverage": {
       "2021": {
-        "portal_gap": 0.0,
-        "qb_continuity_gap": 0.0,
-        "recruiting_gap": 0.0,
-        "returning_production_gap": 0.0,
-        "returning_receiving_gap": 0.0,
-        "returning_rushing_gap": 0.0,
-        "talent_gap": 0.0
+        "portal_gap": 1.0,
+        "qb_continuity_gap": 1.0,
+        "recruiting_gap": 1.0,
+        "returning_production_gap": 1.0,
+        "returning_receiving_gap": 1.0,
+        "returning_rushing_gap": 1.0,
+        "talent_gap": 1.0
       },
       "2022": {
-        "portal_gap": 0.0,
-        "qb_continuity_gap": 0.0,
-        "recruiting_gap": 0.0,
-        "returning_production_gap": 0.0,
-        "returning_receiving_gap": 0.0,
-        "returning_rushing_gap": 0.0,
-        "talent_gap": 0.0
+        "portal_gap": 1.0,
+        "qb_continuity_gap": 1.0,
+        "recruiting_gap": 1.0,
+        "returning_production_gap": 1.0,
+        "returning_receiving_gap": 1.0,
+        "returning_rushing_gap": 1.0,
+        "talent_gap": 1.0
       },
       "2023": {
         "portal_gap": 0.0,
@@ -620,10 +620,79 @@
         "talent_gap": 0.0
       }
     },
-    "candidates_after_coverage": [],
+    "candidates_after_coverage": [
+      "returning_production_gap",
+      "qb_continuity_gap",
+      "returning_receiving_gap",
+      "returning_rushing_gap",
+      "talent_gap",
+      "recruiting_gap",
+      "portal_gap"
+    ],
     "production_coefficients": {},
     "selected_features": [],
-    "selection_history": [],
-    "sign_confirmation": []
+    "selection_history": [
+      {
+        "features": [
+          "returning_production_gap",
+          "qb_continuity_gap",
+          "returning_receiving_gap",
+          "returning_rushing_gap",
+          "talent_gap",
+          "portal_gap"
+        ],
+        "worst": "returning_rushing_gap",
+        "worst_p": 0.9815729307416492
+      },
+      {
+        "features": [
+          "returning_production_gap",
+          "qb_continuity_gap",
+          "returning_receiving_gap",
+          "talent_gap",
+          "portal_gap"
+        ],
+        "worst": "returning_production_gap",
+        "worst_p": 0.9264266799293173
+      },
+      {
+        "features": [
+          "qb_continuity_gap",
+          "returning_receiving_gap",
+          "talent_gap",
+          "portal_gap"
+        ],
+        "worst": "qb_continuity_gap",
+        "worst_p": 0.7404338211508055
+      },
+      {
+        "features": [
+          "returning_receiving_gap",
+          "talent_gap",
+          "portal_gap"
+        ],
+        "worst": "portal_gap",
+        "worst_p": 0.08607275694071304
+      },
+      {
+        "features": [
+          "returning_receiving_gap",
+          "talent_gap"
+        ],
+        "worst": "returning_receiving_gap",
+        "worst_p": 1.1619659561904264e-05
+      }
+    ],
+    "sign_confirmation": [
+      {
+        "confirmation_coefficient": 0.0,
+        "confirmation_p": null,
+        "confirmation_p_le_0_10": false,
+        "discovery_coefficient": 8.587516036433248,
+        "discovery_p": 3.43383320634666e-29,
+        "feature": "talent_gap",
+        "same_sign": false
+      }
+    ]
   }
 }
