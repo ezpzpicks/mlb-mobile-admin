@@ -35,4 +35,4 @@ jobs:
       - name: Compile CFB regression integration
         run: python -m py_compile builders/cfb_game_regression.py app_mobile_admin.py research/test_cfb_game_regression_layer.py
       - name: Run CFB regression smoke test
-        run: python research/test_cfb_game_regression_layer.py
+        run: python -m research.test_cfb_game_regression_layer
