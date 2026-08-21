@@ -1,0 +1,54 @@
+name: NFL v4.2 odds smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - nfl-odds-inputs-v42
+    paths:
+      - builders/nfl_builder.py
+      - app_mobile_admin.py
+      - .github/workflows/nfl-v42-odds-smoke.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - builders/nfl_builder.py
+      - app_mobile_admin.py
+      - .github/workflows/nfl-v42-odds-smoke.yml
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: nfl-odds-inputs-v42
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile final source
+        run: python -m py_compile builders/nfl_builder.py app_mobile_admin.py
+      - name: Validate final v4.2 market wiring
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          builder = Path('builders/nfl_builder.py').read_text(encoding='utf-8')
+          app = Path('app_mobile_admin.py').read_text(encoding='utf-8')
+          checks = {
+              'spread side prices': 'home_spread_odds' in builder and 'away_spread_odds' in builder,
+              'total side prices': 'total_over_odds' in builder and 'total_under_odds' in builder,
+              'price-aware spread': 'home_spread_ev' in builder and 'spread_price_edge' in builder,
+              'price-aware total': 'over_ev' in builder and 'total_price_edge' in builder,
+              'yard input editor': 'QB / RB / WR yard lines and prices' in builder,
+              'requested QB market': '(prop_base["Market"].astype(str) == "Passing Yards")' in builder,
+              'requested RB markets': 'isin(["Rushing Yards", "Receiving Yards"])' in builder,
+              'requested WR market': '(prop_base["Market"].astype(str) == "Receiving Yards")' in builder,
+              'tracker actual prices': '("Spread", spread_pick, spread_odds' in builder and '("Total", total_pick, total_odds' in builder,
+              'v4.2 runtime': 'nfl-v4.2-price-aware-odds-2026-08-21' in app,
+          }
+          failed = [name for name, ok in checks.items() if not ok]
+          assert not failed, failed
+          print('NFL v4.2 final odds smoke test passed')
+          PY
