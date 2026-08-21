@@ -5,12 +5,14 @@ on:
     branches:
       - main
       - auto-init-football-workbooks
+      - football-shared-container-fallback
     paths:
       - shared/storage.py
       - shared/public_contract.py
       - builders/nfl_builder.py
       - builders/cfb_builder.py
       - app_mobile_admin.py
+      - sitecustomize.py
       - research/apply_uniform_sport_databases.py
       - research/test_uniform_sport_databases.py
       - .github/workflows/uniform-sport-databases-smoke.yml
@@ -23,6 +25,7 @@ on:
       - builders/nfl_builder.py
       - builders/cfb_builder.py
       - app_mobile_admin.py
+      - sitecustomize.py
       - research/apply_uniform_sport_databases.py
       - research/test_uniform_sport_databases.py
       - .github/workflows/uniform-sport-databases-smoke.yml
@@ -46,7 +49,7 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Compile storage and builders
         run: |
-          python -m py_compile shared/storage.py shared/public_contract.py builders/nfl_builder.py builders/cfb_builder.py app_mobile_admin.py research/test_uniform_sport_databases.py
+          python -m py_compile shared/storage.py shared/public_contract.py builders/nfl_builder.py builders/cfb_builder.py app_mobile_admin.py sitecustomize.py research/test_uniform_sport_databases.py
       - name: Run database contract smoke test
         run: python -m research.test_uniform_sport_databases
       - name: Re-run CFB v2 regression smoke
