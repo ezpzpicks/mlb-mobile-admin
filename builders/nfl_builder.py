@@ -41,7 +41,11 @@ from shared.modeling import (
     expected_value_per_unit,
     probability_edge,
 )
-from shared.storage import read_sheet, sheets_ready, write_sheet
+from shared.storage import get_or_create_worksheet, read_sheet, sheets_ready, write_sheet
+from shared.public_contract import (
+    ALL_GAME_TRENDS_COLUMNS, ALL_GAME_TRENDS_TAB, ODDS_SNAPSHOT_COLUMNS,
+    ODDS_SNAPSHOT_TAB, PUBLIC_SPLIT_COLUMNS, PUBLIC_SPLIT_TAB,
+)
 
 try:
     import nflreadpy as nfl
@@ -70,15 +74,17 @@ QB_PASSING_YPA_TEAM_TOTAL_BASELINE = 22.5
 QB_PASSING_YPA_TEAM_TOTAL_COEFFICIENT = 0.12
 QB_PASSING_YPA_TEAM_TOTAL_ADJUSTMENT_CAP = 0.75
 
-RATINGS_TAB = "nfl_team_ratings"
-SLATE_TAB = "nfl_daily_slate"
-TRACKER_TAB = "nfl_bet_tracker"
-SCHEDULE_TAB = "nfl_schedule"
-LINEUP_TAB = "nfl_lineup_snapshots"
-MODEL_LOG_TAB = "nfl_model_change_log"
-PROP_SLATE_TAB = "nfl_prop_projections"
-PROP_TRACKER_TAB = "nfl_prop_tracker"
-PROP_CALIBRATION_TAB = "nfl_prop_calibration"
+# This model now owns a dedicated NFL workbook. Within that database, public
+# tab names mirror MLB so the public site can use one sport-agnostic contract.
+RATINGS_TAB = "team_ratings"
+SLATE_TAB = "daily_slate"
+TRACKER_TAB = "bet_tracker"
+SCHEDULE_TAB = "schedule"
+LINEUP_TAB = "lineup_snapshots"
+MODEL_LOG_TAB = "model_change_log"
+PROP_SLATE_TAB = "prop_projections"
+PROP_TRACKER_TAB = "prop_tracker"
+PROP_CALIBRATION_TAB = "prop_calibration"
 
 RATING_COLUMNS = [
     "Team", "Season", "Projection Week", "Previous Season Weight", "Current Season Weight",
@@ -4565,8 +4571,23 @@ def _table(tab: str, columns: list[str], title: str) -> None:
         st.info("No rows yet.")
 
 
+def _ensure_public_database_contract() -> None:
+    """Create the uniform public tabs in the NFL database on first use."""
+    if not sheets_ready():
+        return
+    for tab, columns in [
+        (SLATE_TAB, SLATE_COLUMNS),
+        (TRACKER_TAB, TRACKER_COLUMNS),
+        (ALL_GAME_TRENDS_TAB, ALL_GAME_TRENDS_COLUMNS),
+        (PUBLIC_SPLIT_TAB, PUBLIC_SPLIT_COLUMNS),
+        (ODDS_SNAPSHOT_TAB, ODDS_SNAPSHOT_COLUMNS),
+    ]:
+        get_or_create_worksheet(tab, columns)
+
+
 def render() -> None:
-    st.caption("NFL v4.2 regression slate • price-aware spread/total markets • regression QB/RB/WR yard props")
+    _ensure_public_database_contract()
+    st.caption("NFL v4.2 regression slate • separate NFL database • price-aware spread/total markets • regression QB/RB/WR yard props")
     page = st.radio(
         "NFL section",
         ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],
