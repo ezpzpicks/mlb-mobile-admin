@@ -8,6 +8,7 @@ on:
     paths:
       - research/nfl_game_regression.py
       - research/nfl_game_regression_v2.py
+      - research/nfl_team_score_regression.py
       - .github/workflows/nfl-game-regression.yml
 
 permissions:
@@ -30,25 +31,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pyarrow scipy statsmodels
-      - name: Run stabilized historical NFL game regression
+      - name: Run team-score NFL regression validation
         run: |
-          python -m research.nfl_game_regression_v2 --output-dir artifacts/nfl_game_regression_v2
+          python -m research.nfl_team_score_regression --output-dir artifacts/nfl_team_score_regression
       - name: Save auditable regression results to branch
         run: |
           mkdir -p research/results
-          cp artifacts/nfl_game_regression_v2/nfl_game_regression_results_v2.json research/results/nfl_game_regression_results_v2.json
-          cp artifacts/nfl_game_regression_v2/nfl_game_regression_generated_v2.py research/results/nfl_game_regression_generated_v2.py
+          cp artifacts/nfl_team_score_regression/nfl_team_score_regression_results.json research/results/nfl_team_score_regression_results.json
+          cp artifacts/nfl_team_score_regression/nfl_team_score_regression_generated.py research/results/nfl_team_score_regression_generated.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- research/results/nfl_game_regression_results_v2.json research/results/nfl_game_regression_generated_v2.py
+          git add -- research/results/nfl_team_score_regression_results.json research/results/nfl_team_score_regression_generated.py
           if ! git diff --cached --quiet; then
-            git commit -m "Record stabilized NFL regression results"
+            git commit -m "Record team-score NFL regression results"
             git push origin HEAD:nfl-game-regression-v4
           fi
       - name: Upload full regression outputs
         uses: actions/upload-artifact@v4
         with:
-          name: nfl-game-regression-results-v2
-          path: artifacts/nfl_game_regression_v2/
+          name: nfl-team-score-regression-results
+          path: artifacts/nfl_team_score_regression/
           if-no-files-found: error
           retention-days: 14
