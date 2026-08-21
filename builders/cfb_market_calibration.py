@@ -392,9 +392,8 @@ def install_market_calibration(cfb_builder: Any) -> None:
         with st.expander("CFB v2.1 regression + market calibration breakdown", expanded=False):
             st.dataframe(breakdown, hide_index=True, use_container_width=True)
             st.markdown(
-                f"**Calibrated margin residual SD:** {MARGIN_RESIDUAL_SD:.2f} points  "
-                f"  
-**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'not historically validated; conservative grade gates retained'}"
+                f"**Calibrated margin residual SD:** {MARGIN_RESIDUAL_SD:.2f} points  \n"
+                f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'not historically validated; conservative grade gates retained'}"
             )
             st.caption(TEAM_RESIDUAL_STATUS)
             pricing = pd.DataFrame([
