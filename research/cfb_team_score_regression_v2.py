@@ -404,7 +404,7 @@ def score(frame: pd.DataFrame) -> dict[str, Any]:
         "margin_rmse": float(np.sqrt(np.mean(np.square(me)))),
         "margin_bias": float(np.mean(me)),
         "total_mae": float(np.mean(np.abs(te))),
-        "total_rmse": float(np.sqrt(np.mean(np.square(te))),
+        "total_rmse": float(np.sqrt(np.mean(np.square(te)))),
         "total_bias": float(np.mean(te)),
     }
 
