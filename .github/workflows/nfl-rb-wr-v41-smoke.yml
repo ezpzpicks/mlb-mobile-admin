@@ -8,6 +8,7 @@ on:
     paths:
       - app_mobile_admin.py
       - builders/nfl_skill_prop_regression.py
+      - builders/nfl_skill_prop_consistency.py
       - research/test_nfl_skill_prop_regression.py
       - .github/workflows/nfl-rb-wr-v41-smoke.yml
   pull_request:
@@ -16,6 +17,7 @@ on:
     paths:
       - app_mobile_admin.py
       - builders/nfl_skill_prop_regression.py
+      - builders/nfl_skill_prop_consistency.py
       - research/test_nfl_skill_prop_regression.py
       - .github/workflows/nfl-rb-wr-v41-smoke.yml
 
@@ -37,6 +39,6 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Compile integration
         run: |
-          python -m py_compile app_mobile_admin.py builders/nfl_skill_prop_regression.py research/test_nfl_skill_prop_regression.py
+          python -m py_compile app_mobile_admin.py builders/nfl_skill_prop_regression.py builders/nfl_skill_prop_consistency.py research/test_nfl_skill_prop_regression.py
       - name: Run regression smoke test
         run: python -m research.test_nfl_skill_prop_regression
