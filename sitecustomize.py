@@ -187,3 +187,13 @@ if _is_streamlit_runtime():
         # Do not prevent the admin from starting if Google is temporarily
         # unavailable. The app-level storage functions can still retry later.
         print(f"Football database startup bootstrap failed: {exc}")
+
+    try:
+        from shared.mlb_builder_resume import install_mlb_builder_resume
+
+        install_mlb_builder_resume()
+        print("MLB builder recovery checkpointing ready")
+    except Exception as exc:
+        # Recovery is an additive UX safeguard only. Never block the admin if a
+        # future Streamlit release changes a widget API.
+        print(f"MLB builder recovery checkpointing failed: {exc}")
