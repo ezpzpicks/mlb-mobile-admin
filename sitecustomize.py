@@ -5,12 +5,18 @@ is on ``PYTHONPATH``. The hook runs only for Streamlit and installs a safe
 fallback for environments where the Google service account cannot own new Drive
 files: NFL/CFB use isolated prefixed tabs inside the already-authorized shared
 workbook unless a dedicated sport Sheet ID/name is explicitly configured.
+
+The bootstrap is intentionally process-cached and uses one worksheet-list read
+per workbook. Streamlit reruns the entrypoint for every widget interaction, so a
+bootstrap that re-read every worksheet on every rerun could consume Google's
+per-user Sheets quota before the MLB builder itself ran.
 """
 
 from __future__ import annotations
 
 import os
 import sys
+import threading
 from typing import Iterable
 
 
@@ -32,6 +38,14 @@ def _install_shared_container_fallback(storage) -> None:
     original_config = storage.storage_database_config
     original_name = storage.storage_database_name
     original_get_or_create = storage.get_or_create_worksheet
+
+    # ``app_mobile_admin.py`` calls initialize_sport_workbooks at the top of the
+    # Streamlit script, which means once per widget rerun. Keep the result in the
+    # imported storage module so only the first call in this process touches
+    # Google Sheets. A lock also prevents duplicate initialization if two threads
+    # reach startup at the same time.
+    bootstrap_cache: dict[tuple[str, ...], dict[str, str]] = {}
+    bootstrap_lock = threading.Lock()
 
     def storage_database_config(sport: str | None = None):
         selected = _canonical_sport(
@@ -79,46 +93,79 @@ def _install_shared_container_fallback(storage) -> None:
         return original_get_or_create(physical_name, columns)
 
     def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[str, str]:
-        credentials_json = storage._secret_or_env("GOOGLE_CREDENTIALS")
-        if not credentials_json:
+        requested = tuple(
+            sport
+            for sport in (_canonical_sport(value) for value in sports)
+            if sport in {"NFL", "CFB", "CBB"}
+        )
+        if not requested:
             return {}
 
-        client = storage._authorized_client(credentials_json)
-        initialized: dict[str, str] = {}
+        cached = bootstrap_cache.get(requested)
+        if cached is not None:
+            return dict(cached)
 
-        for requested_sport in sports:
-            sport = _canonical_sport(requested_sport)
-            config = storage_database_config(sport)
-            sheet_id = str(config.get("sheet_id", "") or "")
-            sheet_name = str(config.get("sheet_name", "") or "")
-            prefix = str(config.get("namespace", "") or "")
-            if not (sheet_id or sheet_name):
-                continue
+        with bootstrap_lock:
+            cached = bootstrap_cache.get(requested)
+            if cached is not None:
+                return dict(cached)
 
-            try:
-                workbook = client.open_by_key(sheet_id) if sheet_id else client.open(sheet_name)
-            except Exception as exc:
-                initialized[sport] = f"unavailable:{type(exc).__name__}"
-                continue
+            credentials_json = storage._secret_or_env("GOOGLE_CREDENTIALS")
+            if not credentials_json:
+                bootstrap_cache[requested] = {}
+                return {}
 
-            for tab_name, columns in storage._BOOTSTRAP_PUBLIC_TABS.items():
-                physical_name = f"{prefix}{tab_name}" if prefix else tab_name
+            client = storage._authorized_client(credentials_json)
+            initialized: dict[str, str] = {}
+
+            # NFL and CFB can intentionally point at the same shared workbook.
+            # Group by workbook so we fetch its worksheet metadata only once.
+            workbook_groups: dict[tuple[str, str], list[tuple[str, str]]] = {}
+            for sport in requested:
+                config = storage_database_config(sport)
+                sheet_id = str(config.get("sheet_id", "") or "")
+                sheet_name = str(config.get("sheet_name", "") or "")
+                prefix = str(config.get("namespace", "") or "")
+                if not (sheet_id or sheet_name):
+                    continue
+                workbook_groups.setdefault((sheet_id, sheet_name), []).append((sport, prefix))
+
+            for (sheet_id, sheet_name), sport_entries in workbook_groups.items():
                 try:
-                    worksheet = workbook.worksheet(physical_name)
-                except storage.gspread.WorksheetNotFound:
-                    worksheet = workbook.add_worksheet(
-                        title=physical_name,
-                        rows=2000,
-                        cols=max(20, len(columns) + 5),
-                    )
-                if columns:
-                    values = worksheet.get_all_values()
-                    if not values:
-                        worksheet.update([list(columns)])
+                    workbook = client.open_by_key(sheet_id) if sheet_id else client.open(sheet_name)
 
-            initialized[sport] = str(getattr(workbook, "id", "") or sheet_id or sheet_name)
+                    # One metadata request replaces repeated workbook.worksheet()
+                    # + get_all_values() calls for every bootstrap tab.
+                    existing = {
+                        str(getattr(ws, "title", "") or ""): ws
+                        for ws in workbook.worksheets()
+                    }
 
-        return initialized
+                    for sport, prefix in sport_entries:
+                        for tab_name, columns in storage._BOOTSTRAP_PUBLIC_TABS.items():
+                            physical_name = f"{prefix}{tab_name}" if prefix else tab_name
+                            worksheet = existing.get(physical_name)
+                            if worksheet is None:
+                                worksheet = workbook.add_worksheet(
+                                    title=physical_name,
+                                    rows=2000,
+                                    cols=max(20, len(columns) + 5),
+                                )
+                                existing[physical_name] = worksheet
+                                # A newly created worksheet is empty by definition,
+                                # so write the header directly without a read first.
+                                if columns:
+                                    worksheet.update([list(columns)])
+
+                        initialized[sport] = str(
+                            getattr(workbook, "id", "") or sheet_id or sheet_name
+                        )
+                except Exception as exc:
+                    for sport, _prefix in sport_entries:
+                        initialized[sport] = f"unavailable:{type(exc).__name__}"
+
+            bootstrap_cache[requested] = dict(initialized)
+            return dict(initialized)
 
     storage.storage_database_config = storage_database_config
     storage.storage_database_name = storage_database_name
