@@ -1,5 +1,6 @@
 import copy
 import runpy
+import threading
 import time
 from pathlib import Path
 
@@ -55,11 +56,14 @@ def _set_sport(sport: str) -> None:
 
 
 def _install_mlb_sheet_read_cache() -> None:
-    """Briefly reuse MLB slate Sheet reads across Streamlit widget reruns.
+    """Reduce redundant MLB Google Sheet reads across Streamlit reruns.
 
-    The production MLB builder stays untouched. Only reads for the three tabs
-    used by Daily Slate / Handpick Any are cached, and any normal Sheet write
-    clears that worksheet's cached reads immediately.
+    Streamlit reruns the MLB builder on nearly every widget interaction. The
+    production builder also performs several tracking/history reads after a
+    build, so repeated reruns can otherwise exceed Google's per-user Sheets read
+    quota. Cache every MLB worksheet briefly, invalidate immediately after the
+    builder writes that worksheet, pace uncached reads, and retry transient 429
+    read-quota responses before surfacing an error.
     """
     try:
         import gspread
@@ -70,9 +74,16 @@ def _install_mlb_sheet_read_cache() -> None:
     if getattr(worksheet_cls, "_ezpz_mlb_read_cache_installed", False):
         return
 
-    target_tabs = {"daily_slate", "bet_tracker", "all_game_trends"}
-    cache_state_key = "_ezpz_mlb_sheet_read_cache_v1"
+    cache_state_key = "_ezpz_mlb_sheet_read_cache_v2"
     ttl_seconds = 20.0
+
+    # Google's default Sheets quota is 60 read requests/minute/user. Keep a
+    # healthy cushion because the same service account can also be used by
+    # another process. In normal use the cache means this limiter rarely waits.
+    read_window_seconds = 60.0
+    max_network_reads = 40
+    read_timestamps = []
+    rate_lock = threading.Lock()
 
     original_get_all_records = worksheet_cls.get_all_records
     original_get_all_values = worksheet_cls.get_all_values
@@ -82,7 +93,7 @@ def _install_mlb_sheet_read_cache() -> None:
     def _cache_enabled(worksheet) -> bool:
         return (
             str(st.session_state.get("selected_sport", "") or "").upper() == "MLB"
-            and str(getattr(worksheet, "title", "") or "") in target_tabs
+            and bool(str(getattr(worksheet, "title", "") or "").strip())
         )
 
     def _worksheet_identity(worksheet):
@@ -107,6 +118,52 @@ def _install_mlb_sheet_read_cache() -> None:
             st.session_state[cache_state_key] = cache
         return cache
 
+    def _is_read_quota_error(exc) -> bool:
+        message = str(exc or "").lower()
+        return (
+            "429" in message
+            and (
+                "quota" in message
+                or "read requests" in message
+                or "rate limit" in message
+            )
+        )
+
+    def _throttle_network_read() -> None:
+        # Serialize only the small accounting section. If the session has
+        # already generated a burst, wait until a slot leaves the rolling
+        # 60-second window rather than sending another request that Google will
+        # reject.
+        with rate_lock:
+            while True:
+                now = time.monotonic()
+                cutoff = now - read_window_seconds
+                read_timestamps[:] = [stamp for stamp in read_timestamps if stamp > cutoff]
+                if len(read_timestamps) < max_network_reads:
+                    read_timestamps.append(now)
+                    return
+                wait_seconds = max(0.05, read_window_seconds - (now - read_timestamps[0]) + 0.05)
+                time.sleep(wait_seconds)
+
+    def _network_read_with_retry(worksheet, original_method, args, kwargs):
+        # A quota burst may already have happened immediately before this patch
+        # gets a chance to pace the next read. Brief retries make that transient
+        # condition self-healing instead of showing the red APIError card.
+        retry_delays = (0.0, 3.0, 8.0, 15.0)
+        last_exc = None
+        for attempt, delay in enumerate(retry_delays):
+            if delay:
+                time.sleep(delay)
+            _throttle_network_read()
+            try:
+                return original_method(worksheet, *args, **kwargs)
+            except Exception as exc:
+                last_exc = exc
+                if not _is_read_quota_error(exc) or attempt == len(retry_delays) - 1:
+                    raise
+        if last_exc is not None:
+            raise last_exc
+
     def _cached_read(worksheet, method_name, original_method, args, kwargs):
         if not _cache_enabled(worksheet):
             return original_method(worksheet, *args, **kwargs)
@@ -121,8 +178,8 @@ def _install_mlb_sheet_read_cache() -> None:
                 return copy.deepcopy(cached_value)
             cache.pop(key, None)
 
-        value = original_method(worksheet, *args, **kwargs)
-        cache[key] = (now, copy.deepcopy(value))
+        value = _network_read_with_retry(worksheet, original_method, args, kwargs)
+        cache[key] = (time.monotonic(), copy.deepcopy(value))
         return value
 
     def _invalidate_worksheet(worksheet) -> None:
@@ -238,7 +295,7 @@ if selected_sport != "MLB":
 
 if selected_sport == "MLB":
     # Keep the production builder itself unchanged; only avoid redundant Sheet
-    # downloads while Streamlit reruns the same Slate controls.
+    # downloads while Streamlit reruns the same controls and tracking helpers.
     _install_mlb_sheet_read_cache()
     runpy.run_path(str(ROOT / "builders" / "mlb_builder.py"), run_name="__main__")
 elif selected_sport == "CFB":
