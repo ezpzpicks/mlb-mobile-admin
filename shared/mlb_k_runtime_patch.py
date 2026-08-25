@@ -112,6 +112,120 @@ def run_mlb_builder_with_locked_k_regression(builder_path):
         1,
     )
 
+    # pitcher_recent_form is a single, durable history table across model versions.
+    # A transient Sheets read must never be converted to an empty dataframe and
+    # followed by worksheet.clear(), because that can erase all prior starts.
+    # Read it strictly, merge/upsert against the existing rows, and update in place
+    # without clearing the worksheet. Model Version remains a per-row field.
+    old_recent_form_io = '''def load_pitcher_recent_form():
+    return read_sheet(RECENT_FORM_TAB, RECENT_FORM_COLUMNS)
+
+
+def save_pitcher_recent_form(df):
+    return write_sheet(RECENT_FORM_TAB, df, RECENT_FORM_COLUMNS)
+'''
+    new_recent_form_io = '''def _read_pitcher_recent_form_strict():
+    worksheet = get_or_create_worksheet(RECENT_FORM_TAB, RECENT_FORM_COLUMNS)
+    try:
+        values = worksheet.get_all_values()
+    except Exception as exc:
+        raise RuntimeError(f"Could not safely read persistent pitcher history: {exc}") from exc
+
+    if not values:
+        return pd.DataFrame(columns=RECENT_FORM_COLUMNS)
+
+    header = [str(value).strip() for value in values[0]]
+    required = {"Date", "Pitcher"}
+    if not required.issubset(set(header)):
+        raise RuntimeError(
+            "Persistent pitcher history has an invalid header; refusing a destructive rewrite."
+        )
+
+    positions = {
+        col: header.index(col)
+        for col in RECENT_FORM_COLUMNS
+        if col in header
+    }
+    rows = []
+    for values_row in values[1:]:
+        row = {
+            col: values_row[idx] if idx < len(values_row) else ""
+            for col, idx in positions.items()
+        }
+        for col in RECENT_FORM_COLUMNS:
+            if col not in row:
+                row[col] = ""
+        if any(str(row.get(col, "")).strip() for col in RECENT_FORM_COLUMNS):
+            rows.append(row)
+
+    if not rows:
+        return pd.DataFrame(columns=RECENT_FORM_COLUMNS)
+    return pd.DataFrame(rows, columns=RECENT_FORM_COLUMNS).astype(object)
+
+
+def load_pitcher_recent_form():
+    return _read_pitcher_recent_form_strict()
+
+
+def save_pitcher_recent_form(df):
+    incoming = df.copy() if df is not None else pd.DataFrame(columns=RECENT_FORM_COLUMNS)
+    for col in RECENT_FORM_COLUMNS:
+        if col not in incoming.columns:
+            incoming[col] = ""
+    incoming = incoming[RECENT_FORM_COLUMNS].astype(object)
+
+    # Re-read immediately before every write. If that read fails, the exception
+    # aborts the save rather than treating history as empty.
+    existing = _read_pitcher_recent_form_strict()
+    if existing is not None and not existing.empty and incoming.empty:
+        raise RuntimeError(
+            "Refusing to replace non-empty pitcher history with an empty dataframe."
+        )
+
+    combined = pd.concat([existing, incoming], ignore_index=True)
+    for col in RECENT_FORM_COLUMNS:
+        if col not in combined.columns:
+            combined[col] = ""
+    combined = combined[RECENT_FORM_COLUMNS].astype(object)
+
+    if not combined.empty:
+        def _history_key(row):
+            game_key = str(row.get("Game Key", "") or "").strip()
+            if not game_key:
+                game_key = "|".join([
+                    str(row.get("Team", "") or "").strip(),
+                    str(row.get("Opponent", "") or "").strip(),
+                ])
+            return "|".join([
+                str(row.get("Date", "") or "").strip(),
+                game_key,
+                normalize_name_for_match(row.get("Pitcher", "")),
+                str(row.get("Role", "") or "").strip().upper(),
+            ])
+
+        combined["_history_key"] = combined.apply(_history_key, axis=1)
+        combined = combined.drop_duplicates(subset=["_history_key"], keep="last")
+        combined = combined.drop(columns=["_history_key"]).reset_index(drop=True)
+
+    out = combined.fillna("").astype(str)
+    values = [RECENT_FORM_COLUMNS] + out.values.tolist()
+    worksheet = get_or_create_worksheet(RECENT_FORM_TAB, RECENT_FORM_COLUMNS)
+    try:
+        # Do not clear this history worksheet. The merged table is monotonic, so
+        # an in-place update preserves prior rows even if a later write fails.
+        worksheet.update(values)
+        return True
+    except Exception as exc:
+        st.error(f"Could not safely update persistent pitcher history: {exc}")
+        return False
+'''
+    source = _replace_last(
+        source,
+        old_recent_form_io,
+        new_recent_form_io,
+        "persistent pitcher recent-form storage",
+    )
+
     old_change_log = '''                    "V16.3 pitcher strikeouts: V16.2 locked true-mean K-rate/BF regressions retained; "
                     "nine confirmed batter probabilities with uncapped repeated-PA expected counts; "
                     "replicated mean-preserving P(2+) calibration and convolved 0/1/2/3+ batter PMFs "
