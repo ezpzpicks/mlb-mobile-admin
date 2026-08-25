@@ -11,6 +11,13 @@ def _replace_last(source: str, old: str, new: str, label: str) -> str:
     return source[:index] + new + source[index + len(old):]
 
 
+def _replace_last_if_present(source: str, old: str, new: str) -> str:
+    index = source.rfind(old)
+    if index < 0:
+        return source
+    return source[:index] + new + source[index + len(old):]
+
+
 def run_mlb_builder_with_locked_k_regression(builder_path):
     """Run MLB with the replay-validated V16.4 strikeout fixes."""
     path = Path(builder_path)
@@ -85,20 +92,18 @@ def run_mlb_builder_with_locked_k_regression(builder_path):
         "Over-only workload publication gate",
     )
 
-    source = _replace_last(
+    source = _replace_last_if_present(
         source,
         '        "shadow_grade": published,\n',
         '        "shadow_grade": original,\n',
-        "shadow grade tracking",
     )
 
-    source = _replace_last(
+    source = _replace_last_if_present(
         source,
         '            f"V16.3 true-mean regression projection {raw:.2f} → global calibration {global_projection:.2f}; "\n'
         '            "the multi-K layer reshapes the count PMF but preserves that mean. Pitcher, opponent, "\n',
         '            f"V16.4 locked regression projection {raw:.2f} is the production mean; "\n'
         '            "the multi-K layer reshapes the count PMF but preserves that mean. Pitcher, opponent, "\n',
-        "calibration status text",
     )
 
     source = source.replace(
@@ -119,7 +124,7 @@ def run_mlb_builder_with_locked_k_regression(builder_path):
                     "observed tail overconfidence; workload and early-exit remain inside the BF-mixture PMF, "
                     "with the second Over-only publication penalty removed; starter and lineup eligibility retained."
 '''
-    source = _replace_last(source, old_change_log, new_change_log, "V16.4 model change log")
+    source = _replace_last_if_present(source, old_change_log, new_change_log)
 
     namespace = {
         "__name__": "__main__",
