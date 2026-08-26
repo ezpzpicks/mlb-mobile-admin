@@ -1,0 +1,65 @@
+name: One-time V16 current starter publication fix
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-v16-current-starter-publication.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Allow current full-workload starters to publish
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("builders/mlb_builder.py")
+          text = path.read_text(encoding="utf-8")
+
+          old_doc = '"""V16 live publication: traditional starters and 8 usable profiles only."""'
+          new_doc = '"""V16 live publication: current starters with supported starter workload and 8 usable profiles."""'
+          if text.count(old_doc) != 1:
+              raise SystemExit(f"expected one V16 publication docstring, found {text.count(old_doc)}")
+          text = text.replace(old_doc, new_doc, 1)
+
+          old_gate = '''    if published != "PASS" and hybrid_or_reliever:\n        published = "PASS"\n        reasons.append("V16 publishes established traditional starters only; hybrid/reliever workload is projection-only")\n'''
+          new_gate = '''    # Historical relief usage should not veto a pitcher who is currently in the\n    # starter slot and whose modeled normal workload is fully starter-level.\n    # True openers/bulk arms are still blocked by the role check above, and\n    # starter rows without enough workload support are still handled below.\n    if published != "PASS" and hybrid_or_reliever and not (role_upper == "STARTER" and workload_supported):\n        published = "PASS"\n        reasons.append("V16 requires a current starter role with full starter workload; hybrid/reliever workload without full support is projection-only")\n'''
+          if text.count(old_gate) != 1:
+              raise SystemExit(f"expected one historical-role publication gate, found {text.count(old_gate)}")
+          text = text.replace(old_gate, new_gate, 1)
+
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Syntax check
+        run: python -m py_compile builders/mlb_builder.py
+
+      - name: Verify targeted fix
+        shell: bash
+        run: |
+          grep -q 'current starters with supported starter workload' builders/mlb_builder.py
+          grep -q 'hybrid_or_reliever and not (role_upper == "STARTER" and workload_supported)' builders/mlb_builder.py
+          grep -q 'role_upper != "STARTER"' builders/mlb_builder.py
+          git diff --check
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/mlb_builder.py
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Allow current full-workload starters to publish K plays"
+          git push
