@@ -519,6 +519,35 @@ def _download_to_disk(url: str, destination: str) -> None:
     os.replace(temp_path, destination)
 
 
+def _load_release_parquet_columns(
+    url: str, destination: str, columns: list[str], ttl_seconds: int = 21600,
+) -> pd.DataFrame:
+    """Load a release parquet with bounded memory on small Render instances.
+
+    The raw asset is streamed to /tmp. Polars scans it lazily and projects only
+    model-required columns before the pandas conversion. The local asset is
+    refreshed periodically so in-season release updates still arrive.
+    """
+    if pl is None:
+        raise RuntimeError("Polars is not installed.")
+    stale = True
+    if os.path.exists(destination) and os.path.getsize(destination) >= 1024:
+        age = max(0.0, datetime.now().timestamp() - os.path.getmtime(destination))
+        stale = age >= float(ttl_seconds)
+    if stale:
+        _download_to_disk(url, destination)
+    lazy = pl.scan_parquet(destination)
+    available = set(lazy.collect_schema().names())
+    selected = [column for column in columns if column in available]
+    if not selected:
+        raise RuntimeError("Release parquet contains none of the required model columns.")
+    compact = lazy.select(selected).collect()
+    output = compact.to_pandas()
+    del compact, lazy
+    gc.collect()
+    return output
+
+
 def _load_pbp_season(season: int) -> pd.DataFrame:
     """Load only the play-by-play columns used by the model.
 
@@ -559,7 +588,7 @@ def _load_pbp_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _load_player_stats_season(season: int) -> pd.DataFrame:
     _require_nflreadpy()
     try:
@@ -569,7 +598,7 @@ def _load_player_stats_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _load_depth_charts_season(season: int) -> pd.DataFrame:
     _require_nflreadpy()
     try:
@@ -579,7 +608,7 @@ def _load_depth_charts_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _load_injuries_season(season: int) -> pd.DataFrame:
     _require_nflreadpy()
     try:
@@ -589,7 +618,7 @@ def _load_injuries_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
+@st.cache_resource(ttl=86400, show_spinner=False)
 def _load_sleeper_players() -> pd.DataFrame:
     """Daily current-team, depth-order and injury fallback from Sleeper.
 
@@ -633,7 +662,7 @@ def _load_sleeper_players() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _load_snap_counts_season(season: int) -> pd.DataFrame:
     _require_nflreadpy()
     try:
@@ -643,7 +672,7 @@ def _load_snap_counts_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _load_nextgen_season(season: int, stat_type: str) -> pd.DataFrame:
     _require_nflreadpy()
     required = {
@@ -658,27 +687,36 @@ def _load_nextgen_season(season: int, stat_type: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
 def _load_ftn_charting_season(season: int) -> pd.DataFrame:
-    """Load live FTN charting. It normally posts within roughly 48 hours of games."""
-    _require_nflreadpy()
+    """Load FTN charting directly from compact release parquet columns."""
+    season = int(season)
     try:
-        frame = nfl.load_ftn_charting(int(season))
-        return _compact_to_pandas(frame, FTN_REQUIRED_COLUMNS)
+        return _load_release_parquet_columns(
+            "https://github.com/nflverse/nflverse-data/releases/download/ftn_charting/"
+            f"ftn_charting_{season}.parquet",
+            f"/tmp/ezpz_nfl_ftn_{season}.parquet",
+            FTN_REQUIRED_COLUMNS,
+        )
     except Exception as exc:
-        st.session_state[f"nfl_ftn_error_{int(season)}"] = str(exc)
+        # Charting is an optional refinement. Returning empty is safer than
+        # falling back to nflreadpy's full-file materialization and killing the
+        # Streamlit process on the 512 MB Render instance.
+        st.session_state[f"nfl_ftn_error_{season}"] = str(exc)
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
 def _load_participation_season(season: int) -> pd.DataFrame:
-    """Load historical participation/coverage data when nflverse has published it."""
-    _require_nflreadpy()
+    """Load participation/coverage directly with a projected parquet scan."""
+    season = int(season)
     try:
-        frame = nfl.load_participation(int(season))
-        return _compact_to_pandas(frame, PARTICIPATION_REQUIRED_COLUMNS)
+        return _load_release_parquet_columns(
+            "https://github.com/nflverse/nflverse-data/releases/download/pbp_participation/"
+            f"pbp_participation_{season}.parquet",
+            f"/tmp/ezpz_nfl_participation_{season}.parquet",
+            PARTICIPATION_REQUIRED_COLUMNS,
+        )
     except Exception as exc:
-        st.session_state[f"nfl_participation_error_{int(season)}"] = str(exc)
+        st.session_state[f"nfl_participation_error_{season}"] = str(exc)
         return pd.DataFrame()
 
 
@@ -2493,7 +2531,7 @@ def _bool_numeric(series: pd.Series) -> pd.Series:
     return mapped.fillna(numeric).fillna(0.0)
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _season_charting_features(season: int, through_week: int | None = None) -> dict[str, pd.DataFrame]:
     """Create compact player charting and defensive scheme profiles.
 
@@ -2504,7 +2542,8 @@ def _season_charting_features(season: int, through_week: int | None = None) -> d
     pbp = _load_pbp_season(int(season))
     if pbp is None or pbp.empty:
         return {"players": pd.DataFrame(), "defenses": pd.DataFrame()}
-    df = pbp.copy()
+    # pbp is a fresh local frame; avoid a second full heap copy.
+    df = pbp
     if "season_type" in df.columns:
         df = df[df["season_type"].astype(str).str.upper() == "REG"].copy()
     if through_week is not None and "week" in df.columns:
@@ -2538,6 +2577,8 @@ def _season_charting_features(season: int, through_week: int | None = None) -> d
         keep = ["game_key", "play_key"] + [c for c in FTN_REQUIRED_COLUMNS if c in fc.columns and c not in ["nflverse_game_id", "nflverse_play_id", "season", "week"]]
         fc = fc[keep].drop_duplicates(["game_key", "play_key"])
         df = df.merge(fc, on=["game_key", "play_key"], how="left")
+        del fc, ftn
+        gc.collect()
 
     part = _load_participation_season(int(season))
     if part is not None and not part.empty:
@@ -2547,6 +2588,8 @@ def _season_charting_features(season: int, through_week: int | None = None) -> d
         keep = ["game_key", "play_key"] + [c for c in PARTICIPATION_REQUIRED_COLUMNS if c in pc.columns and c not in ["nflverse_game_id", "play_id", "possession_team"]]
         pc = pc[keep].drop_duplicates(["game_key", "play_key"])
         df = df.merge(pc, on=["game_key", "play_key"], how="left")
+        del pc, part
+        gc.collect()
 
     for col in ["is_interception_worthy", "is_throw_away", "is_catchable_ball", "is_contested_ball", "is_created_reception", "is_drop", "is_qb_fault_sack", "was_pressure"]:
         if col in df.columns:
@@ -2655,8 +2698,7 @@ def _season_charting_features(season: int, through_week: int | None = None) -> d
     return {"players": players.replace([np.inf, -np.inf], np.nan), "defenses": defenses.replace([np.inf, -np.inf], np.nan)}
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _season_player_profiles(season: int, through_week: int | None = None) -> pd.DataFrame:
     stats = _load_player_stats_season(int(season))
     if stats is None or stats.empty:
@@ -2818,7 +2860,7 @@ def _blend_value(prior: dict[str, Any], current: dict[str, Any], metric: str, we
     return (1.0 - weight) * p + weight * c
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _blended_player_profiles(season: int, projection_week: int) -> pd.DataFrame:
     prior_df = _season_player_profiles(int(season) - 1, None)
     current_df = _season_player_profiles(int(season), max(0, int(projection_week) - 1)) if int(projection_week) > 1 else pd.DataFrame()
@@ -2879,7 +2921,7 @@ def _blended_player_profiles(season: int, projection_week: int) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+@st.cache_resource(ttl=21600, show_spinner=False)
 def _defense_position_profiles(season: int, projection_week: int) -> pd.DataFrame:
     def season_frame(target_season: int, through_week: int | None) -> pd.DataFrame:
         stats = _load_player_stats_season(target_season)
