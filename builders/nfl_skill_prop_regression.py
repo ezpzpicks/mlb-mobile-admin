@@ -10,6 +10,10 @@ The regression establishes the stable historical baseline. The production
 builder's current depth-chart, injury/play-probability, route/role, matchup and
 weather information is then retained as a capped live overlay so unexpected
 same-week personnel changes are not ignored.
+
+Final player-prop projections remain model-native: no post-projection residual
+calibration is allowed to pull the regression output back toward a historical
+center. Sportsbook lines are used only for probability/edge/EV comparison.
 """
 from __future__ import annotations
 
@@ -19,7 +23,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.1-rb-wr-regression-2026-08-20"
+MODEL_VERSION = "nfl-v4.3-model-native-player-props-2026-08-25"
 RESEARCH_VERSION = "nfl-rb-wr-opportunity-efficiency-regression-2026-08-20"
 
 RB_RUSH_OPP_INTERCEPT = 1.6934778404401407
@@ -267,9 +271,9 @@ def _row(rows: list[dict[str, Any]], market: str) -> dict[str, Any] | None:
 def _finish_count_row(nfl_builder: Any, row: dict[str, Any] | None, raw_value: float, field: str) -> None:
     if row is None:
         return
-    calibration = _num(row.get("Calibration Adjustment"), 0.0)
-    projection = max(0.0, raw_value + calibration)
+    projection = max(0.0, raw_value)
     row["Raw Projection"] = round(raw_value, 2)
+    row["Calibration Adjustment"] = 0.0
     row["Projection"] = round(projection, 2)
     row["Fair Line"] = nfl_builder._fair_line(projection, str(row.get("Market", "")))
     row[field] = round(raw_value, 2)
@@ -287,14 +291,13 @@ def _finish_yards_row(
     if row is None:
         return
     raw_projection = max(0.0, opportunity * efficiency)
-    calibration = _num(row.get("Calibration Adjustment"), 0.0)
-    projection = max(0.0, raw_projection + calibration)
-    display_efficiency = efficiency * (projection / raw_projection) if raw_projection > 0 else efficiency
+    projection = raw_projection
     row["Raw Projection"] = round(raw_projection, 2)
+    row["Calibration Adjustment"] = 0.0
     row["Projection"] = round(projection, 2)
     row["Fair Line"] = nfl_builder._fair_line(projection, str(row.get("Market", "")))
     row[opportunity_field] = round(opportunity, 2)
-    row["Efficiency"] = round(display_efficiency, 3)
+    row["Efficiency"] = round(efficiency, 3)
     row["Confluence"] = reason
     row["_sd"] = nfl_builder._prop_sd(str(row.get("Market", "")), projection, _num(row.get("Reliability"), 70.0))
 
@@ -307,7 +310,19 @@ def _live_multiplier(current_value: float, historical_raw: float, low: float, hi
     return float(np.clip(current_value / historical_raw, low, high))
 
 
+def _install_model_native_prop_projection(nfl_builder: Any) -> None:
+    """Disable the legacy residual-calibration step for every NFL prop market."""
+    def no_post_projection_adjustment(player: str, position: str, market: str, opponent: str) -> dict[str, float]:
+        return {"adjustment": 0.0, "sample": 0, "residual_sd": np.nan}
+
+    nfl_builder._prop_calibration_adjustment = no_post_projection_adjustment
+
+
 def install_skill_prop_regression(nfl_builder: Any) -> None:
+    # Apply this even on a Streamlit rerun where the regression wrapper may
+    # already be installed. The final projection should always equal the core
+    # model/regression output, never a residual-shrunk follow-up value.
+    _install_model_native_prop_projection(nfl_builder)
     if getattr(nfl_builder, "_SKILL_PROP_REGRESSION_INSTALLED", False):
         return
     original = nfl_builder._project_player_markets
