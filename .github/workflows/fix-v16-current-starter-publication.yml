@@ -63,3 +63,5 @@ jobs:
           fi
           git commit -m "Allow current full-workload starters to publish K plays"
           git push
+
+# Touch to trigger after workflow existed on main.
