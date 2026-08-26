@@ -21,6 +21,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path("builders/mlb_builder.py")
           text = path.read_text(encoding="utf-8")
@@ -48,7 +49,6 @@ jobs:
               """Persist only the handpicked change instead of rewriting all of bet_tracker."""
               try:
                   worksheet = get_or_create_worksheet(TRACKER_TAB, TRACKER_COLUMNS)
-
                   if row_idx not in tracker_df.index:
                       return False
 
@@ -65,13 +65,11 @@ jobs:
                       worksheet.append_row(values, value_input_option="RAW")
                       return True
 
-                  position = tracker_df.index.get_loc(row_idx)
-                  if not isinstance(position, (int,)):
-                      try:
-                          position = int(position)
-                      except Exception:
-                          return False
-                  sheet_row = int(position) + 2
+                  try:
+                      position = int(tracker_df.index.get_loc(row_idx))
+                  except Exception:
+                      return False
+                  sheet_row = position + 2
 
                   first_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[0]) + 1
                   last_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[-1]) + 1
@@ -126,8 +124,6 @@ jobs:
                       matches.append(idx)
 
               if not matches:
-                  # Full-slate candidates may not have qualified for automatic Bet Tracker
-                  # insertion. Append one row instead of clearing/rewriting the entire sheet.
                   new_row = _tracker_row_from_handpick_play(
                       play,
                       favorite_rank=favorite_rank,
@@ -143,8 +139,10 @@ jobs:
                       return True, "Created the tracker row and added it to EZPZ Handpicked Plays."
                   return False, "Could not create/save the handpicked tracker row."
 
-              # Prefer a pending row, but allow completed rows if you are handpicking after results are entered.
-              pending_matches = [idx for idx in matches if str(tracker_df.loc[idx, "Result"]).strip().upper() == "PENDING"]
+              pending_matches = [
+                  idx for idx in matches
+                  if str(tracker_df.loc[idx, "Result"]).strip().upper() == "PENDING"
+              ]
               target_idx = pending_matches[0] if pending_matches else matches[0]
 
               tracker_df.loc[target_idx, "Favorite Pick"] = "TRUE"
@@ -186,13 +184,16 @@ jobs:
                   tracker_df = load_tracker()
               if tracker_df.empty or row_idx not in tracker_df.index:
                   return False, "Could not find that saved bet in bet_tracker."
+
               for col in _HANDPICK_TRACKER_COLUMNS:
                   if col not in tracker_df.columns:
                       tracker_df[col] = ""
+
               tracker_df.loc[row_idx, "Favorite Pick"] = ""
               tracker_df.loc[row_idx, "Favorite Rank"] = ""
               tracker_df.loc[row_idx, "Favorite Tag"] = ""
               tracker_df.loc[row_idx, "Favorite Notes"] = ""
+
               if save_handpick_tracker_row(tracker_df, row_idx):
                   return True, "Removed today's handpicked badge from this saved bet."
               return False, "Could not save the update to Google Sheets."
@@ -202,57 +203,63 @@ jobs:
           text = replace_function(text, "mark_tracker_row_as_handpicked", "unmark_tracker_row_as_handpicked", new_saved)
           text = replace_function(text, "unmark_tracker_row_as_handpicked", "display_record_summary", new_unmark)
 
-          best_ui_old = '''ok, message = mark_best_play_as_handpicked(play)
-                              if ok:
-                                  st.success(message)
-                                  st.rerun()
-                              else:
-                                  st.error(message)'''
-          best_ui_new = '''ok, message = mark_best_play_as_handpicked(play, tracker_df=tracker_df)
-                              if ok:
-                                  st.success(message)
-                              else:
-                                  st.error(message)'''
-          best_count = text.count(best_ui_old)
-          if best_count != 2:
-              raise SystemExit(f"expected 2 best-play handpick UI blocks, found {best_count}")
-          text = text.replace(best_ui_old, best_ui_new)
+          def replace_success_rerun(source, old_call, new_call, expected):
+              pattern = re.compile(
+                  rf'(?m)^(?P<i>[ \t]*){re.escape(old_call)}\n'
+                  rf'(?P=i)if ok:\n'
+                  rf'(?P=i)    st\.success\(message\)\n'
+                  rf'(?P=i)    st\.rerun\(\)\n'
+                  rf'(?P=i)else:\n'
+                  rf'(?P=i)    st\.error\(message\)$'
+              )
+              matches = list(pattern.finditer(source))
+              if len(matches) != expected:
+                  raise SystemExit(
+                      f"expected {expected} UI block(s) for {old_call!r}, found {len(matches)}"
+                  )
 
-          unmark_ui_old = '''ok, message = unmark_tracker_row_as_handpicked(idx)
-                          if ok:
-                              st.success(message)
-                              st.rerun()
-                          else:
-                              st.error(message)'''
-          unmark_ui_new = '''ok, message = unmark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)
-                          if ok:
-                              st.success(message)
-                          else:
-                              st.error(message)'''
-          if text.count(unmark_ui_old) != 1:
-              raise SystemExit("unmark handpick UI block not found exactly once")
-          text = text.replace(unmark_ui_old, unmark_ui_new, 1)
+              def repl(match):
+                  i = match.group('i')
+                  return (
+                      f"{i}{new_call}\n"
+                      f"{i}if ok:\n"
+                      f"{i}    st.success(message)\n"
+                      f"{i}else:\n"
+                      f"{i}    st.error(message)"
+                  )
+              return pattern.sub(repl, source)
 
-          saved_ui_old = '''ok, message = mark_tracker_row_as_handpicked(idx)
-                          if ok:
-                              st.success(message)
-                              st.rerun()
-                          else:
-                              st.error(message)'''
-          saved_ui_new = '''ok, message = mark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)
-                          if ok:
-                              st.success(message)
-                          else:
-                              st.error(message)'''
-          if text.count(saved_ui_old) != 1:
-              raise SystemExit("saved-row handpick UI block not found exactly once")
-          text = text.replace(saved_ui_old, saved_ui_new, 1)
+          text = replace_success_rerun(
+              text,
+              "ok, message = mark_best_play_as_handpicked(play)",
+              "ok, message = mark_best_play_as_handpicked(play, tracker_df=tracker_df)",
+              2,
+          )
+          text = replace_success_rerun(
+              text,
+              "ok, message = unmark_tracker_row_as_handpicked(idx)",
+              "ok, message = unmark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)",
+              1,
+          )
+          text = replace_success_rerun(
+              text,
+              "ok, message = mark_tracker_row_as_handpicked(idx)",
+              "ok, message = mark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)",
+              1,
+          )
 
           path.write_text(text, encoding="utf-8")
           PY
 
       - name: Syntax check
         run: python -m py_compile builders/mlb_builder.py
+
+      - name: Verify targeted hotfix
+        shell: bash
+        run: |
+          grep -q "def save_handpick_tracker_row" builders/mlb_builder.py
+          grep -q "mark_best_play_as_handpicked(play, tracker_df=tracker_df)" builders/mlb_builder.py
+          git diff --check
 
       - name: Commit fix
         shell: bash
