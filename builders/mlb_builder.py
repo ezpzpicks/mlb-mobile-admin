@@ -2214,6 +2214,67 @@ def save_tracker(df):
     return write_sheet(TRACKER_TAB, df, TRACKER_COLUMNS)
 
 
+_HANDPICK_TRACKER_COLUMNS = [
+    "Favorite Pick",
+    "Handpicked Record",
+    "Favorite Rank",
+    "Favorite Tag",
+    "Favorite Notes",
+]
+
+
+def save_handpick_tracker_row(tracker_df, row_idx, append_new=False):
+    """Persist only the handpicked change instead of rewriting all of bet_tracker."""
+    try:
+        worksheet = get_or_create_worksheet(TRACKER_TAB, TRACKER_COLUMNS)
+        if row_idx not in tracker_df.index:
+            return False
+
+        if append_new:
+            values = []
+            for col in TRACKER_COLUMNS:
+                value = tracker_df.loc[row_idx, col] if col in tracker_df.columns else ""
+                try:
+                    if pd.isna(value):
+                        value = ""
+                except Exception:
+                    pass
+                values.append(str(value))
+            worksheet.append_row(values, value_input_option="RAW")
+            return True
+
+        try:
+            position = int(tracker_df.index.get_loc(row_idx))
+        except Exception:
+            return False
+        sheet_row = position + 2
+
+        first_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[0]) + 1
+        last_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[-1]) + 1
+        start_cell = gspread.utils.rowcol_to_a1(sheet_row, first_col)
+        end_cell = gspread.utils.rowcol_to_a1(sheet_row, last_col)
+
+        values = []
+        for col in _HANDPICK_TRACKER_COLUMNS:
+            value = tracker_df.loc[row_idx, col] if col in tracker_df.columns else ""
+            try:
+                if pd.isna(value):
+                    value = ""
+            except Exception:
+                pass
+            values.append(str(value))
+
+        worksheet.update(
+            values=[values],
+            range_name=f"{start_cell}:{end_cell}",
+            value_input_option="RAW",
+        )
+        return True
+    except Exception as e:
+        st.error(f"Could not save the handpicked update to Google Sheets: {e}")
+        return False
+
+
 # Separate research table for both moneyline teams and both total directions from
 # every saved game. This intentionally does not change Bet Tracker, Best Plays,
 # or any model qualification logic.
@@ -2925,13 +2986,14 @@ def _tracker_row_from_handpick_play(play, favorite_rank="", favorite_tag="", fav
     return row
 
 
-def mark_best_play_as_handpicked(play, favorite_rank="", favorite_tag="", favorite_notes=""):
+def mark_best_play_as_handpicked(play, favorite_rank="", favorite_tag="", favorite_notes="", tracker_df=None):
     """Mark any best-play or full-slate candidate as handpicked for the public website."""
-    tracker_df = load_tracker()
+    if tracker_df is None:
+        tracker_df = load_tracker()
     if tracker_df is None or tracker_df.empty:
         tracker_df = pd.DataFrame(columns=TRACKER_COLUMNS)
 
-    for col in ["Favorite Pick", "Handpicked Record", "Favorite Rank", "Favorite Tag", "Favorite Notes"]:
+    for col in _HANDPICK_TRACKER_COLUMNS:
         if col not in tracker_df.columns:
             tracker_df[col] = ""
 
@@ -2941,44 +3003,45 @@ def mark_best_play_as_handpicked(play, favorite_rank="", favorite_tag="", favori
             matches.append(idx)
 
     if not matches:
-        # Full-slate candidates may not have qualified for automatic Bet Tracker
-        # insertion. Create their complete tracker row at the moment they are
-        # handpicked so non-Best Plays can still post and grade normally.
         new_row = _tracker_row_from_handpick_play(
             play,
             favorite_rank=favorite_rank,
             favorite_tag=favorite_tag,
             favorite_notes=favorite_notes,
         )
-        tracker_df = pd.concat([tracker_df, pd.DataFrame([new_row])], ignore_index=True)
-        if save_tracker(tracker_df):
+        new_index = len(tracker_df)
+        while new_index in tracker_df.index:
+            new_index += 1
+        for col in TRACKER_COLUMNS:
+            tracker_df.loc[new_index, col] = new_row.get(col, "")
+        if save_handpick_tracker_row(tracker_df, new_index, append_new=True):
             return True, "Created the tracker row and added it to EZPZ Handpicked Plays."
         return False, "Could not create/save the handpicked tracker row."
 
-    # Prefer a pending row, but allow completed rows if you are handpicking after results are entered.
-    pending_matches = [idx for idx in matches if str(tracker_df.loc[idx, "Result"]).strip().upper() == "PENDING"]
+    pending_matches = [
+        idx for idx in matches
+        if str(tracker_df.loc[idx, "Result"]).strip().upper() == "PENDING"
+    ]
     target_idx = pending_matches[0] if pending_matches else matches[0]
 
-    # Favorite Pick controls today's handpicked badge/list.
-    # Handpicked Record is the permanent flag the public site can use for prior-day handpicked records.
     tracker_df.loc[target_idx, "Favorite Pick"] = "TRUE"
     tracker_df.loc[target_idx, "Handpicked Record"] = "TRUE"
     tracker_df.loc[target_idx, "Favorite Rank"] = str(favorite_rank).strip()
     tracker_df.loc[target_idx, "Favorite Tag"] = str(favorite_tag).strip().upper()
     tracker_df.loc[target_idx, "Favorite Notes"] = str(favorite_notes).strip()
 
-    if save_tracker(tracker_df):
+    if save_handpick_tracker_row(tracker_df, target_idx):
         return True, "Added to EZPZ Handpicked Plays."
     return False, "Could not save the handpicked update to Google Sheets."
 
-
-def mark_tracker_row_as_handpicked(row_idx, favorite_rank="", favorite_tag="", favorite_notes=""):
+def mark_tracker_row_as_handpicked(row_idx, favorite_rank="", favorite_tag="", favorite_notes="", tracker_df=None):
     """Mark any saved bet_tracker row as handpicked, even if it is not a Best Play."""
-    tracker_df = load_tracker()
+    if tracker_df is None:
+        tracker_df = load_tracker()
     if tracker_df.empty or row_idx not in tracker_df.index:
         return False, "Could not find that saved bet in bet_tracker."
 
-    for col in ["Favorite Pick", "Handpicked Record", "Favorite Rank", "Favorite Tag", "Favorite Notes"]:
+    for col in _HANDPICK_TRACKER_COLUMNS:
         if col not in tracker_df.columns:
             tracker_df[col] = ""
 
@@ -2988,27 +3051,29 @@ def mark_tracker_row_as_handpicked(row_idx, favorite_rank="", favorite_tag="", f
     tracker_df.loc[row_idx, "Favorite Tag"] = str(favorite_tag).strip().upper()
     tracker_df.loc[row_idx, "Favorite Notes"] = str(favorite_notes).strip()
 
-    if save_tracker(tracker_df):
+    if save_handpick_tracker_row(tracker_df, row_idx):
         return True, "Added saved bet to EZPZ Handpicked Plays."
     return False, "Could not save the handpicked update to Google Sheets."
 
-
-def unmark_tracker_row_as_handpicked(row_idx):
-    """Remove today's handpicked badge from a row while preserving completed history only if desired later."""
-    tracker_df = load_tracker()
+def unmark_tracker_row_as_handpicked(row_idx, tracker_df=None):
+    """Remove today's handpicked badge without rewriting the entire tracker sheet."""
+    if tracker_df is None:
+        tracker_df = load_tracker()
     if tracker_df.empty or row_idx not in tracker_df.index:
         return False, "Could not find that saved bet in bet_tracker."
-    for col in ["Favorite Pick", "Favorite Rank", "Favorite Tag", "Favorite Notes"]:
+
+    for col in _HANDPICK_TRACKER_COLUMNS:
         if col not in tracker_df.columns:
             tracker_df[col] = ""
+
     tracker_df.loc[row_idx, "Favorite Pick"] = ""
     tracker_df.loc[row_idx, "Favorite Rank"] = ""
     tracker_df.loc[row_idx, "Favorite Tag"] = ""
     tracker_df.loc[row_idx, "Favorite Notes"] = ""
-    if save_tracker(tracker_df):
+
+    if save_handpick_tracker_row(tracker_df, row_idx):
         return True, "Removed today's handpicked badge from this saved bet."
     return False, "Could not save the update to Google Sheets."
-
 
 def display_record_summary(df):
     completed = df[df["Result"].isin(["Win", "Loss", "Push"])].copy()
@@ -8867,10 +8932,9 @@ def render_daily_slate():
                     with st.expander("⭐ Add to EZPZ Handpicked", expanded=False):
                         st.caption("Tap the button to mark this play as handpicked. No tier, tag, or notes are needed.")
                         if st.button("⭐ Add to Handpicked", key=f"add_handpicked_{play_idx}"):
-                            ok, message = mark_best_play_as_handpicked(play)
+                            ok, message = mark_best_play_as_handpicked(play, tracker_df=tracker_df)
                             if ok:
                                 st.success(message)
-                                st.rerun()
                             else:
                                 st.error(message)
                     st.divider()
@@ -8908,10 +8972,9 @@ def render_daily_slate():
                 </div>
                 ''', unsafe_allow_html=True)
                 if st.button("Remove today's badge", key=f"unhandpick_any_{idx}"):
-                    ok, message = unmark_tracker_row_as_handpicked(idx)
+                    ok, message = unmark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)
                     if ok:
                         st.success(message)
-                        st.rerun()
                     else:
                         st.error(message)
             st.divider()
@@ -8997,10 +9060,9 @@ def render_daily_slate():
                 ''', unsafe_allow_html=True)
                 candidate_key = _handpick_text(play.get("Candidate Key", "")) or str(play_idx)
                 if st.button("⭐ Add to Handpicked", key=f"handpick_slate_{candidate_key}"):
-                    ok, message = mark_best_play_as_handpicked(play)
+                    ok, message = mark_best_play_as_handpicked(play, tracker_df=tracker_df)
                     if ok:
                         st.success(message)
-                        st.rerun()
                     else:
                         st.error(message)
                 st.divider()
@@ -9031,10 +9093,9 @@ def render_daily_slate():
                     </div>
                     ''', unsafe_allow_html=True)
                     if st.button("⭐ Add to Handpicked", key=f"handpick_saved_{idx}"):
-                        ok, message = mark_tracker_row_as_handpicked(idx)
+                        ok, message = mark_tracker_row_as_handpicked(idx, tracker_df=tracker_df)
                         if ok:
                             st.success(message)
-                            st.rerun()
                         else:
                             st.error(message)
                     st.divider()
