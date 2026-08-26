@@ -92,6 +92,32 @@ def run_mlb_builder_with_locked_k_regression(builder_path):
         "Over-only workload publication gate",
     )
 
+    # Historical role mix is useful inside the workload/projection model, but it
+    # should not veto a pitcher who is currently occupying the starter slot and
+    # has a fully supported starter workload. Openers/bulk arms remain blocked by
+    # the explicit current-role gate, and partial/unsupported workloads stay
+    # projection-only.
+    old_historical_role_gate = '''    if published != "PASS" and hybrid_or_reliever:
+        published = "PASS"
+        reasons.append("V16 publishes established traditional starters only; hybrid/reliever workload is projection-only")
+'''
+    new_historical_role_gate = '''    if published != "PASS" and hybrid_or_reliever and not (role_upper == "STARTER" and workload_supported):
+        published = "PASS"
+        reasons.append("V16 requires a current starter role with full starter workload; hybrid/reliever workload without full support is projection-only")
+'''
+    source = _replace_last(
+        source,
+        old_historical_role_gate,
+        new_historical_role_gate,
+        "current full-workload starter publication eligibility",
+    )
+
+    source = _replace_last_if_present(
+        source,
+        '"""V16 live publication: traditional starters and 8 usable profiles only."""',
+        '"""V16 live publication: current full-workload starters and 8 usable profiles."""',
+    )
+
     source = _replace_last_if_present(
         source,
         '        "shadow_grade": published,\n',
@@ -236,7 +262,9 @@ def save_pitcher_recent_form(df):
                     "showed rolling mean calibration slightly worsened MAE/RMSE; V16.3 mean-preserving multi-K "
                     "PMF retained; Under decision probability calibrated -5 points after 66.4% modeled / 54.3% "
                     "observed tail overconfidence; workload and early-exit remain inside the BF-mixture PMF, "
-                    "with the second Over-only publication penalty removed; starter and lineup eligibility retained."
+                    "with the second Over-only publication penalty removed; current full-workload starters can "
+                    "publish even when older season role history includes relief usage; opener/bulk and lineup "
+                    "eligibility protections remain active."
 '''
     source = _replace_last_if_present(source, old_change_log, new_change_log)
 
