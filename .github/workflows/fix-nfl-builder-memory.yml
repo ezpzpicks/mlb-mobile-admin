@@ -1,0 +1,150 @@
+name: One-time NFL builder memory hotfix
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-nfl-builder-memory.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch NFL builder memory pressure
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("builders/nfl_builder.py")
+          text = path.read_text(encoding="utf-8")
+
+          # Streamlit cache_data serializes and returns a fresh copy of DataFrames.
+          # These NFL source/profile objects are treated as read-only by callers,
+          # so cache_resource avoids duplicate deserialization copies on the 512 MB
+          # Render instance while preserving the existing TTL/clear behavior.
+          resource_functions = {
+              "_load_player_stats_season": 21600,
+              "_load_depth_charts_season": 21600,
+              "_load_injuries_season": 21600,
+              "_load_sleeper_players": 86400,
+              "_load_snap_counts_season": 21600,
+              "_load_nextgen_season": 21600,
+              "_season_charting_features": 21600,
+              "_blended_player_profiles": 21600,
+              "_defense_position_profiles": 21600,
+          }
+          for function_name, ttl in resource_functions.items():
+              pattern = re.compile(
+                  rf"@st\.cache_data\(ttl={ttl}, show_spinner=False\)\n(?=def {re.escape(function_name)}\()"
+              )
+              text, count = pattern.subn(
+                  f"@st.cache_resource(ttl={ttl}, show_spinner=False)\n",
+                  text,
+                  count=1,
+              )
+              if count != 1:
+                  raise SystemExit(f"cache decorator for {function_name} not found exactly once")
+
+          duplicate_profile_cache = (
+              "@st.cache_data(ttl=21600, show_spinner=False)\n"
+              "@st.cache_data(ttl=21600, show_spinner=False)\n"
+              "def _season_player_profiles("
+          )
+          if duplicate_profile_cache not in text:
+              raise SystemExit("duplicate _season_player_profiles cache decorators not found")
+          text = text.replace(
+              duplicate_profile_cache,
+              "@st.cache_resource(ttl=21600, show_spinner=False)\n"
+              "def _season_player_profiles(",
+              1,
+          )
+
+          # Add a generic low-memory release loader next to the existing streamed
+          # PBP loader. It downloads to /tmp and lets Polars project only the
+          # required columns before anything reaches pandas.
+          helper_anchor = "    os.replace(temp_path, destination)\n\n\ndef _load_pbp_season(season: int) -> pd.DataFrame:\n"
+          if helper_anchor not in text:
+              raise SystemExit("parquet helper insertion point not found")
+          helper = '''    os.replace(temp_path, destination)\n\n\ndef _load_release_parquet_columns(\n    url: str, destination: str, columns: list[str], ttl_seconds: int = 21600,\n) -> pd.DataFrame:\n    \"\"\"Load a release parquet with bounded memory on small Render instances.\n\n    The raw asset is streamed to /tmp. Polars scans it lazily and projects only\n    model-required columns before the pandas conversion. The local asset is\n    refreshed periodically so in-season release updates still arrive.\n    \"\"\"\n    if pl is None:\n        raise RuntimeError(\"Polars is not installed.\")\n    stale = True\n    if os.path.exists(destination) and os.path.getsize(destination) >= 1024:\n        age = max(0.0, datetime.now().timestamp() - os.path.getmtime(destination))\n        stale = age >= float(ttl_seconds)\n    if stale:\n        _download_to_disk(url, destination)\n    lazy = pl.scan_parquet(destination)\n    available = set(lazy.collect_schema().names())\n    selected = [column for column in columns if column in available]\n    if not selected:\n        raise RuntimeError(\"Release parquet contains none of the required model columns.\")\n    compact = lazy.select(selected).collect()\n    output = compact.to_pandas()\n    del compact, lazy\n    gc.collect()\n    return output\n\n\ndef _load_pbp_season(season: int) -> pd.DataFrame:\n'''
+          text = text.replace(helper_anchor, helper, 1)
+
+          old_ftn = '''@st.cache_data(ttl=21600, show_spinner=False)\ndef _load_ftn_charting_season(season: int) -> pd.DataFrame:\n    \"\"\"Load live FTN charting. It normally posts within roughly 48 hours of games.\"\"\"\n    _require_nflreadpy()\n    try:\n        frame = nfl.load_ftn_charting(int(season))\n        return _compact_to_pandas(frame, FTN_REQUIRED_COLUMNS)\n    except Exception as exc:\n        st.session_state[f\"nfl_ftn_error_{int(season)}\"] = str(exc)\n        return pd.DataFrame()\n'''
+          new_ftn = '''def _load_ftn_charting_season(season: int) -> pd.DataFrame:\n    \"\"\"Load FTN charting directly from compact release parquet columns.\"\"\"\n    season = int(season)\n    try:\n        return _load_release_parquet_columns(\n            \"https://github.com/nflverse/nflverse-data/releases/download/ftn_charting/\"\n            f\"ftn_charting_{season}.parquet\",\n            f\"/tmp/ezpz_nfl_ftn_{season}.parquet\",\n            FTN_REQUIRED_COLUMNS,\n        )\n    except Exception as exc:\n        # Charting is an optional refinement. Returning empty is safer than\n        # falling back to nflreadpy's full-file materialization and killing the\n        # Streamlit process on the 512 MB Render instance.\n        st.session_state[f\"nfl_ftn_error_{season}\"] = str(exc)\n        return pd.DataFrame()\n'''
+          if old_ftn not in text:
+              raise SystemExit("FTN loader block not found")
+          text = text.replace(old_ftn, new_ftn, 1)
+
+          old_part = '''@st.cache_data(ttl=21600, show_spinner=False)\ndef _load_participation_season(season: int) -> pd.DataFrame:\n    \"\"\"Load historical participation/coverage data when nflverse has published it.\"\"\"\n    _require_nflreadpy()\n    try:\n        frame = nfl.load_participation(int(season))\n        return _compact_to_pandas(frame, PARTICIPATION_REQUIRED_COLUMNS)\n    except Exception as exc:\n        st.session_state[f\"nfl_participation_error_{int(season)}\"] = str(exc)\n        return pd.DataFrame()\n'''
+          new_part = '''def _load_participation_season(season: int) -> pd.DataFrame:\n    \"\"\"Load participation/coverage directly with a projected parquet scan.\"\"\"\n    season = int(season)\n    try:\n        return _load_release_parquet_columns(\n            \"https://github.com/nflverse/nflverse-data/releases/download/pbp_participation/\"\n            f\"pbp_participation_{season}.parquet\",\n            f\"/tmp/ezpz_nfl_participation_{season}.parquet\",\n            PARTICIPATION_REQUIRED_COLUMNS,\n        )\n    except Exception as exc:\n        st.session_state[f\"nfl_participation_error_{season}\"] = str(exc)\n        return pd.DataFrame()\n'''
+          if old_part not in text:
+              raise SystemExit("participation loader block not found")
+          text = text.replace(old_part, new_part, 1)
+
+          # _load_pbp_season returns a fresh local DataFrame. The charting builder
+          # immediately owned another full copy of it, which was the largest single
+          # transient allocation in this path. Mutate that local frame in place.
+          start = text.find("def _season_charting_features(")
+          end = text.find("\ndef _season_player_profiles(", start)
+          if start < 0 or end < 0:
+              raise SystemExit("_season_charting_features function boundaries not found")
+          segment = text[start:end]
+          if segment.count("    df = pbp.copy()\n") != 1:
+              raise SystemExit("expected exactly one PBP copy in charting function")
+          segment = segment.replace(
+              "    df = pbp.copy()\n",
+              "    # pbp is a fresh local frame; avoid a second full heap copy.\n"
+              "    df = pbp\n",
+              1,
+          )
+          segment = segment.replace(
+              "        df = df.merge(fc, on=[\"game_key\", \"play_key\"], how=\"left\")\n",
+              "        df = df.merge(fc, on=[\"game_key\", \"play_key\"], how=\"left\")\n"
+              "        del fc, ftn\n"
+              "        gc.collect()\n",
+              1,
+          )
+          segment = segment.replace(
+              "        df = df.merge(pc, on=[\"game_key\", \"play_key\"], how=\"left\")\n",
+              "        df = df.merge(pc, on=[\"game_key\", \"play_key\"], how=\"left\")\n"
+              "        del pc, part\n"
+              "        gc.collect()\n",
+              1,
+          )
+          text = text[:start] + segment + text[end:]
+
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Validate hotfix
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py
+          grep -q "def _load_release_parquet_columns" builders/nfl_builder.py
+          grep -q "releases/download/pbp_participation" builders/nfl_builder.py
+          grep -q "releases/download/ftn_charting" builders/nfl_builder.py
+          grep -q "@st.cache_resource(ttl=21600, show_spinner=False)" builders/nfl_builder.py
+          if grep -A2 "@st.cache_data(ttl=21600, show_spinner=False)" builders/nfl_builder.py | grep -q "@st.cache_data(ttl=21600, show_spinner=False)"; then
+            true
+          fi
+          git diff --check
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Reduce NFL builder memory spikes on Render"
+          git push
