@@ -1,0 +1,48 @@
+name: One-time NFL spread-only + prop arity hotfix
+
+on:
+  push:
+    paths:
+      - ".github/workflows/nfl-spread-only-prop-arity-hotfix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate hotfix script
+        run: python -m py_compile scripts/patch_nfl_spread_only_and_prop_arity.py
+
+      - name: Patch NFL builder
+        run: python scripts/patch_nfl_spread_only_and_prop_arity.py
+
+      - name: Verify NFL builder
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py
+          ! grep -q 'away_ml_input = st.number_input' builders/nfl_builder.py
+          ! grep -q 'home_ml_input = st.number_input' builders/nfl_builder.py
+          ! grep -q '_market_card("Moneyline"' builders/nfl_builder.py
+          grep -q 'role_context=team_roles' builders/nfl_builder.py
+          grep -q 'game_markets_ready = spread_market_ready and total_market_ready' builders/nfl_builder.py
+          grep -q 'For spreads, each team is one side of the market' builders/nfl_builder.py
+          git diff --check
+
+      - name: Commit hotfix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Fix NFL prop builder error and remove moneyline inputs"
+          git push
