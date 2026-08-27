@@ -3696,7 +3696,8 @@ def _build_game_prop_rows(
             rows.extend(_project_player_markets(
                 _safe_text(player_row.get("Player", "")), _safe_text(player_row.get("Position", "")),
                 _safe_text(player_row.get("Slot", "")), team, opponent, home_away, lineup, profiles,
-                defense_profiles, rating, opponent_rating, projection, weather_adjustment, team_roles,
+                defense_profiles, rating, opponent_rating, projection, weather_adjustment,
+                role_context=team_roles,
                 pregame_team_total=pregame_team_total,
                 pregame_team_total_source=pregame_team_total_source,
             ))
@@ -4129,6 +4130,7 @@ def _render_build() -> None:
     automatic_home_field = _num(hfa_info.get("value"), HOME_FIELD_PRIOR_POINTS)
     st.markdown("### Manual sportsbook lines and prices")
     st.caption("Manual entry only — no sportsbook/API lines or prices are loaded into the NFL builder.")
+    st.caption("For spreads, each team is one side of the market, so each team has one spread price. Over/Under prices apply to the game total and player props.")
 
     st.markdown(f"**{away_team}**")
     away_spread_input = st.number_input(
@@ -4139,11 +4141,6 @@ def _render_build() -> None:
         f"{away_team} spread odds", value=None, step=5,
         key=f"nfl_away_spread_odds_{market_key}",
     )
-    away_ml_input = st.number_input(
-        f"{away_team} moneyline", value=None, step=5,
-        key=f"nfl_away_ml_{market_key}",
-    )
-
     st.markdown(f"**{home_team}**")
     home_spread_input = st.number_input(
         f"{home_team} spread line", value=None, step=0.5,
@@ -4153,11 +4150,6 @@ def _render_build() -> None:
         f"{home_team} spread odds", value=None, step=5,
         key=f"nfl_home_spread_odds_{market_key}",
     )
-    home_ml_input = st.number_input(
-        f"{home_team} moneyline", value=None, step=5,
-        key=f"nfl_home_ml_{market_key}",
-    )
-
     st.markdown("**Game total**")
     market_total_input = st.number_input(
         "Point total line", value=None, step=0.5,
@@ -4179,10 +4171,9 @@ def _render_build() -> None:
         st.warning("The two spread lines should be opposites (for example +3.5 and -3.5). Check the manual entries.")
         spread_market_ready = False
     total_market_ready = all(value is not None for value in [market_total_input, total_over_odds_input, total_under_odds_input])
-    ml_market_ready = all(value is not None for value in [away_ml_input, home_ml_input])
-    game_markets_ready = spread_market_ready and total_market_ready and ml_market_ready
+    game_markets_ready = spread_market_ready and total_market_ready
     if not game_markets_ready:
-        st.info("Enter both team spreads/prices, both moneylines, and the total with Over/Under prices before saving the game.")
+        st.info("Enter both team spreads/prices and the total with Over/Under prices before saving the game.")
 
     away_spread_line = float(away_spread_input) if away_spread_input is not None else 0.0
     home_spread = float(home_spread_input) if home_spread_input is not None else 0.0
@@ -4191,8 +4182,9 @@ def _render_build() -> None:
     market_total = float(market_total_input) if market_total_input is not None else 45.0
     total_over_odds = int(total_over_odds_input) if total_over_odds_input is not None else -110
     total_under_odds = int(total_under_odds_input) if total_under_odds_input is not None else -110
-    away_ml = int(away_ml_input) if away_ml_input is not None else -110
-    home_ml = int(home_ml_input) if home_ml_input is not None else -110
+    # Moneyline is intentionally disabled in the manual NFL builder.
+    away_ml = -110
+    home_ml = -110
     st.caption(f"Automatic home field: {automatic_home_field:.1f} pts • {_safe_text(hfa_info.get('source', 'Rolling home-field model'))}")
 
     st.markdown("### Game environment")
@@ -4327,18 +4319,14 @@ def _render_build() -> None:
     if not total_market_ready:
         total_grade = "No market line"
 
-    home_win = simulation["home_win"]
-    if home_win >= 0.5:
-        ml_pick, ml_probability, ml_odds, ml_pick_home = home_team, home_win, home_ml, True
-    else:
-        ml_pick, ml_probability, ml_odds, ml_pick_home = away_team, 1 - home_win, away_ml, False
-    ml_edge = probability_edge(ml_probability, ml_odds)
-    ml_confluence, ml_reasons = _moneyline_confluence(
-        ml_pick_home, ml_edge, away_rating, home_rating, away_lineup_summary, home_lineup_summary, reliability
-    )
-    ml_grade = _grade_moneyline(ml_probability, ml_edge, reliability, ml_confluence)
-    if not ml_market_ready:
-        ml_grade = "No market line"
+    # Keep contract-compatible placeholders, but do not grade or track moneyline.
+    ml_pick = ""
+    ml_probability = 0.0
+    ml_odds = -110
+    ml_edge = 0.0
+    ml_confluence = 0
+    ml_reasons: list[str] = []
+    ml_grade = "No market line"
 
     st.divider()
     _metric_cards(away_team, home_team, projection, reliability)
@@ -4346,10 +4334,8 @@ def _render_build() -> None:
     margin_text = f"{margin_team} by {abs(projection['margin']):.1f}"
     spread_edge_text = f"{spread_edge:+.1f} pts • {spread_price_edge:+.1%} price • {spread_pick_odds:+d}" if spread_market_ready else "Manual spread lines and prices required"
     total_edge_text = f"{total_edge:+.1f} pts • {total_price_edge:+.1%} price • {total_pick_odds:+d}" if total_market_ready else "Manual total line and prices required"
-    ml_edge_text = f"{ml_edge:+.1%}" if ml_market_ready else "Manual moneyline prices required"
     _market_card("Spread", margin_text, spread_pick, spread_probability, spread_edge_text, spread_grade, spread_confluence, spread_reasons)
     _market_card("Total", f"{projection['total']:.1f} points", total_pick, total_probability, total_edge_text, total_grade, total_confluence, total_reasons)
-    _market_card("Moneyline", f"{ml_pick} {ml_probability:.1%} win probability", ml_pick, ml_probability, ml_edge_text, ml_grade, ml_confluence, ml_reasons)
 
     game = f"{away_team} at {home_team}"
     slate_row = {
@@ -4360,12 +4346,12 @@ def _render_build() -> None:
         "Away Score High": round(simulation["away_high"], 1), "Home Score Low": round(simulation["home_low"], 1),
         "Home Score High": round(simulation["home_high"], 1), "Market Home Spread": home_spread,
         "Market Total": market_total, "Home Spread Odds": home_spread_odds, "Away Spread Odds": away_spread_odds,
-        "Total Over Odds": total_over_odds, "Total Under Odds": total_under_odds, "Away ML": away_ml, "Home ML": home_ml,
+        "Total Over Odds": total_over_odds, "Total Under Odds": total_under_odds, "Away ML": "", "Home ML": "",
         "Spread Pick": spread_pick, "Spread Probability": round(spread_probability, 4), "Spread Edge": round(spread_edge, 2),
         "Spread Grade": spread_grade, "Spread Confluence": spread_confluence, "Total Pick": total_pick,
         "Total Probability": round(total_probability, 4), "Total Edge": round(total_edge, 2), "Total Grade": total_grade,
-        "Total Confluence": total_confluence, "ML Pick": ml_pick, "ML Probability": round(ml_probability, 4),
-        "ML Odds": ml_odds, "ML Edge": round(ml_edge, 4), "ML Grade": ml_grade, "ML Confluence": ml_confluence,
+        "Total Confluence": total_confluence, "ML Pick": "", "ML Probability": "",
+        "ML Odds": "", "ML Edge": "", "ML Grade": "No market line", "ML Confluence": "",
         "Reliability": reliability, "Data Confidence": data_confidence, "Personnel Confidence": personnel_confidence,
         "Previous Season Weight": away_rating.get("Previous Season Weight", ""), "Current Season Weight": away_rating.get("Current Season Weight", ""),
         "Away Offensive Absence": away_lineup_summary["offense_absence"], "Away Defensive Absence": away_lineup_summary["defense_absence"],
