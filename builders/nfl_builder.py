@@ -2400,33 +2400,6 @@ def _save_lineups(
 # Automatic slate initialization and player-prop engine
 # -----------------------------------------------------------------------------
 
-NFL_TEAM_NAMES = {
-    "ARI": "Arizona Cardinals", "ATL": "Atlanta Falcons", "BAL": "Baltimore Ravens",
-    "BUF": "Buffalo Bills", "CAR": "Carolina Panthers", "CHI": "Chicago Bears",
-    "CIN": "Cincinnati Bengals", "CLE": "Cleveland Browns", "DAL": "Dallas Cowboys",
-    "DEN": "Denver Broncos", "DET": "Detroit Lions", "GB": "Green Bay Packers",
-    "HOU": "Houston Texans", "IND": "Indianapolis Colts", "JAX": "Jacksonville Jaguars",
-    "KC": "Kansas City Chiefs", "LAC": "Los Angeles Chargers", "LAR": "Los Angeles Rams",
-    "LV": "Las Vegas Raiders", "MIA": "Miami Dolphins", "MIN": "Minnesota Vikings",
-    "NE": "New England Patriots", "NO": "New Orleans Saints", "NYG": "New York Giants",
-    "NYJ": "New York Jets", "PHI": "Philadelphia Eagles", "PIT": "Pittsburgh Steelers",
-    "SEA": "Seattle Seahawks", "SF": "San Francisco 49ers", "TB": "Tampa Bay Buccaneers",
-    "TEN": "Tennessee Titans", "WAS": "Washington Commanders",
-}
-
-PROP_MARKET_API_KEYS = {
-    "Passing Attempts": "player_pass_attempts",
-    "Passing Completions": "player_pass_completions",
-    "Passing Yards": "player_pass_yds",
-    "Passing TDs": "player_pass_tds",
-    "Interceptions": "player_pass_interceptions",
-    "Rushing Attempts": "player_rush_attempts",
-    "Rushing Yards": "player_rush_yds",
-    "Receptions": "player_receptions",
-    "Receiving Yards": "player_reception_yds",
-}
-API_KEY_TO_PROP_MARKET = {value: key for key, value in PROP_MARKET_API_KEYS.items()}
-
 POSITION_EFFICIENCY_PRIORS = {
     "QB": {"completion_rate": 0.645, "pass_ypa": 7.05, "rush_ypc": 4.6},
     "RB": {"catch_rate": 0.755, "rush_ypc": 4.25, "yards_per_target": 6.15, "targets_per_route": 0.235},
@@ -3428,8 +3401,7 @@ def _project_player_markets(
     player: str, position: str, slot: str, team: str, opponent: str, home_away: str,
     lineup: pd.DataFrame, profiles: pd.DataFrame, defense_profiles: pd.DataFrame,
     team_rating: dict[str, Any], opponent_rating: dict[str, Any], game_projection: dict[str, float],
-    weather_adjustment: float, market_lines: dict[tuple[str, str], dict[str, Any]],
-    role_context: dict[str, dict[str, Any]] | None = None,
+    weather_adjustment: float, role_context: dict[str, dict[str, Any]] | None = None,
     pregame_team_total: float | None = None,
     pregame_team_total_source: str = "EZPZ score fallback",
 ) -> list[dict[str, Any]]:
@@ -3483,13 +3455,11 @@ def _project_player_markets(
         route_conf = clamp(35 + 48 * clamp(route_participation, 0, 1) + min(17, games * 2.0), 35, 96) if pos in ["RB", "WR", "TE"] else role_conf
         cal_conf = clamp(35 + min(55, calibration["sample"] * 1.8), 35, 90)
         reliability = clamp(0.38 * role_conf + 0.22 * route_conf + 0.20 * data_confidence + 0.12 * matchup_confidence + 0.08 * cal_conf, 35, 95)
-        key = (_normalize_name(player), market)
-        market_data = market_lines.get(key, {})
         rows.append({
             "Team": team, "Opponent": opponent, "Home/Away": home_away, "Player": player, "Position": pos, "Slot": slot,
             "Market": market, "Raw Projection": round(max(0.0, raw_projection), 2), "Calibration Adjustment": round(calibration["adjustment"], 2),
-            "Projection": round(projection, 2), "Fair Line": _fair_line(projection, market), "Market Line": market_data.get("line", np.nan),
-            "Over Odds": market_data.get("over_odds", -110), "Under Odds": market_data.get("under_odds", -110), "Line Source": market_data.get("source", ""),
+            "Projection": round(projection, 2), "Fair Line": _fair_line(projection, market), "Market Line": np.nan,
+            "Over Odds": np.nan, "Under Odds": np.nan, "Line Source": "",
             "Role Confidence": round(role_conf, 1), "Route Confidence": round(route_conf, 1), "Matchup Confidence": round(matchup_confidence, 1),
             "Data Confidence": round(data_confidence, 1), "Calibration Sample": int(calibration["sample"]), "Reliability": round(reliability, 1),
             "Distribution": "Pending evaluation", "Matchup Index": round(matchup_index, 3), "Coverage Matchup": round(coverage_matchup, 3),
@@ -3628,75 +3598,6 @@ def _project_player_markets(
     return rows
 
 
-def _secret_value(*names: str) -> str:
-    for name in names:
-        try:
-            value = st.secrets.get(name, "")
-            if value:
-                return str(value)
-        except Exception:
-            pass
-        value = os.environ.get(name, "")
-        if value:
-            return str(value)
-    return ""
-
-
-@st.cache_data(ttl=900, show_spinner=False)
-def _odds_api_prop_lines(api_key: str, away_team: str, home_team: str) -> dict[tuple[str, str], dict[str, Any]]:
-    if not api_key:
-        return {}
-    base = "https://api.the-odds-api.com/v4"
-    try:
-        events_response = requests.get(f"{base}/sports/americanfootball_nfl/events", params={"apiKey": api_key}, timeout=25)
-        events_response.raise_for_status()
-        events = events_response.json()
-        away_name, home_name = NFL_TEAM_NAMES.get(away_team, away_team), NFL_TEAM_NAMES.get(home_team, home_team)
-        event = next((item for item in events if item.get("away_team") == away_name and item.get("home_team") == home_name), None)
-        if not event:
-            return {}
-        markets = ",".join(PROP_MARKET_API_KEYS.values())
-        odds_response = requests.get(
-            f"{base}/sports/americanfootball_nfl/events/{event.get('id')}/odds",
-            params={"apiKey": api_key, "regions": "us", "markets": markets, "oddsFormat": "american"},
-            timeout=35,
-        )
-        odds_response.raise_for_status()
-        payload = odds_response.json()
-        observations: dict[tuple[str, str], dict[str, list[float]]] = {}
-        for bookmaker in payload.get("bookmakers", []):
-            for market in bookmaker.get("markets", []):
-                internal_market = API_KEY_TO_PROP_MARKET.get(market.get("key", ""))
-                if not internal_market:
-                    continue
-                for outcome in market.get("outcomes", []):
-                    player = _normalize_name(outcome.get("description", ""))
-                    if not player or outcome.get("point") is None:
-                        continue
-                    key = (player, internal_market)
-                    bucket = observations.setdefault(key, {"line": [], "over_odds": [], "under_odds": []})
-                    bucket["line"].append(float(outcome.get("point")))
-                    side = str(outcome.get("name", "")).lower()
-                    if side == "over":
-                        bucket["over_odds"].append(float(outcome.get("price", -110)))
-                    elif side == "under":
-                        bucket["under_odds"].append(float(outcome.get("price", -110)))
-        output = {}
-        for key, bucket in observations.items():
-            if not bucket["line"]:
-                continue
-            output[key] = {
-                "line": round(float(np.median(bucket["line"])), 1),
-                "over_odds": int(round(float(np.median(bucket["over_odds"])))) if bucket["over_odds"] else -110,
-                "under_odds": int(round(float(np.median(bucket["under_odds"])))) if bucket["under_odds"] else -110,
-                "source": "Odds API consensus",
-            }
-        return output
-    except Exception as exc:
-        st.session_state["nfl_prop_odds_error"] = str(exc)
-        return {}
-
-
 def _grade_prop(probability: float, probability_edge_value: float, reliability: float, direction: str, role_confidence: float, market: str) -> str:
     under_penalty = 0.012 if direction == "Under" else 0.0
     count_penalty = 0.006 if market in ["Passing TDs", "Interceptions"] else 0.0
@@ -3710,7 +3611,8 @@ def _grade_prop(probability: float, probability_edge_value: float, reliability: 
 
 
 def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
-    if rows is None or rows.empty: return pd.DataFrame()
+    if rows is None or rows.empty:
+        return pd.DataFrame()
     output = []
     for _, row in rows.iterrows():
         item = row.to_dict()
@@ -3722,23 +3624,44 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         line = _num(item.get("Market Line", np.nan), np.nan)
         if not (math.isfinite(line) and line >= 0):
             item.update({"Pick": "Projection only", "Pick Odds": np.nan, "Model Probability": np.nan, "Push Probability": np.nan, "Implied Probability": np.nan, "Probability Edge": np.nan, "Projection Edge": np.nan, "Expected Value": np.nan, "Grade": "No market line", "Track": False})
-            output.append(item); continue
-        p_over = float(np.mean(samples > line)); p_under = float(np.mean(samples < line)); p_push = max(0.0, 1.0 - p_over - p_under)
-        over_odds, under_odds = _int(item.get("Over Odds", -110), -110), _int(item.get("Under Odds", -110), -110)
+            output.append(item)
+            continue
+
+        over_raw = _num(item.get("Over Odds", np.nan), np.nan)
+        under_raw = _num(item.get("Under Odds", np.nan), np.nan)
+        valid_prices = (
+            math.isfinite(over_raw) and math.isfinite(under_raw)
+            and abs(over_raw) >= 100 and abs(under_raw) >= 100
+        )
+        if not valid_prices:
+            item.update({"Pick": "Enter both odds", "Pick Odds": np.nan, "Model Probability": np.nan, "Push Probability": np.nan, "Implied Probability": np.nan, "Probability Edge": np.nan, "Projection Edge": round(abs(projection - line), 2), "Expected Value": np.nan, "Grade": "Missing odds", "Track": False})
+            output.append(item)
+            continue
+
+        over_odds, under_odds = int(round(over_raw)), int(round(under_raw))
+        p_over = float(np.mean(samples > line))
+        p_under = float(np.mean(samples < line))
+        p_push = max(0.0, 1.0 - p_over - p_under)
         ev_over = _expected_value_with_push(p_over, p_under, over_odds)
         ev_under = _expected_value_with_push(p_under, p_over, under_odds)
         direction = "Over" if ev_over >= ev_under else "Under"
         probability = p_over if direction == "Over" else p_under
         lose_probability = p_under if direction == "Over" else p_over
         odds = over_odds if direction == "Over" else under_odds
-        raw_over = american_implied_probability(over_odds); raw_under = american_implied_probability(under_odds)
+        raw_over = american_implied_probability(over_odds)
+        raw_under = american_implied_probability(under_odds)
         over_novig = raw_over / max(raw_over + raw_under, 1e-9)
         implied = over_novig if direction == "Over" else 1.0 - over_novig
         conditional_probability = probability / max(1.0 - p_push, 1e-9)
         probability_edge_value = conditional_probability - implied
-        grade = _grade_prop(conditional_probability, probability_edge_value, _num(item.get("Reliability", 50), 50), direction, _num(item.get("Role Confidence", 50), 50), _safe_text(item.get("Market", "")))
+        grade = _grade_prop(
+            conditional_probability, probability_edge_value,
+            _num(item.get("Reliability", 50), 50), direction,
+            _num(item.get("Role Confidence", 50), 50),
+            _safe_text(item.get("Market", "")),
+        )
         item.update({
-            "Line Source": _safe_text(item.get("Line Source", "")) or "Manual market line", "Pick": f"{direction} {line:.1f}", "Pick Odds": odds,
+            "Line Source": "Manual market line", "Pick": f"{direction} {line:.1f}", "Pick Odds": odds,
             "Model Probability": round(conditional_probability, 4), "Push Probability": round(p_push, 4), "Implied Probability": round(implied, 4),
             "Probability Edge": round(probability_edge_value, 4), "Projection Edge": round(abs(projection - line), 2),
             "Expected Value": round(_expected_value_with_push(probability, lose_probability, odds), 4), "Grade": grade, "Track": grade in ["A Prop", "B Prop"],
@@ -3751,7 +3674,6 @@ def _build_game_prop_rows(
     away_team: str, home_team: str, away_lineup: pd.DataFrame, home_lineup: pd.DataFrame,
     profiles: pd.DataFrame, defense_profiles: pd.DataFrame, away_rating: dict[str, Any],
     home_rating: dict[str, Any], projection: dict[str, float], weather_adjustment: float,
-    market_lines: dict[tuple[str, str], dict[str, Any]],
     market_total: float | None = None, home_spread: float | None = None,
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
@@ -3774,7 +3696,7 @@ def _build_game_prop_rows(
             rows.extend(_project_player_markets(
                 _safe_text(player_row.get("Player", "")), _safe_text(player_row.get("Position", "")),
                 _safe_text(player_row.get("Slot", "")), team, opponent, home_away, lineup, profiles,
-                defense_profiles, rating, opponent_rating, projection, weather_adjustment, market_lines, team_roles,
+                defense_profiles, rating, opponent_rating, projection, weather_adjustment, team_roles,
                 pregame_team_total=pregame_team_total,
                 pregame_team_total_source=pregame_team_total_source,
             ))
@@ -4205,22 +4127,73 @@ def _render_build() -> None:
     market_key = re.sub(r"[^A-Za-z0-9]+", "_", game_id)
     hfa_info = _automatic_home_field_advantage(season, week, home_team, selected_schedule_row)
     automatic_home_field = _num(hfa_info.get("value"), HOME_FIELD_PRIOR_POINTS)
-    st.markdown("### Sportsbook lines and prices")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        home_spread = st.number_input("Home spread line", value=float(defaults["home_spread"]), step=0.5, key=f"nfl_home_spread_{market_key}")
-        home_spread_odds = int(st.number_input(f"{home_team} spread odds", value=int(defaults.get("home_spread_odds", -110)), step=5, key=f"nfl_home_spread_odds_{market_key}"))
-        away_spread_odds = int(st.number_input(f"{away_team} spread odds", value=int(defaults.get("away_spread_odds", -110)), step=5, key=f"nfl_away_spread_odds_{market_key}"))
-    with c2:
-        market_total = st.number_input("Game total line", value=float(defaults["total"]), step=0.5, key=f"nfl_total_{market_key}")
-        total_over_odds = int(st.number_input("Over odds", value=int(defaults.get("total_over_odds", -110)), step=5, key=f"nfl_total_over_odds_{market_key}"))
-        total_under_odds = int(st.number_input("Under odds", value=int(defaults.get("total_under_odds", -110)), step=5, key=f"nfl_total_under_odds_{market_key}"))
-    with c3:
-        home_ml = st.number_input("Home moneyline", value=int(defaults["home_ml"]), step=5, key=f"nfl_home_ml_{market_key}")
-        away_ml = st.number_input("Away moneyline", value=int(defaults["away_ml"]), step=5, key=f"nfl_away_ml_{market_key}")
-        st.metric("Automatic home field", f"{automatic_home_field:.1f} pts")
-    st.caption("Use the exact sportsbook line and both side prices. Spread/total EV and price edge use these odds instead of assuming -110.")
-    st.caption(_safe_text(hfa_info.get("source", "Rolling home-field model")))
+    st.markdown("### Manual sportsbook lines and prices")
+    st.caption("Manual entry only — no sportsbook/API lines or prices are loaded into the NFL builder.")
+
+    st.markdown(f"**{away_team}**")
+    away_spread_input = st.number_input(
+        f"{away_team} spread line", value=None, step=0.5,
+        key=f"nfl_away_spread_line_{market_key}",
+    )
+    away_spread_odds_input = st.number_input(
+        f"{away_team} spread odds", value=None, step=5,
+        key=f"nfl_away_spread_odds_{market_key}",
+    )
+    away_ml_input = st.number_input(
+        f"{away_team} moneyline", value=None, step=5,
+        key=f"nfl_away_ml_{market_key}",
+    )
+
+    st.markdown(f"**{home_team}**")
+    home_spread_input = st.number_input(
+        f"{home_team} spread line", value=None, step=0.5,
+        key=f"nfl_home_spread_line_{market_key}",
+    )
+    home_spread_odds_input = st.number_input(
+        f"{home_team} spread odds", value=None, step=5,
+        key=f"nfl_home_spread_odds_{market_key}",
+    )
+    home_ml_input = st.number_input(
+        f"{home_team} moneyline", value=None, step=5,
+        key=f"nfl_home_ml_{market_key}",
+    )
+
+    st.markdown("**Game total**")
+    market_total_input = st.number_input(
+        "Point total line", value=None, step=0.5,
+        key=f"nfl_total_{market_key}",
+    )
+    total_over_odds_input = st.number_input(
+        "Over odds", value=None, step=5,
+        key=f"nfl_total_over_odds_{market_key}",
+    )
+    total_under_odds_input = st.number_input(
+        "Under odds", value=None, step=5,
+        key=f"nfl_total_under_odds_{market_key}",
+    )
+
+    spread_market_ready = all(value is not None for value in [
+        away_spread_input, away_spread_odds_input, home_spread_input, home_spread_odds_input,
+    ])
+    if spread_market_ready and abs(float(away_spread_input) + float(home_spread_input)) > 0.01:
+        st.warning("The two spread lines should be opposites (for example +3.5 and -3.5). Check the manual entries.")
+        spread_market_ready = False
+    total_market_ready = all(value is not None for value in [market_total_input, total_over_odds_input, total_under_odds_input])
+    ml_market_ready = all(value is not None for value in [away_ml_input, home_ml_input])
+    game_markets_ready = spread_market_ready and total_market_ready and ml_market_ready
+    if not game_markets_ready:
+        st.info("Enter both team spreads/prices, both moneylines, and the total with Over/Under prices before saving the game.")
+
+    away_spread_line = float(away_spread_input) if away_spread_input is not None else 0.0
+    home_spread = float(home_spread_input) if home_spread_input is not None else 0.0
+    away_spread_odds = int(away_spread_odds_input) if away_spread_odds_input is not None else -110
+    home_spread_odds = int(home_spread_odds_input) if home_spread_odds_input is not None else -110
+    market_total = float(market_total_input) if market_total_input is not None else 45.0
+    total_over_odds = int(total_over_odds_input) if total_over_odds_input is not None else -110
+    total_under_odds = int(total_under_odds_input) if total_under_odds_input is not None else -110
+    away_ml = int(away_ml_input) if away_ml_input is not None else -110
+    home_ml = int(home_ml_input) if home_ml_input is not None else -110
+    st.caption(f"Automatic home field: {automatic_home_field:.1f} pts • {_safe_text(hfa_info.get('source', 'Rolling home-field model'))}")
 
     st.markdown("### Game environment")
     roof_options = ["outdoors", "dome", "closed", "open"]
@@ -4313,7 +4286,7 @@ def _render_build() -> None:
         spread_pick_odds, spread_implied = home_spread_odds, home_spread_novig
         spread_ev = home_spread_ev
     else:
-        spread_pick = f"{away_team} {-home_spread:+.1f}"
+        spread_pick = f"{away_team} {away_spread_line:+.1f}"
         spread_probability, spread_edge, spread_pick_home = away_cover, -spread_edge_home, False
         spread_pick_odds, spread_implied = away_spread_odds, away_spread_novig
         spread_ev = away_spread_ev
@@ -4324,6 +4297,8 @@ def _render_build() -> None:
     spread_grade = _grade_spread(spread_probability, spread_edge, reliability, spread_confluence)
     if spread_price_edge <= 0 or spread_ev <= 0:
         spread_grade = "Non-Edge Spread"
+    if not spread_market_ready:
+        spread_grade = "No market line"
 
     over_probability = simulation["over"]
     under_probability = 1.0 - over_probability
@@ -4349,6 +4324,8 @@ def _render_build() -> None:
     total_grade = _grade_total_direction(total_pick, total_probability, total_edge, reliability, total_confluence)
     if total_price_edge <= 0 or total_ev <= 0:
         total_grade = "Non-Edge Total"
+    if not total_market_ready:
+        total_grade = "No market line"
 
     home_win = simulation["home_win"]
     if home_win >= 0.5:
@@ -4360,14 +4337,19 @@ def _render_build() -> None:
         ml_pick_home, ml_edge, away_rating, home_rating, away_lineup_summary, home_lineup_summary, reliability
     )
     ml_grade = _grade_moneyline(ml_probability, ml_edge, reliability, ml_confluence)
+    if not ml_market_ready:
+        ml_grade = "No market line"
 
     st.divider()
     _metric_cards(away_team, home_team, projection, reliability)
     margin_team = home_team if projection["margin"] >= 0 else away_team
     margin_text = f"{margin_team} by {abs(projection['margin']):.1f}"
-    _market_card("Spread", margin_text, spread_pick, spread_probability, f"{spread_edge:+.1f} pts • {spread_price_edge:+.1%} price • {spread_pick_odds:+d}", spread_grade, spread_confluence, spread_reasons)
-    _market_card("Total", f"{projection['total']:.1f} points", total_pick, total_probability, f"{total_edge:+.1f} pts • {total_price_edge:+.1%} price • {total_pick_odds:+d}", total_grade, total_confluence, total_reasons)
-    _market_card("Moneyline", f"{ml_pick} {ml_probability:.1%} win probability", ml_pick, ml_probability, f"{ml_edge:+.1%}", ml_grade, ml_confluence, ml_reasons)
+    spread_edge_text = f"{spread_edge:+.1f} pts • {spread_price_edge:+.1%} price • {spread_pick_odds:+d}" if spread_market_ready else "Manual spread lines and prices required"
+    total_edge_text = f"{total_edge:+.1f} pts • {total_price_edge:+.1%} price • {total_pick_odds:+d}" if total_market_ready else "Manual total line and prices required"
+    ml_edge_text = f"{ml_edge:+.1%}" if ml_market_ready else "Manual moneyline prices required"
+    _market_card("Spread", margin_text, spread_pick, spread_probability, spread_edge_text, spread_grade, spread_confluence, spread_reasons)
+    _market_card("Total", f"{projection['total']:.1f} points", total_pick, total_probability, total_edge_text, total_grade, total_confluence, total_reasons)
+    _market_card("Moneyline", f"{ml_pick} {ml_probability:.1%} win probability", ml_pick, ml_probability, ml_edge_text, ml_grade, ml_confluence, ml_reasons)
 
     game = f"{away_team} at {home_team}"
     slate_row = {
@@ -4392,63 +4374,100 @@ def _render_build() -> None:
         "Model Version": MODEL_VERSION, "Notes": notes,
     }
 
-    st.markdown("### Automatic player props")
-    odds_api_key = _secret_value("THE_ODDS_API_KEY", "ODDS_API_KEY")
-    market_lines = _odds_api_prop_lines(odds_api_key, away_team, home_team) if odds_api_key else {}
-    if odds_api_key and market_lines:
-        st.caption(f"Loaded {len(market_lines)} consensus player market lines. Edit any line or price below to override it.")
-    elif odds_api_key:
-        st.caption("No matching player lines are posted yet. Projections are ready and market lines can be entered below when available.")
-    else:
-        st.caption("Projections load automatically. Add THE_ODDS_API_KEY to Streamlit secrets for automatic sportsbook lines, or enter lines manually below.")
+    st.markdown("### Manual player prop lines")
+    st.caption("Manual entry only. The model projection is shown first, followed by the sportsbook line and both prices. No Odds API values are loaded.")
 
     prop_base = _build_game_prop_rows(
         away_team, home_team, away_lineup, home_lineup, profiles, defense_profiles,
-        away_rating, home_rating, projection, weather_total_adjustment, market_lines,
-        market_total=market_total, home_spread=home_spread,
+        away_rating, home_rating, projection, weather_total_adjustment,
+        market_total=market_total if total_market_ready else None,
+        home_spread=home_spread if spread_market_ready else None,
     )
     evaluated_props = pd.DataFrame()
     if prop_base.empty:
         st.info("No skill-position players were resolved. Open Lineups, injuries and role overrides to correct the QB/RB/WR/TE card.")
     else:
-        with st.expander("QB / RB / WR yard lines and prices", expanded=True):
-            st.caption("Enter the sportsbook line, Over odds and Under odds. Only QB passing yards, RB rushing/receiving yards and WR receiving yards are wager-input markets here.")
-            wager_mask = (
-                ((prop_base["Position"].astype(str) == "QB") & (prop_base["Market"].astype(str) == "Passing Yards"))
-                | ((prop_base["Position"].astype(str) == "RB") & (prop_base["Market"].astype(str).isin(["Rushing Yards", "Receiving Yards"])))
-                | ((prop_base["Position"].astype(str) == "WR") & (prop_base["Market"].astype(str) == "Receiving Yards"))
-            )
-            yard_inputs = prop_base.loc[wager_mask].copy()
-            input_columns = [
-                "Team", "Player", "Market", "Projection", "Market Line", "Over Odds", "Under Odds", "Line Source",
-            ]
-            edited_yards = st.data_editor(
-                yard_inputs,
-                use_container_width=True,
-                hide_index=True,
-                key=f"nfl_yard_inputs_{market_key}",
-                column_order=input_columns,
-                disabled=[column for column in input_columns if column not in ["Market Line", "Over Odds", "Under Odds"]],
-                column_config={
-                    "Projection": st.column_config.NumberColumn(format="%.1f"),
-                    "Market Line": st.column_config.NumberColumn("Sportsbook Line", min_value=0.0, step=0.5, format="%.1f"),
-                    "Over Odds": st.column_config.NumberColumn("Over Odds", step=5),
-                    "Under Odds": st.column_config.NumberColumn("Under Odds", step=5),
-                },
-            )
-            prop_inputs = prop_base.copy()
-            prop_inputs.loc[~wager_mask, "Market Line"] = np.nan
-            prop_inputs.loc[~wager_mask, "Line Source"] = ""
-            if not edited_yards.empty:
-                for column in ["Market Line", "Over Odds", "Under Odds", "Line Source"]:
-                    if column in edited_yards.columns:
-                        prop_inputs.loc[edited_yards.index, column] = edited_yards[column]
+        wager_mask = (
+            ((prop_base["Position"].astype(str) == "QB") & (prop_base["Market"].astype(str) == "Passing Yards"))
+            | ((prop_base["Position"].astype(str) == "RB") & (prop_base["Market"].astype(str).isin(["Rushing Yards", "Receiving Yards"])))
+            | ((prop_base["Position"].astype(str) == "WR") & (prop_base["Market"].astype(str) == "Receiving Yards"))
+        )
+        prop_inputs = prop_base.copy()
+        prop_inputs["Market Line"] = np.nan
+        prop_inputs["Over Odds"] = np.nan
+        prop_inputs["Under Odds"] = np.nan
+        prop_inputs["Line Source"] = ""
+
+        yard_inputs = prop_inputs.loc[wager_mask].copy()
+        slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE": 6}
+        market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2}
+        team_order = {away_team: 0, home_team: 1}
+        yard_inputs["_team_order"] = yard_inputs["Team"].map(team_order).fillna(99)
+        yard_inputs["_slot_order"] = yard_inputs["Slot"].map(slot_order).fillna(99)
+        yard_inputs["_market_order"] = yard_inputs["Market"].map(market_order).fillna(99)
+        yard_inputs = yard_inputs.sort_values(["_team_order", "_slot_order", "_market_order", "Player"])
+
+        for team in [away_team, home_team]:
+            team_rows = yard_inputs[yard_inputs["Team"].astype(str) == str(team)]
+            if team_rows.empty:
+                continue
+            st.markdown(f"#### {team} player props")
+            for idx, row in team_rows.iterrows():
+                player = _safe_text(row.get("Player", ""))
+                slot = _safe_text(row.get("Slot", ""))
+                market = _safe_text(row.get("Market", ""))
+                projection_value = _num(row.get("Projection", 0), 0)
+                st.markdown(f"**{slot} — {player} · {market}**")
+                st.caption(f"EZPZ projection: {projection_value:.1f}")
+                line_col, over_col, under_col = st.columns(3)
+                line_value = line_col.number_input(
+                    "Line", value=None, step=0.5,
+                    key=f"nfl_prop_line_{market_key}_{idx}",
+                )
+                over_value = over_col.number_input(
+                    "Over odds", value=None, step=5,
+                    key=f"nfl_prop_over_{market_key}_{idx}",
+                )
+                under_value = under_col.number_input(
+                    "Under odds", value=None, step=5,
+                    key=f"nfl_prop_under_{market_key}_{idx}",
+                )
+                if line_value is not None:
+                    prop_inputs.at[idx, "Market Line"] = float(line_value)
+                if over_value is not None:
+                    prop_inputs.at[idx, "Over Odds"] = int(over_value)
+                if under_value is not None:
+                    prop_inputs.at[idx, "Under Odds"] = int(under_value)
+                if line_value is not None and over_value is not None and under_value is not None:
+                    prop_inputs.at[idx, "Line Source"] = "Manual market line"
+
         evaluated_props = _evaluate_prop_rows(prop_inputs)
-        _render_prop_projection_cards(evaluated_props)
+        if not evaluated_props.empty:
+            st.markdown("#### Prop grades")
+            evaluated_wagers = evaluated_props.loc[wager_mask].copy()
+            evaluated_wagers["_team_order"] = evaluated_wagers["Team"].map(team_order).fillna(99)
+            evaluated_wagers["_slot_order"] = evaluated_wagers["Slot"].map(slot_order).fillna(99)
+            evaluated_wagers["_market_order"] = evaluated_wagers["Market"].map(market_order).fillna(99)
+            evaluated_wagers = evaluated_wagers.sort_values(["_team_order", "_slot_order", "_market_order", "Player"])
+            for _, row in evaluated_wagers.iterrows():
+                grade = _safe_text(row.get("Grade", ""))
+                player = _safe_text(row.get("Player", ""))
+                slot = _safe_text(row.get("Slot", ""))
+                market = _safe_text(row.get("Market", ""))
+                projection_value = _num(row.get("Projection", 0), 0)
+                if grade in ["No market line", "Missing odds"]:
+                    st.caption(f"{slot} — {player} · {market}: projection {projection_value:.1f} • {grade}")
+                    continue
+                pick = _safe_text(row.get("Pick", ""))
+                pick_odds = _int(row.get("Pick Odds", 0), 0)
+                probability = _num(row.get("Model Probability", 0), 0)
+                edge = _num(row.get("Probability Edge", 0), 0)
+                st.markdown(f"**{slot} — {player} · {market}: {pick} ({pick_odds:+d}) — {grade}**")
+                st.caption(f"Projection {projection_value:.1f} • model {probability:.1%} • price edge {edge:+.1%}")
 
     st.divider()
     st.caption("This single action saves the game, lineup snapshot and every prop projection. Only qualifying graded bets are placed in the trackers.")
-    if st.button("Save Game & Graded Plays", type="primary", use_container_width=True, key=f"nfl_save_everything_{market_key}"):
+    if st.button("Save Game & Graded Plays", type="primary", use_container_width=True, key=f"nfl_save_everything_{market_key}", disabled=not game_markets_ready):
         prop_projection_rows = _prop_rows_for_storage(
             evaluated_props, slate_date_str, season, week, game_id, game, notes
         )
@@ -4629,7 +4648,7 @@ def _ensure_public_database_contract() -> None:
 
 def render() -> None:
     _ensure_public_database_contract()
-    st.caption("NFL v4.2 regression slate • separate NFL database • price-aware spread/total markets • regression QB/RB/WR yard props")
+    st.caption("NFL v4.2 regression slate • manual sportsbook entry • regression QB/RB/WR yard props")
     page = st.radio(
         "NFL section",
         ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],
