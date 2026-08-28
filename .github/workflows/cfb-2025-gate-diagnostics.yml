@@ -1,0 +1,42 @@
+name: CFB 2025 gate diagnostics
+
+on:
+  push:
+    branches: [research/cfb-2025-gate-diagnostics]
+    paths:
+      - "research/cfb_2025_gate_diagnostics.py"
+      - ".github/workflows/cfb-2025-gate-diagnostics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/cfb-2025-gate-diagnostics
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run gate diagnostics
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/research
+        run: python research/cfb_2025_gate_diagnostics.py
+      - name: Commit diagnostic result
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/cfb_2025_gate_diagnostics.json
+          if git diff --cached --quiet; then
+            echo "No result changes"
+            exit 0
+          fi
+          git commit -m "Add CFB 2025 gate diagnostic results"
+          git push origin research/cfb-2025-gate-diagnostics
