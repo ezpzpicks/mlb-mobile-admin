@@ -1,0 +1,48 @@
+{
+  "season": 2025,
+  "method": "Current production point projection; leakage-safe weekly ratings; closing lines; no postgame QB/injury/weather hindsight; Reliability analyzed separately.",
+  "games_with_spread": 928,
+  "totals_with_line": 931,
+  "fbs_fbs_spreads": 807,
+  "fbs_fbs_totals": 805,
+  "conservative_screens": {
+    "Spread": {
+      "B_screen": {
+        "scope": "FBS-FBS",
+        "market": "Spread",
+        "edge_cutoff": 0.5,
+        "bets": 746,
+        "wins": 388,
+        "losses": 347,
+        "pushes": 11,
+        "win_pct": 52.79,
+        "roi_pct_at_minus_110": 0.78,
+        "wilson_95_low_pct": 49.17,
+        "weeks_0_7_roi_pct": 0.4,
+        "weeks_8_plus_roi_pct": 1.16
+      },
+      "A_screen": {
+        "scope": "FBS-FBS",
+        "market": "Spread",
+        "edge_cutoff": 4.5,
+        "bets": 322,
+        "wins": 173,
+        "losses": 144,
+        "pushes": 5,
+        "win_pct": 54.57,
+        "roi_pct_at_minus_110": 4.19,
+        "wilson_95_low_pct": 49.07,
+        "weeks_0_7_roi_pct": 6.91,
+        "weeks_8_plus_roi_pct": -0.47
+      }
+    },
+    "Over": {
+      "B_screen": null,
+      "A_screen": null
+    },
+    "Under": {
+      "B_screen": null,
+      "A_screen": null
+    }
+  }
+}
