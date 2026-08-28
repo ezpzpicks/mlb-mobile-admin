@@ -1,0 +1,101 @@
+name: Implement finalized CFB total grades
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cfb-final-total-grades.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply finalized grading thresholds
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('builders/cfb_market_calibration.py')
+          text = path.read_text()
+
+          text = text.replace(
+              '- applies conservative A/B spread gates plus positive price-edge and EV vetoes;',
+              '- applies finalized A/B spread gates and direction-specific total gates plus positive price-edge and EV vetoes;'
+          )
+
+          spread_constants = '''SPREAD_B_PROBABILITY = 0.55\nSPREAD_B_POINT_EDGE = 6.0\nSPREAD_A_PROBABILITY = 0.58\nSPREAD_A_POINT_EDGE = 9.5\nATS_CALIBRATION_PROVEN = False'''
+          grade_constants = '''SPREAD_B_PROBABILITY = 0.55\nSPREAD_B_POINT_EDGE = 6.0\nSPREAD_A_PROBABILITY = 0.58\nSPREAD_A_POINT_EDGE = 9.5\n\n# 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and\n# Unders are intentionally graded differently because the historical edge curve\n# was directionally asymmetric. Probability, Reliability, and Confluence remain\n# diagnostic only; actual entered price must still have positive no-vig edge and\n# positive EV or the play is vetoed below.\nTOTAL_UNDER_B_POINT_EDGE = 0.5\nTOTAL_UNDER_A_POINT_EDGE = 3.5\nTOTAL_OVER_B_MIN_POINT_EDGE = 2.0\nTOTAL_OVER_B_MAX_POINT_EDGE = 3.0\nATS_CALIBRATION_PROVEN = False'''
+          if 'TOTAL_UNDER_B_POINT_EDGE' not in text:
+              if spread_constants not in text:
+                  raise SystemExit('Could not locate spread threshold constants')
+              text = text.replace(spread_constants, grade_constants)
+
+          spread_grade = '''def _grade_spread(probability: float, point_edge: float, reliability: float, confluence: int) -> str:\n    # Probability, Reliability, and Confluence remain recorded for diagnostics,\n    # but they do not veto a spread grade. The 2025 holdout-supported point edge\n    # is the grading signal; actual price/EV is enforced immediately afterward.\n    if point_edge >= SPREAD_A_POINT_EDGE:\n        return "A Spread"\n    if point_edge >= SPREAD_B_POINT_EDGE:\n        return "B Spread"\n    return "No Play"\n'''
+          total_grade = spread_grade + '''\n\ndef _grade_total(pick: str, point_edge: float, probability: float, reliability: float, confluence: int) -> str:\n    # The current-production 2025 holdout showed a strong, monotonic Under signal\n    # but only a narrow profitable Over window. Grade from directional point edge;\n    # probability/reliability/confluence are retained as context rather than gates.\n    edge = float(point_edge)\n    direction = str(pick).strip().lower()\n    if direction.startswith("under"):\n        if edge >= TOTAL_UNDER_A_POINT_EDGE:\n            return "A Total"\n        if edge >= TOTAL_UNDER_B_POINT_EDGE:\n            return "B Total"\n        return "No Play"\n    if direction.startswith("over"):\n        if TOTAL_OVER_B_MIN_POINT_EDGE <= edge <= TOTAL_OVER_B_MAX_POINT_EDGE + 1e-9:\n            return "B Total"\n        return "No Play"\n    return "No Play"\n'''
+          if 'def _grade_total(pick:' not in text:
+              if spread_grade not in text:
+                  raise SystemExit('Could not locate spread grading function')
+              text = text.replace(spread_grade, total_grade)
+
+          text = text.replace('    original_grade_total = cfb_builder._grade_total\n', '')
+          old_call = '''        total["grade"] = original_grade_total(\n            total["probability"], total["model_edge_points"], reliability, total_conf\n        )'''
+          new_call = '''        total["grade"] = _grade_total(\n            total["pick"], total["model_edge_points"], total["probability"], reliability, total_conf\n        )'''
+          if old_call in text:
+              text = text.replace(old_call, new_call)
+          elif new_call not in text:
+              raise SystemExit('Could not locate total grading call')
+
+          path.write_text(text)
+          PY
+
+      - name: Verify grading boundaries
+        run: |
+          python -m py_compile builders/cfb_market_calibration.py
+          python - <<'PY'
+          from builders.cfb_market_calibration import _grade_spread, _grade_total
+
+          # Locked spread thresholds.
+          assert _grade_spread(.99, 5.99, 100, 6) == 'No Play'
+          assert _grade_spread(.01, 6.00, 0, 0) == 'B Spread'
+          assert _grade_spread(.01, 9.49, 0, 0) == 'B Spread'
+          assert _grade_spread(.01, 9.50, 0, 0) == 'A Spread'
+
+          # Under: B 0.5-3.49, A 3.5+.
+          assert _grade_total('Under 50', 0.49, .99, 100, 6) == 'No Play'
+          assert _grade_total('Under 50', 0.50, .01, 0, 0) == 'B Total'
+          assert _grade_total('Under 50', 3.49, .01, 0, 0) == 'B Total'
+          assert _grade_total('Under 50', 3.50, .01, 0, 0) == 'A Total'
+          assert _grade_total('Under 50', 12.0, .01, 0, 0) == 'A Total'
+
+          # Over: B only in the 2.0-3.0 point window; no A grade.
+          assert _grade_total('Over 50', 1.99, .99, 100, 6) == 'No Play'
+          assert _grade_total('Over 50', 2.00, .01, 0, 0) == 'B Total'
+          assert _grade_total('Over 50', 3.00, .01, 0, 0) == 'B Total'
+          assert _grade_total('Over 50', 3.01, .99, 100, 6) == 'No Play'
+          assert _grade_total('Over 50', 10.0, .99, 100, 6) == 'No Play'
+          print('CFB finalized grade thresholds verified')
+          PY
+
+      - name: Commit implementation
+        run: |
+          if git diff --quiet -- builders/cfb_market_calibration.py; then
+            echo 'No grading changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add builders/cfb_market_calibration.py
+          git commit -m 'cfb: apply finalized spread and total grades'
+          git push
