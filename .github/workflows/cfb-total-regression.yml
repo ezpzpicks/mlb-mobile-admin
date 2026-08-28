@@ -28,6 +28,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Make zero-penalty candidate collinearity-safe
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('research/cfb_total_regression.py')
+          text = path.read_text()
+          old = '    beta = np.linalg.solve(design.T @ design + penalty, design.T @ y)'
+          new = '    beta = np.linalg.lstsq(design, y, rcond=None)[0] if float(alpha) == 0.0 else np.linalg.solve(design.T @ design + penalty, design.T @ y)'
+          if old in text:
+              path.write_text(text.replace(old, new))
+          PY
+
       - name: Run leakage-safe totals backtest
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '0'
@@ -37,12 +49,12 @@ jobs:
 
       - name: Commit research results
         run: |
-          if git diff --quiet -- research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md; then
+          if git diff --quiet -- research/cfb_total_regression.py research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md; then
             echo 'No result changes to commit.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md
+          git add research/cfb_total_regression.py research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md
           git commit -m 'research: record CFB totals regression holdout results'
           git push
