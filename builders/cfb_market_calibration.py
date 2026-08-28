@@ -4,7 +4,7 @@ The validated CFB v2 regression remains the mean-margin engine. This layer:
 - replaces the old spread simulation width with the 2024 out-of-sample residual SD;
 - preserves the existing totals simulation mechanics while centering them on the independent totals regression;
 - prices both spread sides and total sides from entered American odds with no-vig probabilities;
-- applies conservative A/B spread gates plus positive price-edge and EV vetoes;
+- applies finalized A/B spread gates and direction-specific total gates plus positive price-edge and EV vetoes;
 - records actual selected prices in the slate/tracker;
 - exposes the regression/overlay/market breakdown in the admin UI.
 
@@ -39,6 +39,16 @@ SPREAD_B_PROBABILITY = 0.55
 SPREAD_B_POINT_EDGE = 6.0
 SPREAD_A_PROBABILITY = 0.58
 SPREAD_A_POINT_EDGE = 9.5
+
+# 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and
+# Unders are intentionally graded differently because the historical edge curve
+# was directionally asymmetric. Probability, Reliability, and Confluence remain
+# diagnostic only; actual entered price must still have positive no-vig edge and
+# positive EV or the play is vetoed below.
+TOTAL_UNDER_B_POINT_EDGE = 0.5
+TOTAL_UNDER_A_POINT_EDGE = 3.5
+TOTAL_OVER_B_MIN_POINT_EDGE = 2.0
+TOTAL_OVER_B_MAX_POINT_EDGE = 3.0
 ATS_CALIBRATION_PROVEN = False
 
 # Historical roster/returning/portal candidates did not have usable 2024
@@ -152,13 +162,31 @@ def _grade_spread(probability: float, point_edge: float, reliability: float, con
     return "No Play"
 
 
+def _grade_total(pick: str, point_edge: float, probability: float, reliability: float, confluence: int) -> str:
+    # The current-production 2025 holdout showed a strong, monotonic Under signal
+    # but only a narrow profitable Over window. Grade from directional point edge;
+    # probability/reliability/confluence are retained as context rather than gates.
+    edge = float(point_edge)
+    direction = str(pick).strip().lower()
+    if direction.startswith("under"):
+        if edge >= TOTAL_UNDER_A_POINT_EDGE:
+            return "A Total"
+        if edge >= TOTAL_UNDER_B_POINT_EDGE:
+            return "B Total"
+        return "No Play"
+    if direction.startswith("over"):
+        if TOTAL_OVER_B_MIN_POINT_EDGE <= edge <= TOTAL_OVER_B_MAX_POINT_EDGE + 1e-9:
+            return "B Total"
+        return "No Play"
+    return "No Play"
+
+
 def install_market_calibration(cfb_builder: Any) -> None:
     if getattr(cfb_builder, "_MARKET_CALIBRATION_LAYER_INSTALLED", False):
         return
 
     # The CFB v2 mean-margin layer must be installed first by app_mobile_admin.py.
     original_simulate = cfb_builder.simulate_game
-    original_grade_total = cfb_builder._grade_total
     original_display_result = cfb_builder._display_result
     original_slate_row = cfb_builder.slate_row
     original_tracker_rows = cfb_builder.tracker_rows
@@ -276,8 +304,8 @@ def install_market_calibration(cfb_builder: Any) -> None:
         spread["grade"] = _grade_spread(
             spread["probability"], spread["model_edge_points"], reliability, spread_conf
         )
-        total["grade"] = original_grade_total(
-            total["probability"], total["model_edge_points"], reliability, total_conf
+        total["grade"] = _grade_total(
+            total["pick"], total["model_edge_points"], total["probability"], reliability, total_conf
         )
         moneyline["grade"] = cfb_builder._grade_ml(
             moneyline["edge"], moneyline["ev"], reliability, ml_conf
