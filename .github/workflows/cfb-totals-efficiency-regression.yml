@@ -30,6 +30,27 @@ jobs:
           pip install -r requirements.txt
           pip install statsmodels
 
+      - name: Make earliest-season prior optional
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('research/cfb_totals_efficiency_regression.py')
+          text = path.read_text()
+          text = text.replace(
+              '    seasons_needed = range(min(TRAIN_SEASONS) - 1, HOLDOUT_SEASON + 1)\n    games_cache = {season: games_from_pbp(season) for season in seasons_needed}',
+              '    seasons_needed = range(min(TRAIN_SEASONS), HOLDOUT_SEASON + 1)\n    games_cache = {season: games_from_pbp(season) for season in seasons_needed}'
+          )
+          text = text.replace(
+              '        prior_games = games_cache[season - 1]\n        prior_stats = team_summary(prior_games)\n        prior_pbp = original_open_pbp(season - 1)\n        current_pbp = original_open_pbp(season)',
+              '        prior_games = games_cache.get(season - 1, pd.DataFrame())\n        prior_stats = team_summary(prior_games)\n        prior_pbp = original_open_pbp(season - 1) if season - 1 in games_cache else pd.DataFrame()\n        current_pbp = original_open_pbp(season)'
+          )
+          text = text.replace(
+              '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None)\n            prior_metrics = metric_lookup(prior_metric_frame)',
+              '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None) if not prior_pbp.empty else pd.DataFrame()\n            prior_metrics = metric_lookup(prior_metric_frame)'
+          )
+          path.write_text(text)
+          PY
+
       - name: Run totals-specific regression
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
@@ -40,12 +61,12 @@ jobs:
 
       - name: Commit research results
         run: |
-          if git diff --quiet -- research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md; then
+          if git diff --quiet -- research/cfb_totals_efficiency_regression.py research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md; then
             echo 'No result changes to commit.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md
+          git add research/cfb_totals_efficiency_regression.py research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md
           git commit -m 'research: record CFB pace-efficiency totals holdout results'
           git push
