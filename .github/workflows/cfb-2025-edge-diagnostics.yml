@@ -1,0 +1,34 @@
+name: CFB 2025 edge diagnostics
+
+on:
+  push:
+    branches:
+      - research/cfb-2025-grade-backtest
+    paths:
+      - "research/cfb_2025_edge_diagnostics.py"
+      - ".github/workflows/cfb-2025-edge-diagnostics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/cfb-2025-grade-backtest
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Diagnose edges
+        run: python research/cfb_2025_edge_diagnostics.py
+      - name: Commit diagnostics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/cfb_2025_edge_diagnostics.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add 2025 CFB edge diagnostics"
+          git push origin research/cfb-2025-grade-backtest
