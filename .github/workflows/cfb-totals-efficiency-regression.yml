@@ -46,10 +46,11 @@ jobs:
               '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None)\n            prior_metrics = metric_lookup(prior_metric_frame)',
               '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None) if not prior_pbp.empty else pd.DataFrame()\n            prior_metrics = metric_lookup(prior_metric_frame)'
           )
-          old = '''    if out.empty:\n        raise RuntimeError(f"No completed games reconstructed for {season}")\n    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'''
-          new = '''    if out.empty:\n        espn = cfb._parse_games(cfb._espn_games_payload(int(season)), int(season))\n        if espn is not None and not espn.empty:\n            mask = espn["Completed"].map(cfb._bool)\n            mask &= pd.to_numeric(espn["Away Score"], errors="coerce").notna()\n            mask &= pd.to_numeric(espn["Home Score"], errors="coerce").notna()\n            mask &= pd.to_numeric(espn["Week"], errors="coerce").fillna(0).gt(0)\n            espn = espn.loc[mask].copy()\n            out = pd.DataFrame({\n                "season": int(season),\n                "week": pd.to_numeric(espn["Week"], errors="coerce").astype(int),\n                "game_id": espn["Game ID"].astype(str),\n                "away_team": espn["Away Team"].map(cfb._normalize_team),\n                "home_team": espn["Home Team"].map(cfb._normalize_team),\n                "neutral": espn["Neutral Site"].map(cfb._bool),\n                "away_score": pd.to_numeric(espn["Away Score"], errors="coerce"),\n                "home_score": pd.to_numeric(espn["Home Score"], errors="coerce"),\n                "market_total": pd.to_numeric(espn.get("Total"), errors="coerce"),\n                "market_home_spread": pd.to_numeric(espn.get("Home Spread"), errors="coerce"),\n            })\n            out["actual_total"] = out["away_score"] + out["home_score"]\n            out["actual_margin"] = out["home_score"] - out["away_score"]\n        if out.empty:\n            raise RuntimeError(f"No completed games reconstructed for {season}")\n    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'''
-          if old in text:
-              text = text.replace(old, new)
+
+          marker = '    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'
+          enrichment = '''    # Evaluation-only market enrichment. PBP line fields are not stable across\n    # SportsDataverse seasons, so fill missing archived totals/spreads from the\n    # repo's ESPN historical schedule feed. These fields never enter predictors.\n    if not out.empty:\n        try:\n            espn_market = cfb._parse_games(cfb._espn_games_payload(int(season)), int(season))\n        except Exception as exc:\n            print(f"ESPN market enrichment failed for {season}: {exc}")\n            espn_market = pd.DataFrame()\n        if espn_market is not None and not espn_market.empty:\n            market = pd.DataFrame({\n                "_game_id": espn_market["Game ID"].astype(str),\n                "_week": pd.to_numeric(espn_market["Week"], errors="coerce"),\n                "_away": espn_market["Away Team"].map(cfb._normalize_team),\n                "_home": espn_market["Home Team"].map(cfb._normalize_team),\n                "_espn_total": pd.to_numeric(espn_market.get("Total"), errors="coerce"),\n                "_espn_spread": pd.to_numeric(espn_market.get("Home Spread"), errors="coerce"),\n            })\n            market.loc[market["_espn_total"] <= 0, "_espn_total"] = np.nan\n            market = market.drop_duplicates("_game_id")\n            total_by_id = market.set_index("_game_id")["_espn_total"]\n            spread_by_id = market.set_index("_game_id")["_espn_spread"]\n            out_ids = out["game_id"].astype(str)\n            current_total = pd.to_numeric(out.get("market_total"), errors="coerce")\n            current_spread = pd.to_numeric(out.get("market_home_spread"), errors="coerce")\n            id_total = out_ids.map(total_by_id)\n            id_spread = out_ids.map(spread_by_id)\n            out["market_total"] = current_total.where(current_total > 0).fillna(id_total)\n            out["market_home_spread"] = current_spread.fillna(id_spread)\n\n            # Team/week fallback protects against historical ID formatting changes.\n            market["_key"] = market["_week"].fillna(0).astype(int).astype(str) + "|" + market["_away"] + "|" + market["_home"]\n            total_by_key = market.drop_duplicates("_key").set_index("_key")["_espn_total"]\n            spread_by_key = market.drop_duplicates("_key").set_index("_key")["_espn_spread"]\n            out_key = pd.to_numeric(out["week"], errors="coerce").fillna(0).astype(int).astype(str) + "|" + out["away_team"].astype(str) + "|" + out["home_team"].astype(str)\n            out["market_total"] = pd.to_numeric(out["market_total"], errors="coerce").fillna(out_key.map(total_by_key))\n            out["market_home_spread"] = pd.to_numeric(out["market_home_spread"], errors="coerce").fillna(out_key.map(spread_by_key))\n        found = int(pd.to_numeric(out.get("market_total"), errors="coerce").notna().sum())\n        print(f"{season}: archived market totals recovered for {found}/{len(out)} games")\n    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'''
+          if 'archived market totals recovered for' not in text and marker in text:
+              text = text.replace(marker, enrichment)
           path.write_text(text)
           PY
 
@@ -61,7 +62,16 @@ jobs:
           PYTHONPATH: '.'
         run: python research/cfb_totals_efficiency_regression.py
 
+      - name: Show totals grade results
+        if: always()
+        run: |
+          echo '===== CFB TOTALS BACKTEST ====='
+          if [ -f research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md ]; then
+            cat research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md
+          fi
+
       - name: Commit research results
+        if: success()
         run: |
           if git diff --quiet -- research/cfb_totals_efficiency_regression.py research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md; then
             echo 'No result changes to commit.'
@@ -70,5 +80,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research/cfb_totals_efficiency_regression.py research/results/cfb_totals_efficiency_regression_results.json research/results/CFB_TOTALS_EFFICIENCY_REGRESSION.md
-          git commit -m 'research: record CFB pace-efficiency totals holdout results'
+          git commit -m 'research: record CFB totals grade holdout results'
           git push
