@@ -30,13 +30,14 @@ CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 MARGIN_RESIDUAL_SD = 17.75939215594032
 MARGIN_ROBUST_SIGMA = 16.871932143212987
 
-# No candidate probability/edge gate passed the predefined 2024 ATS stability
-# screen. These are deliberately conservative fallback gates, not claims of a
-# historically proven ATS threshold.
+# 2025 leakage-safe FBS-vs-FBS backtesting showed a material hit-rate/ROI lift
+# when the point-edge gates were made substantially stricter. Probability,
+# reliability, confluence, positive price-edge, and EV gates still apply.
+# These cutoffs are intentionally selective and are not a guarantee of future ATS results.
 SPREAD_B_PROBABILITY = 0.55
-SPREAD_B_POINT_EDGE = 2.5
+SPREAD_B_POINT_EDGE = 6.0
 SPREAD_A_PROBABILITY = 0.58
-SPREAD_A_POINT_EDGE = 4.0
+SPREAD_A_POINT_EDGE = 9.5
 ATS_CALIBRATION_PROVEN = False
 
 # Historical roster/returning/portal candidates did not have usable 2024
