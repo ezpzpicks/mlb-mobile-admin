@@ -1,0 +1,2702 @@
+{
+  "fbs_fbs": {
+    "spread_signal": {
+      "n": 807,
+      "corr_signed_edge_to_actual_cover": 0.1088,
+      "linear_slope": 0.2743
+    },
+    "total_signal": {
+      "n": 805,
+      "corr_signed_edge_to_actual_total_edge": -0.0721,
+      "linear_slope": -0.1097,
+      "mean_actual_minus_projection": -3.656,
+      "mae_points": 15.722
+    },
+    "cumulative": {
+      "Spread": [
+        {
+          "cutoff": 0.5,
+          "n": 746,
+          "wins": 388,
+          "losses": 347,
+          "pushes": 11,
+          "win_pct": 52.79,
+          "roi_pct": 0.78
+        },
+        {
+          "cutoff": 1.0,
+          "n": 693,
+          "wins": 367,
+          "losses": 317,
+          "pushes": 9,
+          "win_pct": 53.65,
+          "roi_pct": 2.43
+        },
+        {
+          "cutoff": 1.5,
+          "n": 633,
+          "wins": 340,
+          "losses": 284,
+          "pushes": 9,
+          "win_pct": 54.49,
+          "roi_pct": 4.02
+        },
+        {
+          "cutoff": 2.0,
+          "n": 584,
+          "wins": 311,
+          "losses": 264,
+          "pushes": 9,
+          "win_pct": 54.09,
+          "roi_pct": 3.26
+        },
+        {
+          "cutoff": 2.5,
+          "n": 521,
+          "wins": 276,
+          "losses": 236,
+          "pushes": 9,
+          "win_pct": 53.91,
+          "roi_pct": 2.91
+        },
+        {
+          "cutoff": 3.0,
+          "n": 470,
+          "wins": 247,
+          "losses": 215,
+          "pushes": 8,
+          "win_pct": 53.46,
+          "roi_pct": 2.07
+        },
+        {
+          "cutoff": 3.5,
+          "n": 414,
+          "wins": 218,
+          "losses": 188,
+          "pushes": 8,
+          "win_pct": 53.69,
+          "roi_pct": 2.51
+        },
+        {
+          "cutoff": 4.0,
+          "n": 359,
+          "wins": 192,
+          "losses": 162,
+          "pushes": 5,
+          "win_pct": 54.24,
+          "roi_pct": 3.54
+        },
+        {
+          "cutoff": 4.5,
+          "n": 322,
+          "wins": 173,
+          "losses": 144,
+          "pushes": 5,
+          "win_pct": 54.57,
+          "roi_pct": 4.19
+        },
+        {
+          "cutoff": 5.0,
+          "n": 292,
+          "wins": 157,
+          "losses": 130,
+          "pushes": 5,
+          "win_pct": 54.7,
+          "roi_pct": 4.43
+        },
+        {
+          "cutoff": 5.5,
+          "n": 259,
+          "wins": 143,
+          "losses": 112,
+          "pushes": 4,
+          "win_pct": 56.08,
+          "roi_pct": 7.06
+        },
+        {
+          "cutoff": 6.0,
+          "n": 234,
+          "wins": 132,
+          "losses": 99,
+          "pushes": 3,
+          "win_pct": 57.14,
+          "roi_pct": 9.09
+        },
+        {
+          "cutoff": 6.5,
+          "n": 203,
+          "wins": 112,
+          "losses": 89,
+          "pushes": 2,
+          "win_pct": 55.72,
+          "roi_pct": 6.38
+        },
+        {
+          "cutoff": 7.0,
+          "n": 179,
+          "wins": 101,
+          "losses": 76,
+          "pushes": 2,
+          "win_pct": 57.06,
+          "roi_pct": 8.94
+        },
+        {
+          "cutoff": 7.5,
+          "n": 147,
+          "wins": 83,
+          "losses": 63,
+          "pushes": 1,
+          "win_pct": 56.85,
+          "roi_pct": 8.53
+        },
+        {
+          "cutoff": 8.0,
+          "n": 130,
+          "wins": 75,
+          "losses": 54,
+          "pushes": 1,
+          "win_pct": 58.14,
+          "roi_pct": 10.99
+        },
+        {
+          "cutoff": 8.5,
+          "n": 114,
+          "wins": 66,
+          "losses": 47,
+          "pushes": 1,
+          "win_pct": 58.41,
+          "roi_pct": 11.5
+        },
+        {
+          "cutoff": 9.0,
+          "n": 99,
+          "wins": 58,
+          "losses": 41,
+          "pushes": 0,
+          "win_pct": 58.59,
+          "roi_pct": 11.85
+        },
+        {
+          "cutoff": 9.5,
+          "n": 83,
+          "wins": 50,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 60.24,
+          "roi_pct": 15.01
+        },
+        {
+          "cutoff": 10.0,
+          "n": 70,
+          "wins": 43,
+          "losses": 27,
+          "pushes": 0,
+          "win_pct": 61.43,
+          "roi_pct": 17.27
+        },
+        {
+          "cutoff": 10.5,
+          "n": 64,
+          "wins": 41,
+          "losses": 23,
+          "pushes": 0,
+          "win_pct": 64.06,
+          "roi_pct": 22.3
+        },
+        {
+          "cutoff": 11.0,
+          "n": 56,
+          "wins": 36,
+          "losses": 20,
+          "pushes": 0,
+          "win_pct": 64.29,
+          "roi_pct": 22.73
+        },
+        {
+          "cutoff": 11.5,
+          "n": 49,
+          "wins": 30,
+          "losses": 19,
+          "pushes": 0,
+          "win_pct": 61.22,
+          "roi_pct": 16.88
+        },
+        {
+          "cutoff": 12.0,
+          "n": 41,
+          "wins": 23,
+          "losses": 18,
+          "pushes": 0,
+          "win_pct": 56.1,
+          "roi_pct": 7.1
+        },
+        {
+          "cutoff": 12.5,
+          "n": 38,
+          "wins": 22,
+          "losses": 16,
+          "pushes": 0,
+          "win_pct": 57.89,
+          "roi_pct": 10.53
+        },
+        {
+          "cutoff": 13.0,
+          "n": 34,
+          "wins": 20,
+          "losses": 14,
+          "pushes": 0,
+          "win_pct": 58.82,
+          "roi_pct": 12.3
+        },
+        {
+          "cutoff": 13.5,
+          "n": 29,
+          "wins": 19,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 65.52,
+          "roi_pct": 25.08
+        },
+        {
+          "cutoff": 14.0,
+          "n": 27,
+          "wins": 17,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 62.96,
+          "roi_pct": 20.2
+        },
+        {
+          "cutoff": 14.5,
+          "n": 25,
+          "wins": 15,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 60.0,
+          "roi_pct": 14.55
+        },
+        {
+          "cutoff": 15.0,
+          "n": 24,
+          "wins": 14,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 58.33,
+          "roi_pct": 11.36
+        },
+        {
+          "cutoff": 15.5,
+          "n": 21,
+          "wins": 12,
+          "losses": 9,
+          "pushes": 0,
+          "win_pct": 57.14,
+          "roi_pct": 9.09
+        },
+        {
+          "cutoff": 16.0,
+          "n": 19,
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 63.16,
+          "roi_pct": 20.57
+        },
+        {
+          "cutoff": 16.5,
+          "n": 16,
+          "wins": 10,
+          "losses": 6,
+          "pushes": 0,
+          "win_pct": 62.5,
+          "roi_pct": 19.32
+        },
+        {
+          "cutoff": 17.0,
+          "n": 14,
+          "wins": 9,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 64.29,
+          "roi_pct": 22.73
+        },
+        {
+          "cutoff": 17.5,
+          "n": 13,
+          "wins": 9,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 69.23,
+          "roi_pct": 32.17
+        },
+        {
+          "cutoff": 18.0,
+          "n": 13,
+          "wins": 9,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 69.23,
+          "roi_pct": 32.17
+        },
+        {
+          "cutoff": 18.5,
+          "n": 10,
+          "wins": 7,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 70.0,
+          "roi_pct": 33.64
+        },
+        {
+          "cutoff": 19.0,
+          "n": 8,
+          "wins": 5,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 62.5,
+          "roi_pct": 19.32
+        },
+        {
+          "cutoff": 19.5,
+          "n": 8,
+          "wins": 5,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 62.5,
+          "roi_pct": 19.32
+        },
+        {
+          "cutoff": 20.0,
+          "n": 6,
+          "wins": 4,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 66.67,
+          "roi_pct": 27.27
+        },
+        {
+          "cutoff": 20.5,
+          "n": 6,
+          "wins": 4,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 66.67,
+          "roi_pct": 27.27
+        },
+        {
+          "cutoff": 21.0,
+          "n": 6,
+          "wins": 4,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 66.67,
+          "roi_pct": 27.27
+        },
+        {
+          "cutoff": 21.5,
+          "n": 5,
+          "wins": 4,
+          "losses": 1,
+          "pushes": 0,
+          "win_pct": 80.0,
+          "roi_pct": 52.73
+        },
+        {
+          "cutoff": 22.0,
+          "n": 4,
+          "wins": 4,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 22.5,
+          "n": 3,
+          "wins": 3,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 23.0,
+          "n": 2,
+          "wins": 2,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 23.5,
+          "n": 2,
+          "wins": 2,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 24.0,
+          "n": 2,
+          "wins": 2,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 24.5,
+          "n": 1,
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 25.0,
+          "n": 1,
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 25.5,
+          "n": 1,
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 26.0,
+          "n": 1,
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": 100.0,
+          "roi_pct": 90.91
+        },
+        {
+          "cutoff": 26.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 27.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 27.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 28.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 28.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 29.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 29.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 30.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 30.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 31.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 31.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 32.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 32.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 33.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 33.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 34.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 34.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 35.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 35.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 36.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 36.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 37.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 37.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 38.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 38.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 39.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 39.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 40.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        }
+      ],
+      "Over": [
+        {
+          "cutoff": 0.5,
+          "n": 504,
+          "wins": 228,
+          "losses": 276,
+          "pushes": 0,
+          "win_pct": 45.24,
+          "roi_pct": -13.64
+        },
+        {
+          "cutoff": 1.0,
+          "n": 487,
+          "wins": 224,
+          "losses": 263,
+          "pushes": 0,
+          "win_pct": 46.0,
+          "roi_pct": -12.19
+        },
+        {
+          "cutoff": 1.5,
+          "n": 472,
+          "wins": 217,
+          "losses": 255,
+          "pushes": 0,
+          "win_pct": 45.97,
+          "roi_pct": -12.23
+        },
+        {
+          "cutoff": 2.0,
+          "n": 458,
+          "wins": 211,
+          "losses": 247,
+          "pushes": 0,
+          "win_pct": 46.07,
+          "roi_pct": -12.05
+        },
+        {
+          "cutoff": 2.5,
+          "n": 435,
+          "wins": 199,
+          "losses": 236,
+          "pushes": 0,
+          "win_pct": 45.75,
+          "roi_pct": -12.66
+        },
+        {
+          "cutoff": 3.0,
+          "n": 427,
+          "wins": 195,
+          "losses": 232,
+          "pushes": 0,
+          "win_pct": 45.67,
+          "roi_pct": -12.82
+        },
+        {
+          "cutoff": 3.5,
+          "n": 412,
+          "wins": 191,
+          "losses": 221,
+          "pushes": 0,
+          "win_pct": 46.36,
+          "roi_pct": -11.5
+        },
+        {
+          "cutoff": 4.0,
+          "n": 390,
+          "wins": 180,
+          "losses": 210,
+          "pushes": 0,
+          "win_pct": 46.15,
+          "roi_pct": -11.89
+        },
+        {
+          "cutoff": 4.5,
+          "n": 371,
+          "wins": 172,
+          "losses": 199,
+          "pushes": 0,
+          "win_pct": 46.36,
+          "roi_pct": -11.49
+        },
+        {
+          "cutoff": 5.0,
+          "n": 348,
+          "wins": 155,
+          "losses": 193,
+          "pushes": 0,
+          "win_pct": 44.54,
+          "roi_pct": -14.97
+        },
+        {
+          "cutoff": 5.5,
+          "n": 334,
+          "wins": 151,
+          "losses": 183,
+          "pushes": 0,
+          "win_pct": 45.21,
+          "roi_pct": -13.69
+        },
+        {
+          "cutoff": 6.0,
+          "n": 321,
+          "wins": 144,
+          "losses": 177,
+          "pushes": 0,
+          "win_pct": 44.86,
+          "roi_pct": -14.36
+        },
+        {
+          "cutoff": 6.5,
+          "n": 306,
+          "wins": 137,
+          "losses": 169,
+          "pushes": 0,
+          "win_pct": 44.77,
+          "roi_pct": -14.53
+        },
+        {
+          "cutoff": 7.0,
+          "n": 290,
+          "wins": 131,
+          "losses": 159,
+          "pushes": 0,
+          "win_pct": 45.17,
+          "roi_pct": -13.76
+        },
+        {
+          "cutoff": 7.5,
+          "n": 269,
+          "wins": 121,
+          "losses": 148,
+          "pushes": 0,
+          "win_pct": 44.98,
+          "roi_pct": -14.13
+        },
+        {
+          "cutoff": 8.0,
+          "n": 254,
+          "wins": 116,
+          "losses": 138,
+          "pushes": 0,
+          "win_pct": 45.67,
+          "roi_pct": -12.81
+        },
+        {
+          "cutoff": 8.5,
+          "n": 238,
+          "wins": 108,
+          "losses": 130,
+          "pushes": 0,
+          "win_pct": 45.38,
+          "roi_pct": -13.37
+        },
+        {
+          "cutoff": 9.0,
+          "n": 218,
+          "wins": 101,
+          "losses": 117,
+          "pushes": 0,
+          "win_pct": 46.33,
+          "roi_pct": -11.55
+        },
+        {
+          "cutoff": 9.5,
+          "n": 204,
+          "wins": 95,
+          "losses": 109,
+          "pushes": 0,
+          "win_pct": 46.57,
+          "roi_pct": -11.1
+        },
+        {
+          "cutoff": 10.0,
+          "n": 190,
+          "wins": 89,
+          "losses": 101,
+          "pushes": 0,
+          "win_pct": 46.84,
+          "roi_pct": -10.57
+        },
+        {
+          "cutoff": 10.5,
+          "n": 179,
+          "wins": 83,
+          "losses": 96,
+          "pushes": 0,
+          "win_pct": 46.37,
+          "roi_pct": -11.48
+        },
+        {
+          "cutoff": 11.0,
+          "n": 173,
+          "wins": 80,
+          "losses": 93,
+          "pushes": 0,
+          "win_pct": 46.24,
+          "roi_pct": -11.72
+        },
+        {
+          "cutoff": 11.5,
+          "n": 163,
+          "wins": 76,
+          "losses": 87,
+          "pushes": 0,
+          "win_pct": 46.63,
+          "roi_pct": -10.99
+        },
+        {
+          "cutoff": 12.0,
+          "n": 155,
+          "wins": 70,
+          "losses": 85,
+          "pushes": 0,
+          "win_pct": 45.16,
+          "roi_pct": -13.78
+        },
+        {
+          "cutoff": 12.5,
+          "n": 141,
+          "wins": 64,
+          "losses": 77,
+          "pushes": 0,
+          "win_pct": 45.39,
+          "roi_pct": -13.35
+        },
+        {
+          "cutoff": 13.0,
+          "n": 133,
+          "wins": 59,
+          "losses": 74,
+          "pushes": 0,
+          "win_pct": 44.36,
+          "roi_pct": -15.31
+        },
+        {
+          "cutoff": 13.5,
+          "n": 125,
+          "wins": 55,
+          "losses": 70,
+          "pushes": 0,
+          "win_pct": 44.0,
+          "roi_pct": -16.0
+        },
+        {
+          "cutoff": 14.0,
+          "n": 118,
+          "wins": 51,
+          "losses": 67,
+          "pushes": 0,
+          "win_pct": 43.22,
+          "roi_pct": -17.49
+        },
+        {
+          "cutoff": 14.5,
+          "n": 108,
+          "wins": 43,
+          "losses": 65,
+          "pushes": 0,
+          "win_pct": 39.81,
+          "roi_pct": -23.99
+        },
+        {
+          "cutoff": 15.0,
+          "n": 102,
+          "wins": 40,
+          "losses": 62,
+          "pushes": 0,
+          "win_pct": 39.22,
+          "roi_pct": -25.13
+        },
+        {
+          "cutoff": 15.5,
+          "n": 93,
+          "wins": 37,
+          "losses": 56,
+          "pushes": 0,
+          "win_pct": 39.78,
+          "roi_pct": -24.05
+        },
+        {
+          "cutoff": 16.0,
+          "n": 87,
+          "wins": 36,
+          "losses": 51,
+          "pushes": 0,
+          "win_pct": 41.38,
+          "roi_pct": -21.0
+        },
+        {
+          "cutoff": 16.5,
+          "n": 75,
+          "wins": 29,
+          "losses": 46,
+          "pushes": 0,
+          "win_pct": 38.67,
+          "roi_pct": -26.18
+        },
+        {
+          "cutoff": 17.0,
+          "n": 74,
+          "wins": 29,
+          "losses": 45,
+          "pushes": 0,
+          "win_pct": 39.19,
+          "roi_pct": -25.18
+        },
+        {
+          "cutoff": 17.5,
+          "n": 70,
+          "wins": 26,
+          "losses": 44,
+          "pushes": 0,
+          "win_pct": 37.14,
+          "roi_pct": -29.09
+        },
+        {
+          "cutoff": 18.0,
+          "n": 66,
+          "wins": 23,
+          "losses": 43,
+          "pushes": 0,
+          "win_pct": 34.85,
+          "roi_pct": -33.47
+        },
+        {
+          "cutoff": 18.5,
+          "n": 60,
+          "wins": 22,
+          "losses": 38,
+          "pushes": 0,
+          "win_pct": 36.67,
+          "roi_pct": -30.0
+        },
+        {
+          "cutoff": 19.0,
+          "n": 55,
+          "wins": 20,
+          "losses": 35,
+          "pushes": 0,
+          "win_pct": 36.36,
+          "roi_pct": -30.58
+        },
+        {
+          "cutoff": 19.5,
+          "n": 51,
+          "wins": 18,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 35.29,
+          "roi_pct": -32.62
+        },
+        {
+          "cutoff": 20.0,
+          "n": 46,
+          "wins": 17,
+          "losses": 29,
+          "pushes": 0,
+          "win_pct": 36.96,
+          "roi_pct": -29.45
+        },
+        {
+          "cutoff": 20.5,
+          "n": 42,
+          "wins": 16,
+          "losses": 26,
+          "pushes": 0,
+          "win_pct": 38.1,
+          "roi_pct": -27.27
+        },
+        {
+          "cutoff": 21.0,
+          "n": 40,
+          "wins": 15,
+          "losses": 25,
+          "pushes": 0,
+          "win_pct": 37.5,
+          "roi_pct": -28.41
+        },
+        {
+          "cutoff": 21.5,
+          "n": 38,
+          "wins": 14,
+          "losses": 24,
+          "pushes": 0,
+          "win_pct": 36.84,
+          "roi_pct": -29.67
+        },
+        {
+          "cutoff": 22.0,
+          "n": 36,
+          "wins": 14,
+          "losses": 22,
+          "pushes": 0,
+          "win_pct": 38.89,
+          "roi_pct": -25.76
+        },
+        {
+          "cutoff": 22.5,
+          "n": 32,
+          "wins": 13,
+          "losses": 19,
+          "pushes": 0,
+          "win_pct": 40.62,
+          "roi_pct": -22.44
+        },
+        {
+          "cutoff": 23.0,
+          "n": 30,
+          "wins": 13,
+          "losses": 17,
+          "pushes": 0,
+          "win_pct": 43.33,
+          "roi_pct": -17.27
+        },
+        {
+          "cutoff": 23.5,
+          "n": 28,
+          "wins": 13,
+          "losses": 15,
+          "pushes": 0,
+          "win_pct": 46.43,
+          "roi_pct": -11.36
+        },
+        {
+          "cutoff": 24.0,
+          "n": 26,
+          "wins": 12,
+          "losses": 14,
+          "pushes": 0,
+          "win_pct": 46.15,
+          "roi_pct": -11.89
+        },
+        {
+          "cutoff": 24.5,
+          "n": 24,
+          "wins": 12,
+          "losses": 12,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 25.0,
+          "n": 23,
+          "wins": 11,
+          "losses": 12,
+          "pushes": 0,
+          "win_pct": 47.83,
+          "roi_pct": -8.7
+        },
+        {
+          "cutoff": 25.5,
+          "n": 21,
+          "wins": 10,
+          "losses": 11,
+          "pushes": 0,
+          "win_pct": 47.62,
+          "roi_pct": -9.09
+        },
+        {
+          "cutoff": 26.0,
+          "n": 20,
+          "wins": 9,
+          "losses": 11,
+          "pushes": 0,
+          "win_pct": 45.0,
+          "roi_pct": -14.09
+        },
+        {
+          "cutoff": 26.5,
+          "n": 17,
+          "wins": 7,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 41.18,
+          "roi_pct": -21.39
+        },
+        {
+          "cutoff": 27.0,
+          "n": 16,
+          "wins": 6,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 37.5,
+          "roi_pct": -28.41
+        },
+        {
+          "cutoff": 27.5,
+          "n": 14,
+          "wins": 5,
+          "losses": 9,
+          "pushes": 0,
+          "win_pct": 35.71,
+          "roi_pct": -31.82
+        },
+        {
+          "cutoff": 28.0,
+          "n": 12,
+          "wins": 4,
+          "losses": 8,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 28.5,
+          "n": 11,
+          "wins": 4,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 36.36,
+          "roi_pct": -30.58
+        },
+        {
+          "cutoff": 29.0,
+          "n": 11,
+          "wins": 4,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 36.36,
+          "roi_pct": -30.58
+        },
+        {
+          "cutoff": 29.5,
+          "n": 11,
+          "wins": 4,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 36.36,
+          "roi_pct": -30.58
+        },
+        {
+          "cutoff": 30.0,
+          "n": 9,
+          "wins": 4,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        },
+        {
+          "cutoff": 30.5,
+          "n": 9,
+          "wins": 4,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        },
+        {
+          "cutoff": 31.0,
+          "n": 8,
+          "wins": 3,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 37.5,
+          "roi_pct": -28.41
+        },
+        {
+          "cutoff": 31.5,
+          "n": 7,
+          "wins": 3,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 42.86,
+          "roi_pct": -18.18
+        },
+        {
+          "cutoff": 32.0,
+          "n": 7,
+          "wins": 3,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 42.86,
+          "roi_pct": -18.18
+        },
+        {
+          "cutoff": 32.5,
+          "n": 6,
+          "wins": 3,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 33.0,
+          "n": 6,
+          "wins": 3,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 33.5,
+          "n": 6,
+          "wins": 3,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 34.0,
+          "n": 6,
+          "wins": 3,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 34.5,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 35.0,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 35.5,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 36.0,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 36.5,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 37.0,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 37.5,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 38.0,
+          "n": 4,
+          "wins": 2,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 38.5,
+          "n": 4,
+          "wins": 2,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        },
+        {
+          "cutoff": 39.0,
+          "n": 3,
+          "wins": 1,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 39.5,
+          "n": 3,
+          "wins": 1,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 40.0,
+          "n": 2,
+          "wins": 1,
+          "losses": 1,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        }
+      ],
+      "Under": [
+        {
+          "cutoff": 0.5,
+          "n": 262,
+          "wins": 126,
+          "losses": 136,
+          "pushes": 0,
+          "win_pct": 48.09,
+          "roi_pct": -8.19
+        },
+        {
+          "cutoff": 1.0,
+          "n": 250,
+          "wins": 119,
+          "losses": 131,
+          "pushes": 0,
+          "win_pct": 47.6,
+          "roi_pct": -9.13
+        },
+        {
+          "cutoff": 1.5,
+          "n": 234,
+          "wins": 114,
+          "losses": 120,
+          "pushes": 0,
+          "win_pct": 48.72,
+          "roi_pct": -6.99
+        },
+        {
+          "cutoff": 2.0,
+          "n": 227,
+          "wins": 109,
+          "losses": 118,
+          "pushes": 0,
+          "win_pct": 48.02,
+          "roi_pct": -8.33
+        },
+        {
+          "cutoff": 2.5,
+          "n": 219,
+          "wins": 105,
+          "losses": 114,
+          "pushes": 0,
+          "win_pct": 47.95,
+          "roi_pct": -8.47
+        },
+        {
+          "cutoff": 3.0,
+          "n": 197,
+          "wins": 96,
+          "losses": 101,
+          "pushes": 0,
+          "win_pct": 48.73,
+          "roi_pct": -6.97
+        },
+        {
+          "cutoff": 3.5,
+          "n": 181,
+          "wins": 88,
+          "losses": 93,
+          "pushes": 0,
+          "win_pct": 48.62,
+          "roi_pct": -7.18
+        },
+        {
+          "cutoff": 4.0,
+          "n": 169,
+          "wins": 82,
+          "losses": 87,
+          "pushes": 0,
+          "win_pct": 48.52,
+          "roi_pct": -7.37
+        },
+        {
+          "cutoff": 4.5,
+          "n": 162,
+          "wins": 77,
+          "losses": 85,
+          "pushes": 0,
+          "win_pct": 47.53,
+          "roi_pct": -9.26
+        },
+        {
+          "cutoff": 5.0,
+          "n": 150,
+          "wins": 72,
+          "losses": 78,
+          "pushes": 0,
+          "win_pct": 48.0,
+          "roi_pct": -8.36
+        },
+        {
+          "cutoff": 5.5,
+          "n": 141,
+          "wins": 65,
+          "losses": 76,
+          "pushes": 0,
+          "win_pct": 46.1,
+          "roi_pct": -11.99
+        },
+        {
+          "cutoff": 6.0,
+          "n": 133,
+          "wins": 60,
+          "losses": 73,
+          "pushes": 0,
+          "win_pct": 45.11,
+          "roi_pct": -13.88
+        },
+        {
+          "cutoff": 6.5,
+          "n": 120,
+          "wins": 54,
+          "losses": 66,
+          "pushes": 0,
+          "win_pct": 45.0,
+          "roi_pct": -14.09
+        },
+        {
+          "cutoff": 7.0,
+          "n": 110,
+          "wins": 50,
+          "losses": 60,
+          "pushes": 0,
+          "win_pct": 45.45,
+          "roi_pct": -13.22
+        },
+        {
+          "cutoff": 7.5,
+          "n": 101,
+          "wins": 45,
+          "losses": 56,
+          "pushes": 0,
+          "win_pct": 44.55,
+          "roi_pct": -14.94
+        },
+        {
+          "cutoff": 8.0,
+          "n": 92,
+          "wins": 41,
+          "losses": 51,
+          "pushes": 0,
+          "win_pct": 44.57,
+          "roi_pct": -14.92
+        },
+        {
+          "cutoff": 8.5,
+          "n": 84,
+          "wins": 38,
+          "losses": 46,
+          "pushes": 0,
+          "win_pct": 45.24,
+          "roi_pct": -13.64
+        },
+        {
+          "cutoff": 9.0,
+          "n": 77,
+          "wins": 36,
+          "losses": 41,
+          "pushes": 0,
+          "win_pct": 46.75,
+          "roi_pct": -10.74
+        },
+        {
+          "cutoff": 9.5,
+          "n": 73,
+          "wins": 34,
+          "losses": 39,
+          "pushes": 0,
+          "win_pct": 46.58,
+          "roi_pct": -11.08
+        },
+        {
+          "cutoff": 10.0,
+          "n": 64,
+          "wins": 30,
+          "losses": 34,
+          "pushes": 0,
+          "win_pct": 46.88,
+          "roi_pct": -10.51
+        },
+        {
+          "cutoff": 10.5,
+          "n": 61,
+          "wins": 28,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 45.9,
+          "roi_pct": -12.37
+        },
+        {
+          "cutoff": 11.0,
+          "n": 58,
+          "wins": 27,
+          "losses": 31,
+          "pushes": 0,
+          "win_pct": 46.55,
+          "roi_pct": -11.13
+        },
+        {
+          "cutoff": 11.5,
+          "n": 50,
+          "wins": 22,
+          "losses": 28,
+          "pushes": 0,
+          "win_pct": 44.0,
+          "roi_pct": -16.0
+        },
+        {
+          "cutoff": 12.0,
+          "n": 45,
+          "wins": 20,
+          "losses": 25,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        },
+        {
+          "cutoff": 12.5,
+          "n": 43,
+          "wins": 19,
+          "losses": 24,
+          "pushes": 0,
+          "win_pct": 44.19,
+          "roi_pct": -15.64
+        },
+        {
+          "cutoff": 13.0,
+          "n": 35,
+          "wins": 14,
+          "losses": 21,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 13.5,
+          "n": 31,
+          "wins": 14,
+          "losses": 17,
+          "pushes": 0,
+          "win_pct": 45.16,
+          "roi_pct": -13.78
+        },
+        {
+          "cutoff": 14.0,
+          "n": 25,
+          "wins": 12,
+          "losses": 13,
+          "pushes": 0,
+          "win_pct": 48.0,
+          "roi_pct": -8.36
+        },
+        {
+          "cutoff": 14.5,
+          "n": 23,
+          "wins": 10,
+          "losses": 13,
+          "pushes": 0,
+          "win_pct": 43.48,
+          "roi_pct": -17.0
+        },
+        {
+          "cutoff": 15.0,
+          "n": 21,
+          "wins": 9,
+          "losses": 12,
+          "pushes": 0,
+          "win_pct": 42.86,
+          "roi_pct": -18.18
+        },
+        {
+          "cutoff": 15.5,
+          "n": 21,
+          "wins": 9,
+          "losses": 12,
+          "pushes": 0,
+          "win_pct": 42.86,
+          "roi_pct": -18.18
+        },
+        {
+          "cutoff": 16.0,
+          "n": 18,
+          "wins": 8,
+          "losses": 10,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        },
+        {
+          "cutoff": 16.5,
+          "n": 14,
+          "wins": 6,
+          "losses": 8,
+          "pushes": 0,
+          "win_pct": 42.86,
+          "roi_pct": -18.18
+        },
+        {
+          "cutoff": 17.0,
+          "n": 11,
+          "wins": 4,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 36.36,
+          "roi_pct": -30.58
+        },
+        {
+          "cutoff": 17.5,
+          "n": 10,
+          "wins": 3,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 30.0,
+          "roi_pct": -42.73
+        },
+        {
+          "cutoff": 18.0,
+          "n": 10,
+          "wins": 3,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 30.0,
+          "roi_pct": -42.73
+        },
+        {
+          "cutoff": 18.5,
+          "n": 10,
+          "wins": 3,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 30.0,
+          "roi_pct": -42.73
+        },
+        {
+          "cutoff": 19.0,
+          "n": 10,
+          "wins": 3,
+          "losses": 7,
+          "pushes": 0,
+          "win_pct": 30.0,
+          "roi_pct": -42.73
+        },
+        {
+          "cutoff": 19.5,
+          "n": 8,
+          "wins": 2,
+          "losses": 6,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "cutoff": 20.0,
+          "n": 8,
+          "wins": 2,
+          "losses": 6,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "cutoff": 20.5,
+          "n": 6,
+          "wins": 2,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 21.0,
+          "n": 6,
+          "wins": 2,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 21.5,
+          "n": 6,
+          "wins": 2,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 22.0,
+          "n": 6,
+          "wins": 2,
+          "losses": 4,
+          "pushes": 0,
+          "win_pct": 33.33,
+          "roi_pct": -36.36
+        },
+        {
+          "cutoff": 22.5,
+          "n": 5,
+          "wins": 2,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 40.0,
+          "roi_pct": -23.64
+        },
+        {
+          "cutoff": 23.0,
+          "n": 4,
+          "wins": 1,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "cutoff": 23.5,
+          "n": 4,
+          "wins": 1,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "cutoff": 24.0,
+          "n": 4,
+          "wins": 1,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "cutoff": 24.5,
+          "n": 3,
+          "wins": 0,
+          "losses": 3,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 25.0,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 25.5,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 26.0,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 26.5,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 27.0,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 27.5,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 28.0,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 28.5,
+          "n": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        },
+        {
+          "cutoff": 29.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 29.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 30.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 30.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 31.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 31.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 32.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 32.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 33.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 33.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 34.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 34.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 35.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 35.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 36.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 36.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 37.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 37.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 38.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 38.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 39.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 39.5,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        },
+        {
+          "cutoff": 40.0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        }
+      ]
+    },
+    "bins": {
+      "Spread": [
+        {
+          "lo": 0,
+          "hi": 2,
+          "n": 223,
+          "wins": 100,
+          "losses": 120,
+          "pushes": 3,
+          "win_pct": 45.45,
+          "roi_pct": -13.22
+        },
+        {
+          "lo": 2,
+          "hi": 4,
+          "n": 225,
+          "wins": 119,
+          "losses": 102,
+          "pushes": 4,
+          "win_pct": 53.85,
+          "roi_pct": 2.8
+        },
+        {
+          "lo": 4,
+          "hi": 6,
+          "n": 125,
+          "wins": 60,
+          "losses": 63,
+          "pushes": 2,
+          "win_pct": 48.78,
+          "roi_pct": -6.87
+        },
+        {
+          "lo": 6,
+          "hi": 8,
+          "n": 104,
+          "wins": 57,
+          "losses": 45,
+          "pushes": 2,
+          "win_pct": 55.88,
+          "roi_pct": 6.68
+        },
+        {
+          "lo": 8,
+          "hi": 10,
+          "n": 60,
+          "wins": 32,
+          "losses": 27,
+          "pushes": 1,
+          "win_pct": 54.24,
+          "roi_pct": 3.54
+        },
+        {
+          "lo": 10,
+          "hi": 12,
+          "n": 29,
+          "wins": 20,
+          "losses": 9,
+          "pushes": 0,
+          "win_pct": 68.97,
+          "roi_pct": 31.66
+        },
+        {
+          "lo": 12,
+          "hi": 15,
+          "n": 17,
+          "wins": 9,
+          "losses": 8,
+          "pushes": 0,
+          "win_pct": 52.94,
+          "roi_pct": 1.07
+        },
+        {
+          "lo": 15,
+          "hi": 20,
+          "n": 18,
+          "wins": 10,
+          "losses": 8,
+          "pushes": 0,
+          "win_pct": 55.56,
+          "roi_pct": 6.06
+        },
+        {
+          "lo": 20,
+          "hi": 30,
+          "n": 6,
+          "wins": 4,
+          "losses": 2,
+          "pushes": 0,
+          "win_pct": 66.67,
+          "roi_pct": 27.27
+        },
+        {
+          "lo": 30,
+          "hi": 999,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        }
+      ],
+      "Over": [
+        {
+          "lo": 0,
+          "hi": 2,
+          "n": 66,
+          "wins": 26,
+          "losses": 40,
+          "pushes": 0,
+          "win_pct": 39.39,
+          "roi_pct": -24.79
+        },
+        {
+          "lo": 2,
+          "hi": 4,
+          "n": 68,
+          "wins": 31,
+          "losses": 37,
+          "pushes": 0,
+          "win_pct": 45.59,
+          "roi_pct": -12.97
+        },
+        {
+          "lo": 4,
+          "hi": 6,
+          "n": 69,
+          "wins": 36,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 52.17,
+          "roi_pct": -0.4
+        },
+        {
+          "lo": 6,
+          "hi": 8,
+          "n": 67,
+          "wins": 28,
+          "losses": 39,
+          "pushes": 0,
+          "win_pct": 41.79,
+          "roi_pct": -20.22
+        },
+        {
+          "lo": 8,
+          "hi": 10,
+          "n": 64,
+          "wins": 27,
+          "losses": 37,
+          "pushes": 0,
+          "win_pct": 42.19,
+          "roi_pct": -19.46
+        },
+        {
+          "lo": 10,
+          "hi": 12,
+          "n": 35,
+          "wins": 19,
+          "losses": 16,
+          "pushes": 0,
+          "win_pct": 54.29,
+          "roi_pct": 3.64
+        },
+        {
+          "lo": 12,
+          "hi": 15,
+          "n": 53,
+          "wins": 30,
+          "losses": 23,
+          "pushes": 0,
+          "win_pct": 56.6,
+          "roi_pct": 8.06
+        },
+        {
+          "lo": 15,
+          "hi": 20,
+          "n": 56,
+          "wins": 23,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 41.07,
+          "roi_pct": -21.59
+        },
+        {
+          "lo": 20,
+          "hi": 30,
+          "n": 37,
+          "wins": 13,
+          "losses": 24,
+          "pushes": 0,
+          "win_pct": 35.14,
+          "roi_pct": -32.92
+        },
+        {
+          "lo": 30,
+          "hi": 999,
+          "n": 9,
+          "wins": 4,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        }
+      ],
+      "Under": [
+        {
+          "lo": 0,
+          "hi": 2,
+          "n": 54,
+          "wins": 24,
+          "losses": 30,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        },
+        {
+          "lo": 2,
+          "hi": 4,
+          "n": 58,
+          "wins": 27,
+          "losses": 31,
+          "pushes": 0,
+          "win_pct": 46.55,
+          "roi_pct": -11.13
+        },
+        {
+          "lo": 4,
+          "hi": 6,
+          "n": 36,
+          "wins": 22,
+          "losses": 14,
+          "pushes": 0,
+          "win_pct": 61.11,
+          "roi_pct": 16.67
+        },
+        {
+          "lo": 6,
+          "hi": 8,
+          "n": 41,
+          "wins": 19,
+          "losses": 22,
+          "pushes": 0,
+          "win_pct": 46.34,
+          "roi_pct": -11.53
+        },
+        {
+          "lo": 8,
+          "hi": 10,
+          "n": 28,
+          "wins": 11,
+          "losses": 17,
+          "pushes": 0,
+          "win_pct": 39.29,
+          "roi_pct": -25.0
+        },
+        {
+          "lo": 10,
+          "hi": 12,
+          "n": 19,
+          "wins": 10,
+          "losses": 9,
+          "pushes": 0,
+          "win_pct": 52.63,
+          "roi_pct": 0.48
+        },
+        {
+          "lo": 12,
+          "hi": 15,
+          "n": 24,
+          "wins": 11,
+          "losses": 13,
+          "pushes": 0,
+          "win_pct": 45.83,
+          "roi_pct": -12.5
+        },
+        {
+          "lo": 15,
+          "hi": 20,
+          "n": 13,
+          "wins": 7,
+          "losses": 6,
+          "pushes": 0,
+          "win_pct": 53.85,
+          "roi_pct": 2.8
+        },
+        {
+          "lo": 20,
+          "hi": 30,
+          "n": 8,
+          "wins": 2,
+          "losses": 6,
+          "pushes": 0,
+          "win_pct": 25.0,
+          "roi_pct": -52.27
+        },
+        {
+          "lo": 30,
+          "hi": 999,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "win_pct": null,
+          "roi_pct": null
+        }
+      ]
+    },
+    "total_by_week": {
+      "1": {
+        "n": 93,
+        "mean_actual_minus_projection": -9.798,
+        "mae": 19.838,
+        "record": {
+          "n": 93,
+          "wins": 40,
+          "losses": 53,
+          "pushes": 0,
+          "win_pct": 43.01,
+          "roi_pct": -17.89
+        }
+      },
+      "2": {
+        "n": 48,
+        "mean_actual_minus_projection": -2.605,
+        "mae": 15.994,
+        "record": {
+          "n": 48,
+          "wins": 25,
+          "losses": 23,
+          "pushes": 0,
+          "win_pct": 52.08,
+          "roi_pct": -0.57
+        }
+      },
+      "3": {
+        "n": 47,
+        "mean_actual_minus_projection": -3.133,
+        "mae": 16.685,
+        "record": {
+          "n": 47,
+          "wins": 23,
+          "losses": 24,
+          "pushes": 0,
+          "win_pct": 48.94,
+          "roi_pct": -6.58
+        }
+      },
+      "4": {
+        "n": 50,
+        "mean_actual_minus_projection": 0.156,
+        "mae": 14.665,
+        "record": {
+          "n": 50,
+          "wins": 24,
+          "losses": 26,
+          "pushes": 0,
+          "win_pct": 48.0,
+          "roi_pct": -8.36
+        }
+      },
+      "5": {
+        "n": 51,
+        "mean_actual_minus_projection": -6.253,
+        "mae": 15.839,
+        "record": {
+          "n": 51,
+          "wins": 23,
+          "losses": 28,
+          "pushes": 0,
+          "win_pct": 45.1,
+          "roi_pct": -13.9
+        }
+      },
+      "6": {
+        "n": 50,
+        "mean_actual_minus_projection": -3.747,
+        "mae": 11.766,
+        "record": {
+          "n": 50,
+          "wins": 23,
+          "losses": 27,
+          "pushes": 0,
+          "win_pct": 46.0,
+          "roi_pct": -12.18
+        }
+      },
+      "7": {
+        "n": 56,
+        "mean_actual_minus_projection": -2.213,
+        "mae": 13.714,
+        "record": {
+          "n": 56,
+          "wins": 28,
+          "losses": 28,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        }
+      },
+      "8": {
+        "n": 59,
+        "mean_actual_minus_projection": -2.949,
+        "mae": 15.992,
+        "record": {
+          "n": 59,
+          "wins": 28,
+          "losses": 31,
+          "pushes": 0,
+          "win_pct": 47.46,
+          "roi_pct": -9.4
+        }
+      },
+      "9": {
+        "n": 53,
+        "mean_actual_minus_projection": -0.339,
+        "mae": 14.844,
+        "record": {
+          "n": 53,
+          "wins": 29,
+          "losses": 24,
+          "pushes": 0,
+          "win_pct": 54.72,
+          "roi_pct": 4.46
+        }
+      },
+      "10": {
+        "n": 52,
+        "mean_actual_minus_projection": -2.866,
+        "mae": 16.852,
+        "record": {
+          "n": 52,
+          "wins": 19,
+          "losses": 33,
+          "pushes": 0,
+          "win_pct": 36.54,
+          "roi_pct": -30.24
+        }
+      },
+      "11": {
+        "n": 51,
+        "mean_actual_minus_projection": -4.641,
+        "mae": 14.278,
+        "record": {
+          "n": 51,
+          "wins": 23,
+          "losses": 28,
+          "pushes": 0,
+          "win_pct": 45.1,
+          "roi_pct": -13.9
+        }
+      },
+      "12": {
+        "n": 58,
+        "mean_actual_minus_projection": -3.736,
+        "mae": 14.399,
+        "record": {
+          "n": 58,
+          "wins": 21,
+          "losses": 37,
+          "pushes": 0,
+          "win_pct": 36.21,
+          "roi_pct": -30.88
+        }
+      },
+      "13": {
+        "n": 60,
+        "mean_actual_minus_projection": -0.353,
+        "mae": 15.806,
+        "record": {
+          "n": 60,
+          "wins": 30,
+          "losses": 30,
+          "pushes": 0,
+          "win_pct": 50.0,
+          "roi_pct": -4.55
+        }
+      },
+      "14": {
+        "n": 67,
+        "mean_actual_minus_projection": -1.987,
+        "mae": 15.743,
+        "record": {
+          "n": 67,
+          "wins": 30,
+          "losses": 37,
+          "pushes": 0,
+          "win_pct": 44.78,
+          "roi_pct": -14.52
+        }
+      },
+      "15": {
+        "n": 9,
+        "mean_actual_minus_projection": -16.059,
+        "mae": 16.059,
+        "record": {
+          "n": 9,
+          "wins": 4,
+          "losses": 5,
+          "pushes": 0,
+          "win_pct": 44.44,
+          "roi_pct": -15.15
+        }
+      },
+      "16": {
+        "n": 1,
+        "mean_actual_minus_projection": -44.115,
+        "mae": 44.115,
+        "record": {
+          "n": 1,
+          "wins": 0,
+          "losses": 1,
+          "pushes": 0,
+          "win_pct": 0.0,
+          "roi_pct": -100.0
+        }
+      }
+    }
+  }
+}
