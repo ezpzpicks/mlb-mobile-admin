@@ -266,12 +266,12 @@ if selected_sport not in valid_sports:
                     _set_sport(sport)
                     st.rerun()
 
-    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models. CFB now uses the validated team-score regression plus calibrated margin volatility and price-aware spread/total evaluation while retaining live personnel/environment overlays. CBB remains a foundation model for setup and shadow testing.")
+    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models. CFB now combines the validated spread-margin regression with an independent pace/efficiency totals regression, derives team scores algebraically, and retains live personnel/weather overlays plus calibrated market evaluation. CBB remains a foundation model for setup and shadow testing.")
     st.stop()
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
-    "CFB": "cfb-v2.1-calibrated-pricing-2026-08-21",
+    "CFB": "cfb-v2.3-independent-total-2026-08-28",
     "NFL": "nfl-v4.2-price-aware-odds-2026-08-21",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
@@ -302,10 +302,12 @@ elif selected_sport == "CFB":
     set_storage_sport("CFB")
     from builders import cfb_builder
     from builders.cfb_game_regression import install_regression_layer
+    from builders.cfb_total_regression import install_total_regression
     from builders.cfb_market_calibration import install_market_calibration
     install_regression_layer(cfb_builder)
+    install_total_regression(cfb_builder)
     install_market_calibration(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.1-calibrated-pricing-2026-08-21"
+    cfb_builder.MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")

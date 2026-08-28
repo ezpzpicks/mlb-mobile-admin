@@ -2,7 +2,7 @@
 
 The validated CFB v2 regression remains the mean-margin engine. This layer:
 - replaces the old spread simulation width with the 2024 out-of-sample residual SD;
-- preserves the existing totals distribution exactly;
+- preserves the existing totals simulation mechanics while centering them on the independent totals regression;
 - prices both spread sides and total sides from entered American odds with no-vig probabilities;
 - applies conservative A/B spread gates plus positive price-edge and EV vetoes;
 - records actual selected prices in the slate/tracker;
@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-MODEL_VERSION = "cfb-v2.2-edge-only-grading-2026-08-28"
+MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
 # 2024 out-of-sample residual distribution from the 2021-23-trained CFB v2 model.
@@ -169,8 +169,9 @@ def install_market_calibration(cfb_builder: Any) -> None:
 
     def simulate_game(projection: dict[str, Any], seed: str, simulations: int = None) -> dict[str, Any]:
         simulations = int(simulations or cfb_builder.SIMULATIONS)
-        # Preserve the existing CFB totals engine exactly. Only the margin draw is
-        # replaced by the observed out-of-sample CFB v2 residual distribution.
+        # Preserve the existing CFB totals simulation mechanics. The deterministic
+        # total mean now comes from the independent totals-regression layer; only
+        # the margin draw is replaced by the observed out-of-sample residual width.
         legacy = original_simulate(projection, seed, simulations=simulations)
         totals = np.asarray(legacy["totals"], dtype=float).copy()
         digest = hashlib.sha256(f"{seed}-{MODEL_VERSION}-margin".encode()).hexdigest()
@@ -394,8 +395,19 @@ def install_market_calibration(cfb_builder: Any) -> None:
             {"Component": "Venue / travel / rest deviation", "Home-margin points": _num(projection.get("regression_venue_delta"))},
             {"Component": "Final deterministic margin", "Home-margin points": _num(projection.get("margin"))},
         ])
-        with st.expander("CFB v2.1 regression + market calibration breakdown", expanded=False):
+        total_breakdown = pd.DataFrame([
+            {"Component": "Independent regression base total", "Total points": _num(projection.get("total_regression_base"), _num(projection.get("total")))},
+            {"Component": "Live personnel / injuries", "Total points": _num(projection.get("total_regression_personnel_delta"))},
+            {"Component": "QB / coaching continuity", "Total points": _num(projection.get("total_regression_continuity_delta"))},
+            {"Component": "Weather", "Total points": _num(projection.get("total_regression_weather_delta"))},
+            {"Component": "Score-consistency floor", "Total points": _num(projection.get("total_regression_consistency_adjustment"))},
+            {"Component": "Final deterministic total", "Total points": _num(projection.get("total"))},
+        ])
+        with st.expander("CFB v2.3 spread + independent total breakdown", expanded=False):
+            st.markdown("**Spread / margin model**")
             st.dataframe(breakdown, hide_index=True, use_container_width=True)
+            st.markdown("**Independent totals model**")
+            st.dataframe(total_breakdown, hide_index=True, use_container_width=True)
             st.markdown(
                 f"**Calibrated margin residual SD:** {MARGIN_RESIDUAL_SD:.2f} points  \n"
                 f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'not historically validated; conservative grade gates retained'}"
