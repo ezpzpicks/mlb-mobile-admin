@@ -35,6 +35,10 @@ jobs:
           path = Path('research/cfb_totals_efficiency_regression.py')
           text = path.read_text()
           text = text.replace(
+              '"total": ("overUnder", "over_under", "total"),',
+              '"total": ("overUnder", "over_under", "game_over_under", "total"),'
+          )
+          text = text.replace(
               '    seasons_needed = range(min(TRAIN_SEASONS) - 1, HOLDOUT_SEASON + 1)\n    games_cache = {season: games_from_pbp(season) for season in seasons_needed}',
               '    seasons_needed = range(min(TRAIN_SEASONS), HOLDOUT_SEASON + 1)\n    games_cache = {season: games_from_pbp(season) for season in seasons_needed}'
           )
