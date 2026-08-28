@@ -26,11 +26,9 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install statsmodels
+        run: pip install -r requirements.txt
 
-      - name: Make earliest-season prior optional
+      - name: Make research data loading robust
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -48,6 +46,10 @@ jobs:
               '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None)\n            prior_metrics = metric_lookup(prior_metric_frame)',
               '            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None) if not prior_pbp.empty else pd.DataFrame()\n            prior_metrics = metric_lookup(prior_metric_frame)'
           )
+          old = '''    if out.empty:\n        raise RuntimeError(f"No completed games reconstructed for {season}")\n    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'''
+          new = '''    if out.empty:\n        espn = cfb._parse_games(cfb._espn_games_payload(int(season)), int(season))\n        if espn is not None and not espn.empty:\n            mask = espn["Completed"].map(cfb._bool)\n            mask &= pd.to_numeric(espn["Away Score"], errors="coerce").notna()\n            mask &= pd.to_numeric(espn["Home Score"], errors="coerce").notna()\n            mask &= pd.to_numeric(espn["Week"], errors="coerce").fillna(0).gt(0)\n            espn = espn.loc[mask].copy()\n            out = pd.DataFrame({\n                "season": int(season),\n                "week": pd.to_numeric(espn["Week"], errors="coerce").astype(int),\n                "game_id": espn["Game ID"].astype(str),\n                "away_team": espn["Away Team"].map(cfb._normalize_team),\n                "home_team": espn["Home Team"].map(cfb._normalize_team),\n                "neutral": espn["Neutral Site"].map(cfb._bool),\n                "away_score": pd.to_numeric(espn["Away Score"], errors="coerce"),\n                "home_score": pd.to_numeric(espn["Home Score"], errors="coerce"),\n                "market_total": pd.to_numeric(espn.get("Total"), errors="coerce"),\n                "market_home_spread": pd.to_numeric(espn.get("Home Spread"), errors="coerce"),\n            })\n            out["actual_total"] = out["away_score"] + out["home_score"]\n            out["actual_margin"] = out["home_score"] - out["away_score"]\n        if out.empty:\n            raise RuntimeError(f"No completed games reconstructed for {season}")\n    return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)'''
+          if old in text:
+              text = text.replace(old, new)
           path.write_text(text)
           PY
 
