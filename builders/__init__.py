@@ -24,6 +24,7 @@ def _patch_cfb_builder(module: Any) -> Any:
     original_ensure_schedule = module._ensure_automatic_schedule
     original_get_cached_ratings = module._get_cached_ratings
     original_ratings_are_fresh = module._ratings_are_fresh
+    original_espn_games_payload = module._espn_games_payload
 
     def _cfb_storage_active() -> bool:
         try:
@@ -56,7 +57,7 @@ def _patch_cfb_builder(module: Any) -> Any:
         optional: bool = False,
         max_age: int | None = None,
     ) -> Any:
-        """Keep ESPN failures short and visible while preserving stale-cache fallback."""
+        """Keep public-feed failures short while preserving stale-cache fallback."""
         params = {k: v for k, v in (params or {}).items() if v is not None and v != ""}
         if max_age is None:
             max_age = int(getattr(module, "CACHE_SECONDS", 21600))
@@ -68,14 +69,14 @@ def _patch_cfb_builder(module: Any) -> Any:
                 pass
 
         is_espn = "espn.com" in str(url).lower()
-        timeout = (3, 8) if is_espn else 60
+        timeout = (2, 6) if is_espn else 60
         try:
             response = module.requests.get(
                 url,
                 params=params,
                 headers={
                     "Accept": "application/json",
-                    "User-Agent": "EZPZ-Picks-NCAAF/1.5 (public-data model; contact admin@ezpzpicks.com)",
+                    "User-Agent": "EZPZ-Picks-NCAAF/1.6 (public-data model; contact admin@ezpzpicks.com)",
                 },
                 timeout=timeout,
             )
@@ -83,24 +84,21 @@ def _patch_cfb_builder(module: Any) -> Any:
             payload = response.json()
             path.write_text(module.json.dumps(payload))
             return payload
-        except Exception as exc:
+        except Exception:
             if path.exists():
                 try:
                     return module.json.loads(path.read_text())
                 except Exception:
                     pass
-            if is_espn and "/scoreboard" in str(url):
-                _set_schedule_warning(f"ESPN schedule request failed: {exc}")
             if optional:
                 return {} if str(url).endswith(".json") else []
             raise
 
     module._public_json_get = _public_json_get
 
-    # ESPN's season-wide scoreboard request is not schema/coverage-stable across
-    # historical seasons. A zero-row response therefore must NOT be treated as a
-    # confirmed empty season. Always fall back to bounded week requests before
-    # declaring the source unavailable.
+    # Do not fan out dozens of week-by-week ESPN calls from a Streamlit request.
+    # Season-level ESPN is the live source; a single SportsDataverse season file
+    # below is the durable coverage fallback for historical/current schedules.
     def _espn_events_uncached(season: int) -> list[dict[str, Any]]:
         events: dict[str, dict[str, Any]] = {}
 
@@ -118,30 +116,6 @@ def _patch_cfb_builder(module: Any) -> Any:
                 event_id = module._text(event.get("id"))
                 if event_id:
                     events[event_id] = event
-
-        # Run the bounded week fallback whenever the season-level payload is
-        # incomplete, including the important zero-event historical case.
-        if len(events) < 100:
-            requests_to_make = [
-                {"dates": int(season), "limit": 500, "groups": 80, "seasontype": season_type, "week": week}
-                for season_type, max_week in ((2, 18), (3, 8))
-                for week in range(0, max_week + 1)
-            ]
-            with module.ThreadPoolExecutor(max_workers=8, thread_name_prefix="ezpz-cfb-espn") as executor:
-                futures = [executor.submit(fetch, params) for params in requests_to_make]
-                for future in module.as_completed(futures):
-                    try:
-                        for event in future.result():
-                            event_id = module._text(event.get("id"))
-                            if event_id:
-                                events[event_id] = event
-                    except Exception:
-                        continue
-
-        if not events:
-            _set_schedule_warning(
-                "ESPN returned no usable season or week schedule. The builder used the CFB database fallback and did not create neutral team ratings."
-            )
         return list(events.values())
 
     try:
@@ -149,8 +123,170 @@ def _patch_cfb_builder(module: Any) -> Any:
     except Exception:
         module._espn_events = _espn_events_uncached
 
+    def _sportsdataverse_schedule_payload(season: int) -> list[dict[str, Any]]:
+        """Load one small, season-level cfbfastR schedule/results parquet.
+
+        This file is the fast reliability fallback when ESPN's season scoreboard
+        is empty or incomplete. It contains final scores and FBS/FCS identity, so
+        prior-season ratings do not depend on dozens of live week requests.
+        """
+        path = module.OPEN_DATA_DIR / f"cfb_schedules_{int(season)}.parquet"
+        freshness = 21600 if int(season) >= date.today().year else 86400 * 30
+        needs_download = not path.exists() or path.stat().st_size < 1024
+        if path.exists() and path.stat().st_size >= 1024 and module.time.time() - path.stat().st_mtime > freshness:
+            needs_download = True
+
+        if needs_download:
+            url = (
+                "https://raw.githubusercontent.com/sportsdataverse/cfbfastR-cfb-data/main/"
+                f"cfb/cfb_schedules/parquet/cfb_schedules_{int(season)}.parquet"
+            )
+            temp = path.with_suffix(".tmp")
+            try:
+                with module.requests.get(
+                    url,
+                    stream=True,
+                    timeout=(4, 25),
+                    headers={"User-Agent": "EZPZ-Picks-NCAAF/1.6 SportsDataverse schedule fallback"},
+                ) as response:
+                    response.raise_for_status()
+                    with temp.open("wb") as handle:
+                        for chunk in response.iter_content(chunk_size=256 * 1024):
+                            if chunk:
+                                handle.write(chunk)
+                if temp.stat().st_size < 1024:
+                    raise RuntimeError("SportsDataverse CFB schedule file was unexpectedly small")
+                temp.replace(path)
+            except Exception:
+                try:
+                    temp.unlink(missing_ok=True)
+                except Exception:
+                    pass
+                if not path.exists() or path.stat().st_size < 1024:
+                    return []
+
+        aliases = {
+            "game_id": ("game_id",),
+            "season": ("season",),
+            "week": ("week",),
+            "season_type": ("season_type",),
+            "start_date": ("start_date", "game_date"),
+            "completed": ("completed", "status_type_completed"),
+            "neutral_site": ("neutral_site",),
+            "conference_game": ("conference_game", "conference_competition"),
+            "venue_id": ("venue_id",),
+            "venue": ("venue", "venue_full_name"),
+            "home_team": ("home_team",),
+            "home_conference": ("home_conference",),
+            "home_division": ("home_division",),
+            "home_points": ("home_points", "home_score"),
+            "away_team": ("away_team",),
+            "away_conference": ("away_conference",),
+            "away_division": ("away_division",),
+            "away_points": ("away_points", "away_score"),
+            "fbs_participant": ("fbs_participant",),
+        }
+        frame = module._read_open_parquet(path, aliases)
+        if frame is None or frame.empty:
+            return []
+        if "fbs_participant" in frame.columns:
+            mask = module._bool_series(frame["fbs_participant"])
+            if mask.any():
+                frame = frame[mask].copy()
+
+        def finite_or_none(value: Any) -> float | None:
+            try:
+                number = float(value)
+                return number if math.isfinite(number) else None
+            except Exception:
+                return None
+
+        rows: list[dict[str, Any]] = []
+        for _, row in frame.iterrows():
+            away = module._normalize_team(row.get("away_team"))
+            home = module._normalize_team(row.get("home_team"))
+            if not away or not home:
+                continue
+            completed = module._bool(row.get("completed"))
+            away_points = finite_or_none(row.get("away_points")) if completed else None
+            home_points = finite_or_none(row.get("home_points")) if completed else None
+            if completed and (away_points is None or home_points is None):
+                completed = False
+                away_points = None
+                home_points = None
+            rows.append({
+                "id": module._text(row.get("game_id")),
+                "season": int(module._num(row.get("season"), season)),
+                "week": int(module._num(row.get("week"), 0)),
+                "seasonType": module._text(row.get("season_type"), "regular"),
+                "startDate": module._text(row.get("start_date")),
+                "awayTeam": away,
+                "homeTeam": home,
+                "awayConference": module._text(row.get("away_conference")),
+                "homeConference": module._text(row.get("home_conference")),
+                "awayClassification": module._text(row.get("away_division")).lower(),
+                "homeClassification": module._text(row.get("home_division")).lower(),
+                "awayPoints": away_points,
+                "homePoints": home_points,
+                "neutralSite": module._bool(row.get("neutral_site")),
+                "conferenceGame": module._bool(row.get("conference_game")),
+                "venueId": module._text(row.get("venue_id")),
+                "venue": module._text(row.get("venue")),
+                "location": "",
+                "latitude": float("nan"),
+                "longitude": float("nan"),
+                "elevation": 0.0,
+                "capacity": 0.0,
+                "roof": "Outdoor/Unknown",
+                "surface": "",
+                "lineProvider": "",
+                "openingHomeSpread": float("nan"),
+                "openingTotal": float("nan"),
+                "homeSpread": float("nan"),
+                "total": float("nan"),
+                "homeMoneyline": 0.0,
+                "awayMoneyline": 0.0,
+            })
+        return rows
+
+    def _espn_games_payload_fast(season: int) -> list[dict[str, Any]]:
+        try:
+            espn_rows = list(original_espn_games_payload(int(season)) or [])
+        except Exception:
+            espn_rows = []
+
+        # A full CFB season is far larger than 100 games. If ESPN returned a
+        # thin/empty season payload, fill coverage from one ~100 KB public file.
+        if len(espn_rows) < 100:
+            fallback_rows = _sportsdataverse_schedule_payload(int(season))
+            if fallback_rows:
+                combined = {
+                    module._text(row.get("id")): row
+                    for row in fallback_rows
+                    if module._text(row.get("id"))
+                }
+                for row in espn_rows:
+                    game_id = module._text(row.get("id"))
+                    if game_id:
+                        combined[game_id] = row
+                rows = list(combined.values())
+                if len(rows) >= 100:
+                    _clear_schedule_warning()
+                return rows
+
+        if espn_rows:
+            return espn_rows
+        _set_schedule_warning(
+            "ESPN and the SportsDataverse season schedule were unavailable. The builder did not create neutral team ratings."
+        )
+        return []
+
+    try:
+        module._espn_games_payload = module.st.cache_data(ttl=21600, show_spinner=False)(_espn_games_payload_fast)
+    except Exception:
+        module._espn_games_payload = _espn_games_payload_fast
+
     def _week_from_date(game_date: date) -> int:
-        # Week 0 is the final Saturday of August; the following Saturday is Week 1.
         august_last = date(game_date.year, 8, 31)
         week_zero = august_last - timedelta(days=(august_last.weekday() - 5) % 7)
         return max(0, int((game_date - week_zero).days // 7))
@@ -187,22 +323,20 @@ def _patch_cfb_builder(module: Any) -> Any:
                 continue
             seen.add(game_id)
             item = {column: "" for column in module.SCHEDULE_COLUMNS}
-            item.update(
-                {
-                    "Season": int(season),
-                    "Week": _week_from_date(game_day),
-                    "Season Type": 2,
-                    "Game Date": game_day.isoformat(),
-                    "Game Time": module._text(row.get("Game Time")),
-                    "Away Team": away,
-                    "Home Team": home,
-                    "Completed": False,
-                    "Neutral Site": False,
-                    "Conference Game": False,
-                    "Line Provider": "CFB all_game_trends fallback",
-                    "Game ID": game_id,
-                }
-            )
+            item.update({
+                "Season": int(season),
+                "Week": _week_from_date(game_day),
+                "Season Type": 2,
+                "Game Date": game_day.isoformat(),
+                "Game Time": module._text(row.get("Game Time")),
+                "Away Team": away,
+                "Home Team": home,
+                "Completed": False,
+                "Neutral Site": False,
+                "Conference Game": False,
+                "Line Provider": "CFB all_game_trends fallback",
+                "Game ID": game_id,
+            })
             rows.append(item)
 
         if not rows:
@@ -210,7 +344,6 @@ def _patch_cfb_builder(module: Any) -> Any:
         return module.pd.DataFrame(rows, columns=module.SCHEDULE_COLUMNS).sort_values(["Week", "Game Date", "Game Time"])
 
     def _ensure_automatic_schedule(season: int, provider: str = "", force: bool = False) -> Any:
-        """Use only the CFB workbook for durable/fallback schedule state."""
         schedule = original_ensure_schedule(season, provider, force)
         if schedule is not None and not schedule.empty:
             _clear_schedule_warning()
@@ -225,7 +358,7 @@ def _patch_cfb_builder(module: Any) -> Any:
             except Exception:
                 pass
             _set_schedule_warning(
-                "ESPN schedule was unavailable, so the builder loaded the current slate from this CFB database's all_game_trends table. Force Refresh will retry the full ESPN schedule."
+                "Public schedule feeds were unavailable, so the builder loaded the current slate from this CFB database's all_game_trends table."
             )
             return fallback
         return schedule
@@ -262,8 +395,6 @@ def _patch_cfb_builder(module: Any) -> Any:
         return frame[names.ne("")].copy()
 
     def _ratings_are_fresh(frame: Any, max_age_seconds: int | None = None) -> bool:
-        # Never allow the old one-row neutral fallback to become a six-hour
-        # "fresh" cache entry. A bad data pull now fails closed and retries.
         if not _ratings_look_real(frame):
             return False
         if max_age_seconds is None:
@@ -332,12 +463,7 @@ def _patch_cfb_builder(module: Any) -> Any:
         subset = frame[frame["Team"].map(_clean_team_name) == team]
         return subset.iloc[-1].to_dict() if not subset.empty else {}
 
-    def _current_metric_available(
-        column: str,
-        raw_current: dict[str, Any],
-        current_avail: dict[str, bool],
-        fbs_games: float,
-    ) -> bool:
+    def _current_metric_available(column: str, raw_current: dict[str, Any], current_avail: dict[str, bool], fbs_games: float) -> bool:
         if fbs_games <= 0:
             return False
         if column in {"Offense Rating", "Defense Rating"}:
@@ -346,26 +472,20 @@ def _patch_cfb_builder(module: Any) -> Any:
             return bool(current_avail.get("advanced"))
         if column == "Pace Seconds Per Play" and not current_avail.get("advanced"):
             return False
-        source = edge_sources.get(column, column)
-        return _finite(raw_current.get(source))
+        return _finite(raw_current.get(edge_sources.get(column, column)))
 
     def _build_team_ratings(season: int, week: int) -> Any:
         """Build ratings without letting missing current data erase the prior season."""
         prior_frame, prior_avail = module._season_features(season - 1, None)
         current_frame, current_avail = module._season_features(season, week)
-
-        if prior_frame is None:
-            prior_frame = module.pd.DataFrame()
-        if current_frame is None:
-            current_frame = module.pd.DataFrame()
+        prior_frame = prior_frame if prior_frame is not None else module.pd.DataFrame()
+        current_frame = current_frame if current_frame is not None else module.pd.DataFrame()
 
         if "Team" in prior_frame.columns:
             prior_frame = prior_frame[prior_frame["Team"].map(_clean_team_name).ne("")].copy()
         if "Team" in current_frame.columns:
             current_frame = current_frame[current_frame["Team"].map(_clean_team_name).ne("")].copy()
 
-        # The preseason regression depends on a real prior-season sample. Do not
-        # write average-team placeholders if the historical source is unavailable.
         if not _valid_team_frame(prior_frame):
             message = (
                 f"CFB {season - 1} prior-season team data did not load. "
@@ -388,15 +508,13 @@ def _patch_cfb_builder(module: Any) -> Any:
         current_model = module._current_components(current_frame)
         prior_weight, current_weight = module._season_weights(week)
 
-        teams = sorted(
-            {
-                _clean_team_name(value)
-                for frame in (preseason_frame, prior_model, current_model)
-                if frame is not None and not frame.empty and "Team" in frame.columns
-                for value in frame["Team"].tolist()
-                if _clean_team_name(value)
-            }
-        )
+        teams = sorted({
+            _clean_team_name(value)
+            for frame in (preseason_frame, prior_model, current_model)
+            if frame is not None and not frame.empty and "Team" in frame.columns
+            for value in frame["Team"].tolist()
+            if _clean_team_name(value)
+        })
         if len(teams) < 20:
             message = f"Only {len(teams)} usable CFB teams were available for {season} Week {week}; ratings were not saved."
             _set_ratings_warning(message)
@@ -417,21 +535,10 @@ def _patch_cfb_builder(module: Any) -> Any:
             effective_prior = 1.0 - effective_current
             current_power = module._num(current_row.get("Current Power"), preseason)
 
-            conference = (
-                module._text(raw_current.get("Conference"))
-                or module._text(preseason_row.get("Conference"))
-                or module._text(prior_row.get("Conference"))
-            )
-            classification = (
-                module._text(raw_current.get("Classification"))
-                or module._text(preseason_row.get("Classification"))
-                or module._text(prior_row.get("Classification"))
-                or "fbs"
-            )
-
+            conference = module._text(raw_current.get("Conference")) or module._text(preseason_row.get("Conference")) or module._text(prior_row.get("Conference"))
+            classification = module._text(raw_current.get("Classification")) or module._text(preseason_row.get("Classification")) or module._text(prior_row.get("Classification")) or "fbs"
             data_conf = (
-                34.0
-                + 28.0 * sample_factor
+                34.0 + 28.0 * sample_factor
                 + (10.0 if prior_avail.get("advanced") else 0.0)
                 + (6.0 if prior_avail.get("roster") else 0.0)
                 + (10.0 if current_avail.get("advanced") else 0.0)
@@ -454,14 +561,10 @@ def _patch_cfb_builder(module: Any) -> Any:
                 "Data Confidence": round(module.clamp(data_conf, 20.0, 98.0), 1),
                 "Advanced Data Available": bool(prior_avail.get("advanced") or current_avail.get("advanced")),
                 "Roster Data Available": bool(prior_avail.get("roster") or current_avail.get("roster")),
-                "Source": "ESPN prior-season performance + progressive current-season blend; SportsDataverse advanced upgrade",
+                "Source": "ESPN/SportsDataverse prior-season performance + progressive current-season blend",
                 "Updated": module._now(),
             }
 
-            # At Week 0/1 this remains 100% prior-season performance. As actual
-            # FBS games accumulate, only metrics that truly exist in the current
-            # raw feed are blended in. Missing current advanced fields no longer
-            # overwrite real prior data with neutral constants.
             for column in performance_columns:
                 prior_value = prior_row.get(column, preseason_row.get(column))
                 current_value = current_row.get(column)
@@ -480,8 +583,6 @@ def _patch_cfb_builder(module: Any) -> Any:
                     value = module.NEUTRAL.get(column, 0.0)
                 row[column] = round(value, 6) if isinstance(value, (int, float)) else value
 
-            # Returning production/roster/continuity are forward-looking inputs,
-            # so prefer the upcoming/current-season row even when games=0.
             for column in roster_columns:
                 current_value = raw_current.get(column)
                 prior_value = preseason_row.get(column, prior_row.get(column))
@@ -494,8 +595,7 @@ def _patch_cfb_builder(module: Any) -> Any:
 
             for column in module.RATING_COLUMNS:
                 if column not in row:
-                    candidate = preseason_row.get(column, prior_row.get(column, current_row.get(column, "")))
-                    row[column] = candidate
+                    row[column] = preseason_row.get(column, prior_row.get(column, current_row.get(column, "")))
             rows.append(row)
 
         output = module.pd.DataFrame(rows)
@@ -505,15 +605,10 @@ def _patch_cfb_builder(module: Any) -> Any:
         output = output[module.RATING_COLUMNS].sort_values("Power Rating", ascending=False)
 
         if not _ratings_look_real(output):
-            message = (
-                f"CFB {season} Week {week} ratings failed validation. "
-                "The model refused to save a flat neutral rating table."
-            )
+            message = f"CFB {season} Week {week} ratings failed validation. The model refused to save a flat neutral rating table."
             _set_ratings_warning(message)
             raise RuntimeError(message)
 
-        # Replace this season/week atomically so any old blank neutral row is
-        # removed instead of surviving as a separate Team=\"\" key.
         existing = module._sheet(module.RATINGS_TAB, module.RATING_COLUMNS)
         if existing is None or existing.empty:
             combined = output
