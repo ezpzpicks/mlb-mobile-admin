@@ -178,7 +178,7 @@ def load_game_columns(season: int) -> pd.DataFrame:
         "home_team_spread": ("homeTeamSpread", "home_team_spread", "spread_home"),
         "game_spread": ("gameSpread", "game_spread", "spread"),
         "home_favorite": ("homeFavorite", "home_favorite"),
-        "total": ("overUnder", "over_under", "total"),
+        "total": ("overUnder", "over_under", "game_over_under", "total"),
     }
     frame = cfb._read_open_parquet(Path(path), aliases)
     if frame is None or frame.empty:
