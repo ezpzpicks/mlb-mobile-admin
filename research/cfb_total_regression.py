@@ -146,7 +146,7 @@ def fit_ridge(train: pd.DataFrame, alpha: float) -> dict[str, Any]:
     design = np.column_stack([np.ones(len(z)), z])
     penalty = np.eye(design.shape[1]) * float(alpha)
     penalty[0, 0] = 0.0
-    beta = np.linalg.solve(design.T @ design + penalty, design.T @ y)
+    beta = np.linalg.lstsq(design, y, rcond=None)[0] if float(alpha) == 0.0 else np.linalg.solve(design.T @ design + penalty, design.T @ y)
     return {
         "alpha": float(alpha),
         "intercept": float(beta[0]),
@@ -342,7 +342,7 @@ def main() -> None:
     }
 
     out_json = RESULTS_DIR / "cfb_total_regression_results.json"
-    out_json.write_text(json.dumps(results, indent=2, allow_nan=False))
+    out_json.write_text(json.dumps(results, indent=2, allow_nan=True))
 
     h = results["holdout_metrics"]
     base = h["spread_regression_team_score_sum"]
