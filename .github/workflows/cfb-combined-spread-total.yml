@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
+          cache: pip
 
       - name: Install dependencies
         run: |
@@ -40,12 +40,12 @@ jobs:
 
       - name: Commit research results
         run: |
-          if git diff --quiet -- research/results/cfb_combined_spread_total_results.json research/results/CFB_COMBINED_SPREAD_TOTAL_RESULTS.md; then
+          git add research/results/cfb_combined_spread_total_results.json research/results/CFB_COMBINED_SPREAD_TOTAL_RESULTS.md
+          if git diff --cached --quiet; then
             echo 'No result changes to commit.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/results/cfb_combined_spread_total_results.json research/results/CFB_COMBINED_SPREAD_TOTAL_RESULTS.md
-          git commit -m 'research: record combined CFB spread and totals holdout results'
+          git commit -m 'research: persist combined CFB spread and totals model'
           git push
