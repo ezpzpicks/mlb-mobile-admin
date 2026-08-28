@@ -1,0 +1,97 @@
+{
+  "season": 2025,
+  "margin_residual_sd": 17.75939215594032,
+  "probability_at_6_edge": 0.6322616600448836,
+  "probability_at_9_5_edge": 0.7036502525701324,
+  "note": "Probability is downstream of regression margin/market edge; confluence is a separate legacy matchup heuristic and is not a regression predictor.",
+  "B_edge_6_conf_3": {
+    "edge_cutoff": 6.0,
+    "confluence_cutoff": 3,
+    "all_edge_qualifiers": {
+      "bets": 234,
+      "wins": 132,
+      "losses": 99,
+      "pushes": 3,
+      "win_pct": 57.14,
+      "roi_pct_at_minus_110": 9.09
+    },
+    "after_confluence_gate": {
+      "bets": 193,
+      "wins": 113,
+      "losses": 78,
+      "pushes": 2,
+      "win_pct": 59.16,
+      "roi_pct_at_minus_110": 12.95
+    }
+  },
+  "A_edge_9_5_conf_4": {
+    "edge_cutoff": 9.5,
+    "confluence_cutoff": 4,
+    "all_edge_qualifiers": {
+      "bets": 83,
+      "wins": 50,
+      "losses": 33,
+      "pushes": 0,
+      "win_pct": 60.24,
+      "roi_pct_at_minus_110": 15.01
+    },
+    "after_confluence_gate": {
+      "bets": 56,
+      "wins": 37,
+      "losses": 19,
+      "pushes": 0,
+      "win_pct": 66.07,
+      "roi_pct_at_minus_110": 26.14
+    }
+  },
+  "confluence_score_all_fbs_fbs": {
+    "0": {
+      "bets": 6,
+      "wins": 3,
+      "losses": 3,
+      "pushes": 0,
+      "win_pct": 50.0,
+      "roi_pct_at_minus_110": -4.55
+    },
+    "1": {
+      "bets": 38,
+      "wins": 15,
+      "losses": 23,
+      "pushes": 0,
+      "win_pct": 39.47,
+      "roi_pct_at_minus_110": -24.64
+    },
+    "2": {
+      "bets": 122,
+      "wins": 59,
+      "losses": 61,
+      "pushes": 2,
+      "win_pct": 49.17,
+      "roi_pct_at_minus_110": -6.14
+    },
+    "3": {
+      "bets": 186,
+      "wins": 94,
+      "losses": 88,
+      "pushes": 4,
+      "win_pct": 51.65,
+      "roi_pct_at_minus_110": -1.4
+    },
+    "4": {
+      "bets": 221,
+      "wins": 120,
+      "losses": 100,
+      "pushes": 1,
+      "win_pct": 54.55,
+      "roi_pct_at_minus_110": 4.13
+    },
+    "5": {
+      "bets": 234,
+      "wins": 120,
+      "losses": 109,
+      "pushes": 5,
+      "win_pct": 52.4,
+      "roi_pct_at_minus_110": 0.04
+    }
+  }
+}
