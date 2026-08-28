@@ -1,0 +1,78 @@
+name: CFB independent total production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cfb-independent-total-production.yml'
+      - 'builders/cfb_total_regression.py'
+      - 'research/test_cfb_total_regression_layer.py'
+      - 'research/apply_cfb_independent_total_production.py'
+      - 'research/results/cfb_combined_spread_total_results.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply production wiring
+        run: python research/apply_cfb_independent_total_production.py
+
+      - name: Compile CFB production modules
+        run: |
+          python -m py_compile \
+            builders/cfb_game_regression.py \
+            builders/cfb_total_regression.py \
+            builders/cfb_market_calibration.py \
+            app_mobile_admin.py
+
+      - name: Run spread regression smoke test
+        env:
+          PYTHONPATH: '.'
+        run: python research/test_cfb_game_regression_layer.py
+
+      - name: Run independent total smoke test
+        env:
+          PYTHONPATH: '.'
+        run: python research/test_cfb_total_regression_layer.py
+
+      - name: Verify production load order
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('app_mobile_admin.py').read_text()
+          spread = text.index('install_regression_layer(cfb_builder)')
+          total = text.index('install_total_regression(cfb_builder)')
+          market = text.index('install_market_calibration(cfb_builder)')
+          assert spread < total < market, (spread, total, market)
+          assert 'cfb-v2.3-independent-total-2026-08-28' in text
+          print('CFB production load order verified')
+          PY
+
+      - name: Commit production wiring
+        run: |
+          git add app_mobile_admin.py builders/cfb_market_calibration.py
+          if git diff --cached --quiet; then
+            echo 'Production wiring already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: activate independent CFB totals regression'
+          git push
