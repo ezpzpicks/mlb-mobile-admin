@@ -40,7 +40,7 @@ Formula: Home = (Total + Margin)/2; Away = (Total - Margin)/2.
 
 - Correlation between independent total error and fixed spread-margin error: 0.141
 
-The low error correlation supports treating margin and scoring environment as separate prediction problems and combining them algebraically after each model produces its independent output.
+A low correlation supports treating margin and scoring environment as separate prediction problems.
 
 ## Independent totals standardized coefficients
 
