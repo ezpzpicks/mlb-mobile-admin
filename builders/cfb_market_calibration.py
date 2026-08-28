@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-MODEL_VERSION = "cfb-v2.1-calibrated-pricing-2026-08-21"
+MODEL_VERSION = "cfb-v2.2-edge-only-grading-2026-08-28"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
 # 2024 out-of-sample residual distribution from the 2021-23-trained CFB v2 model.
@@ -31,9 +31,10 @@ MARGIN_RESIDUAL_SD = 17.75939215594032
 MARGIN_ROBUST_SIGMA = 16.871932143212987
 
 # 2025 leakage-safe FBS-vs-FBS backtesting showed a material hit-rate/ROI lift
-# when the point-edge gates were made substantially stricter. Probability,
-# reliability, confluence, positive price-edge, and EV gates still apply.
-# These cutoffs are intentionally selective and are not a guarantee of future ATS results.
+# when the point-edge gates were made substantially stricter. Spread A/B grading
+# is intentionally simple: point edge determines the grade, while probability,
+# reliability, and confluence are tracked as diagnostics. Actual price must still
+# have positive no-vig edge and positive EV or the play is vetoed.
 SPREAD_B_PROBABILITY = 0.55
 SPREAD_B_POINT_EDGE = 6.0
 SPREAD_A_PROBABILITY = 0.58
@@ -141,9 +142,12 @@ def _priced_total_market(
 
 
 def _grade_spread(probability: float, point_edge: float, reliability: float, confluence: int) -> str:
-    if probability >= SPREAD_A_PROBABILITY and point_edge >= SPREAD_A_POINT_EDGE and reliability >= 72 and confluence >= 4:
+    # Probability, Reliability, and Confluence remain recorded for diagnostics,
+    # but they do not veto a spread grade. The 2025 holdout-supported point edge
+    # is the grading signal; actual price/EV is enforced immediately afterward.
+    if point_edge >= SPREAD_A_POINT_EDGE:
         return "A Spread"
-    if probability >= SPREAD_B_PROBABILITY and point_edge >= SPREAD_B_POINT_EDGE and reliability >= 62 and confluence >= 3:
+    if point_edge >= SPREAD_B_POINT_EDGE:
         return "B Spread"
     return "No Play"
 
