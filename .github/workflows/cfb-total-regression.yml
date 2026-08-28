@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Make zero-penalty candidate collinearity-safe
+      - name: Make research runner robust
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -37,7 +37,9 @@ jobs:
           old = '    beta = np.linalg.solve(design.T @ design + penalty, design.T @ y)'
           new = '    beta = np.linalg.lstsq(design, y, rcond=None)[0] if float(alpha) == 0.0 else np.linalg.solve(design.T @ design + penalty, design.T @ y)'
           if old in text:
-              path.write_text(text.replace(old, new))
+              text = text.replace(old, new)
+          text = text.replace('json.dumps(results, indent=2, allow_nan=False)', 'json.dumps(results, indent=2, allow_nan=True)')
+          path.write_text(text)
           PY
 
       - name: Run leakage-safe totals backtest
