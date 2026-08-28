@@ -1,0 +1,83 @@
+name: CFB current production grade backtest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cfb-current-production-grade-backtest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare proven closing-line backtest for current production models
+        run: |
+          git show origin/research/cfb-2025-grade-backtest:research/cfb_2025_grade_backtest.py > /tmp/cfb_current_grade.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('/tmp/cfb_current_grade.py')
+          text = path.read_text()
+          text = text.replace(
+              'from builders.cfb_game_regression import install_regression_layer',
+              'from builders.cfb_game_regression import install_regression_layer\nfrom builders.cfb_total_regression import install_total_regression'
+          )
+          text = text.replace(
+              '    install_regression_layer(cfb_builder)',
+              '    install_regression_layer(cfb_builder)\n    install_total_regression(cfb_builder)'
+          )
+          text = text.replace('# 2025 CFB point-edge grade backtest', '# 2025 CFB current-production point-edge grade backtest')
+          text = text.replace('cfb_2025_game_edges.csv', 'cfb_2025_current_production_game_edges.csv')
+          text = text.replace('cfb_2025_edge_thresholds.csv', 'cfb_2025_current_production_edge_thresholds.csv')
+          text = text.replace('cfb_2025_grade_backtest.json', 'cfb_2025_current_production_grade_backtest.json')
+          text = text.replace('CFB_2025_GRADE_BACKTEST.md', 'CFB_2025_CURRENT_PRODUCTION_GRADE_BACKTEST.md')
+          path.write_text(text)
+          PY
+
+      - name: Run current production 2025 grade backtest
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+          EZPZ_CFB_CACHE_SECONDS: '86400'
+          PYTHONUNBUFFERED: '1'
+          PYTHONPATH: '.'
+        run: python /tmp/cfb_current_grade.py
+
+      - name: Show grade results
+        if: always()
+        run: |
+          echo '===== CURRENT CFB PRODUCTION GRADE BACKTEST ====='
+          if [ -f research/results/CFB_2025_CURRENT_PRODUCTION_GRADE_BACKTEST.md ]; then
+            cat research/results/CFB_2025_CURRENT_PRODUCTION_GRADE_BACKTEST.md
+          fi
+
+      - name: Commit research results
+        if: success()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/results/cfb_2025_current_production_game_edges.csv \
+                  research/results/cfb_2025_current_production_edge_thresholds.csv \
+                  research/results/cfb_2025_current_production_grade_backtest.json \
+                  research/results/CFB_2025_CURRENT_PRODUCTION_GRADE_BACKTEST.md
+          if git diff --cached --quiet; then
+            echo 'No result changes to commit.'
+            exit 0
+          fi
+          git commit -m 'research: record current CFB production grade backtest'
+          git push
