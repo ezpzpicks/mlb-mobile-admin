@@ -19,6 +19,7 @@ jobs:
     env:
       EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: "1"
       EZPZ_CFB_CACHE_DIR: /tmp/ezpz_cfb_backtest_cache
+      PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
         with:
