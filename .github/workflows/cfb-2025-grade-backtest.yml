@@ -1,0 +1,52 @@
+name: CFB 2025 grade backtest
+
+on:
+  push:
+    branches:
+      - research/cfb-2025-grade-backtest
+    paths:
+      - "research/cfb_2025_grade_backtest.py"
+      - ".github/workflows/cfb-2025-grade-backtest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: "1"
+      EZPZ_CFB_CACHE_DIR: /tmp/ezpz_cfb_backtest_cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/cfb-2025-grade-backtest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run leakage-safe 2025 backtest
+        run: python research/cfb_2025_grade_backtest.py
+
+      - name: Commit research results
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/cfb_2025_game_edges.csv \
+                  research/results/cfb_2025_edge_thresholds.csv \
+                  research/results/cfb_2025_grade_backtest.json \
+                  research/results/CFB_2025_GRADE_BACKTEST.md
+          if git diff --cached --quiet; then
+            echo "No result changes to commit"
+            exit 0
+          fi
+          git commit -m "Add 2025 CFB grade backtest results"
+          git push origin research/cfb-2025-grade-backtest
