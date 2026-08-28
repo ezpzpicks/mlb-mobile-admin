@@ -1,0 +1,51 @@
+name: CFB combined spread and totals evaluation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/cfb_combined_spread_total_evaluation.py'
+      - '.github/workflows/cfb-combined-spread-total.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install statsmodels
+
+      - name: Run combined spread + total evaluation
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+          EZPZ_CFB_CACHE_SECONDS: '86400'
+          PYTHONUNBUFFERED: '1'
+          PYTHONPATH: '.'
+        run: python research/cfb_combined_spread_total_evaluation.py
+
+      - name: Commit research results
+        run: |
+          if git diff --quiet -- research/results/cfb_combined_spread_total_results.json research/results/CFB_COMBINED_SPREAD_TOTAL_RESULTS.md; then
+            echo 'No result changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/results/cfb_combined_spread_total_results.json research/results/CFB_COMBINED_SPREAD_TOTAL_RESULTS.md
+          git commit -m 'research: record combined CFB spread and totals holdout results'
+          git push
