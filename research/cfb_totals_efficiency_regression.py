@@ -246,6 +246,45 @@ def games_from_pbp(season: int) -> pd.DataFrame:
             out["actual_margin"] = out["home_score"] - out["away_score"]
         if out.empty:
             raise RuntimeError(f"No completed games reconstructed for {season}")
+    # Evaluation-only market enrichment. PBP line fields are not stable across
+    # SportsDataverse seasons, so fill missing archived totals/spreads from the
+    # repo's ESPN historical schedule feed. These fields never enter predictors.
+    if not out.empty:
+        try:
+            espn_market = cfb._parse_games(cfb._espn_games_payload(int(season)), int(season))
+        except Exception as exc:
+            print(f"ESPN market enrichment failed for {season}: {exc}")
+            espn_market = pd.DataFrame()
+        if espn_market is not None and not espn_market.empty:
+            market = pd.DataFrame({
+                "_game_id": espn_market["Game ID"].astype(str),
+                "_week": pd.to_numeric(espn_market["Week"], errors="coerce"),
+                "_away": espn_market["Away Team"].map(cfb._normalize_team),
+                "_home": espn_market["Home Team"].map(cfb._normalize_team),
+                "_espn_total": pd.to_numeric(espn_market.get("Total"), errors="coerce"),
+                "_espn_spread": pd.to_numeric(espn_market.get("Home Spread"), errors="coerce"),
+            })
+            market.loc[market["_espn_total"] <= 0, "_espn_total"] = np.nan
+            market = market.drop_duplicates("_game_id")
+            total_by_id = market.set_index("_game_id")["_espn_total"]
+            spread_by_id = market.set_index("_game_id")["_espn_spread"]
+            out_ids = out["game_id"].astype(str)
+            current_total = pd.to_numeric(out.get("market_total"), errors="coerce")
+            current_spread = pd.to_numeric(out.get("market_home_spread"), errors="coerce")
+            id_total = out_ids.map(total_by_id)
+            id_spread = out_ids.map(spread_by_id)
+            out["market_total"] = current_total.where(current_total > 0).fillna(id_total)
+            out["market_home_spread"] = current_spread.fillna(id_spread)
+
+            # Team/week fallback protects against historical ID formatting changes.
+            market["_key"] = market["_week"].fillna(0).astype(int).astype(str) + "|" + market["_away"] + "|" + market["_home"]
+            total_by_key = market.drop_duplicates("_key").set_index("_key")["_espn_total"]
+            spread_by_key = market.drop_duplicates("_key").set_index("_key")["_espn_spread"]
+            out_key = pd.to_numeric(out["week"], errors="coerce").fillna(0).astype(int).astype(str) + "|" + out["away_team"].astype(str) + "|" + out["home_team"].astype(str)
+            out["market_total"] = pd.to_numeric(out["market_total"], errors="coerce").fillna(out_key.map(total_by_key))
+            out["market_home_spread"] = pd.to_numeric(out["market_home_spread"], errors="coerce").fillna(out_key.map(spread_by_key))
+        found = int(pd.to_numeric(out.get("market_total"), errors="coerce").notna().sum())
+        print(f"{season}: archived market totals recovered for {found}/{len(out)} games")
     return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)
 
 
