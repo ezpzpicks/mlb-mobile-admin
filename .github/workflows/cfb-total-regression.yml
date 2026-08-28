@@ -1,0 +1,47 @@
+name: CFB totals regression research
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/cfb_total_regression.py'
+      - '.github/workflows/cfb-total-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run leakage-safe totals backtest
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '0'
+          PYTHONUNBUFFERED: '1'
+        run: python research/cfb_total_regression.py
+
+      - name: Commit research results
+        run: |
+          if git diff --quiet -- research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md; then
+            echo 'No result changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/results/cfb_total_regression_results.json research/results/CFB_TOTAL_REGRESSION_RESULTS.md
+          git commit -m 'research: record CFB totals regression holdout results'
+          git push
