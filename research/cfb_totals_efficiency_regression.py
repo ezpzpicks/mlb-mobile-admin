@@ -223,7 +223,29 @@ def games_from_pbp(season: int) -> pd.DataFrame:
         })
     out = pd.DataFrame(rows)
     if out.empty:
-        raise RuntimeError(f"No completed games reconstructed for {season}")
+        espn = cfb._parse_games(cfb._espn_games_payload(int(season)), int(season))
+        if espn is not None and not espn.empty:
+            mask = espn["Completed"].map(cfb._bool)
+            mask &= pd.to_numeric(espn["Away Score"], errors="coerce").notna()
+            mask &= pd.to_numeric(espn["Home Score"], errors="coerce").notna()
+            mask &= pd.to_numeric(espn["Week"], errors="coerce").fillna(0).gt(0)
+            espn = espn.loc[mask].copy()
+            out = pd.DataFrame({
+                "season": int(season),
+                "week": pd.to_numeric(espn["Week"], errors="coerce").astype(int),
+                "game_id": espn["Game ID"].astype(str),
+                "away_team": espn["Away Team"].map(cfb._normalize_team),
+                "home_team": espn["Home Team"].map(cfb._normalize_team),
+                "neutral": espn["Neutral Site"].map(cfb._bool),
+                "away_score": pd.to_numeric(espn["Away Score"], errors="coerce"),
+                "home_score": pd.to_numeric(espn["Home Score"], errors="coerce"),
+                "market_total": pd.to_numeric(espn.get("Total"), errors="coerce"),
+                "market_home_spread": pd.to_numeric(espn.get("Home Spread"), errors="coerce"),
+            })
+            out["actual_total"] = out["away_score"] + out["home_score"]
+            out["actual_margin"] = out["home_score"] - out["away_score"]
+        if out.empty:
+            raise RuntimeError(f"No completed games reconstructed for {season}")
     return out.sort_values(["week", "game_id"]).drop_duplicates("game_id").reset_index(drop=True)
 
 
@@ -425,16 +447,16 @@ def build_feature_row(game: pd.Series, prior_stats: dict[str, TeamStats], curren
 
 
 def build_dataset() -> pd.DataFrame:
-    seasons_needed = range(min(TRAIN_SEASONS) - 1, HOLDOUT_SEASON + 1)
+    seasons_needed = range(min(TRAIN_SEASONS), HOLDOUT_SEASON + 1)
     games_cache = {season: games_from_pbp(season) for season in seasons_needed}
     rows: list[dict[str, Any]] = []
     original_open_pbp = cfb._open_pbp_frame
 
     for season in (*TRAIN_SEASONS, VALIDATION_SEASON, HOLDOUT_SEASON):
         games = games_cache[season]
-        prior_games = games_cache[season - 1]
+        prior_games = games_cache.get(season - 1, pd.DataFrame())
         prior_stats = team_summary(prior_games)
-        prior_pbp = original_open_pbp(season - 1)
+        prior_pbp = original_open_pbp(season - 1) if season - 1 in games_cache else pd.DataFrame()
         current_pbp = original_open_pbp(season)
 
         def cached_open_pbp(year: int) -> pd.DataFrame:
@@ -446,7 +468,7 @@ def build_dataset() -> pd.DataFrame:
 
         cfb._open_pbp_frame = cached_open_pbp
         try:
-            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None)
+            prior_metric_frame = cfb._pbp_team_metrics(season - 1, None) if not prior_pbp.empty else pd.DataFrame()
             prior_metrics = metric_lookup(prior_metric_frame)
             print(f"season {season}: {len(games)} games; prior advanced teams={len(prior_metrics)}")
             for week in sorted(pd.to_numeric(games["week"], errors="coerce").dropna().astype(int).unique()):
