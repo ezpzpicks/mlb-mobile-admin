@@ -189,6 +189,22 @@ if _is_streamlit_runtime():
         print(f"Football database startup bootstrap failed: {exc}")
 
     try:
+        # Importing the CFB module is safe here: it defines functions/caches but
+        # does not render the Streamlit page. Installing the guard before the
+        # first app rerun ensures line/odds edits never trigger automatic Sheet
+        # writes or a surprise advanced-data rebuild.
+        from builders import cfb_builder as _cfb_builder
+        from builders.cfb_runtime_guard import install_runtime_guard
+
+        install_runtime_guard(_cfb_builder)
+        print("CFB interactive runtime guard ready")
+    except Exception as exc:
+        # The guard is a stability layer only. If a future builder refactor moves
+        # one of the patched helpers, allow the admin to start and expose the
+        # diagnostic in Render logs instead of failing the entire service.
+        print(f"CFB interactive runtime guard failed: {exc}")
+
+    try:
         from shared.mlb_builder_resume import install_mlb_builder_resume
 
         install_mlb_builder_resume()
