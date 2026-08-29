@@ -133,7 +133,14 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             )
             projection[side] = safe_rating
         safe_result["projection"] = projection
-        return original_slate_row(safe_result)
+
+        # The market-calibration layer appends additional slate columns after this
+        # guard is installed. Missing extra columns are initially created as NaN,
+        # which makes pandas infer float64. Newer pandas versions reject assigning
+        # a bool (ATS Calibration Proven=False) into that float64 slot. Return an
+        # object-backed one-row persistence frame so the later market layer can
+        # safely add booleans, ints, floats, and text before Sheets stringifies it.
+        return original_slate_row(safe_result).astype(object)
 
     cfb_builder.slate_row = _safe_slate_row
 
