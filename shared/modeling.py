@@ -80,3 +80,16 @@ class MarketProjection:
     home_win_probability: float
     home_cover_probability: float
     over_probability: float
+
+
+# Install the shared manual-completion UX whenever a sport builder imports the
+# modeling helpers. The patch is idempotent and ignores MLB, which already has
+# its own production completed-matchup behavior.
+try:
+    from shared.completed_matchup_flow import install_completed_matchup_flow
+
+    install_completed_matchup_flow()
+except Exception:
+    # Builder math must remain available even if a future Streamlit/storage
+    # change temporarily prevents the additive completion UX from installing.
+    pass
