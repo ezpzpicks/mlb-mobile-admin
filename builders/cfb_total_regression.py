@@ -26,7 +26,7 @@ import pandas as pd
 
 from builders import cfb_game_regression as spread_reg
 
-MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"
+MODEL_VERSION = "cfb-v2.4-independent-total-pace-data-fix-2026-08-29"
 MODEL_RESEARCH_VERSION = "cfb-combined-spread-total-independent-2026-08-28"
 MODEL_RESULT_PATH = (
     Path(__file__).resolve().parents[1]
@@ -117,26 +117,53 @@ def _metric_lookup(frame: pd.DataFrame | None) -> dict[str, dict[str, float]]:
     return output
 
 
+def _load_pbp_metrics(cfb_builder: Any, season: int, week: int | None) -> pd.DataFrame:
+    """Return real team PBP metrics, synchronously warming the open-data file once if needed.
+
+    The normal CFB open-data loader is intentionally asynchronous so ordinary
+    Streamlit renders do not wait on large public files. The totals model cannot
+    safely treat that first empty response as real neutral team data, though,
+    because doing so collapses every team's pace toward 12 possessions / 69 plays.
+    For totals only, make one blocking attempt to populate the season file and then
+    recompute the metrics. Failures remain non-fatal and are handled by the caller.
+    """
+    try:
+        frame = cfb_builder._pbp_team_metrics(int(season), week)
+    except Exception:
+        frame = pd.DataFrame()
+    if frame is not None and not frame.empty:
+        return frame
+
+    blocking_loader = getattr(cfb_builder, "_download_open_asset_now", None)
+    if callable(blocking_loader):
+        try:
+            blocking_loader("cfbfastR_cfb_pbp", int(season), ("play_by_play", "pbp"))
+            frame = cfb_builder._pbp_team_metrics(int(season), week)
+        except Exception:
+            frame = pd.DataFrame()
+    return frame if frame is not None else pd.DataFrame()
+
+
 def _metric_context(cfb_builder: Any, season: int, week: int) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]]]:
     key = (int(season), int(week))
     cached = _METRIC_CONTEXT_CACHE.get(key)
     if cached is not None:
         return cached
 
-    # Open PBP is already part of the production CFB data stack. When a release is
-    # temporarily unavailable, neutral defaults are intentional and mirror the
-    # research treatment of seasons/weeks with no advanced coverage.
-    try:
-        prior_frame = cfb_builder._pbp_team_metrics(int(season) - 1, None)
-    except Exception:
-        prior_frame = pd.DataFrame()
-    try:
-        current_frame = cfb_builder._pbp_team_metrics(int(season), int(week))
-    except Exception:
-        current_frame = pd.DataFrame()
+    prior_frame = _load_pbp_metrics(cfb_builder, int(season) - 1, None)
+    current_frame = _load_pbp_metrics(cfb_builder, int(season), int(week))
 
-    value = (_metric_lookup(prior_frame), _metric_lookup(current_frame))
-    _METRIC_CONTEXT_CACHE[key] = value
+    prior_lookup = _metric_lookup(prior_frame)
+    current_lookup = _metric_lookup(current_frame)
+    value = (prior_lookup, current_lookup)
+
+    # Never cache an all-empty response. The first Streamlit request can arrive
+    # before the asynchronous public-data download has completed; caching that
+    # transient miss caused every later game in the slate to inherit neutral pace.
+    # Current-season metrics can legitimately be empty in Week 0/1, so a populated
+    # prior-season lookup is enough to make the context stable and cacheable.
+    if prior_lookup or current_lookup:
+        _METRIC_CONTEXT_CACHE[key] = value
     return value
 
 
