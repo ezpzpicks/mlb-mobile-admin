@@ -1,0 +1,81 @@
+name: CFB team-score regression research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cfb-regression-v2-research
+    paths:
+      - research/cfb_team_score_regression_v2.py
+      - research/cfb_team_score_regression_runner.py
+      - research/cfb_team_score_regression_v3_nonlinear.py
+      - research/cfb_v2_calibration_and_team_residual.py
+      - .github/workflows/cfb-team-score-regression.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - research/cfb_team_score_regression_v2.py
+      - research/cfb_team_score_regression_runner.py
+      - research/cfb_team_score_regression_v3_nonlinear.py
+      - research/cfb_v2_calibration_and_team_residual.py
+      - .github/workflows/cfb-team-score-regression.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cfb-regression-v2-research
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install statsmodels pyarrow
+      - name: Repair research sources for exact historical reconstruction
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('research/cfb_team_score_regression_v2.py')
+          text = path.read_text()
+          old = '"total_rmse": float(np.sqrt(np.mean(np.square(te))),'
+          new = '"total_rmse": float(np.sqrt(np.mean(np.square(te)))),'
+          if old in text:
+              path.write_text(text.replace(old, new, 1))
+
+          path = Path('research/cfb_v2_calibration_and_team_residual.py')
+          text = path.read_text()
+          old_import = 'from research import cfb_team_score_regression_v2 as base\n'
+          new_import = old_import + 'from research import cfb_team_score_regression_runner as exact\n'
+          if 'cfb_team_score_regression_runner as exact' not in text:
+              text = text.replace(old_import, new_import, 1)
+          text = text.replace('base.games_from_pbp(season)', 'exact.games_from_pbp_exact(season)')
+          path.write_text(text)
+          PY
+      - name: Compile research
+        run: python -m py_compile research/cfb_team_score_regression_v2.py research/cfb_team_score_regression_runner.py research/cfb_v2_calibration_and_team_residual.py builders/cfb_builder.py
+      - name: Run CFB v2 calibration and team residual research
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+          EZPZ_CFB_CACHE_SECONDS: '86400'
+        run: python -m research.cfb_v2_calibration_and_team_residual
+      - name: Record CFB calibration results
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/cfb_v2_calibration_and_team_residual.py research/results/cfb_v2_calibration_team_residual.json research/results/cfb_v2_calibration_team_residual.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Record calibrated CFB v2 research results"
+            git pull --rebase origin cfb-regression-v2-research
+            git push origin HEAD:cfb-regression-v2-research
+          fi
