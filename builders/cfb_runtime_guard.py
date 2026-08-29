@@ -108,7 +108,52 @@ def install_runtime_guard(cfb_builder: Any) -> None:
     cfb_builder.write_sheet = _guarded_write_sheet
 
     # ------------------------------------------------------------------
-    # 2) Ratings: do not rebuild giant advanced data during +/- interactions.
+    # 2) Save-path type safety and MLB-matching button copy.
+    # ------------------------------------------------------------------
+    # Google Sheets snapshots are string-backed, so rating rows loaded from the
+    # workbook can carry season weights such as "1.0". The original slate_row()
+    # averaged those values before coercing them, which produced a str/int
+    # TypeError only when Save was pressed. Coerce the two persistence fields at
+    # the boundary while leaving the live projection object otherwise unchanged.
+    original_slate_row = cfb_builder.slate_row
+
+    def _safe_slate_row(result: dict[str, Any]) -> pd.DataFrame:
+        safe_result = copy.copy(result)
+        projection = copy.copy(result.get("projection", {}))
+        for side in ("away", "home"):
+            rating = projection.get(side)
+            if not isinstance(rating, dict):
+                continue
+            safe_rating = copy.copy(rating)
+            safe_rating["Previous Season Weight"] = cfb_builder._num(
+                safe_rating.get("Previous Season Weight"), 1.0
+            )
+            safe_rating["Current Season Weight"] = cfb_builder._num(
+                safe_rating.get("Current Season Weight"), 0.0
+            )
+            projection[side] = safe_rating
+        safe_result["projection"] = projection
+        return original_slate_row(safe_result)
+
+    cfb_builder.slate_row = _safe_slate_row
+
+    # Keep the CFB builder wording consistent with the MLB builder without
+    # replacing Streamlit's global button function. The label is a direct string
+    # constant in _render_build(), so changing that one function's code constant
+    # is isolated to this page and survives normal Streamlit reruns.
+    try:
+        render_build = cfb_builder._render_build
+        code = render_build.__code__
+        old_label = "Save projection and graded plays"
+        new_label = "Save matchup summary"
+        constants = tuple(new_label if value == old_label else value for value in code.co_consts)
+        if constants != code.co_consts:
+            render_build.__code__ = code.replace(co_consts=constants)
+    except Exception:
+        pass
+
+    # ------------------------------------------------------------------
+    # 3) Ratings: do not rebuild giant advanced data during +/- interactions.
     # ------------------------------------------------------------------
     # Once a valid week snapshot has been saved, it is the interactive builder's
     # source for that week. A newly downloaded parquet file no longer makes that
@@ -139,7 +184,7 @@ def install_runtime_guard(cfb_builder: Any) -> None:
     cfb_builder._ensure_automatic_ratings = _ensure_automatic_ratings
 
     # ------------------------------------------------------------------
-    # 3) Lower-memory parquet conversion for the occasional weekly rebuild.
+    # 4) Lower-memory parquet conversion for the occasional weekly rebuild.
     # ------------------------------------------------------------------
     # The previous `pd.DataFrame(polars_frame.to_dicts())` materialized a Python
     # dictionary for every play while the Polars frame was still resident. With
