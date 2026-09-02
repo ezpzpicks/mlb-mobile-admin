@@ -1,0 +1,54 @@
+name: MLB K V16.5 Top2 Feature Smoke
+
+on:
+  push:
+    branches:
+      - feature/mlb-k-v16-5-top2-whiff
+    paths:
+      - 'scripts/apply_mlb_v165_top2_whiff.py'
+      - 'scripts/fix_mlb_v165_metadata.py'
+      - 'research/test_mlb_k_v165_top2_patch.py'
+      - '.github/workflows/mlb-k-v165-feature-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/mlb-k-v16-5-top2-whiff
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate installer syntax
+        run: python -m py_compile scripts/apply_mlb_v165_top2_whiff.py scripts/fix_mlb_v165_metadata.py
+
+      - name: Apply V16.5 patch to feature branch files
+        run: |
+          python scripts/apply_mlb_v165_top2_whiff.py
+          python scripts/fix_mlb_v165_metadata.py
+
+      - name: Compile and smoke-test patched MLB builder source
+        run: python research/test_mlb_k_v165_top2_patch.py
+
+      - name: Show patch diff
+        run: git diff -- shared/mlb_k_runtime_patch.py shared/__init__.py
+
+      - name: Commit tested feature files
+        run: |
+          if git diff --quiet -- shared/mlb_k_runtime_patch.py shared/__init__.py; then
+            echo "No runtime file changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared/mlb_k_runtime_patch.py shared/__init__.py
+          git commit -m "Finalize V16.5 Top-2 Whiff model metadata"
+          git push origin HEAD:feature/mlb-k-v16-5-top2-whiff
