@@ -6,6 +6,7 @@ on:
       - feature/mlb-k-v16-5-top2-whiff
     paths:
       - 'scripts/apply_mlb_v165_top2_whiff.py'
+      - 'scripts/fix_mlb_v165_metadata.py'
       - 'research/test_mlb_k_v165_top2_patch.py'
       - '.github/workflows/mlb-k-v165-feature-smoke.yml'
   workflow_dispatch:
@@ -27,10 +28,12 @@ jobs:
           python-version: '3.12'
 
       - name: Validate installer syntax
-        run: python -m py_compile scripts/apply_mlb_v165_top2_whiff.py
+        run: python -m py_compile scripts/apply_mlb_v165_top2_whiff.py scripts/fix_mlb_v165_metadata.py
 
       - name: Apply V16.5 patch to feature branch files
-        run: python scripts/apply_mlb_v165_top2_whiff.py
+        run: |
+          python scripts/apply_mlb_v165_top2_whiff.py
+          python scripts/fix_mlb_v165_metadata.py
 
       - name: Compile and smoke-test patched MLB builder source
         run: python research/test_mlb_k_v165_top2_patch.py
@@ -47,5 +50,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add shared/mlb_k_runtime_patch.py shared/__init__.py
-          git commit -m "Add V16.5 Top-2 Whiff K-rate refit"
+          git commit -m "Finalize V16.5 Top-2 Whiff model metadata"
           git push origin HEAD:feature/mlb-k-v16-5-top2-whiff
