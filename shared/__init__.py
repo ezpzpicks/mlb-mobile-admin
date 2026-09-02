@@ -10,14 +10,14 @@ from .mlb_k_runtime_patch import run_mlb_builder_with_locked_k_regression
 # package. Patching the module attribute here therefore updates that same module
 # object without requiring a large edit to the admin entrypoint. Only the MLB
 # builder path is intercepted; every other runpy call behaves normally.
-if not getattr(runpy, "_ezpz_v164_k_patch_installed", False):
+if not getattr(runpy, "_ezpz_v165_k_patch_installed", False):
     _ezpz_original_run_path = runpy.run_path
 
     def _ezpz_run_path(path_name, init_globals=None, run_name=None):
         path = Path(path_name)
         if path.name == "mlb_builder.py" and path.parent.name == "builders":
             if init_globals:
-                raise RuntimeError("V16.4 MLB runtime patch does not accept custom init_globals.")
+                raise RuntimeError("V16.5 MLB runtime patch does not accept custom init_globals.")
             return run_mlb_builder_with_locked_k_regression(path)
         return _ezpz_original_run_path(
             path_name,
@@ -26,7 +26,7 @@ if not getattr(runpy, "_ezpz_v164_k_patch_installed", False):
         )
 
     runpy.run_path = _ezpz_run_path
-    runpy._ezpz_v164_k_patch_installed = True
+    runpy._ezpz_v165_k_patch_installed = True
 
 
 # One-time repair for the pitcher_recent_form table. This runs at package import
