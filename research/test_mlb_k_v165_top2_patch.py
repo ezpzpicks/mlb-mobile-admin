@@ -27,7 +27,7 @@ def main():
     assert '"pitcher_top2_whiff": _safe_float_or_none((recent_pitch or {}).get("pitcher_top2_whiff"))' in source
     assert 'under_probability = max(0.0, raw_under_probability - 0.05)' in source
     assert "global_projection = raw" in source
-    assert "The multi-K layer reshapes the count PMF but preserves that mean" in source
+    assert "the multi-K layer reshapes the count PMF but preserves that mean" in source
     assert "Could not safely read persistent pitcher history" in source
 
     # The old frozen six-variable rate equation must not remain active after patching.
