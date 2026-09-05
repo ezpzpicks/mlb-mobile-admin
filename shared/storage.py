@@ -1,5 +1,7 @@
 import json
 import os
+import threading
+import time
 from typing import Iterable
 
 import gspread
@@ -27,6 +29,16 @@ _DEFAULT_DATABASE_NAMES = {
     "CBB": "CBB Model Database",
     "NCAAM": "CBB Model Database",
 }
+
+# Streamlit reruns the script for every widget interaction. Looking up the same
+# worksheet by name on every rerun costs one Google Sheets read request each
+# time and can exhaust the per-user read quota during a busy CFB slate. Cache
+# worksheet objects for the lifetime of the Render process; the objects still
+# perform live reads/writes when their data methods are called.
+_WORKSHEET_CACHE: dict[tuple[str, str], object] = {}
+_WORKSHEET_CACHE_LOCK = threading.Lock()
+_SHEETS_QUOTA_COOLDOWN_UNTIL = 0.0
+_SHEETS_QUOTA_COOLDOWN_SECONDS = 65.0
 
 # Create a small, MLB-compatible public contract immediately when a new sport
 # workbook is first created. The full builder headers replace/expand the slate
@@ -116,6 +128,45 @@ def storage_database_config(sport: str | None = None) -> dict[str, str]:
 def storage_database_name(sport: str | None = None) -> str:
     config = storage_database_config(sport)
     return config["sheet_name"] or config["sheet_id"]
+
+
+def _worksheet_cache_key(workbook, tab_name: str) -> tuple[str, str]:
+    workbook_id = str(getattr(workbook, "id", "") or "")
+    if not workbook_id:
+        workbook_id = f"object:{id(workbook)}"
+    return workbook_id, str(tab_name)
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    response = getattr(exc, "response", None)
+    if getattr(response, "status_code", None) == 429:
+        return True
+    text = str(exc).lower()
+    return "429" in text and "quota" in text
+
+
+def _quota_cooldown_active() -> bool:
+    return time.monotonic() < _SHEETS_QUOTA_COOLDOWN_UNTIL
+
+
+def _start_quota_cooldown() -> None:
+    global _SHEETS_QUOTA_COOLDOWN_UNTIL
+    with _WORKSHEET_CACHE_LOCK:
+        _SHEETS_QUOTA_COOLDOWN_UNTIL = max(
+            _SHEETS_QUOTA_COOLDOWN_UNTIL,
+            time.monotonic() + _SHEETS_QUOTA_COOLDOWN_SECONDS,
+        )
+    try:
+        now = time.monotonic()
+        last_warning = float(st.session_state.get("_ezpz_sheets_quota_warning_at", 0.0) or 0.0)
+        if now - last_warning >= 5.0:
+            st.warning(
+                "Google Sheets read limit was reached. The admin is cooling down Sheets reads "
+                "for about a minute instead of crashing; already cached tabs remain usable."
+            )
+            st.session_state["_ezpz_sheets_quota_warning_at"] = now
+    except Exception:
+        pass
 
 
 @st.cache_resource(show_spinner=False)
@@ -241,16 +292,38 @@ def get_or_create_worksheet(tab_name: str, columns: Iterable[str]):
     if workbook is None:
         return None
     columns = list(columns)
+    cache_key = _worksheet_cache_key(workbook, tab_name)
+
+    with _WORKSHEET_CACHE_LOCK:
+        cached = _WORKSHEET_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    # A 429 applies to the service account/user, so once Google tells us to
+    # throttle, avoid hammering the API with the rest of the tabs on the same
+    # Streamlit rerun. Cached worksheet objects are returned before this check.
+    if _quota_cooldown_active():
+        return None
+
     try:
-        worksheet = workbook.worksheet(tab_name)
-    except gspread.WorksheetNotFound:
-        worksheet = workbook.add_worksheet(
-            title=tab_name,
-            rows=2000,
-            cols=max(20, len(columns) + 5),
-        )
-        if columns:
-            worksheet.update([columns])
+        try:
+            worksheet = workbook.worksheet(tab_name)
+        except gspread.WorksheetNotFound:
+            worksheet = workbook.add_worksheet(
+                title=tab_name,
+                rows=2000,
+                cols=max(20, len(columns) + 5),
+            )
+            if columns:
+                worksheet.update([columns])
+    except gspread.exceptions.APIError as exc:
+        if _is_quota_error(exc):
+            _start_quota_cooldown()
+            return None
+        raise
+
+    with _WORKSHEET_CACHE_LOCK:
+        _WORKSHEET_CACHE[cache_key] = worksheet
     return worksheet
 
 
@@ -276,6 +349,12 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
             if any(str(value).strip() for value in row.values()):
                 rows.append(row)
         return pd.DataFrame(rows, columns=columns)
+    except gspread.exceptions.APIError as exc:
+        if _is_quota_error(exc):
+            _start_quota_cooldown()
+            return pd.DataFrame(columns=columns)
+        st.error(f"Could not read Google Sheets tab '{tab_name}': {exc}")
+        return pd.DataFrame(columns=columns)
     except Exception as exc:
         st.error(f"Could not read Google Sheets tab '{tab_name}': {exc}")
         return pd.DataFrame(columns=columns)
@@ -283,12 +362,27 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
 
 def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) -> bool:
     columns = list(columns)
+    # If a read just failed with 429, do not allow a follow-up write based on an
+    # empty fallback DataFrame to clear valid rows from Google Sheets. The user
+    # can retry the save after the short cooldown with the real sheet reloaded.
+    if _quota_cooldown_active():
+        st.warning(
+            "Google Sheets is temporarily rate-limited. This save was not attempted; "
+            "wait about a minute and try again."
+        )
+        return False
     try:
         worksheet = get_or_create_worksheet(tab_name, columns)
         if worksheet is None:
-            st.warning(
-                "Google Sheets is not configured. Add GOOGLE_CREDENTIALS and the sport database setting."
-            )
+            if _quota_cooldown_active():
+                st.warning(
+                    "Google Sheets is temporarily rate-limited. This save was not attempted; "
+                    "wait about a minute and try again."
+                )
+            else:
+                st.warning(
+                    "Google Sheets is not configured. Add GOOGLE_CREDENTIALS and the sport database setting."
+                )
             return False
         out = dataframe.copy() if dataframe is not None else pd.DataFrame(columns=columns)
         for column in columns:
@@ -298,6 +392,16 @@ def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) 
         worksheet.clear()
         worksheet.update([columns] + out.values.tolist())
         return True
+    except gspread.exceptions.APIError as exc:
+        if _is_quota_error(exc):
+            _start_quota_cooldown()
+            st.warning(
+                "Google Sheets is temporarily rate-limited. This save did not complete; "
+                "wait about a minute and try again."
+            )
+            return False
+        st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
+        return False
     except Exception as exc:
         st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
         return False
