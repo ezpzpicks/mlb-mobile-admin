@@ -28,6 +28,27 @@ def _quota_error(exc: Exception) -> bool:
     return status == 429 or "429" in text or "quota" in text or "rate limit" in text
 
 
+def _shared_storage_cooling_down() -> bool:
+    try:
+        from shared import storage
+
+        checker = getattr(storage, "_quota_cooldown_active", None)
+        return bool(callable(checker) and checker())
+    except Exception:
+        return False
+
+
+def _start_shared_storage_cooldown() -> None:
+    try:
+        from shared import storage
+
+        starter = getattr(storage, "_start_quota_cooldown", None)
+        if callable(starter):
+            starter()
+    except Exception:
+        pass
+
+
 def _retry(operation):
     delays = (0.0, 2.0, 5.0, 12.0)
     last_exc: Exception | None = None
@@ -69,9 +90,15 @@ def install_runtime_guard(cfb_builder: Any) -> None:
     # trailing rows with a single batch_clear after the main update.
     def _guarded_write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) -> bool:
         columns = list(columns)
+        if _shared_storage_cooling_down():
+            # shared.storage already displayed the quota/cooldown explanation.
+            # Do not misreport an active cooldown as missing credentials.
+            return False
         try:
             worksheet = cfb_builder.get_or_create_worksheet(tab_name, columns)
             if worksheet is None:
+                if _shared_storage_cooling_down():
+                    return False
                 st.warning(
                     "Google Sheets is not configured. Add GOOGLE_CREDENTIALS and the sport database setting."
                 )
@@ -89,7 +116,10 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             previous_rows = 0
             try:
                 previous_rows = len(_retry(lambda: worksheet.col_values(1)))
-            except Exception:
+            except Exception as exc:
+                if _quota_error(exc):
+                    _start_shared_storage_cooldown()
+                    return False
                 previous_rows = 0
 
             _retry(lambda: worksheet.update(values))
@@ -98,12 +128,17 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             if previous_rows > new_rows:
                 try:
                     _retry(lambda: worksheet.batch_clear([f"A{new_rows + 1}:ZZ{previous_rows}"]))
-                except Exception:
+                except Exception as exc:
+                    if _quota_error(exc):
+                        _start_shared_storage_cooldown()
                     # Stale trailing rows are preferable to turning a successful
                     # model save into a visible error during a quota burst.
                     pass
             return True
         except Exception as exc:
+            if _quota_error(exc):
+                _start_shared_storage_cooldown()
+                return False
             st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
             return False
 
