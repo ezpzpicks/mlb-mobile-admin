@@ -26,6 +26,17 @@ COMPLETION_COLUMNS = [
 _SUPPORTED_SPORTS = {"CFB", "NFL", "CBB"}
 _DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 
+# CFB's automatic Slate population also writes daily_slate, so daily_slate by
+# itself cannot tell us whether the user actually finished a matchup in Build.
+# A manual CFB save also writes both personnel snapshots, while the automatic
+# batch explicitly runs with save_personnel_snapshots=False. Joining those two
+# tabs gives us a safe backfill for matchups saved before builder_completed was
+# introduced or when its tiny marker write was lost to a transient Sheets quota.
+_CFB_SLATE_TAB = "daily_slate"
+_CFB_SLATE_COLUMNS = ["Date", "Game ID", "Away Team", "Home Team"]
+_CFB_PERSONNEL_TAB = "personnel_snapshots"
+_CFB_PERSONNEL_COLUMNS = ["Game ID", "Team"]
+
 
 def _sport() -> str:
     value = str(st.session_state.get("selected_sport", "") or "").strip().upper()
@@ -98,18 +109,74 @@ def _completion_frame(sport: str) -> pd.DataFrame:
     return frame
 
 
+def _cfb_manual_pairs(date_text: str) -> set[str]:
+    """Recover explicit CFB Build saves without mistaking auto-slate rows for saves."""
+    cache_key = f"_ezpz_cfb_manual_save_pairs::{date_text}"
+    cached = st.session_state.get(cache_key)
+    if isinstance(cached, set):
+        return set(cached)
+    if isinstance(cached, (list, tuple)):
+        return set(str(value) for value in cached)
+
+    try:
+        from shared import storage
+
+        if str(storage.get_storage_sport() or "").strip().upper() != "CFB":
+            return set()
+        cooldown = getattr(storage, "_quota_cooldown_active", None)
+        if callable(cooldown) and cooldown():
+            # Do not cache an empty fallback while Google is actively throttling;
+            # the next rerun after the cooldown should get another chance.
+            return set()
+
+        slate = storage.read_sheet(_CFB_SLATE_TAB, _CFB_SLATE_COLUMNS)
+        personnel = storage.read_sheet(_CFB_PERSONNEL_TAB, _CFB_PERSONNEL_COLUMNS)
+        if callable(cooldown) and cooldown():
+            return set()
+        if slate.empty or personnel.empty:
+            st.session_state[cache_key] = set()
+            return set()
+
+        manual_ids = {
+            str(value or "").strip()
+            for value in personnel.get("Game ID", pd.Series(dtype=str)).tolist()
+            if str(value or "").strip()
+        }
+        if not manual_ids:
+            st.session_state[cache_key] = set()
+            return set()
+
+        view = slate[
+            slate.get("Date", pd.Series(index=slate.index, dtype=str)).astype(str).str.strip().eq(str(date_text))
+            & slate.get("Game ID", pd.Series(index=slate.index, dtype=str)).astype(str).str.strip().isin(manual_ids)
+        ]
+        pairs = {
+            _pair_key(row.get("Away Team", ""), row.get("Home Team", ""))
+            for _, row in view.iterrows()
+            if _norm(row.get("Away Team", "")) and _norm(row.get("Home Team", ""))
+        }
+        st.session_state[cache_key] = set(pairs)
+        return pairs
+    except Exception:
+        return set()
+
+
 def _completed_pairs(sport: str, date_text: str) -> set[str]:
     frame = _completion_frame(sport)
-    if frame.empty:
-        return set()
-    sport_mask = frame["Sport"].astype(str).str.upper().eq(sport)
-    date_mask = frame["Date"].astype(str).str.strip().eq(str(date_text))
-    view = frame[sport_mask & date_mask]
-    return {
-        _pair_key(row.get("Away Team", ""), row.get("Home Team", ""))
-        for _, row in view.iterrows()
-        if _norm(row.get("Away Team", "")) and _norm(row.get("Home Team", ""))
-    }
+    pairs: set[str] = set()
+    if not frame.empty:
+        sport_mask = frame["Sport"].astype(str).str.upper().eq(sport)
+        date_mask = frame["Date"].astype(str).str.strip().eq(str(date_text))
+        view = frame[sport_mask & date_mask]
+        pairs = {
+            _pair_key(row.get("Away Team", ""), row.get("Home Team", ""))
+            for _, row in view.iterrows()
+            if _norm(row.get("Away Team", "")) and _norm(row.get("Home Team", ""))
+        }
+
+    if sport == "CFB":
+        pairs.update(_cfb_manual_pairs(date_text))
+    return pairs
 
 
 def _mark_completed(active: dict[str, Any]) -> bool:
@@ -150,6 +217,12 @@ def _mark_completed(active: dict[str, Any]) -> bool:
     # has a transient write problem. A successful write makes the behavior persist
     # across browser refreshes and new Streamlit sessions.
     st.session_state[_cache_key(sport)] = output.copy()
+    if sport == "CFB":
+        cfb_pairs_key = f"_ezpz_cfb_manual_save_pairs::{date_text}"
+        recovered = st.session_state.get(cfb_pairs_key)
+        recovered_pairs = set(recovered) if isinstance(recovered, (set, list, tuple)) else set()
+        recovered_pairs.add(pair)
+        st.session_state[cfb_pairs_key] = recovered_pairs
     try:
         from shared.storage import get_storage_sport, write_sheet
 
