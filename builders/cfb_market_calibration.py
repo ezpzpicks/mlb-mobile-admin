@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"
+MODEL_VERSION = "cfb-v2.3-independent-total-2026-09-08-w2-spread-guardrail"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
 # 2024 out-of-sample residual distribution from the 2021-23-trained CFB v2 model.
@@ -151,10 +151,19 @@ def _priced_total_market(
     return max(options, key=lambda option: (option["ev"], option["price_edge"], option["probability"]))
 
 
-def _grade_spread(probability: float, point_edge: float, reliability: float, confluence: int) -> str:
-    # Probability, Reliability, and Confluence remain recorded for diagnostics,
-    # but they do not veto a spread grade. The 2025 holdout-supported point edge
-    # is the grading signal; actual price/EV is enforced immediately afterward.
+def _grade_spread(
+    probability: float,
+    point_edge: float,
+    reliability: float,
+    confluence: int,
+    market_spread: float = 0.0,
+) -> str:
+    # The 2025 holdout-supported point edge remains the primary grading signal.
+    # Week 1 exposed extra fragility on very large numbers, so 21+ point spreads
+    # now require at least one independent confluence signal. This is a
+    # qualification safeguard only; it does not change the projection itself.
+    if abs(float(market_spread)) >= 21.0 and int(confluence) < 1:
+        return "No Play"
     if point_edge >= SPREAD_A_POINT_EDGE:
         return "A Spread"
     if point_edge >= SPREAD_B_POINT_EDGE:
@@ -302,8 +311,10 @@ def install_market_calibration(cfb_builder: Any) -> None:
         )
 
         spread["grade"] = _grade_spread(
-            spread["probability"], spread["model_edge_points"], reliability, spread_conf
+            spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread
         )
+        if abs(market_home_spread) >= 21.0 and spread_conf < 1:
+            spread_support = list(spread_support) + ["21+ point spread requires Confluence >= 1"]
         total["grade"] = _grade_total(
             total["pick"], total["model_edge_points"], total["probability"], reliability, total_conf
         )
