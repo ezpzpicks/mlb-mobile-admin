@@ -1,0 +1,89 @@
+name: Apply CFB Week 2 spread guardrail
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cfb-week2-spread-guardrail.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply 21-plus spread confluence gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('builders/cfb_market_calibration.py')
+          text = path.read_text()
+
+          old_version = 'MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"'
+          new_version = 'MODEL_VERSION = "cfb-v2.3-independent-total-2026-09-08-w2-spread-guardrail"'
+          if old_version in text:
+              text = text.replace(old_version, new_version, 1)
+          elif new_version not in text:
+              raise SystemExit('Could not locate CFB model version')
+
+          old_grade = '''def _grade_spread(probability: float, point_edge: float, reliability: float, confluence: int) -> str:\n    # Probability, Reliability, and Confluence remain recorded for diagnostics,\n    # but they do not veto a spread grade. The 2025 holdout-supported point edge\n    # is the grading signal; actual price/EV is enforced immediately afterward.\n    if point_edge >= SPREAD_A_POINT_EDGE:\n        return "A Spread"\n    if point_edge >= SPREAD_B_POINT_EDGE:\n        return "B Spread"\n    return "No Play"\n'''
+          new_grade = '''def _grade_spread(\n    probability: float,\n    point_edge: float,\n    reliability: float,\n    confluence: int,\n    market_spread: float = 0.0,\n) -> str:\n    # The 2025 holdout-supported point edge remains the primary grading signal.\n    # Week 1 exposed extra fragility on very large numbers, so 21+ point spreads\n    # now require at least one independent confluence signal. This is a\n    # qualification safeguard only; it does not change the projection itself.\n    if abs(float(market_spread)) >= 21.0 and int(confluence) < 1:\n        return "No Play"\n    if point_edge >= SPREAD_A_POINT_EDGE:\n        return "A Spread"\n    if point_edge >= SPREAD_B_POINT_EDGE:\n        return "B Spread"\n    return "No Play"\n'''
+          if old_grade in text:
+              text = text.replace(old_grade, new_grade, 1)
+          elif new_grade not in text:
+              raise SystemExit('Could not locate spread grading function')
+
+          old_call = '''        spread["grade"] = _grade_spread(\n            spread["probability"], spread["model_edge_points"], reliability, spread_conf\n        )'''
+          new_call = '''        spread["grade"] = _grade_spread(\n            spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread\n        )\n        if abs(market_home_spread) >= 21.0 and spread_conf < 1:\n            spread_support = list(spread_support) + ["21+ point spread requires Confluence >= 1"]'''
+          if old_call in text:
+              text = text.replace(old_call, new_call, 1)
+          elif new_call not in text:
+              raise SystemExit('Could not locate spread grading call')
+
+          path.write_text(text)
+          PY
+
+      - name: Verify CFB spread guardrail
+        run: |
+          python -m py_compile builders/cfb_market_calibration.py
+          python - <<'PY'
+          from builders.cfb_market_calibration import _grade_spread
+
+          # Existing point-edge thresholds remain unchanged below 21 points.
+          assert _grade_spread(.01, 5.99, 0, 0, 20.5) == 'No Play'
+          assert _grade_spread(.01, 6.00, 0, 0, 20.5) == 'B Spread'
+          assert _grade_spread(.01, 9.50, 0, 0, 20.5) == 'A Spread'
+
+          # New safeguard: 21+ requires at least one confluence signal.
+          assert _grade_spread(.99, 12.0, 100, 0, 21.0) == 'No Play'
+          assert _grade_spread(.01, 9.50, 0, 1, 21.0) == 'A Spread'
+          assert _grade_spread(.01, 6.00, 0, 0, -28.0) == 'No Play'
+          assert _grade_spread(.01, 6.00, 0, 1, -28.0) == 'B Spread'
+          print('CFB 21+ spread confluence guardrail verified')
+          PY
+          git diff --check
+
+      - name: Commit implementation
+        run: |
+          if git diff --quiet -- builders/cfb_market_calibration.py; then
+            echo 'No CFB spread guardrail source changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add builders/cfb_market_calibration.py
+          git commit -m 'cfb: require confluence on 21-plus spreads'
+          git pull --rebase origin main
+          git push origin HEAD:main
