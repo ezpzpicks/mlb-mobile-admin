@@ -331,15 +331,17 @@ def install_skill_prop_regression(nfl_builder: Any) -> None:
         player: str, position: str, slot: str, team: str, opponent: str, home_away: str,
         lineup: pd.DataFrame, profiles: pd.DataFrame, defense_profiles: pd.DataFrame,
         team_rating: dict[str, Any], opponent_rating: dict[str, Any], game_projection: dict[str, float],
-        weather_adjustment: float, market_lines: dict[tuple[str, str], dict[str, Any]],
+        weather_adjustment: float, market_lines: dict[tuple[str, str], dict[str, Any]] | None = None,
         role_context: dict[str, dict[str, Any]] | None = None,
         pregame_team_total: float | None = None,
         pregame_team_total_source: str = "EZPZ score fallback",
     ) -> list[dict[str, Any]]:
         rows = original(
             player, position, slot, team, opponent, home_away, lineup, profiles, defense_profiles,
-            team_rating, opponent_rating, game_projection, weather_adjustment, market_lines,
-            role_context, pregame_team_total, pregame_team_total_source,
+            team_rating, opponent_rating, game_projection, weather_adjustment,
+            role_context=role_context,
+            pregame_team_total=pregame_team_total,
+            pregame_team_total_source=pregame_team_total_source,
         )
         pos = nfl_builder._position_group(position)
         if pos not in {"RB", "WR"}:
