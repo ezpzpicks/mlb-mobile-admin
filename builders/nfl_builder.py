@@ -2409,13 +2409,15 @@ POSITION_EFFICIENCY_PRIORS = {
 
 
 def _current_nfl_season() -> int:
+    # Prefer the calendar-defined current NFL season when the data library lags.
+    today = date.today()
+    calendar_season = today.year - 1 if today.month <= 2 else today.year
     try:
         if nfl is not None and hasattr(nfl, "get_current_season"):
-            return int(nfl.get_current_season())
+            return max(calendar_season, int(nfl.get_current_season()))
     except Exception:
         pass
-    today = date.today()
-    return today.year - 1 if today.month <= 2 else today.year
+    return calendar_season
 
 
 def _schedule_date_series(schedule: pd.DataFrame) -> pd.Series:
