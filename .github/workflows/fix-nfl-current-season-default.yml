@@ -1,0 +1,72 @@
+name: Fix NFL builder current-season default
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/fix-nfl-current-season-default.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make NFL builder prefer the current season
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("builders/nfl_builder.py")
+          text = path.read_text()
+          old = '''def _current_nfl_season() -> int:
+    try:
+        if nfl is not None and hasattr(nfl, "get_current_season"):
+            return int(nfl.get_current_season())
+    except Exception:
+        pass
+    today = date.today()
+    return today.year - 1 if today.month <= 2 else today.year
+'''
+          new = '''def _current_nfl_season() -> int:
+    # nflreadpy can briefly report the prior season even after the new NFL
+    # season has begun. Use the calendar-defined NFL season as the floor so
+    # the builder opens on the current slate by default (2026 right now).
+    today = date.today()
+    calendar_season = today.year - 1 if today.month <= 2 else today.year
+    try:
+        if nfl is not None and hasattr(nfl, "get_current_season"):
+            return max(calendar_season, int(nfl.get_current_season()))
+    except Exception:
+        pass
+    return calendar_season
+'''
+          if new in text:
+              print("Current-season default already applied")
+          elif old in text:
+              path.write_text(text.replace(old, new, 1))
+              print("Updated NFL builder current-season default")
+          else:
+              raise SystemExit("Could not find _current_nfl_season patch target")
+          PY
+
+      - name: Verify
+        shell: bash
+        run: |
+          grep -q 'return max(calendar_season, int(nfl.get_current_season()))' builders/nfl_builder.py
+          python -m py_compile builders/nfl_builder.py
+
+      - name: Commit source change
+        shell: bash
+        run: |
+          rm -f .github/workflows/fix-nfl-current-season-default.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py .github/workflows/fix-nfl-current-season-default.yml
+          git commit -m "Default NFL builder to current season"
+          git push
