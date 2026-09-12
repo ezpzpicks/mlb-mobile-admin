@@ -271,7 +271,7 @@ if selected_sport not in valid_sports:
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
-    "CFB": "cfb-v2.3-independent-total-2026-08-28",
+    "CFB": "cfb-v2.4-covers-personnel-weather-2026-09-11",
     "NFL": "nfl-v4.2-price-aware-odds-2026-08-21",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
@@ -304,10 +304,12 @@ elif selected_sport == "CFB":
     from builders.cfb_game_regression import install_regression_layer
     from builders.cfb_total_regression import install_total_regression
     from builders.cfb_market_calibration import install_market_calibration
+    from builders.cfb_covers import install_covers_layer
     install_regression_layer(cfb_builder)
     install_total_regression(cfb_builder)
     install_market_calibration(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.3-independent-total-2026-08-28"
+    install_covers_layer(cfb_builder)
+    cfb_builder.MODEL_VERSION = "cfb-v2.4-covers-personnel-weather-2026-09-11"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
