@@ -23,4 +23,4 @@ jobs:
       - name: Compile integration files
         run: python -m py_compile builders/cfb_covers.py app_mobile_admin.py
       - name: Run Covers parser and matching smoke test
-        run: python research/test_cfb_covers_layer.py
+        run: PYTHONPATH=. python research/test_cfb_covers_layer.py
