@@ -1,10 +1,9 @@
 """Covers.com personnel and weather overlays for the CFB model.
 
-This module is deliberately additive. If Covers is unavailable, ambiguous, or
+The layer is additive and fail-open: if Covers is unavailable, ambiguous, or
 changes markup, the existing CFB personnel/environment logic remains in force.
-The layer stores compact weekly starter/injury observations so QB continuity and
-return-from-injury inference improve as the season progresses without requiring
-historical scraping.
+It stores compact weekly starter/injury observations so QB continuity and
+return-from-injury inference improve as the season progresses.
 """
 from __future__ import annotations
 
@@ -44,21 +43,30 @@ DIRECTORY_TTL = 6 * 60 * 60
 TEAM_TTL = 30 * 60
 WEATHER_TTL = 30 * 60
 STALE_MAX_AGE = 48 * 60 * 60
+STARTER_FLUSH_SIZE = 300
+INJURY_FLUSH_SIZE = 150
 
 POSITION_POINTS = {
-    "QB": 4.5, "RB": 0.9, "FB": 0.45, "WR": 0.75, "TE": 0.55,
+    "QB": 4.50, "RB": 0.90, "FB": 0.45, "WR": 0.75, "TE": 0.55,
     "OT": 0.45, "OG": 0.45, "OL": 0.45, "C": 0.45,
     "DL": 0.45, "DE": 0.45, "DT": 0.45, "NT": 0.45,
     "LB": 0.40, "ILB": 0.40, "OLB": 0.40,
     "CB": 0.45, "S": 0.45, "DB": 0.45, "K": 0.30, "P": 0.15,
 }
 
+# ESPN/open-data short names that are not reliably recoverable from the Covers
+# mascot slug with fuzzy matching alone. Ambiguous Miami variants stay explicit.
 _ALIAS_TO_SLUG = {
     "ole miss": "mississippi-rebels",
-    "miami fl": "miami-hurricanes",
-    "miami florida": "miami-hurricanes",
-    "miami oh": "miami-oh-redhawks",
-    "miami ohio": "miami-oh-redhawks",
+    "app state": "appalachian-state-mountaineers",
+    "nc state": "nc-state-wolfpack",
+    "pitt": "pittsburgh-panthers",
+    "southern miss": "southern-miss-golden-eagles",
+    "la tech": "louisiana-tech-bulldogs",
+    "fiu": "florida-international-panthers",
+    "fau": "florida-atlantic-owls",
+    "ulm": "louisiana-monroe-warhawks",
+    "utep": "utep-miners",
     "ucf": "ucf-knights",
     "usc": "usc-trojans",
     "uconn": "connecticut-huskies",
@@ -69,6 +77,11 @@ _ALIAS_TO_SLUG = {
     "byu": "byu-cougars",
     "lsu": "lsu-tigers",
     "ucla": "ucla-bruins",
+    "hawai i": "hawaii-rainbow-warriors",
+    "miami fl": "miami-hurricanes",
+    "miami florida": "miami-hurricanes",
+    "miami oh": "miami-oh-redhawks",
+    "miami ohio": "miami-oh-redhawks",
 }
 
 _LOCK = threading.RLock()
@@ -91,21 +104,21 @@ def _norm(value: Any) -> str:
 
 
 def _slug_label(slug: str) -> str:
-    return " ".join(part for part in slug.replace("-", " ").split() if part)
+    return " ".join(slug.replace("-", " ").split())
 
 
-def _cache_file(builder: Any, kind: str, key: str):
-    digest = hashlib.sha256(f"covers:{kind}:{key}".encode()).hexdigest()
+def _cache_file(builder: Any, key: str):
+    digest = hashlib.sha256(f"covers:{key}".encode()).hexdigest()
     return builder.CACHE_DIR / f"covers_{digest}.json"
 
 
 def _fetch_html(builder: Any, url: str, *, ttl: int) -> str:
     now = time.time()
     with _LOCK:
-        cached = _MEMORY_HTML.get(url)
-        if cached and now - cached[0] <= ttl:
-            return cached[1]
-    path = _cache_file(builder, "html", url)
+        hit = _MEMORY_HTML.get(url)
+        if hit and now - hit[0] <= ttl:
+            return hit[1]
+    path = _cache_file(builder, url)
     if path.exists() and now - path.stat().st_mtime <= ttl:
         try:
             html = str(json.loads(path.read_text()).get("html", ""))
@@ -155,10 +168,10 @@ def _candidate_score(query: str, candidate: str) -> float:
         return 1.0
     qt, ct = q.split(), c.split()
     qset, cset = set(qt), set(ct)
-    if qset and qset.issubset(cset):
+    if qset.issubset(cset):
         base = 0.86 if len(qt) == 1 else 0.93
         return min(0.99, base + 0.05 * len(qt) / max(1, len(ct)))
-    if cset and cset.issubset(qset):
+    if cset.issubset(qset):
         return min(0.96, 0.89 + 0.04 * len(ct) / max(1, len(qt)))
     overlap = len(qset & cset) / max(1, len(qset | cset))
     sequence = SequenceMatcher(None, q, c).ratio()
@@ -171,18 +184,21 @@ def _directory(builder: Any) -> list[dict[str, str]]:
     with _LOCK:
         if _DIRECTORY and now - _DIRECTORY[0] <= DIRECTORY_TTL:
             return list(_DIRECTORY[1])
-    html = _fetch_html(builder, COVERS_INJURIES_URL, ttl=DIRECTORY_TTL)
-    soup = BeautifulSoup(html, "html.parser")
-    rows: dict[str, dict[str, str]] = {}
+    soup = BeautifulSoup(_fetch_html(builder, COVERS_INJURIES_URL, ttl=DIRECTORY_TTL), "html.parser")
     pattern = re.compile(r"/sport/football/ncaaf/teams/main/([^/?#]+)/injuries", re.I)
+    rows: dict[str, dict[str, str]] = {}
     for anchor in soup.find_all("a", href=True):
         href = str(anchor.get("href") or "")
         match = pattern.search(href)
         if not match:
             continue
         slug = match.group(1).strip("/")
-        label = _clean_text(anchor.get_text(" ", strip=True)) or _slug_label(slug)
-        rows[slug] = {"slug": slug, "label": label, "slug_label": _slug_label(slug), "url": urljoin(COVERS_BASE, href)}
+        rows[slug] = {
+            "slug": slug,
+            "label": _clean_text(anchor.get_text(" ", strip=True)) or _slug_label(slug),
+            "slug_label": _slug_label(slug),
+            "url": urljoin(COVERS_BASE, href),
+        }
     directory = list(rows.values())
     with _LOCK:
         _DIRECTORY = (now, directory)
@@ -190,14 +206,10 @@ def _directory(builder: Any) -> list[dict[str, str]]:
 
 
 def _team_url(builder: Any, team: str) -> str:
-    query = _norm(team)
-    alias_slug = _ALIAS_TO_SLUG.get(query)
-    directory = _directory(builder)
+    alias_slug = _ALIAS_TO_SLUG.get(_norm(team))
     if alias_slug:
-        for row in directory:
-            if row["slug"] == alias_slug:
-                return row["url"]
         return f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{alias_slug}/injuries"
+    directory = _directory(builder)
     scored = []
     for row in directory:
         score = max(_candidate_score(team, row["label"]), _candidate_score(team, row["slug_label"]))
@@ -210,12 +222,12 @@ def _team_url(builder: Any, team: str) -> str:
     return scored[0][1]["url"]
 
 
-def _header_map(table: Any) -> list[str]:
+def _headers(table: Any) -> list[str]:
     first = table.find("tr") if table else None
     return [_norm(cell.get_text(" ", strip=True)) for cell in first.find_all(["th", "td"])] if first else []
 
 
-def _parse_table_rows(table: Any) -> list[list[str]]:
+def _rows(table: Any) -> list[list[str]]:
     output = []
     for tr in table.find_all("tr"):
         cells = [_clean_text(cell.get_text(" ", strip=True)) for cell in tr.find_all(["th", "td"])]
@@ -228,39 +240,39 @@ def _parse_team_report(html: str, url: str) -> dict[str, Any]:
     soup = BeautifulSoup(html, "html.parser")
     h1 = soup.find("h1")
     team = _clean_text(h1.get_text(" ", strip=True) if h1 else "")
-    injuries, starters = [], []
+    injuries: list[dict[str, str]] = []
+    starters: list[dict[str, str]] = []
     starter_table_index = 0
     for table in soup.find_all("table"):
-        headers = _header_map(table)
+        headers = _headers(table)
         header_set = set(headers)
-        rows = _parse_table_rows(table)
+        rows = _rows(table)
         if {"player", "pos", "status"}.issubset(header_set):
-            indices = {name: headers.index(name) for name in ("player", "pos", "status")}
+            pidx, xidx, sidx = headers.index("player"), headers.index("pos"), headers.index("status")
             for cells in rows[1:]:
-                if len(cells) <= max(indices.values()):
+                if len(cells) <= max(pidx, xidx, sidx):
                     continue
-                player, position, status = cells[indices["player"]], cells[indices["pos"]].upper(), cells[indices["status"]]
+                player, position, status = cells[pidx], cells[xidx].upper(), cells[sidx]
                 if player and position and status:
-                    injuries.append({"player": player, "position": position, "status": status, "detail": " ".join(cells[max(indices.values()) + 1:])})
+                    extras = [cell for i, cell in enumerate(cells) if i not in {pidx, xidx, sidx}]
+                    injuries.append({"player": player, "position": position, "status": status, "detail": " ".join(extras)})
         elif {"pos", "player"}.issubset(header_set) and "status" not in header_set:
             unit = "Offense" if starter_table_index == 0 else "Defense"
             starter_table_index += 1
-            pos_idx, player_idx = headers.index("pos"), headers.index("player")
+            xidx, pidx = headers.index("pos"), headers.index("player")
             for cells in rows[1:]:
-                if len(cells) > max(pos_idx, player_idx):
-                    position, player = cells[pos_idx].upper(), cells[player_idx]
-                    if position and player:
-                        starters.append({"unit": unit, "position": position, "player": player})
+                if len(cells) > max(xidx, pidx) and cells[xidx] and cells[pidx]:
+                    starters.append({"unit": unit, "position": cells[xidx].upper(), "player": cells[pidx]})
     if not starters:
-        visible = [_clean_text(x) for x in soup.stripped_strings]
+        visible = [_clean_text(value) for value in soup.stripped_strings]
         try:
             start = next(i for i, value in enumerate(visible) if "starters - last game" in value.lower())
         except StopIteration:
             start = -1
         if start >= 0:
             unit = ""
-            pos_tokens = set(POSITION_POINTS) | {"LS"}
-            chunk = visible[start:start + 180]
+            tokens = set(POSITION_POINTS) | {"LS"}
+            chunk = visible[start:start + 190]
             i = 0
             while i < len(chunk):
                 token = chunk[i]
@@ -268,7 +280,7 @@ def _parse_team_report(html: str, url: str) -> dict[str, Any]:
                     unit = "Offense"
                 elif token.lower() == "defense":
                     unit = "Defense"
-                elif token.upper() in pos_tokens and i + 2 < len(chunk):
+                elif token.upper() in tokens and i + 2 < len(chunk):
                     number, player = chunk[i + 1], chunk[i + 2]
                     if unit and re.fullmatch(r"\d{1,3}", number or ""):
                         starters.append({"unit": unit, "position": token.upper(), "player": player})
@@ -280,13 +292,13 @@ def _parse_team_report(html: str, url: str) -> dict[str, Any]:
 def _team_report(builder: Any, team: str) -> dict[str, Any]:
     key, now = _norm(team), time.time()
     with _LOCK:
-        cached = _TEAM_REPORTS.get(key)
-        if cached and now - cached[0] <= TEAM_TTL:
-            return dict(cached[1])
+        hit = _TEAM_REPORTS.get(key)
+        if hit and now - hit[0] <= TEAM_TTL:
+            return dict(hit[1])
     try:
         url = _team_url(builder, team)
         if not url:
-            return {"team": team, "injuries": [], "starters": [], "url": "", "ok": False}
+            raise RuntimeError("No unambiguous Covers team match")
         report = _parse_team_report(_fetch_html(builder, url, ttl=TEAM_TTL), url)
         with _LOCK:
             _TEAM_REPORTS[key] = (now, report)
@@ -297,23 +309,31 @@ def _team_report(builder: Any, team: str) -> dict[str, Any]:
 
 def _parse_weather_html(html: str) -> list[dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
-    rows, seen = [], set()
+    output: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+
     def parse_block(matchup: str, text: str) -> None:
         if "@" not in matchup:
             return
         away, home = [_clean_text(part) for part in matchup.split("@", 1)]
         if not away or not home:
             return
-        temp_match = re.search(r"(-?\d+(?:\.\d+)?)\s*°\s*F", text, re.I)
-        wind_match = re.search(r"(\d+(?:\.\d+)?)\s*Mph\b", text, re.I)
-        pop_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", text, re.I)
-        if not (temp_match or wind_match or pop_match):
+        temp = re.search(r"(-?\d+(?:\.\d+)?)\s*°\s*F", text, re.I)
+        wind = re.search(r"(\d+(?:\.\d+)?)\s*Mph\b", text, re.I)
+        pop = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", text, re.I)
+        if not (temp or wind or pop):
             return
         key = (_norm(away), _norm(home))
         if key in seen:
             return
         seen.add(key)
-        rows.append({"away": away, "home": home, "temperature": float(temp_match.group(1)) if temp_match else math.nan, "wind": float(wind_match.group(1)) if wind_match else math.nan, "precipitation": float(pop_match.group(1)) / 100.0 if pop_match else math.nan})
+        output.append({
+            "away": away, "home": home,
+            "temperature": float(temp.group(1)) if temp else math.nan,
+            "wind": float(wind.group(1)) if wind else math.nan,
+            "precipitation": float(pop.group(1)) / 100.0 if pop else math.nan,
+        })
+
     for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5"]):
         matchup = _clean_text(heading.get_text(" ", strip=True))
         if " @ " not in f" {matchup} ":
@@ -330,14 +350,14 @@ def _parse_weather_html(html: str) -> list[dict[str, Any]]:
             if "Mph" in candidate or "P.O.P" in candidate or "Humidity" in candidate:
                 break
         parse_block(matchup, block)
-    if rows:
-        return rows
-    lines = [_clean_text(x) for x in soup.stripped_strings]
-    matchup_indices = [i for i, value in enumerate(lines) if " @ " in f" {value} " and len(value) < 120]
-    for offset, start in enumerate(matchup_indices):
-        end = matchup_indices[offset + 1] if offset + 1 < len(matchup_indices) else min(len(lines), start + 160)
+    if output:
+        return output
+    lines = [_clean_text(value) for value in soup.stripped_strings]
+    starts = [i for i, value in enumerate(lines) if " @ " in f" {value} " and len(value) < 120]
+    for offset, start in enumerate(starts):
+        end = starts[offset + 1] if offset + 1 < len(starts) else min(len(lines), start + 160)
         parse_block(lines[start], " ".join(lines[start:end]))
-    return rows
+    return output
 
 
 def _weather_cards(builder: Any) -> list[dict[str, Any]]:
@@ -356,10 +376,10 @@ def _weather_cards(builder: Any) -> list[dict[str, Any]]:
 
 
 def _match_weather(builder: Any, away: str, home: str) -> dict[str, Any]:
-    scored = []
-    for card in _weather_cards(builder):
-        score = (_candidate_score(away, card.get("away", "")) + _candidate_score(home, card.get("home", ""))) / 2.0
-        scored.append((score, card))
+    scored = [
+        ((_candidate_score(away, card.get("away", "")) + _candidate_score(home, card.get("home", ""))) / 2.0, card)
+        for card in _weather_cards(builder)
+    ]
     scored.sort(key=lambda item: item[0], reverse=True)
     if not scored or scored[0][0] < 0.86:
         return {}
@@ -369,7 +389,7 @@ def _match_weather(builder: Any, away: str, home: str) -> dict[str, Any]:
 
 
 def _player_signature(name: str) -> tuple[str, str]:
-    tokens = [token for token in _norm(name).split() if token not in {"jr", "sr", "ii", "iii", "iv"}]
+    tokens = [t for t in _norm(name).split() if t not in {"jr", "sr", "ii", "iii", "iv"}]
     if not tokens:
         return "", ""
     return (tokens[0][0] if tokens[0] else ""), tokens[-1]
@@ -385,7 +405,7 @@ def _severity(status: str, detail: str = "") -> float:
     text = f"{status} {detail}".lower()
     if any(term in text for term in ("cleared", "available", "will play", "expected to play", "probable")):
         return 0.12
-    if any(term in text for term in ("season", "out", "suspended", "inactive", "will miss", "shut down")):
+    if any(term in text for term in ("season-ending", "remainder of season", "remainder of the season", "out", "suspended", "inactive", "will miss", "shut down")):
         return 1.0
     if "doubtful" in text:
         return 0.82
@@ -394,7 +414,7 @@ def _severity(status: str, detail: str = "") -> float:
     return 0.30
 
 
-def _pending_list(builder: Any, key: str) -> list[dict[str, Any]]:
+def _pending(builder: Any, key: str) -> list[dict[str, Any]]:
     try:
         state_key = f"cfb_covers_pending_{key}"
         values = builder.st.session_state.get(state_key)
@@ -414,31 +434,40 @@ def _history(builder: Any, tab: str, columns: list[str]) -> pd.DataFrame:
         return pd.DataFrame(columns=columns)
 
 
-def _buffer_observations(builder: Any, report: dict[str, Any], team: str, season: int, week: int, game_id: str) -> None:
-    observed, version = date.today().isoformat(), str(getattr(builder, "MODEL_VERSION", ""))
-    starters, injuries = _pending_list(builder, "starters"), _pending_list(builder, "injuries")
+def _buffer(builder: Any, report: dict[str, Any], team: str, season: int, week: int, game_id: str) -> None:
+    observed = date.today().isoformat()
+    version = str(getattr(builder, "MODEL_VERSION", ""))
+    starters, injuries = _pending(builder, "starters"), _pending(builder, "injuries")
     starter_keys = {(str(x.get("Season")), str(x.get("Week")), _norm(x.get("Team")), x.get("Unit"), x.get("Position"), _norm(x.get("Player"))) for x in starters}
     injury_keys = {(x.get("Observed Date"), _norm(x.get("Team")), _norm(x.get("Player")), x.get("Status")) for x in injuries}
     for row in report.get("starters", []):
-        position = _clean_text(row.get("position")).upper()
-        item = {"Observed Date": observed, "Season": season, "Week": week, "Game ID": game_id, "Team": team, "Unit": row.get("unit", ""), "Position": position, "Player": row.get("player", ""), "Source URL": report.get("url", ""), "Model Version": version}
-        key = (str(season), str(week), _norm(team), item["Unit"], position, _norm(item["Player"]))
+        item = {
+            "Observed Date": observed, "Season": season, "Week": week, "Game ID": game_id,
+            "Team": team, "Unit": row.get("unit", ""), "Position": _clean_text(row.get("position")).upper(),
+            "Player": row.get("player", ""), "Source URL": report.get("url", ""), "Model Version": version,
+        }
+        key = (str(season), str(week), _norm(team), item["Unit"], item["Position"], _norm(item["Player"]))
         if key not in starter_keys:
             starters.append(item); starter_keys.add(key)
     for row in report.get("injuries", []):
-        item = {"Observed Date": observed, "Season": season, "Week": week, "Game ID": game_id, "Team": team, "Player": row.get("player", ""), "Position": row.get("position", ""), "Status": row.get("status", ""), "Detail": row.get("detail", ""), "Source URL": report.get("url", ""), "Model Version": version}
+        item = {
+            "Observed Date": observed, "Season": season, "Week": week, "Game ID": game_id,
+            "Team": team, "Player": row.get("player", ""), "Position": row.get("position", ""),
+            "Status": row.get("status", ""), "Detail": row.get("detail", ""),
+            "Source URL": report.get("url", ""), "Model Version": version,
+        }
         key = (observed, _norm(team), _norm(item["Player"]), item["Status"])
         if key not in injury_keys:
             injuries.append(item); injury_keys.add(key)
 
 
 def _write_pending(builder: Any, key: str, tab: str, columns: list[str], dedupe: list[str]) -> bool:
-    pending = _pending_list(builder, key)
+    pending = _pending(builder, key)
     if not pending:
         return True
     incoming = pd.DataFrame(pending).reindex(columns=columns)
-    existing = _history(builder, tab, columns)
-    combined = pd.concat([existing, incoming], ignore_index=True).drop_duplicates(subset=dedupe, keep="last")
+    combined = pd.concat([_history(builder, tab, columns), incoming], ignore_index=True)
+    combined = combined.drop_duplicates(subset=dedupe, keep="last")
     try:
         success = bool(builder.write_sheet(tab, combined, columns))
     except Exception:
@@ -453,14 +482,15 @@ def _write_pending(builder: Any, key: str, tab: str, columns: list[str], dedupe:
 
 
 def _flush_history(builder: Any, *, force: bool = False) -> None:
-    starters, injuries = _pending_list(builder, "starters"), _pending_list(builder, "injuries")
-    if not force and len(starters) < 120 and len(injuries) < 80:
+    starters, injuries = _pending(builder, "starters"), _pending(builder, "injuries")
+    if not force and len(starters) < STARTER_FLUSH_SIZE and len(injuries) < INJURY_FLUSH_SIZE:
         return
     _write_pending(builder, "starters", STARTER_HISTORY_TAB, STARTER_HISTORY_COLUMNS, ["Season", "Week", "Team", "Unit", "Position", "Player"])
     _write_pending(builder, "injuries", INJURY_HISTORY_TAB, INJURY_HISTORY_COLUMNS, ["Observed Date", "Team", "Player", "Status"])
 
 
-def _prior_team_rows(frame: pd.DataFrame, team: str, season: int, week: int) -> pd.DataFrame:
+def _prior_rows(builder: Any, tab: str, columns: list[str], team: str, season: int, week: int) -> pd.DataFrame:
+    frame = _history(builder, tab, columns)
     if frame.empty:
         return frame
     subset = frame[(frame["Season"].astype(str) == str(season)) & (frame["Team"].map(_norm) == _norm(team))].copy()
@@ -468,7 +498,7 @@ def _prior_team_rows(frame: pd.DataFrame, team: str, season: int, week: int) -> 
 
 
 def _modal_prior_qb(builder: Any, team: str, season: int, week: int) -> tuple[str, int, int]:
-    history = _prior_team_rows(_history(builder, STARTER_HISTORY_TAB, STARTER_HISTORY_COLUMNS), team, season, week)
+    history = _prior_rows(builder, STARTER_HISTORY_TAB, STARTER_HISTORY_COLUMNS, team, season, week)
     if history.empty:
         return "", 0, 0
     qbs = history[history["Position"].astype(str).str.upper() == "QB"].drop_duplicates(subset=["Week"], keep="last")
@@ -480,19 +510,18 @@ def _modal_prior_qb(builder: Any, team: str, season: int, week: int) -> tuple[st
 
 
 def _previous_injury_status(builder: Any, team: str, player: str, season: int, week: int) -> str:
-    history = _prior_team_rows(_history(builder, INJURY_HISTORY_TAB, INJURY_HISTORY_COLUMNS), team, season, week)
+    history = _prior_rows(builder, INJURY_HISTORY_TAB, INJURY_HISTORY_COLUMNS, team, season, week)
     if history.empty:
         return ""
-    matched = history[history["Player"].map(lambda value: _player_matches(str(value), player))]
+    matched = history[history["Player"].map(lambda value: _player_matches(str(value), player))].copy()
     if matched.empty:
         return ""
-    matched = matched.copy()
     matched["_week"] = pd.to_numeric(matched["Week"], errors="coerce").fillna(-1)
     matched = matched.sort_values(["_week", "Observed Date"])
     return _clean_text(matched.iloc[-1].get("Status"))
 
 
-def _injury_for_player(injuries: list[dict[str, str]], player: str) -> dict[str, str] | None:
+def _injury_for(injuries: list[dict[str, str]], player: str) -> dict[str, str] | None:
     return next((row for row in injuries if _player_matches(str(row.get("player", "")), player)), None)
 
 
@@ -500,56 +529,65 @@ def _starter_names(report: dict[str, Any]) -> list[str]:
     return [_clean_text(row.get("player")) for row in report.get("starters", []) if _clean_text(row.get("player"))]
 
 
-def _starter_history_names(builder: Any, team: str, season: int, week: int) -> list[str]:
-    history = _prior_team_rows(_history(builder, STARTER_HISTORY_TAB, STARTER_HISTORY_COLUMNS), team, season, week)
+def _historical_starter_names(builder: Any, team: str, season: int, week: int) -> list[str]:
+    history = _prior_rows(builder, STARTER_HISTORY_TAB, STARTER_HISTORY_COLUMNS, team, season, week)
     return [_clean_text(value) for value in history.get("Player", []) if _clean_text(value)] if not history.empty else []
 
 
-def _personnel_overlay(builder: Any, base: Any, report: dict[str, Any], team: str, rating: dict[str, Any], season: int, week: int, game_id: str) -> Any:
+def _personnel_overlay(builder: Any, base: Any, report: dict[str, Any], team: str, season: int, week: int) -> Any:
     if not report.get("ok"):
         return base
-    source_lower = _clean_text(getattr(base, "source", "")).lower()
-    if ("manual" in source_lower or "saved" in source_lower) and _clean_text(getattr(base, "expected_qb", "")) not in {"", "Unconfirmed"}:
+    source = _clean_text(getattr(base, "source", "")).lower()
+    expected_base = _clean_text(getattr(base, "expected_qb", ""))
+    if ("manual" in source or "saved" in source) and expected_base not in {"", "Unconfirmed"}:
         return base
-    current_starters, injuries = report.get("starters", []), report.get("injuries", [])
-    current_qb = next((_clean_text(row.get("player")) for row in current_starters if str(row.get("position", "")).upper() == "QB"), "")
-    modal_qb, modal_count, prior_qb_samples = _modal_prior_qb(builder, team, season, week)
-    expected_qb = current_qb or _clean_text(getattr(base, "expected_qb", "")) or "Unconfirmed"
+
+    starters = report.get("starters", [])
+    injuries = report.get("injuries", [])
+    current_qb = next((_clean_text(row.get("player")) for row in starters if str(row.get("position", "")).upper() == "QB"), "")
+    modal_qb, modal_count, qb_samples = _modal_prior_qb(builder, team, season, week)
+    expected_qb = current_qb or expected_base or "Unconfirmed"
     qb_confirmed = bool(current_qb)
-    notes = []
+    notes: list[str] = []
     if current_qb:
         notes.append(f"Covers last-game QB: {current_qb}")
+
     if modal_qb and modal_qb != current_qb:
-        modal_current_injury = _injury_for_player(injuries, modal_qb)
-        prior_status = _previous_injury_status(builder, team, modal_qb, season, week)
-        if modal_current_injury is None and _severity(prior_status) >= 0.40 and modal_count >= 2:
+        modal_injury = _injury_for(injuries, modal_qb)
+        previous_status = _previous_injury_status(builder, team, modal_qb, season, week)
+        if modal_injury is None and modal_count >= 2 and _severity(previous_status) >= 0.40:
             expected_qb, qb_confirmed = modal_qb, False
-            notes.append(f"Return candidate: {modal_qb} was a {modal_count}-game prior starter and is no longer on the injury list")
-        elif modal_current_injury is not None:
-            notes.append(f"Prior primary QB {modal_qb}: {modal_current_injury.get('status', '')}")
-    current_qb_injury = _injury_for_player(injuries, expected_qb)
-    if current_qb_injury and _severity(current_qb_injury.get("status", ""), current_qb_injury.get("detail", "")) >= 0.25:
+            notes.append(f"Return candidate: {modal_qb} was the starter in {modal_count} prior observations and is no longer on the injury list")
+        elif modal_injury is not None:
+            notes.append(f"Prior primary QB {modal_qb}: {modal_injury.get('status', '')}")
+
+    expected_injury = _injury_for(injuries, expected_qb)
+    if expected_injury and _severity(expected_injury.get("status", ""), expected_injury.get("detail", "")) >= 0.25:
         qb_confirmed = False
-        notes.append(f"{expected_qb}: {current_qb_injury.get('status', '')}")
-    base_cont = float(getattr(base, "qb_continuity", 0.50) or 0.50)
-    if prior_qb_samples:
-        stability = modal_count / max(1, prior_qb_samples)
-        hist_weight = 0.55 if prior_qb_samples >= 3 else 0.45
-        qb_continuity = hist_weight * stability + (1.0 - hist_weight) * base_cont
+        notes.append(f"{expected_qb}: {expected_injury.get('status', '')}")
+
+    base_continuity = float(getattr(base, "qb_continuity", 0.50) or 0.50)
+    if qb_samples:
+        stability = modal_count / max(1, qb_samples)
+        hist_weight = 0.55 if qb_samples >= 3 else 0.45
+        qb_continuity = hist_weight * stability + (1.0 - hist_weight) * base_continuity
         if current_qb and modal_qb and current_qb != modal_qb:
             qb_continuity *= 0.72
     else:
-        qb_continuity = base_cont
+        qb_continuity = base_continuity
     qb_continuity = max(0.10, min(1.0, qb_continuity))
-    current_names, prior_names = _starter_names(report), _starter_history_names(builder, team, season, week)
+
+    starter_names = _starter_names(report)
+    historical_names = _historical_starter_names(builder, team, season, week)
     qb_adj = ol_adj = skill_adj = dl_adj = lb_adj = sec_adj = kicker_adj = uncertainty = 0.0
     for injury in injuries:
-        position, player = _clean_text(injury.get("position")).upper(), _clean_text(injury.get("player"))
+        position = _clean_text(injury.get("position")).upper()
+        player = _clean_text(injury.get("player"))
         if position not in POSITION_POINTS or not player:
             continue
         sev = _severity(injury.get("status", ""), injury.get("detail", ""))
-        is_starter = any(_player_matches(player, name) for name in current_names) or any(_player_matches(player, name) for name in prior_names)
-        role_weight = 1.0 if is_starter else 0.35
+        was_starter = any(_player_matches(player, name) for name in starter_names + historical_names)
+        role_weight = 1.0 if was_starter else 0.35
         points = -POSITION_POINTS[position] * sev * role_weight
         uncertainty += (1.0 if position == "QB" else 0.4) * (1.0 - abs(sev - 0.5) * 2.0) * role_weight
         if position == "QB": qb_adj += points
@@ -559,27 +597,49 @@ def _personnel_overlay(builder: Any, base: Any, report: dict[str, Any], team: st
         elif position in {"LB", "ILB", "OLB"}: lb_adj += points
         elif position in {"CB", "S", "DB"}: sec_adj += points
         elif position == "K": kicker_adj += points
+
     if modal_qb and modal_qb != current_qb and modal_count >= 2:
-        lost_qb = _injury_for_player(injuries, modal_qb)
+        lost_qb = _injury_for(injuries, modal_qb)
         if lost_qb:
             qb_adj = min(qb_adj, -POSITION_POINTS["QB"] * _severity(lost_qb.get("status", ""), lost_qb.get("detail", "")))
-    qb_adj = max(-5.0, min(0.0, qb_adj)); skill_adj = max(-2.25, min(0.0, skill_adj)); ol_adj = max(-1.50, min(0.0, ol_adj))
-    dl_adj = max(-1.50, min(0.0, dl_adj)); lb_adj = max(-1.20, min(0.0, lb_adj)); sec_adj = max(-1.50, min(0.0, sec_adj)); kicker_adj = max(-0.50, min(0.0, kicker_adj))
-    availability = 88.0 if current_starters else 68.0
+
+    qb_adj = max(-5.0, min(0.0, qb_adj))
+    skill_adj = max(-2.25, min(0.0, skill_adj))
+    ol_adj = max(-1.50, min(0.0, ol_adj))
+    dl_adj = max(-1.50, min(0.0, dl_adj))
+    lb_adj = max(-1.20, min(0.0, lb_adj))
+    sec_adj = max(-1.50, min(0.0, sec_adj))
+    kicker_adj = max(-0.50, min(0.0, kicker_adj))
+
+    availability = 88.0 if starters else 68.0
     availability -= min(18.0, uncertainty * 5.0)
-    if expected_qb == "Unconfirmed": availability = min(availability, 55.0)
-    if not qb_confirmed: availability = min(availability, 76.0)
+    if expected_qb == "Unconfirmed":
+        availability = min(availability, 55.0)
+    if not qb_confirmed:
+        availability = min(availability, 76.0)
     availability = max(35.0, min(96.0, availability))
-    injury_notes = [f"{row.get('player')} {row.get('status')}" for row in injuries if str(row.get("position", "")).upper() in {"QB", "RB", "WR", "TE"}]
-    if injury_notes:
-        notes.append("Skill injuries: " + "; ".join(injury_notes[:6]))
+
+    skill_notes = [f"{row.get('player')} {row.get('status')}" for row in injuries if str(row.get("position", "")).upper() in {"QB", "RB", "WR", "TE"}]
+    if skill_notes:
+        notes.append("Skill injuries: " + "; ".join(skill_notes[:6]))
+
     return builder.Personnel(
-        expected_qb=expected_qb, qb_confirmed=qb_confirmed, qb_continuity=round(qb_continuity, 3),
-        qb_adjustment=round(qb_adj, 3), ol_adjustment=round(ol_adj, 3), skill_adjustment=round(skill_adj, 3),
-        dl_adjustment=round(dl_adj, 3), linebacker_adjustment=round(lb_adj, 3), secondary_adjustment=round(sec_adj, 3),
-        kicker_adjustment=round(kicker_adj, 3), special_teams_adjustment=float(getattr(base, "special_teams_adjustment", 0.0) or 0.0),
-        coaching_continuity=float(getattr(base, "coaching_continuity", 0.75) or 0.75), coordinator_continuity=float(getattr(base, "coordinator_continuity", 0.67) or 0.67),
-        availability_confidence=round(availability, 1), source="Covers.com injuries + last-game starters", notes="; ".join(notes),
+        expected_qb=expected_qb,
+        qb_confirmed=qb_confirmed,
+        qb_continuity=round(qb_continuity, 3),
+        qb_adjustment=round(qb_adj, 3),
+        ol_adjustment=round(ol_adj, 3),
+        skill_adjustment=round(skill_adj, 3),
+        dl_adjustment=round(dl_adj, 3),
+        linebacker_adjustment=round(lb_adj, 3),
+        secondary_adjustment=round(sec_adj, 3),
+        kicker_adjustment=round(kicker_adj, 3),
+        special_teams_adjustment=float(getattr(base, "special_teams_adjustment", 0.0) or 0.0),
+        coaching_continuity=float(getattr(base, "coaching_continuity", 0.75) or 0.75),
+        coordinator_continuity=float(getattr(base, "coordinator_continuity", 0.67) or 0.67),
+        availability_confidence=round(availability, 1),
+        source="Covers.com injuries + last-game starters",
+        notes="; ".join(notes),
     )
 
 
@@ -590,23 +650,27 @@ def _prefetch(builder: Any, teams: list[str]) -> None:
     with ThreadPoolExecutor(max_workers=min(6, len(unique)), thread_name_prefix="ezpz-covers-cfb") as pool:
         futures = [pool.submit(_team_report, builder, team) for team in unique]
         for future in as_completed(futures):
-            try: future.result()
-            except Exception: pass
+            try:
+                future.result()
+            except Exception:
+                pass
 
 
 def install_covers_layer(builder: Any) -> None:
     """Install the Covers overlay on an imported ``cfb_builder`` module."""
     if getattr(builder, "_EZPZ_CFB_COVERS_LAYER", False):
         return
+
     builder.COVERS_STARTER_HISTORY_TAB = STARTER_HISTORY_TAB
     builder.COVERS_STARTER_HISTORY_COLUMNS = STARTER_HISTORY_COLUMNS
     builder.COVERS_INJURY_HISTORY_TAB = INJURY_HISTORY_TAB
     builder.COVERS_INJURY_HISTORY_COLUMNS = INJURY_HISTORY_COLUMNS
+
     original_default_personnel = builder.default_personnel
     original_build_environment = builder.build_environment
     original_run_week = builder.run_week
     original_incremental = builder._ensure_automatic_day_slate_incremental
-    original_auto_save = builder._auto_save_selected_projection
+    original_save_result = builder.save_result
     original_clear = builder._clear_automatic_state
 
     def default_personnel(team: str, rating: dict[str, Any], season: int, week: int, game_id: str, live_candidate: bool = True):
@@ -615,8 +679,8 @@ def install_covers_layer(builder: Any) -> None:
             report = _team_report(builder, team)
             if not report.get("ok"):
                 return base
-            result = _personnel_overlay(builder, base, report, team, rating, season, week, game_id)
-            _buffer_observations(builder, report, team, season, week, game_id)
+            result = _personnel_overlay(builder, base, report, team, season, week)
+            _buffer(builder, report, team, season, week, game_id)
             _flush_history(builder, force=False)
             return result
         except Exception:
@@ -628,28 +692,35 @@ def install_covers_layer(builder: Any) -> None:
             card = _match_weather(builder, str(game.get("Away Team", "")), str(game.get("Home Team", "")))
             if not card:
                 return base
-            temp, wind, precip = float(card.get("temperature", math.nan)), float(card.get("wind", math.nan)), float(card.get("precipitation", math.nan))
-            if sum(math.isfinite(v) for v in (temp, wind, precip)) < 2:
+            values = [float(card.get("temperature", math.nan)), float(card.get("wind", math.nan)), float(card.get("precipitation", math.nan))]
+            if sum(math.isfinite(value) for value in values) < 2:
                 return base
-            temp = temp if math.isfinite(temp) else float(getattr(base, "temperature", math.nan))
-            wind = wind if math.isfinite(wind) else float(getattr(base, "wind", math.nan))
-            precip = precip if math.isfinite(precip) else float(getattr(base, "precipitation_probability", math.nan))
-            if not all(math.isfinite(v) for v in (temp, wind, precip)):
+            temp = values[0] if math.isfinite(values[0]) else float(getattr(base, "temperature", math.nan))
+            wind = values[1] if math.isfinite(values[1]) else float(getattr(base, "wind", math.nan))
+            precip = values[2] if math.isfinite(values[2]) else float(getattr(base, "precipitation_probability", math.nan))
+            if not all(math.isfinite(value) for value in (temp, wind, precip)):
                 return base
-            total_weather, home_weather, weather_note = builder._weather_adjustment(temp, wind, precip, str(getattr(base, "roof", "")))
+            total_weather, home_weather, note = builder._weather_adjustment(temp, wind, precip, str(getattr(base, "roof", "")))
             non_weather_hfa = float(getattr(base, "home_field", 0.0)) - float(getattr(base, "weather_home_adjustment", 0.0))
-            base.temperature, base.wind, base.precipitation_probability = temp, wind, precip
-            base.weather_total_adjustment, base.weather_home_adjustment = total_weather, home_weather
+            base.temperature = temp
+            base.wind = wind
+            base.precipitation_probability = precip
+            base.weather_total_adjustment = total_weather
+            base.weather_home_adjustment = home_weather
             base.home_field = round(non_weather_hfa + home_weather, 3)
             base.weather_confidence = max(float(getattr(base, "weather_confidence", 0.0)), 92.0)
-            prior_notes = _clean_text(getattr(base, "notes", ""))
-            base.notes = f"{prior_notes}; Covers weather: {weather_note} ({temp:.1f}F, wind {wind:.1f} mph, POP {precip:.0%})".strip("; ")
-            return base
+            prior = _clean_text(getattr(base, "notes", ""))
+            base.notes = f"{prior}; Covers weather: {note} ({temp:.1f}F, wind {wind:.1f} mph, POP {precip:.0%})".strip("; ")
         except Exception:
-            return base
+            pass
+        return base
 
     def run_week(*args, **kwargs):
         schedule = kwargs.get("schedule")
+        if not isinstance(schedule, pd.DataFrame):
+            # run_week(season, week, provider, *, schedule=...) currently makes
+            # schedule keyword-only, but keep this defensive for future refactors.
+            schedule = None
         try:
             if isinstance(schedule, pd.DataFrame) and not schedule.empty:
                 _prefetch(builder, list(schedule.get("Away Team", [])) + list(schedule.get("Home Team", [])))
@@ -669,23 +740,34 @@ def install_covers_layer(builder: Any) -> None:
             pass
         return result
 
-    def auto_save(result: dict[str, Any]) -> None:
-        try: original_auto_save(result)
-        finally: _flush_history(builder, force=True)
+    def save_result(*args, **kwargs):
+        result = original_save_result(*args, **kwargs)
+        _flush_history(builder, force=True)
+        return result
 
     def clear_automatic_state() -> None:
         original_clear()
         global _DIRECTORY, _WEATHER
         with _LOCK:
-            _MEMORY_HTML.clear(); _TEAM_REPORTS.clear(); _DIRECTORY = None; _WEATHER = None
+            _MEMORY_HTML.clear()
+            _TEAM_REPORTS.clear()
+            _DIRECTORY = None
+            _WEATHER = None
+        _pending(builder, "starters").clear()
+        _pending(builder, "injuries").clear()
 
     builder.default_personnel = default_personnel
     builder.build_environment = build_environment
     builder.run_week = run_week
     builder._ensure_automatic_day_slate_incremental = incremental
-    builder._auto_save_selected_projection = auto_save
+    # Persist history on the explicit Save action, never on the runtime guard's
+    # automatic projection helper. This preserves the CFB anti-quota behavior.
+    builder.save_result = save_result
     builder._clear_automatic_state = clear_automatic_state
     builder._EZPZ_CFB_COVERS_LAYER = True
 
 
-__all__ = ["install_covers_layer", "_parse_team_report", "_parse_weather_html", "_candidate_score", "_player_matches", "_severity"]
+__all__ = [
+    "install_covers_layer", "_parse_team_report", "_parse_weather_html",
+    "_candidate_score", "_player_matches", "_severity",
+]
