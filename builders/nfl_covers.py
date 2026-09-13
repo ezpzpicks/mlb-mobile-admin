@@ -19,7 +19,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-COVERS_NFL_WEATHER_URL = "https://www.covers.com/sport/football/nfl/weather"
+# Covers' current NFL weather route. The older /sport/football/nfl/weather path
+# is not the page used by the live site and can fail to return the weather cards.
+COVERS_NFL_WEATHER_URL = "https://www.covers.com/sport/nfl/weather"
 WEATHER_TTL = 30 * 60
 STALE_MAX_AGE = 48 * 60 * 60
 CACHE_DIR = Path("/tmp/ezpz_nfl_covers_cache")
@@ -46,15 +48,15 @@ NFL_TEAM_NAMES: dict[str, tuple[str, ...]] = {
     "IND": ("ind", "indianapolis", "colts", "indianapolis colts"),
     "JAX": ("jax", "jac", "jacksonville", "jaguars", "jacksonville jaguars"),
     "KC": ("kc", "kansas city", "chiefs", "kansas city chiefs"),
-    "LAC": ("lac", "la chargers", "los angeles chargers", "chargers"),
-    "LAR": ("lar", "la rams", "los angeles rams", "rams"),
+    "LAC": ("lac", "la chargers", "l a chargers", "los angeles chargers", "chargers"),
+    "LAR": ("lar", "la rams", "l a rams", "los angeles rams", "rams"),
     "LV": ("lv", "las vegas", "raiders", "las vegas raiders"),
     "MIA": ("mia", "miami", "dolphins", "miami dolphins"),
     "MIN": ("min", "minnesota", "vikings", "minnesota vikings"),
     "NE": ("ne", "new england", "patriots", "new england patriots"),
     "NO": ("no", "new orleans", "saints", "new orleans saints"),
-    "NYG": ("nyg", "ny giants", "new york giants", "giants"),
-    "NYJ": ("nyj", "ny jets", "new york jets", "jets"),
+    "NYG": ("nyg", "ny giants", "n y giants", "new york giants", "giants"),
+    "NYJ": ("nyj", "ny jets", "n y jets", "new york jets", "jets"),
     "PHI": ("phi", "philadelphia", "eagles", "philadelphia eagles"),
     "PIT": ("pit", "pittsburgh", "steelers", "pittsburgh steelers"),
     "SEA": ("sea", "seattle", "seahawks", "seattle seahawks"),
@@ -120,28 +122,49 @@ def _condition(text: str, pop: float) -> str:
 
 
 def _parse_weather_html(html: str) -> list[dict[str, Any]]:
+    """Parse each Covers matchup together with the weather that follows it.
+
+    Covers places the stadium weather after the odds table and before the next
+    matchup heading. Parsing the page as an ordered text stream is more stable
+    than walking parent DOM nodes, which can accidentally include a neighboring
+    game's weather card.
+    """
     soup = BeautifulSoup(html, "html.parser")
+    lines = [_clean_text(value) for value in soup.stripped_strings]
     output: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
 
-    def parse_block(matchup: str, text: str) -> None:
+    starts = [
+        i for i, value in enumerate(lines)
+        if " @ " in f" {value} "
+        and len(value) < 120
+        and "compare odds" not in value.lower()
+        and " on " not in value.lower()
+    ]
+
+    for offset, start in enumerate(starts):
+        matchup = lines[start]
         if "@" not in matchup:
-            return
+            continue
+        end = starts[offset + 1] if offset + 1 < len(starts) else min(len(lines), start + 220)
+        block = " ".join(lines[start:end])
         away_raw, home_raw = [_clean_text(part) for part in matchup.split("@", 1)]
         away, home = _team_code(away_raw), _team_code(home_raw)
         if not away or not home or away == home:
-            return
-        temp_match = re.search(r"(-?\d+(?:\.\d+)?)\s*°\s*F", text, re.I)
-        wind_match = re.search(r"(\d+(?:\.\d+)?)\s*Mph\b", text, re.I)
-        pop_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", text, re.I)
+            continue
+
+        temp_match = re.search(r"(-?\d+(?:\.\d+)?)\s*°\s*F", block, re.I)
+        wind_match = re.search(r"(\d+(?:\.\d+)?)\s*Mph\b", block, re.I)
+        pop_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", block, re.I)
         temp = float(temp_match.group(1)) if temp_match else math.nan
         wind = float(wind_match.group(1)) if wind_match else math.nan
         pop = float(pop_match.group(1)) / 100.0 if pop_match else math.nan
         if not (math.isfinite(temp) or math.isfinite(wind) or math.isfinite(pop)):
-            return
+            continue
+
         key = (away, home)
         if key in seen:
-            return
+            continue
         seen.add(key)
         output.append({
             "away": away,
@@ -149,34 +172,9 @@ def _parse_weather_html(html: str) -> list[dict[str, Any]]:
             "temperature": temp,
             "wind": wind,
             "precipitation_probability": pop,
-            "precipitation": _condition(text, pop),
+            "precipitation": _condition(block, pop),
         })
 
-    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5"]):
-        matchup = _clean_text(heading.get_text(" ", strip=True))
-        if " @ " not in f" {matchup} ":
-            continue
-        node, block = heading, ""
-        for _ in range(6):
-            node = node.parent
-            if node is None:
-                break
-            candidate = _clean_text(node.get_text(" ", strip=True))
-            if len(candidate) > 5000:
-                break
-            block = candidate
-            if "Mph" in candidate or "P.O.P" in candidate or "Humidity" in candidate:
-                break
-        parse_block(matchup, block)
-
-    if output:
-        return output
-
-    lines = [_clean_text(value) for value in soup.stripped_strings]
-    starts = [i for i, value in enumerate(lines) if " @ " in f" {value} " and len(value) < 120]
-    for offset, start in enumerate(starts):
-        end = starts[offset + 1] if offset + 1 < len(starts) else min(len(lines), start + 160)
-        parse_block(lines[start], " ".join(lines[start:end]))
     return output
 
 
@@ -242,6 +240,13 @@ def _match_weather(away: Any, home: Any) -> dict[str, Any]:
     return {}
 
 
+def _same_number(value: Any, expected: Any) -> bool:
+    try:
+        return abs(float(value) - float(expected)) < 0.001
+    except Exception:
+        return False
+
+
 def install_covers_weather(builder: Any) -> None:
     """Install the NFL-only Covers weather pathway on the NFL builder."""
     if getattr(builder, "_EZPZ_NFL_COVERS_WEATHER", False):
@@ -254,6 +259,8 @@ def install_covers_weather(builder: Any) -> None:
         if row is None:
             return defaults
         try:
+            original_temp = float(defaults.get("temperature", 70.0))
+            original_wind = float(defaults.get("wind", 6.0))
             away = row.get("Away Team", "")
             home = row.get("Home Team", "")
             weather = _match_weather(away, home)
@@ -269,7 +276,13 @@ def install_covers_weather(builder: Any) -> None:
                 defaults["wind"] = max(0.0, wind)
             defaults["precipitation"] = precip if precip in {"None", "Rain", "Heavy Rain", "Snow", "Heavy Snow"} else "None"
             defaults["weather_source"] = "Covers.com"
+            defaults["precipitation_probability"] = weather.get("precipitation_probability", math.nan)
 
+            # Streamlit keeps keyed widget values across reruns. If this game was
+            # opened before Covers weather loaded, the old schedule defaults can
+            # remain stuck at values such as 70 F / 6 mph. Replace only values
+            # that still equal those automatic defaults; preserve anything the
+            # user actually changed by hand.
             game_id = _clean_text(defaults.get("game_id") or row.get("Game ID") or "")
             market_key = re.sub(r"[^A-Za-z0-9]+", "_", game_id)
             if market_key:
@@ -277,11 +290,16 @@ def install_covers_weather(builder: Any) -> None:
                 temp_key = f"nfl_temp_{market_key}"
                 wind_key = f"nfl_wind_{market_key}"
                 precip_key = f"nfl_precip_{market_key}"
-                if math.isfinite(temp) and temp_key not in session:
+
+                current_temp = session.get(temp_key)
+                current_wind = session.get(wind_key)
+                current_precip = _clean_text(session.get(precip_key, "None")) or "None"
+
+                if math.isfinite(temp) and (temp_key not in session or _same_number(current_temp, original_temp)):
                     session[temp_key] = float(temp)
-                if math.isfinite(wind) and wind_key not in session:
+                if math.isfinite(wind) and (wind_key not in session or _same_number(current_wind, original_wind)):
                     session[wind_key] = float(max(0.0, wind))
-                if precip_key not in session:
+                if precip_key not in session or current_precip == "None":
                     session[precip_key] = defaults["precipitation"]
         except Exception:
             return defaults
