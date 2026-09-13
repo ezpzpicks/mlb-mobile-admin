@@ -1,18 +1,14 @@
 from pathlib import Path
 
-
 path = Path("builders/nfl_builder.py")
 text = path.read_text(encoding="utf-8")
 
-# RB2 should mean the second running back, not a fullback fallback.
 old_rb2 = '("RB2", ["RB", "HB", "FB"]),'
 new_rb2 = '("RB2", ["RB", "HB"]),'
 if text.count(old_rb2) != 1:
     raise SystemExit("RB2 slot definition not found exactly once")
 text = text.replace(old_rb2, new_rb2, 1)
 
-# Sleeper remains useful for injury/status data, but its depth ordering is stale
-# often enough that it should not be an authority for player-prop roles.
 old_doc = '    """Daily current-team, depth-order and injury fallback from Sleeper.\n'
 new_doc = '    """Daily current-team and injury/status fallback from Sleeper.\n'
 if text.count(old_doc) != 1:
@@ -27,7 +23,6 @@ for obsolete_line in [
         raise SystemExit(f"obsolete Sleeper depth field not found exactly once: {obsolete_line.strip()}")
     text = text.replace(obsolete_line, "", 1)
 
-# Insert ESPN loader before snap-count loading.
 insertion_anchor = "\n\n@st.cache_resource(ttl=21600, show_spinner=False)\ndef _load_snap_counts_season(season: int) -> pd.DataFrame:\n"
 if text.count(insertion_anchor) != 1:
     raise SystemExit("snap-count loader insertion anchor not found exactly once")
@@ -70,15 +65,8 @@ def _load_espn_depth_charts() -> pd.DataFrame:
         rows: list[dict[str, Any]] = []
         failed_teams: list[str] = []
         position_map = {
-            "QB": "QB",
-            "RB": "RB",
-            "HB": "RB",
-            "FB": "FB",
-            "WR": "WR",
-            "LWR": "WR",
-            "RWR": "WR",
-            "SWR": "WR",
-            "TE": "TE",
+            "QB": "QB", "RB": "RB", "HB": "RB", "FB": "FB", "WR": "WR",
+            "LWR": "WR", "RWR": "WR", "SWR": "WR", "TE": "TE",
         }
 
         with requests.Session() as session:
@@ -94,19 +82,14 @@ def _load_espn_depth_charts() -> pd.DataFrame:
                     team_response.raise_for_status()
                     team_payload = team_response.json()
                     charts = team_payload.get("depthCharts", []) if isinstance(team_payload, dict) else []
-                    team_rows_before = len(rows)
-
+                    before = len(rows)
                     for chart in charts:
                         if not isinstance(chart, dict):
                             continue
                         positions = chart.get("positions", {})
-                        if isinstance(positions, dict):
-                            position_entries = list(positions.values())
-                        elif isinstance(positions, list):
-                            position_entries = positions
-                        else:
+                        position_entries = list(positions.values()) if isinstance(positions, dict) else positions
+                        if not isinstance(position_entries, list):
                             continue
-
                         for position_entry in position_entries:
                             if not isinstance(position_entry, dict):
                                 continue
@@ -119,7 +102,6 @@ def _load_espn_depth_charts() -> pd.DataFrame:
                             position = position_map.get(raw_position, "")
                             if not position:
                                 continue
-
                             athletes = position_entry.get("athletes", [])
                             if not isinstance(athletes, list):
                                 continue
@@ -145,8 +127,7 @@ def _load_espn_depth_charts() -> pd.DataFrame:
                                     "pos_slot_num": order,
                                     "depth_source": "ESPN current depth chart",
                                 })
-
-                    if len(rows) == team_rows_before:
+                    if len(rows) == before:
                         failed_teams.append(team)
                 except Exception:
                     failed_teams.append(team)
@@ -175,11 +156,8 @@ def _load_espn_depth_charts() -> pd.DataFrame:
         st.session_state["nfl_espn_depth_status"] = "ESPN depth charts unavailable; nflverse fallback used."
         return pd.DataFrame()
 '''
-
 text = text.replace(insertion_anchor, espn_loader + insertion_anchor, 1)
 
-# Replace the old depth-authority function wholesale. This removes the legacy
-# Sleeper override rather than stacking another fallback on top of it.
 start = text.find("def _latest_depth_chart(season: int) -> pd.DataFrame:")
 end = text.find("\ndef _injury_lookup(season: int, week: int)", start)
 if start < 0 or end < 0:
@@ -190,20 +168,18 @@ new_latest = '''def _latest_depth_chart(season: int) -> pd.DataFrame:
 
     Current-season QB/RB/WR/TE ordering comes from ESPN's live depth-chart API.
     nflverse remains the detailed OL/defensive source and the fallback whenever
-    ESPN is unavailable for a specific team or position. Sleeper is intentionally
-    not used for depth ordering because its depth_chart_order values can be stale.
+    ESPN is unavailable for a specific team or position. Sleeper remains an
+    injury/status source only because its role-order metadata can be stale.
     """
     depth = _load_depth_charts_season(season)
     if depth.empty and season > 2001:
         depth = _load_depth_charts_season(season - 1)
 
     if depth.empty:
-        out = pd.DataFrame(
-            columns=[
-                "team_norm", "player_name_display", "pos_norm", "pos_rank_num",
-                "pos_slot_num", "depth_source",
-            ]
-        )
+        out = pd.DataFrame(columns=[
+            "team_norm", "player_name_display", "pos_norm", "pos_rank_num",
+            "pos_slot_num", "depth_source",
+        ])
     else:
         out = depth.copy()
         out["team_norm"] = _column(out, "team", default="").map(_normalize_team)
@@ -223,15 +199,12 @@ new_latest = '''def _latest_depth_chart(season: int) -> pd.DataFrame:
             if not current.empty:
                 out = current
 
-    # ESPN's site endpoint is a current depth chart, so never inject it into a
-    # historical-season view/backtest.
     espn = _load_espn_depth_charts() if int(season) == int(DEFAULT_SEASON) else pd.DataFrame()
     if not espn.empty:
         espn_skill = espn[
             espn["pos_norm"].astype(str).str.upper().isin(["QB", "RB", "WR", "TE"])
         ].copy()
         if not espn_skill.empty:
-            # Replace only the team/position families ESPN actually returned.
             for (team, position), _ in espn_skill.groupby(["team_norm", "pos_norm"], dropna=False):
                 if out.empty:
                     break
@@ -256,10 +229,14 @@ new_latest = '''def _latest_depth_chart(season: int) -> pd.DataFrame:
     return out.drop_duplicates(["team_norm", "name_norm"], keep="first").reset_index(drop=True)
 
 '''
-
 text = text[:start] + new_latest + text[end:]
 
-if "depth_chart_order" in text or "depth_chart_position" in text:
+legacy_patterns = [
+    '"depth_chart_order": _int(raw.get("depth_chart_order"',
+    '"depth_chart_position": _safe_text(raw.get("depth_chart_position"',
+    'pd.to_numeric(skill["depth_chart_order"]',
+]
+if any(pattern in text for pattern in legacy_patterns):
     raise SystemExit("legacy Sleeper depth-order code still remains")
 
 path.write_text(text, encoding="utf-8")
