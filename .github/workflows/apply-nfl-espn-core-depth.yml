@@ -1,0 +1,94 @@
+name: Apply permanent ESPN Core NFL depth replacement
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/apply-nfl-espn-core-depth.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Replace NFL depth source in actual builder
+        run: python .github/scripts/replace_nfl_espn_core_depth.py
+
+      - name: Validate builder and live ESPN ordering
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py
+          grep -q 'ESPN Core current depth chart' builders/nfl_builder.py
+          grep -q 'ESPN_TEAM_IDS' builders/nfl_builder.py
+          ! grep -q 'site.api.espn.com/apis/site/v2/sports/football/nfl/teams?limit=50' builders/nfl_builder.py
+          git diff --check
+          python - <<'PY'
+          import requests
+
+          s = requests.Session()
+          s.headers.update({"User-Agent": "EZPZ-Picks/1.0"})
+          sleeper = s.get("https://api.sleeper.app/v1/players/nfl", timeout=60)
+          sleeper.raise_for_status()
+          players = sleeper.json()
+          espn_names = {}
+          for pid, raw in players.items():
+              if not isinstance(raw, dict):
+                  continue
+              eid = str(raw.get("espn_id") or "").strip()
+              name = str(raw.get("full_name") or "").strip()
+              if eid and name:
+                  espn_names[eid] = name
+
+          expected = {
+              "ATL": ("1", ["Bijan Robinson", "Brian Robinson Jr.", "Trey Sermon"]),
+              "PIT": ("23", ["Jaylen Warren", "Rico Dowdle", "Eli Heidenreich"]),
+          }
+
+          for team, (team_id, wanted) in expected.items():
+              url = f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/teams/{team_id}/depthcharts"
+              response = s.get(url, timeout=30)
+              response.raise_for_status()
+              payload = response.json()
+              rb_entries = []
+              for chart in payload.get("items", []):
+                  positions = chart.get("positions", {}) if isinstance(chart, dict) else {}
+                  if not isinstance(positions, dict) or "rb" not in positions:
+                      continue
+                  keys = set(positions)
+                  if not {"qb", "rb", "wr", "te"}.issubset(keys):
+                      continue
+                  rb_entries = positions["rb"].get("athletes", [])
+                  break
+              got = []
+              for entry in sorted(rb_entries, key=lambda x: int(x.get("rank", 99))):
+                  ref = str((entry.get("athlete") or {}).get("$ref") or "")
+                  eid = ref.split("/athletes/", 1)[1].split("?", 1)[0] if "/athletes/" in ref else ""
+                  got.append(espn_names.get(eid, eid))
+              assert got[:3] == wanted, f"{team} RB order mismatch: {got[:3]} != {wanted}"
+              print(team, got[:3])
+          PY
+
+      - name: Remove temporary migration and diagnostic files
+        shell: bash
+        run: |
+          rm -f .github/scripts/replace_nfl_espn_core_depth.py
+          rm -f .github/workflows/apply-nfl-espn-core-depth.yml
+          rm -f .github/workflows/diagnose-espn-depth-html.yml
+
+      - name: Commit permanent builder replacement
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Use ESPN Core for current NFL skill depth charts"
+          git push
