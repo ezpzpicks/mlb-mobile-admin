@@ -92,11 +92,17 @@ def main() -> None:
         nfl_builder.TRACKER_TAB,
         nfl_builder.PROP_TRACKER_TAB,
         nfl_builder.LINEUP_TAB,
+        nfl_builder.BUILDER_COMPLETION_TAB,
     ]
     stored = {
         tab: pd.DataFrame({"Date": ["2026-09-12", "2026-09-13"], "Marker": ["keep", "reset"]})
         for tab in generated_tabs
     }
+    stored[nfl_builder.BUILDER_COMPLETION_TAB] = pd.DataFrame({
+        "Sport": ["NFL", "NFL", "CFB"],
+        "Date": ["2026-09-12", "2026-09-13", "2026-09-13"],
+        "Marker": ["keep", "reset", "other sport"],
+    })
     reset_writes = {}
     try:
         nfl_builder.sheets_ready = lambda: True
@@ -115,8 +121,11 @@ def main() -> None:
     assert reset_ok
     assert reset_counts == {tab: 1 for tab in generated_tabs}
     assert set(reset_writes) == set(generated_tabs)
-    for dataframe in reset_writes.values():
-        assert dataframe["Date"].tolist() == ["2026-09-12"]
+    for tab, dataframe in reset_writes.items():
+        if tab == nfl_builder.BUILDER_COMPLETION_TAB:
+            assert dataframe["Marker"].tolist() == ["keep", "other sport"]
+        else:
+            assert dataframe["Date"].tolist() == ["2026-09-12"]
 
     rb_carries, rb_ypc = skill.project_rb_rushing(_context("RB"))
     rb_targets, rb_ypt = skill.project_rb_receiving(_context("RB"))

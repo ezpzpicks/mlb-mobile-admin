@@ -86,6 +86,10 @@ MODEL_LOG_TAB = "model_change_log"
 PROP_SLATE_TAB = "prop_projections"
 PROP_TRACKER_TAB = "prop_tracker"
 PROP_CALIBRATION_TAB = "prop_calibration"
+BUILDER_COMPLETION_TAB = "builder_completed"
+BUILDER_COMPLETION_COLUMNS = [
+    "Sport", "Date", "Away Team", "Home Team", "Game Label", "Saved At",
+]
 
 RATING_COLUMNS = [
     "Team", "Season", "Projection Week", "Previous Season Weight", "Current Season Weight",
@@ -4080,6 +4084,7 @@ def _reset_slate_date(slate_date: str) -> tuple[bool, dict[str, int], str]:
         (TRACKER_TAB, TRACKER_COLUMNS),
         (PROP_TRACKER_TAB, PROP_TRACKER_COLUMNS),
         (LINEUP_TAB, LINEUP_COLUMNS),
+        (BUILDER_COMPLETION_TAB, BUILDER_COMPLETION_COLUMNS),
     ]
     originals: dict[str, pd.DataFrame] = {}
     replacements: dict[str, pd.DataFrame] = {}
@@ -4100,6 +4105,8 @@ def _reset_slate_date(slate_date: str) -> tuple[bool, dict[str, int], str]:
         parsed_dates = pd.to_datetime(raw_dates, errors="coerce").dt.strftime("%Y-%m-%d")
         normalized_dates = parsed_dates.fillna(raw_dates.str[:10])
         reset_mask = normalized_dates == target_date
+        if tab == BUILDER_COMPLETION_TAB and "Sport" in existing.columns:
+            reset_mask &= existing["Sport"].astype(str).str.strip().str.upper().eq("NFL")
         removed_counts[tab] = int(reset_mask.sum())
         if removed_counts[tab]:
             replacements[tab] = existing.loc[~reset_mask].copy()
@@ -4133,6 +4140,47 @@ def _reset_slate_date(slate_date: str) -> tuple[bool, dict[str, int], str]:
 
     total_removed = sum(removed_counts.values())
     return True, removed_counts, f"Cleared {total_removed} saved row(s) for the {target_date} NFL slate."
+
+
+def _render_slate_reset_control(slate_date: str, season: int) -> None:
+    """Render the reset before the completed-matchup selector can stop the page."""
+    target_date = str(slate_date).strip()[:10]
+    flash_key = f"nfl_reset_slate_flash_{season}_{target_date}"
+    flash_message = st.session_state.pop(flash_key, None)
+    if flash_message:
+        st.success(str(flash_message))
+
+    with st.expander("Reset selected slate", expanded=False):
+        st.warning(
+            f"This clears saved NFL rows dated {target_date} from the daily slate, prop projections, "
+            "game tracker, prop tracker, lineup snapshots, and completed-matchup list. Schedule, ratings, "
+            "calibration history, model history, and every other date are preserved."
+        )
+        reset_confirmed = st.checkbox(
+            f"I understand and want to clear the {target_date} NFL slate",
+            value=False,
+            key=f"nfl_reset_slate_confirm_{season}_{target_date}",
+        )
+        if st.button(
+            f"Reset {target_date} NFL slate",
+            disabled=not reset_confirmed,
+            use_container_width=True,
+            key=f"nfl_reset_slate_{season}_{target_date}",
+        ):
+            with st.spinner(f"Clearing the {target_date} NFL slate..."):
+                reset_ok, reset_counts, reset_message = _reset_slate_date(target_date)
+            if not reset_ok:
+                st.error(reset_message)
+                return
+
+            changed_counts = " • ".join(
+                f"{tab}: {count}" for tab, count in reset_counts.items() if count
+            )
+            st.session_state.pop("_ezpz_builder_completed_rows::NFL", None)
+            st.session_state.pop("_ezpz_active_matchup::NFL", None)
+            st.session_state.pop("_ezpz_completed_matchup_flash", None)
+            st.session_state[flash_key] = reset_message + (f" {changed_counts}" if changed_counts else "")
+            st.rerun()
 
 
 
@@ -4616,6 +4664,7 @@ def _render_build() -> None:
     eligible_schedule = schedule[schedule["Game Type"].astype(str).str.upper().isin(valid_types)].copy() if schedule is not None and not schedule.empty else pd.DataFrame()
     manual_mode = mode == "Test Matchup"
     selected_schedule_row: pd.Series | None = None
+    reset_control_rendered = False
 
     if not manual_mode and not eligible_schedule.empty:
         slate_dates = _available_slate_dates(eligible_schedule)
@@ -4625,6 +4674,9 @@ def _render_build() -> None:
             "Slate date", slate_dates, index=default_index, format_func=lambda value: value.strftime("%A, %B %-d, %Y"),
             key=f"nfl_slate_date_{season}",
         )
+        slate_date_str = str(slate_date)
+        _render_slate_reset_control(slate_date_str, season)
+        reset_control_rendered = True
         date_mask = _schedule_date_series(eligible_schedule) == slate_date
         day_schedule = eligible_schedule[date_mask].copy()
         if day_schedule.empty:
@@ -4639,7 +4691,6 @@ def _render_build() -> None:
             selected_label = st.selectbox("Game", labels, index=0, key=f"nfl_scheduled_game_{season}_{slate_date}")
             selected_schedule_row = day_schedule.iloc[labels.index(selected_label)]
             week = _int(selected_schedule_row.get("Week", 1), 1)
-            slate_date_str = str(slate_date)
             st.markdown(f"**{len(day_schedule)} game{'s' if len(day_schedule) != 1 else ''} on this slate** • Week {week}")
     elif not manual_mode:
         st.warning("The automatic NFL schedule is currently unavailable, so Test Matchup mode is active.")
@@ -4649,32 +4700,8 @@ def _render_build() -> None:
         slate_date_str = str(date.today())
         week = int(st.number_input("Projection week", min_value=1, max_value=22, value=1, step=1, key="nfl_test_week_auto"))
 
-    with st.expander("Reset selected slate", expanded=False):
-        st.warning(
-            f"This clears saved NFL rows dated {slate_date_str} from the daily slate, prop projections, "
-            "game tracker, prop tracker, and lineup snapshots. Schedule, ratings, calibration history, "
-            "model history, and every other date are preserved."
-        )
-        reset_confirmed = st.checkbox(
-            f"I understand and want to clear the {slate_date_str} NFL slate",
-            value=False,
-            key=f"nfl_reset_slate_confirm_{season}_{slate_date_str}",
-        )
-        if st.button(
-            f"Reset {slate_date_str} NFL slate",
-            disabled=not reset_confirmed,
-            use_container_width=True,
-            key=f"nfl_reset_slate_{season}_{slate_date_str}",
-        ):
-            with st.spinner(f"Clearing the {slate_date_str} NFL slate..."):
-                reset_ok, reset_counts, reset_message = _reset_slate_date(slate_date_str)
-            if reset_ok:
-                changed_counts = " • ".join(
-                    f"{tab}: {count}" for tab, count in reset_counts.items() if count
-                )
-                st.success(reset_message + (f" {changed_counts}" if changed_counts else ""))
-            else:
-                st.error(reset_message)
+    if not reset_control_rendered:
+        _render_slate_reset_control(slate_date_str, season)
 
     ratings = _ensure_automated_ratings(season, week)
     teams = sorted(set(NFL_TEAMS) | set(ratings.get("Team", pd.Series(dtype=str)).astype(str).map(_normalize_team).tolist()))
