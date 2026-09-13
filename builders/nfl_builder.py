@@ -4068,6 +4068,73 @@ def _replace_game_rows(tab: str, columns: list[str], rows: list[dict[str, Any]],
     return bool(write_sheet(tab, output, columns))
 
 
+def _reset_slate_date(slate_date: str) -> tuple[bool, dict[str, int], str]:
+    """Remove one slate date from generated NFL tables and preserve all history."""
+    if not sheets_ready():
+        return False, {}, "Google Sheets is not configured."
+
+    target_date = str(slate_date).strip()[:10]
+    tab_specs = [
+        (SLATE_TAB, SLATE_COLUMNS),
+        (PROP_SLATE_TAB, PROP_PROJECTION_COLUMNS),
+        (TRACKER_TAB, TRACKER_COLUMNS),
+        (PROP_TRACKER_TAB, PROP_TRACKER_COLUMNS),
+        (LINEUP_TAB, LINEUP_COLUMNS),
+    ]
+    originals: dict[str, pd.DataFrame] = {}
+    replacements: dict[str, pd.DataFrame] = {}
+    removed_counts: dict[str, int] = {}
+
+    for tab, columns in tab_specs:
+        existing = read_sheet(tab, columns)
+        if existing is None:
+            return False, removed_counts, f"Could not read {tab}; no slate data was changed."
+        existing = existing.copy()
+        originals[tab] = existing
+        if existing.empty:
+            removed_counts[tab] = 0
+            continue
+        if "Date" not in existing.columns:
+            return False, removed_counts, f"{tab} has no Date column; no slate data was changed."
+        raw_dates = existing["Date"].astype(str).str.strip()
+        parsed_dates = pd.to_datetime(raw_dates, errors="coerce").dt.strftime("%Y-%m-%d")
+        normalized_dates = parsed_dates.fillna(raw_dates.str[:10])
+        reset_mask = normalized_dates == target_date
+        removed_counts[tab] = int(reset_mask.sum())
+        if removed_counts[tab]:
+            replacements[tab] = existing.loc[~reset_mask].copy()
+
+    if not replacements:
+        return True, removed_counts, f"The {target_date} NFL slate is already clear."
+
+    columns_by_tab = {tab: columns for tab, columns in tab_specs}
+    written_tabs: list[str] = []
+    try:
+        for tab, replacement in replacements.items():
+            if not write_sheet(tab, replacement, columns_by_tab[tab]):
+                raise RuntimeError(f"Could not write {tab}")
+            written_tabs.append(tab)
+    except Exception as exc:
+        rollback_failures: list[str] = []
+        for tab in reversed(written_tabs):
+            try:
+                restored = write_sheet(tab, originals[tab], columns_by_tab[tab])
+            except Exception:
+                restored = False
+            if not restored:
+                rollback_failures.append(tab)
+        if rollback_failures:
+            return (
+                False,
+                removed_counts,
+                f"Reset stopped after {exc}. Rollback also failed for: {', '.join(rollback_failures)}.",
+            )
+        return False, removed_counts, f"Reset stopped after {exc}; completed writes were rolled back."
+
+    total_removed = sum(removed_counts.values())
+    return True, removed_counts, f"Cleared {total_removed} saved row(s) for the {target_date} NFL slate."
+
+
 
 
 def _upsert_rows(tab: str, columns: list[str], rows: list[dict[str, Any]], key_columns: list[str]) -> bool:
@@ -4581,6 +4648,33 @@ def _render_build() -> None:
     if manual_mode:
         slate_date_str = str(date.today())
         week = int(st.number_input("Projection week", min_value=1, max_value=22, value=1, step=1, key="nfl_test_week_auto"))
+
+    with st.expander("Reset selected slate", expanded=False):
+        st.warning(
+            f"This clears saved NFL rows dated {slate_date_str} from the daily slate, prop projections, "
+            "game tracker, prop tracker, and lineup snapshots. Schedule, ratings, calibration history, "
+            "model history, and every other date are preserved."
+        )
+        reset_confirmed = st.checkbox(
+            f"I understand and want to clear the {slate_date_str} NFL slate",
+            value=False,
+            key=f"nfl_reset_slate_confirm_{season}_{slate_date_str}",
+        )
+        if st.button(
+            f"Reset {slate_date_str} NFL slate",
+            disabled=not reset_confirmed,
+            use_container_width=True,
+            key=f"nfl_reset_slate_{season}_{slate_date_str}",
+        ):
+            with st.spinner(f"Clearing the {slate_date_str} NFL slate..."):
+                reset_ok, reset_counts, reset_message = _reset_slate_date(slate_date_str)
+            if reset_ok:
+                changed_counts = " • ".join(
+                    f"{tab}: {count}" for tab, count in reset_counts.items() if count
+                )
+                st.success(reset_message + (f" {changed_counts}" if changed_counts else ""))
+            else:
+                st.error(reset_message)
 
     ratings = _ensure_automated_ratings(season, week)
     teams = sorted(set(NFL_TEAMS) | set(ratings.get("Team", pd.Series(dtype=str)).astype(str).map(_normalize_team).tolist()))

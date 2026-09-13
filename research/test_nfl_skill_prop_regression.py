@@ -81,6 +81,43 @@ def _receiving_row(play_probability: float, line: float = 39.5) -> dict[str, flo
 
 
 def main() -> None:
+    # A slate reset removes only the selected date from generated tables. It
+    # must preserve prior dates and must not touch ratings/calibration tables.
+    original_sheets_ready = nfl_builder.sheets_ready
+    original_read_sheet = nfl_builder.read_sheet
+    original_write_sheet = nfl_builder.write_sheet
+    generated_tabs = [
+        nfl_builder.SLATE_TAB,
+        nfl_builder.PROP_SLATE_TAB,
+        nfl_builder.TRACKER_TAB,
+        nfl_builder.PROP_TRACKER_TAB,
+        nfl_builder.LINEUP_TAB,
+    ]
+    stored = {
+        tab: pd.DataFrame({"Date": ["2026-09-12", "2026-09-13"], "Marker": ["keep", "reset"]})
+        for tab in generated_tabs
+    }
+    reset_writes = {}
+    try:
+        nfl_builder.sheets_ready = lambda: True
+        nfl_builder.read_sheet = lambda tab, columns: stored[tab].copy()
+
+        def _capture_reset(tab, dataframe, columns):
+            reset_writes[tab] = dataframe.copy()
+            return True
+
+        nfl_builder.write_sheet = _capture_reset
+        reset_ok, reset_counts, _ = nfl_builder._reset_slate_date("2026-09-13")
+    finally:
+        nfl_builder.sheets_ready = original_sheets_ready
+        nfl_builder.read_sheet = original_read_sheet
+        nfl_builder.write_sheet = original_write_sheet
+    assert reset_ok
+    assert reset_counts == {tab: 1 for tab in generated_tabs}
+    assert set(reset_writes) == set(generated_tabs)
+    for dataframe in reset_writes.values():
+        assert dataframe["Date"].tolist() == ["2026-09-12"]
+
     rb_carries, rb_ypc = skill.project_rb_rushing(_context("RB"))
     rb_targets, rb_ypt = skill.project_rb_receiving(_context("RB"))
     wr_targets, wr_ypt = skill.project_wr_receiving(_context("WR"))
