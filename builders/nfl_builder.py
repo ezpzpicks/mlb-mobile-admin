@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v3.4-espn-core-depth-2026-09-13"
+MODEL_VERSION = "nfl-v3.5-espn-only-depth-injury-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 HOME_FIELD_LOOKBACK_SEASONS = 5
@@ -208,7 +208,7 @@ DEFENSE_SLOTS = [
     ("LB2", ["LB", "ILB", "MLB", "OLB"]),
     ("CB1", ["CB"]),
     ("CB2", ["CB"]),
-    ("SLOT", ["CB", "NB", "DB"]),
+    ("SLOT", ["NB", "CB", "DB"]),
     ("S1", ["S", "FS", "SS"]),
     ("S2", ["S", "FS", "SS"]),
 ]
@@ -630,123 +630,155 @@ def _load_injuries_season(season: int) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_resource(ttl=86400, show_spinner=False)
-def _load_sleeper_players() -> pd.DataFrame:
-    """Daily current-team and injury/status fallback from Sleeper.
+@st.cache_resource(ttl=900, show_spinner=False)
+def _load_espn_athlete_index() -> dict[str, dict[str, Any]]:
+    """Load ESPN Core athlete metadata used by the current depth chart.
 
-    Sleeper asks clients to cache this roughly 5 MB endpoint and call it no more
-    than once per day. Only compact fields used by the model are retained.
-    """
-    try:
-        response = requests.get("https://api.sleeper.app/v1/players/nfl", timeout=60)
-        response.raise_for_status()
-        payload = response.json()
-        if not isinstance(payload, dict):
-            return pd.DataFrame()
-        rows: list[dict[str, Any]] = []
-        for player_id, raw in payload.items():
-            if not isinstance(raw, dict):
-                continue
-            team = _normalize_team(raw.get("team", ""))
-            position = _safe_text(raw.get("position", "")).upper()
-            first = _safe_text(raw.get("first_name", ""))
-            last = _safe_text(raw.get("last_name", ""))
-            full_name = _safe_text(raw.get("full_name", "")) or f"{first} {last}".strip()
-            if not team or team not in NFL_TEAMS or not full_name or not position:
-                continue
-            rows.append({
-                "player_id": _safe_text(raw.get("player_id", player_id)),
-                "team": team,
-                "full_name": full_name,
-                "position": position,
-                "status": _safe_text(raw.get("status", "")),
-                "injury_status": _safe_text(raw.get("injury_status", "")),
-                "practice_participation": _safe_text(raw.get("practice_participation", "")),
-                "injury_body_part": _safe_text(raw.get("injury_body_part", "")),
-                "injury_notes": _safe_text(raw.get("injury_notes", "")),
-                "news_updated": _safe_text(raw.get("news_updated", "")),
-            })
-        return pd.DataFrame(rows)
-    except Exception as exc:
-        st.session_state["nfl_sleeper_error"] = str(exc)
-        return pd.DataFrame()
-
-
-@st.cache_resource(ttl=86400, show_spinner=False)
-def _load_espn_athlete_name_index() -> dict[str, str]:
-    """Load ESPN's enriched athlete ID-to-name index once per day.
-
-    ESPN Core depth charts store athlete references rather than embedded names.
-    The v3 athlete index returns the names in bulk, avoiding hundreds of
-    individual athlete requests every time live depth charts refresh.
+    ESPN is the only current-season depth/injury authority. The bulk v3
+    athlete index supplies names and, when present, live status/injury
+    metadata. Any incomplete athlete record is resolved from that same
+    player's ESPN Core v2 athlete URL; no third-party fallback is used.
     """
     headers = {"User-Agent": "EZPZ-Picks/1.0"}
-    names: dict[str, str] = {}
+    index: dict[str, dict[str, Any]] = {}
     try:
         with requests.Session() as session:
             session.headers.update(headers)
-            first_url = "https://sports.core.api.espn.com/v3/sports/football/nfl/athletes?limit=1000&page=1"
-            first_response = session.get(first_url, timeout=45)
-            first_response.raise_for_status()
-            first_payload = first_response.json()
+            first = session.get(
+                "https://sports.core.api.espn.com/v3/sports/football/nfl/athletes?limit=1000&page=1",
+                timeout=45,
+            )
+            first.raise_for_status()
+            first_payload = first.json()
             if not isinstance(first_payload, dict):
-                return names
-
-            page_count = max(1, _int(first_payload.get("pageCount", 1), 1))
+                return index
             payloads = [first_payload]
-            for page in range(2, page_count + 1):
+            page_count = max(1, _int(first_payload.get("pageCount", 1), 1))
+            for page_num in range(2, page_count + 1):
                 response = session.get(
-                    f"https://sports.core.api.espn.com/v3/sports/football/nfl/athletes?limit=1000&page={page}",
+                    f"https://sports.core.api.espn.com/v3/sports/football/nfl/athletes?limit=1000&page={page_num}",
                     timeout=45,
                 )
                 response.raise_for_status()
                 payload = response.json()
                 if isinstance(payload, dict):
                     payloads.append(payload)
-
             for payload in payloads:
                 for athlete in payload.get("items", []):
                     if not isinstance(athlete, dict):
                         continue
                     athlete_id = _safe_text(athlete.get("id", ""))
-                    player_name = _safe_text(
-                        athlete.get("displayName", athlete.get("fullName", athlete.get("name", "")))
-                    )
-                    if athlete_id and player_name:
-                        names[athlete_id] = player_name
-
+                    if athlete_id:
+                        index[athlete_id] = athlete
         st.session_state["nfl_espn_athlete_index_status"] = (
-            f"ESPN athlete index loaded {len(names):,} names."
+            f"ESPN Core athlete index loaded {len(index):,} players."
         )
         st.session_state.pop("nfl_espn_athlete_index_error", None)
-        return names
+        return index
     except Exception as exc:
         st.session_state["nfl_espn_athlete_index_error"] = str(exc)
-        return names
+        return index
+
+
+def _normalize_espn_availability(value: Any) -> str:
+    if isinstance(value, dict):
+        raw = (
+            _safe_text(value.get("abbreviation", ""))
+            or _safe_text(value.get("description", ""))
+            or _safe_text(value.get("name", ""))
+            or _safe_text(value.get("type", ""))
+        )
+    else:
+        raw = _safe_text(value)
+    upper = raw.upper().replace("_", " ").strip()
+    aliases = {
+        "O": "Out", "OUT": "Out", "INJURY STATUS OUT": "Out",
+        "Q": "Questionable", "QUESTIONABLE": "Questionable", "INJURY STATUS QUESTIONABLE": "Questionable",
+        "D": "Doubtful", "DOUBTFUL": "Doubtful", "INJURY STATUS DOUBTFUL": "Doubtful",
+        "IR": "IR", "INJURED RESERVE": "IR", "INJURY STATUS IR": "IR",
+        "PUP": "PUP", "PHYSICALLY UNABLE TO PERFORM": "PUP",
+        "SUSP": "Suspended", "SSPD": "Suspended", "SUSPENDED": "Suspended",
+        "ACTIVE": "Healthy", "HEALTHY": "Healthy",
+        "DAY-TO-DAY": "Questionable", "DAY TO DAY": "Questionable",
+    }
+    if upper in aliases:
+        return aliases[upper]
+    for token, normalized in [
+        ("INJURED RESERVE", "IR"), ("QUESTIONABLE", "Questionable"),
+        ("DOUBTFUL", "Doubtful"), ("SUSPEND", "Suspended"),
+        ("OUT", "Out"), ("PUP", "PUP"),
+    ]:
+        if token in upper:
+            return normalized
+    return raw.title() if raw else "Healthy"
+
+
+def _espn_athlete_availability(athlete: dict[str, Any]) -> tuple[str, str, float]:
+    injuries = athlete.get("injuries", []) if isinstance(athlete, dict) else []
+    injuries = [item for item in injuries if isinstance(item, dict)] if isinstance(injuries, list) else []
+    if injuries:
+        injuries.sort(key=lambda item: _safe_text(item.get("date", "")), reverse=True)
+        latest = injuries[0]
+        status = _normalize_espn_availability(
+            latest.get("type", {}) or latest.get("status", "")
+        )
+        details = latest.get("details", {}) if isinstance(latest.get("details", {}), dict) else {}
+        injury = (
+            _safe_text(details.get("type", ""))
+            or _safe_text(details.get("detail", ""))
+            or _safe_text(latest.get("shortComment", ""))
+            or _safe_text(latest.get("longComment", ""))
+        )
+        return status, injury, _status_probability(status)
+
+    roster_status = athlete.get("status", {}) if isinstance(athlete, dict) else {}
+    status = _normalize_espn_availability(roster_status)
+    return status, "", _status_probability(status)
+
+
+def _normalize_espn_depth_position(value: Any) -> str:
+    raw = _safe_text(value).upper()
+    mapping = {
+        "QB": "QB", "RB": "RB", "HB": "RB", "FB": "FB",
+        "WR": "WR", "LWR": "WR", "RWR": "WR", "SWR": "WR", "TE": "TE",
+        "LT": "LT", "LG": "LG", "C": "C", "RG": "RG", "RT": "RT", "T": "T", "G": "G",
+        "LDE": "DE", "RDE": "DE", "LE": "DE", "RE": "DE", "DE": "DE", "EDGE": "EDGE",
+        "LDT": "DT", "RDT": "DT", "DT": "DT", "NT": "NT", "DL": "DL",
+        "LOLB": "EDGE", "ROLB": "EDGE", "OLB": "OLB",
+        "WLB": "LB", "SLB": "LB", "LB": "LB", "ILB": "ILB", "LILB": "ILB", "RILB": "ILB", "MLB": "MLB",
+        "LCB": "CB", "RCB": "CB", "CB": "CB", "NB": "NB", "NICKEL": "NB", "DB": "DB",
+        "FS": "FS", "SS": "SS", "S": "S",
+    }
+    return mapping.get(raw, "")
 
 
 @st.cache_resource(ttl=900, show_spinner=False)
 def _load_espn_depth_charts() -> pd.DataFrame:
-    """Load current NFL skill-position depth order from ESPN Core.
-
-    ESPN Core is the live authority for QB/RB/WR/TE ordering. The older
-    site.api endpoint is intentionally not used because server-side access is
-    denied and previously forced the builder onto stale nflverse ordering.
-    nflverse remains the fallback only when ESPN Core is unavailable for a
-    specific team or position.
-    """
+    """Load ESPN Core as the sole current-season NFL depth authority."""
     headers = {"User-Agent": "EZPZ-Picks/1.0"}
-    athlete_names = _load_espn_athlete_name_index()
+    athlete_index = _load_espn_athlete_index()
     rows: list[dict[str, Any]] = []
     failed_teams: list[str] = []
-    position_map = {"QB": "QB", "RB": "RB", "HB": "RB", "WR": "WR", "TE": "TE"}
 
     def athlete_id_from_ref(ref: str) -> str:
-        ref = _safe_text(ref)
         marker = "/athletes/"
+        ref = _safe_text(ref)
         if marker not in ref:
             return ""
         return ref.split(marker, 1)[1].split("?", 1)[0].strip("/")
+
+    def chart_positions(chart: dict[str, Any]) -> dict[str, Any]:
+        positions = chart.get("positions", {}) if isinstance(chart, dict) else {}
+        return positions if isinstance(positions, dict) else {}
+
+    def raw_keys(positions: dict[str, Any]) -> set[str]:
+        keys: set[str] = set()
+        for key, entry in positions.items():
+            info = entry.get("position", {}) if isinstance(entry, dict) else {}
+            if not isinstance(info, dict):
+                info = {}
+            keys.add(_safe_text(info.get("abbreviation", key)).upper())
+        return keys
 
     with requests.Session() as session:
         session.headers.update(headers)
@@ -760,91 +792,109 @@ def _load_espn_depth_charts() -> pd.DataFrame:
                 f"seasons/{int(DEFAULT_SEASON)}/teams/{team_id}/depthcharts"
             )
             try:
-                response = session.get(url, timeout=20)
+                response = session.get(url, timeout=25)
                 response.raise_for_status()
                 payload = response.json()
                 charts = payload.get("items", []) if isinstance(payload, dict) else []
+                charts = [chart for chart in charts if isinstance(chart, dict)]
 
-                # Select the offensive chart by its skill-position coverage, not
-                # by a hard-coded formation label such as "3WR 1TE".
-                best_positions: dict[str, Any] = {}
-                best_score = -1
+                best_offense = None
+                best_offense_score = -1
+                best_defense = None
+                best_defense_score = -1
+                offense_markers = {"QB", "RB", "WR", "TE", "LT", "LG", "C", "RG", "RT"}
+                defense_markers = {
+                    "LDE", "RDE", "LE", "RE", "DE", "DT", "NT", "LOLB", "ROLB", "OLB",
+                    "WLB", "SLB", "LB", "ILB", "LILB", "RILB", "MLB", "LCB", "RCB", "CB", "NB", "FS", "SS",
+                }
                 for chart in charts:
-                    if not isinstance(chart, dict):
-                        continue
-                    positions = chart.get("positions", {})
-                    if not isinstance(positions, dict):
-                        continue
-                    normalized_keys = {
-                        _safe_text(
-                            (entry.get("position", {}) or {}).get("abbreviation", key)
-                            if isinstance(entry, dict) else key
-                        ).upper()
-                        for key, entry in positions.items()
-                    }
-                    score = sum(1 for pos in ["QB", "RB", "WR", "TE"] if pos in normalized_keys)
-                    if score > best_score:
-                        best_score = score
-                        best_positions = positions
+                    positions = chart_positions(chart)
+                    keys = raw_keys(positions)
+                    offense_score = len(keys & offense_markers)
+                    defense_score = len(keys & defense_markers)
+                    if offense_score > best_offense_score:
+                        best_offense_score = offense_score
+                        best_offense = chart
+                    if defense_score > best_defense_score:
+                        best_defense_score = defense_score
+                        best_defense = chart
 
-                if best_score < 3 or not best_positions:
+                selected: list[dict[str, Any]] = []
+                if best_offense is not None and best_offense_score >= 4:
+                    selected.append(best_offense)
+                if best_defense is not None and best_defense_score >= 4 and best_defense is not best_offense:
+                    selected.append(best_defense)
+                if not selected:
                     failed_teams.append(team)
                     continue
 
                 before = len(rows)
-                for position_key, position_entry in best_positions.items():
-                    if not isinstance(position_entry, dict):
-                        continue
-                    position_info = position_entry.get("position", {})
-                    if not isinstance(position_info, dict):
-                        position_info = {}
-                    raw_position = _safe_text(position_info.get("abbreviation", position_key)).upper()
-                    position = position_map.get(raw_position, "")
-                    if not position:
-                        continue
-                    athletes = position_entry.get("athletes", [])
-                    if not isinstance(athletes, list):
-                        continue
-
-                    for order, athlete_entry in enumerate(athletes, start=1):
-                        if not isinstance(athlete_entry, dict):
+                direct_cache: dict[str, dict[str, Any]] = {}
+                for chart in selected:
+                    chart_name = _safe_text(chart.get("name", chart.get("displayName", "")))
+                    for position_key, position_entry in chart_positions(chart).items():
+                        if not isinstance(position_entry, dict):
                             continue
-                        athlete_ref = athlete_entry.get("athlete", {})
-                        if not isinstance(athlete_ref, dict):
-                            athlete_ref = {}
-                        ref = _safe_text(athlete_ref.get("$ref", "")).replace("http://", "https://")
-                        espn_id = athlete_id_from_ref(ref)
-                        player_name = athlete_names.get(espn_id, "")
-
-                        # If a brand-new player has not reached the daily athlete
-                        # index yet, resolve only that missing player directly.
-                        if not player_name and ref:
-                            try:
-                                athlete_response = session.get(ref, timeout=10)
-                                athlete_response.raise_for_status()
-                                athlete = athlete_response.json()
-                                if isinstance(athlete, dict):
-                                    player_name = _safe_text(
-                                        athlete.get("displayName", athlete.get("fullName", athlete.get("name", "")))
-                                    )
-                            except Exception:
-                                player_name = ""
-                        if not player_name:
+                        position_info = position_entry.get("position", {})
+                        if not isinstance(position_info, dict):
+                            position_info = {}
+                        raw_position = _safe_text(position_info.get("abbreviation", position_key)).upper()
+                        position = _normalize_espn_depth_position(raw_position)
+                        if not position:
+                            continue
+                        athletes = position_entry.get("athletes", [])
+                        if not isinstance(athletes, list):
                             continue
 
-                        rank = _int(athlete_entry.get("rank", order), order)
-                        if rank <= 0:
-                            rank = order
-                        rows.append({
-                            "team_norm": team,
-                            "player_name_display": player_name,
-                            "pos_norm": position,
-                            "pos_rank_num": rank,
-                            "pos_slot_num": order,
-                            "depth_source": "ESPN Core current depth chart",
-                            "espn_id": espn_id,
-                        })
+                        for order, athlete_entry in enumerate(athletes, start=1):
+                            if not isinstance(athlete_entry, dict):
+                                continue
+                            athlete_ref = athlete_entry.get("athlete", {})
+                            if not isinstance(athlete_ref, dict):
+                                athlete_ref = {}
+                            ref = _safe_text(athlete_ref.get("$ref", "")).replace("http://", "https://")
+                            espn_id = athlete_id_from_ref(ref)
+                            athlete = athlete_index.get(espn_id, {}) if espn_id else {}
+                            complete = isinstance(athlete, dict) and "status" in athlete and "injuries" in athlete
+                            if not complete and ref:
+                                if ref not in direct_cache:
+                                    try:
+                                        athlete_response = session.get(ref, timeout=12)
+                                        athlete_response.raise_for_status()
+                                        resolved = athlete_response.json()
+                                        direct_cache[ref] = resolved if isinstance(resolved, dict) else {}
+                                    except Exception:
+                                        direct_cache[ref] = {}
+                                athlete = direct_cache.get(ref, {}) or athlete
+                            if not isinstance(athlete, dict):
+                                athlete = {}
 
+                            player_name = _safe_text(
+                                athlete.get("displayName", athlete.get("fullName", athlete.get("name", "")))
+                            )
+                            if not player_name:
+                                continue
+                            status, injury, auto_probability = _espn_athlete_availability(athlete)
+                            rank = _int(athlete_entry.get("rank", order), order)
+                            if rank <= 0:
+                                rank = order
+                            slot_num = _int(athlete_entry.get("slot", order), order)
+                            if slot_num <= 0:
+                                slot_num = order
+                            rows.append({
+                                "team_norm": team,
+                                "player_name_display": player_name,
+                                "pos_norm": position,
+                                "raw_pos_norm": raw_position,
+                                "pos_rank_num": rank,
+                                "pos_slot_num": slot_num,
+                                "depth_source": "ESPN Core current depth chart",
+                                "depth_chart_name": chart_name,
+                                "espn_id": espn_id,
+                                "espn_injury_status": status,
+                                "espn_injury": injury,
+                                "espn_auto_probability": auto_probability,
+                            })
                 if len(rows) == before:
                     failed_teams.append(team)
             except Exception as exc:
@@ -852,145 +902,46 @@ def _load_espn_depth_charts() -> pd.DataFrame:
                 st.session_state[f"nfl_espn_depth_error_{team}"] = str(exc)
 
     output = pd.DataFrame(rows)
-    if not output.empty:
-        output["name_norm"] = output["player_name_display"].map(_normalize_name)
-        output = output[
-            output["team_norm"].isin(NFL_TEAMS)
-            & output["name_norm"].astype(str).str.len().gt(0)
-        ].copy()
-        output = output.sort_values(
-            ["team_norm", "pos_norm", "pos_rank_num", "pos_slot_num", "player_name_display"]
-        )
-        output = output.drop_duplicates(["team_norm", "pos_norm", "name_norm"], keep="first")
+    if output.empty:
+        st.session_state["nfl_espn_depth_status"] = "ESPN Core returned no usable current depth rows."
+        st.session_state["nfl_espn_depth_error"] = "No ESPN Core depth rows loaded."
+        return output
 
-    loaded_teams = sorted(set(output.get("team_norm", pd.Series(dtype=str)).astype(str))) if not output.empty else []
-    st.session_state["nfl_espn_depth_status"] = (
-        f"ESPN Core depth charts loaded for {len(loaded_teams)}/32 teams."
-        + (f" nflverse fallback used for: {', '.join(sorted(set(failed_teams)))}." if failed_teams else "")
+    output["name_norm"] = output["player_name_display"].map(_normalize_name)
+    output = output[
+        output["team_norm"].isin(NFL_TEAMS)
+        & output["name_norm"].astype(str).str.len().gt(0)
+    ].copy()
+    output = output.sort_values(
+        ["team_norm", "pos_norm", "pos_rank_num", "pos_slot_num", "player_name_display"]
     )
-    if loaded_teams:
-        st.session_state.pop("nfl_espn_depth_error", None)
-    else:
-        st.session_state["nfl_espn_depth_error"] = "ESPN Core returned no usable skill depth rows."
-    return output.reset_index(drop=True) if not output.empty else pd.DataFrame()
+    output = output.drop_duplicates(["team_norm", "pos_norm", "name_norm"], keep="first")
+    loaded_teams = sorted(set(output["team_norm"].astype(str)))
+    st.session_state["nfl_espn_depth_status"] = (
+        f"ESPN Core depth charts loaded for {len(loaded_teams)}/32 teams; no backup depth source is enabled."
+        + (f" ESPN unavailable for: {', '.join(sorted(set(failed_teams)))}." if failed_teams else "")
+    )
+    st.session_state.pop("nfl_espn_depth_error", None)
+    return output.reset_index(drop=True)
 
 
 @st.cache_resource(ttl=900, show_spinner=False)
 def _load_espn_injuries() -> pd.DataFrame:
-    """Load ESPN's current NFL injury report every 15 minutes.
-
-    This is the same current-status family that powers ESPN's team injury/depth
-    pages. Depth order stays in the ESPN depth-chart loader; this function owns
-    live availability labels such as O, Q, D, IR and suspended.
-    """
-    url = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
-    headers = {"User-Agent": "EZPZ-Picks/1.0"}
-
-    def status_text(value: Any) -> str:
-        if isinstance(value, dict):
-            for key in ["abbreviation", "shortName", "name", "description", "displayName"]:
-                candidate = _safe_text(value.get(key, ""))
-                if candidate:
-                    return candidate
-            return ""
-        return _safe_text(value)
-
-    def normalize_status(value: Any) -> str:
-        raw = status_text(value).strip()
-        upper = raw.upper()
-        aliases = {
-            "O": "Out", "OUT": "Out",
-            "Q": "Questionable", "QUESTIONABLE": "Questionable",
-            "D": "Doubtful", "DOUBTFUL": "Doubtful",
-            "IR": "IR", "INJURED RESERVE": "IR",
-            "PUP": "PUP", "PHYSICALLY UNABLE TO PERFORM": "PUP",
-            "SSPD": "Suspended", "SUSP": "Suspended", "SUSPENDED": "Suspended",
-            "ACTIVE": "Active", "HEALTHY": "Healthy",
-        }
-        if upper in aliases:
-            return aliases[upper]
-        for token, normalized in [
-            ("INJURED RESERVE", "IR"), ("QUESTIONABLE", "Questionable"),
-            ("DOUBTFUL", "Doubtful"), ("SUSPEND", "Suspended"),
-            ("OUT", "Out"), ("PUP", "PUP"),
-        ]:
-            if token in upper:
-                return normalized
-        return raw.title() if raw else ""
-
-    try:
-        response = requests.get(url, headers=headers, timeout=25)
-        response.raise_for_status()
-        payload = response.json()
-        groups = payload.get("injuries", []) if isinstance(payload, dict) else []
-        rows: list[dict[str, Any]] = []
-        for group in groups:
-            if not isinstance(group, dict):
-                continue
-            team_data = group.get("team", {})
-            if not isinstance(team_data, dict):
-                team_data = {}
-            team = _normalize_team(team_data.get("abbreviation", ""))
-            if not team or team not in NFL_TEAMS:
-                continue
-            injuries = group.get("injuries", [])
-            if not isinstance(injuries, list):
-                continue
-            for item in injuries:
-                if not isinstance(item, dict):
-                    continue
-                athlete = item.get("athlete", {})
-                if not isinstance(athlete, dict):
-                    athlete = {}
-                player_name = _safe_text(
-                    athlete.get("displayName", athlete.get("fullName", athlete.get("name", "")))
-                )
-                if not player_name:
-                    continue
-
-                status = normalize_status(item.get("status", ""))
-                if not status:
-                    candidate = normalize_status(item.get("type", ""))
-                    if candidate.upper() in {
-                        "OUT", "QUESTIONABLE", "DOUBTFUL", "IR", "PUP", "SUSPENDED"
-                    }:
-                        status = candidate
-                if not status:
-                    status = "Questionable"
-
-                details = item.get("details", {})
-                if not isinstance(details, dict):
-                    details = {}
-                injury = (
-                    _safe_text(details.get("type", ""))
-                    or _safe_text(details.get("detail", ""))
-                    or _safe_text(item.get("shortComment", ""))
-                    or _safe_text(item.get("longComment", ""))
-                )
-                rows.append({
-                    "team_norm": team,
-                    "player_name_display": player_name,
-                    "name_norm": _normalize_name(player_name),
-                    "status": status,
-                    "injury": injury,
-                    "source": "ESPN current injury report",
-                })
-
-        output = pd.DataFrame(rows)
-        if output.empty:
-            st.session_state["nfl_espn_injury_status"] = "ESPN returned no current NFL injury rows."
-            return output
-        output = output[
-            output["team_norm"].isin(NFL_TEAMS)
-            & output["name_norm"].astype(str).str.len().gt(0)
-        ].drop_duplicates(["team_norm", "name_norm"], keep="last")
-        st.session_state["nfl_espn_injury_status"] = f"ESPN current injuries loaded for {len(output):,} players."
-        st.session_state.pop("nfl_espn_injury_error", None)
-        return output.reset_index(drop=True)
-    except Exception as exc:
-        st.session_state["nfl_espn_injury_error"] = str(exc)
-        st.session_state["nfl_espn_injury_status"] = "ESPN injuries unavailable; nflverse/Sleeper fallback used."
+    """Return ESPN Core availability for every player on ESPN's current depth charts."""
+    depth = _load_espn_depth_charts()
+    if depth is None or depth.empty:
         return pd.DataFrame()
+    out = depth[[
+        "team_norm", "player_name_display", "name_norm", "espn_injury_status",
+        "espn_injury", "espn_auto_probability",
+    ]].copy()
+    out = out.rename(columns={
+        "espn_injury_status": "status",
+        "espn_injury": "injury",
+        "espn_auto_probability": "auto_probability",
+    })
+    out["source"] = "ESPN Core depth-chart athlete status"
+    return out.drop_duplicates(["team_norm", "name_norm"], keep="first").reset_index(drop=True)
 
 
 @st.cache_resource(ttl=21600, show_spinner=False)
@@ -1646,133 +1597,103 @@ def _blend_player_values(season: int, projection_week: int) -> dict[str, float]:
 
 
 def _latest_depth_chart(season: int) -> pd.DataFrame:
-    """Return the current depth chart with ESPN authoritative for skill roles.
+    """Return ESPN-only current depth charts; nflverse is historical only."""
+    if int(season) == int(DEFAULT_SEASON):
+        espn = _load_espn_depth_charts()
+        if espn is None or espn.empty:
+            return pd.DataFrame(columns=[
+                "team_norm", "player_name_display", "pos_norm", "pos_rank_num",
+                "pos_slot_num", "depth_source", "name_norm",
+            ])
+        out = espn.copy()
+        out["player_name_display"] = out["player_name_display"].astype(str)
+        if "name_norm" not in out.columns:
+            out["name_norm"] = out["player_name_display"].map(_normalize_name)
+        out = out.sort_values(
+            ["team_norm", "pos_norm", "pos_rank_num", "pos_slot_num", "player_name_display"]
+        )
+        return out.drop_duplicates(
+            ["team_norm", "pos_norm", "name_norm"], keep="first"
+        ).reset_index(drop=True)
 
-    Current-season QB/RB/WR/TE ordering comes from ESPN Core's live depth chart.
-    nflverse remains the detailed OL/defensive source and the fallback whenever
-    ESPN is unavailable for a specific team or position. Sleeper remains an
-    injury/status source only because its role-order metadata can be stale.
-    """
     depth = _load_depth_charts_season(season)
     if depth.empty and season > 2001:
         depth = _load_depth_charts_season(season - 1)
-
     if depth.empty:
-        out = pd.DataFrame(columns=[
+        return pd.DataFrame(columns=[
             "team_norm", "player_name_display", "pos_norm", "pos_rank_num",
-            "pos_slot_num", "depth_source",
+            "pos_slot_num", "depth_source", "name_norm",
         ])
-    else:
-        out = depth.copy()
-        out["team_norm"] = _column(out, "team", default="").map(_normalize_team)
-        out["player_name_display"] = _column(out, "player_name", "full_name", default="").astype(str)
-        out["pos_norm"] = _column(out, "pos_abb", "position", default="").astype(str).str.upper()
-        out["pos_rank_num"] = pd.to_numeric(
-            _column(out, "pos_rank", "depth_team", default=99), errors="coerce"
-        ).fillna(99)
-        out["pos_slot_num"] = pd.to_numeric(
-            _column(out, "pos_slot", default=99), errors="coerce"
-        ).fillna(99)
-        out["depth_source"] = "nflverse depth chart"
-        if "dt" in out.columns:
-            out["dt_parsed"] = pd.to_datetime(out["dt"], errors="coerce", utc=True)
-            latest = out.groupby("team_norm")["dt_parsed"].transform("max")
-            current = out[(out["dt_parsed"] == latest) | out["dt_parsed"].isna()].copy()
-            if not current.empty:
-                out = current
-
-    espn = _load_espn_depth_charts() if int(season) == int(DEFAULT_SEASON) else pd.DataFrame()
-    if not espn.empty:
-        espn_skill = espn[
-            espn["pos_norm"].astype(str).str.upper().isin(["QB", "RB", "WR", "TE"])
-        ].copy()
-        if not espn_skill.empty:
-            for (team, position), _ in espn_skill.groupby(["team_norm", "pos_norm"], dropna=False):
-                if out.empty:
-                    break
-                mask = (
-                    out["team_norm"].astype(str).eq(str(team))
-                    & out["pos_norm"].astype(str).str.upper().eq(str(position).upper())
-                )
-                out = out.loc[~mask].copy()
-            out = pd.concat([out, espn_skill], ignore_index=True, sort=False)
-
-    if out.empty:
-        return out
-    out["player_name_display"] = out["player_name_display"].astype(str)
+    out = depth.copy()
+    out["team_norm"] = _column(out, "team", default="").map(_normalize_team)
+    out["player_name_display"] = _column(out, "player_name", "full_name", default="").astype(str)
+    out["pos_norm"] = _column(out, "pos_abb", "position", default="").astype(str).str.upper()
+    out["pos_rank_num"] = pd.to_numeric(
+        _column(out, "pos_rank", "depth_team", default=99), errors="coerce"
+    ).fillna(99)
+    out["pos_slot_num"] = pd.to_numeric(
+        _column(out, "pos_slot", default=99), errors="coerce"
+    ).fillna(99)
+    out["depth_source"] = "nflverse historical depth chart"
+    if "dt" in out.columns:
+        out["dt_parsed"] = pd.to_datetime(out["dt"], errors="coerce", utc=True)
+        latest = out.groupby("team_norm")["dt_parsed"].transform("max")
+        current = out[(out["dt_parsed"] == latest) | out["dt_parsed"].isna()].copy()
+        if not current.empty:
+            out = current
     out["name_norm"] = out["player_name_display"].map(_normalize_name)
     out = out[
         out["team_norm"].astype(str).str.len().gt(0)
         & out["name_norm"].astype(str).str.len().gt(0)
     ].copy()
-    out = out.sort_values(
+    return out.sort_values(
         ["team_norm", "pos_norm", "pos_rank_num", "pos_slot_num", "player_name_display"]
-    )
-    return out.drop_duplicates(["team_norm", "name_norm"], keep="first").reset_index(drop=True)
+    ).drop_duplicates(["team_norm", "name_norm"], keep="first").reset_index(drop=True)
 
 
 def _injury_lookup(season: int, week: int) -> dict[tuple[str, str], dict[str, Any]]:
-    """Merge nflverse/Sleeper fallbacks with ESPN as live-season authority."""
+    """Use ESPN Core for every current depth-chart player's availability."""
     lookup: dict[tuple[str, str], dict[str, Any]] = {}
-    injuries = _load_injuries_season(season)
-    if not injuries.empty:
-        out = injuries.copy()
-        out["team_norm"] = _column(out, "team", default="").map(_normalize_team)
-        out["name_norm"] = _column(out, "full_name", "player_name", default="").map(_normalize_name)
-        if "week" in out.columns:
-            week_values = pd.to_numeric(out["week"], errors="coerce")
-            eligible = out[week_values <= int(week)].copy()
-            if not eligible.empty:
-                out = eligible
-                latest_week = out.groupby(["team_norm", "name_norm"])["week"].transform("max")
-                out = out[pd.to_numeric(out["week"], errors="coerce") == pd.to_numeric(latest_week, errors="coerce")]
-        for _, row in out.iterrows():
-            key = (_normalize_team(row.get("team_norm", "")), _normalize_name(row.get("name_norm", "")))
-            status = _safe_text(_first_existing(row, "report_status", "practice_status", default="")).upper()
-            lookup[key] = {
-                "status": status.title() if status else "Healthy",
-                "injury": _safe_text(_first_existing(row, "report_primary_injury", "practice_primary_injury", default="")),
-                "auto_probability": _status_probability(status),
-                "source": "nflverse injury report",
-            }
-
-    sleeper = _load_sleeper_players()
-    if not sleeper.empty:
-        for _, row in sleeper.iterrows():
-            team = _normalize_team(row.get("team", ""))
-            name = _normalize_name(row.get("full_name", ""))
-            if not team or not name:
-                continue
-            injury_status = _safe_text(row.get("injury_status", ""))
-            practice = _safe_text(row.get("practice_participation", ""))
-            roster_status = _safe_text(row.get("status", ""))
-            status = injury_status or practice or roster_status or "Healthy"
-            if roster_status.upper() == "ACTIVE" and not injury_status and not practice:
-                status = "Healthy"
-            injury = _safe_text(row.get("injury_body_part", "")) or _safe_text(row.get("injury_notes", ""))
-            lookup[(team, name)] = {
-                "status": status.title(),
-                "injury": injury,
-                "auto_probability": _status_probability(status),
-                "source": "Sleeper daily players",
-            }
-
-    # ESPN's current injury page is the final authority for the current season.
     if int(season) == int(DEFAULT_SEASON):
         espn = _load_espn_injuries()
-        if espn is not None and not espn.empty:
-            for _, row in espn.iterrows():
-                team = _normalize_team(row.get("team_norm", ""))
-                name = _normalize_name(row.get("name_norm", row.get("player_name_display", "")))
-                status = _safe_text(row.get("status", "")) or "Questionable"
-                if not team or not name:
-                    continue
-                lookup[(team, name)] = {
-                    "status": status,
-                    "injury": _safe_text(row.get("injury", "")),
-                    "auto_probability": _status_probability(status),
-                    "source": "ESPN current injury report",
-                }
+        if espn is None or espn.empty:
+            return lookup
+        for _, row in espn.iterrows():
+            team = _normalize_team(row.get("team_norm", ""))
+            name = _normalize_name(row.get("name_norm", row.get("player_name_display", "")))
+            if not team or not name:
+                continue
+            status = _safe_text(row.get("status", "Healthy")) or "Healthy"
+            lookup[(team, name)] = {
+                "status": status,
+                "injury": _safe_text(row.get("injury", "")),
+                "auto_probability": _num(row.get("auto_probability", _status_probability(status)), _status_probability(status)),
+                "source": "ESPN Core depth-chart athlete status",
+            }
+        return lookup
+
+    injuries = _load_injuries_season(season)
+    if injuries.empty:
+        return lookup
+    out = injuries.copy()
+    out["team_norm"] = _column(out, "team", default="").map(_normalize_team)
+    out["name_norm"] = _column(out, "full_name", "player_name", default="").map(_normalize_name)
+    if "week" in out.columns:
+        week_values = pd.to_numeric(out["week"], errors="coerce")
+        eligible = out[week_values <= int(week)].copy()
+        if not eligible.empty:
+            out = eligible
+            latest_week = out.groupby(["team_norm", "name_norm"])["week"].transform("max")
+            out = out[pd.to_numeric(out["week"], errors="coerce") == pd.to_numeric(latest_week, errors="coerce")]
+    for _, row in out.iterrows():
+        key = (_normalize_team(row.get("team_norm", "")), _normalize_name(row.get("name_norm", "")))
+        status = _safe_text(_first_existing(row, "report_status", "practice_status", default="")).upper()
+        lookup[key] = {
+            "status": status.title() if status else "Healthy",
+            "injury": _safe_text(_first_existing(row, "report_primary_injury", "practice_primary_injury", default="")),
+            "auto_probability": _status_probability(status),
+            "source": "nflverse historical injury report",
+        }
     return lookup
 
 
@@ -1798,13 +1719,18 @@ def _slot_player(
     team_rows = depth[depth["team_norm"] == team_norm].copy()
     if team_rows.empty:
         return "", position_options[0], occurrence + 1, []
-    rows = team_rows[team_rows["pos_norm"].isin([p.upper() for p in position_options])].copy()
+    normalized_options = [p.upper() for p in position_options]
+    rows = team_rows[team_rows["pos_norm"].isin(normalized_options)].copy()
     if rows.empty:
         return "", position_options[0], occurrence + 1, []
-    rows = rows.sort_values(["pos_rank_num", "pos_slot_num", "player_name_display"])
+    priority = {position: idx for idx, position in enumerate(normalized_options)}
+    rows["_position_priority"] = rows["pos_norm"].map(priority).fillna(len(priority))
+    rows = rows.sort_values([
+        "_position_priority", "pos_rank_num", "pos_slot_num", "player_name_display"
+    ])
     available = rows[~rows["player_name_display"].map(_normalize_name).isin(used_names)]
     if available.empty:
-        available = rows
+        return "", position_options[0], occurrence + 1, []
 
     skipped_unavailable: list[str] = []
     for _, row in available.iterrows():
@@ -1815,8 +1741,6 @@ def _slot_player(
         injury = injury_lookup.get((team_norm, name), {})
         play_probability = _num(injury.get("auto_probability", 1.0), 1.0)
         if play_probability <= 0.05:
-            # Mark the inactive player used so a later RB/WR slot does not try
-            # to recycle the same unavailable player.
             used_names.add(name)
             skipped_unavailable.append(name)
             continue
@@ -1827,16 +1751,7 @@ def _slot_player(
             skipped_unavailable,
         )
 
-    # If every listed player is unavailable, retain the top listed player so the
-    # normal zero play-probability absence logic still flags the position.
-    fallback = available.iloc[0]
-    player = _safe_text(fallback.get("player_name_display", ""))
-    return (
-        player,
-        _safe_text(fallback.get("pos_norm", position_options[0])),
-        _int(fallback.get("pos_rank_num", occurrence + 1), occurrence + 1),
-        [],
-    )
+    return "", position_options[0], occurrence + 1, skipped_unavailable
 
 
 def _auto_lineup(
@@ -4589,8 +4504,8 @@ def _render_build() -> None:
         if st.button("Force refresh automatic NFL data", use_container_width=True, key="nfl_force_refresh"):
             for cached_loader in [
                 _load_schedule_live, _load_schedule_csv_fallback, _load_player_stats_season,
-                _load_depth_charts_season, _load_injuries_season, _load_sleeper_players,
-                _load_espn_athlete_name_index, _load_espn_depth_charts, _load_espn_injuries, _load_snap_counts_season,
+                _load_depth_charts_season, _load_injuries_season,
+                _load_espn_athlete_index, _load_espn_depth_charts, _load_espn_injuries, _load_snap_counts_season,
                 _load_nextgen_season, _load_ftn_charting_season, _load_participation_season,
                 _season_charting_features, _season_player_profiles, _blended_player_profiles,
                 _defense_position_profiles, _prop_calibration_data, _rolling_home_field_model,
@@ -5099,10 +5014,6 @@ def _render_setup() -> None:
                 for path_to_clear in [cache_file, partial_file]:
                     if os.path.exists(path_to_clear):
                         os.remove(path_to_clear)
-            try:
-                _load_sleeper_players.clear()
-            except Exception:
-                pass
             for key in list(st.session_state):
                 if str(key).startswith(("nfl_live_lineup_source_", "nfl_pbp_", "nfl_schedule_", "nfl_auto_bundle_", "nfl_auto_ratings_", "nfl_sleeper_")):
                     del st.session_state[key]
