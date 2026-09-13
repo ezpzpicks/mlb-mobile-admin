@@ -27,6 +27,7 @@ from bs4 import BeautifulSoup
 COVERS_BASE = "https://www.covers.com"
 COVERS_INJURIES_URL = f"{COVERS_BASE}/sport/football/ncaaf/injuries"
 COVERS_WEATHER_URL = f"{COVERS_BASE}/sport/ncaaf/weather"
+COVERS_NFL_WEATHER_URL = f"{COVERS_BASE}/sport/football/nfl/weather"
 
 STARTER_HISTORY_TAB = "covers_starter_history"
 STARTER_HISTORY_COLUMNS = [
@@ -88,7 +89,7 @@ _LOCK = threading.RLock()
 _MEMORY_HTML: dict[str, tuple[float, str]] = {}
 _TEAM_REPORTS: dict[str, tuple[float, dict[str, Any]]] = {}
 _DIRECTORY: tuple[float, list[dict[str, str]]] | None = None
-_WEATHER: tuple[float, list[dict[str, Any]]] | None = None
+_WEATHER: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 _FALLBACK_PENDING: dict[str, list[dict[str, Any]]] = {"starters": [], "injuries": []}
 
 
@@ -360,25 +361,27 @@ def _parse_weather_html(html: str) -> list[dict[str, Any]]:
     return output
 
 
-def _weather_cards(builder: Any) -> list[dict[str, Any]]:
-    global _WEATHER
+def _weather_cards(builder: Any, league: str = "ncaaf") -> list[dict[str, Any]]:
+    league_key = "nfl" if _clean_text(league).lower() == "nfl" else "ncaaf"
     now = time.time()
     with _LOCK:
-        if _WEATHER and now - _WEATHER[0] <= WEATHER_TTL:
-            return list(_WEATHER[1])
+        cached = _WEATHER.get(league_key)
+        if cached and now - cached[0] <= WEATHER_TTL:
+            return list(cached[1])
+    url = COVERS_NFL_WEATHER_URL if league_key == "nfl" else COVERS_WEATHER_URL
     try:
-        cards = _parse_weather_html(_fetch_html(builder, COVERS_WEATHER_URL, ttl=WEATHER_TTL))
+        cards = _parse_weather_html(_fetch_html(builder, url, ttl=WEATHER_TTL))
     except Exception:
         cards = []
     with _LOCK:
-        _WEATHER = (now, cards)
+        _WEATHER[league_key] = (now, cards)
     return list(cards)
 
 
-def _match_weather(builder: Any, away: str, home: str) -> dict[str, Any]:
+def _match_weather(builder: Any, away: str, home: str, league: str = "ncaaf") -> dict[str, Any]:
     scored = [
         ((_candidate_score(away, card.get("away", "")) + _candidate_score(home, card.get("home", ""))) / 2.0, card)
-        for card in _weather_cards(builder)
+        for card in _weather_cards(builder, league)
     ]
     scored.sort(key=lambda item: item[0], reverse=True)
     if not scored or scored[0][0] < 0.86:
@@ -656,9 +659,11 @@ def _prefetch(builder: Any, teams: list[str]) -> None:
                 pass
 
 
-def install_covers_layer(builder: Any) -> None:
-    """Install the Covers overlay on an imported ``cfb_builder`` module."""
-    if getattr(builder, "_EZPZ_CFB_COVERS_LAYER", False):
+def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
+    """Install the shared Covers weather layer, plus CFB personnel overlays."""
+    weather_league = "nfl" if _clean_text(league).lower() == "nfl" else "ncaaf"
+    layer_key = "_EZPZ_NFL_COVERS_WEATHER_LAYER" if weather_league == "nfl" else "_EZPZ_CFB_COVERS_LAYER"
+    if getattr(builder, layer_key, False):
         return
 
     builder.COVERS_STARTER_HISTORY_TAB = STARTER_HISTORY_TAB
@@ -689,7 +694,7 @@ def install_covers_layer(builder: Any) -> None:
     def build_environment(game: pd.Series, season: int, manual_roof: str | None = None):
         base = original_build_environment(game, season, manual_roof)
         try:
-            card = _match_weather(builder, str(game.get("Away Team", "")), str(game.get("Home Team", "")))
+            card = _match_weather(builder, str(game.get("Away Team", "")), str(game.get("Home Team", "")), weather_league)
             if not card:
                 return base
             values = [float(card.get("temperature", math.nan)), float(card.get("wind", math.nan)), float(card.get("precipitation", math.nan))]
@@ -747,24 +752,33 @@ def install_covers_layer(builder: Any) -> None:
 
     def clear_automatic_state() -> None:
         original_clear()
-        global _DIRECTORY, _WEATHER
+        global _DIRECTORY
         with _LOCK:
             _MEMORY_HTML.clear()
             _TEAM_REPORTS.clear()
             _DIRECTORY = None
-            _WEATHER = None
+            _WEATHER.clear()
         _pending(builder, "starters").clear()
         _pending(builder, "injuries").clear()
 
-    builder.default_personnel = default_personnel
     builder.build_environment = build_environment
-    builder.run_week = run_week
-    builder._ensure_automatic_day_slate_incremental = incremental
-    # Persist history on the explicit Save action, never on the runtime guard's
-    # automatic projection helper. This preserves the CFB anti-quota behavior.
-    builder.save_result = save_result
-    builder._clear_automatic_state = clear_automatic_state
-    builder._EZPZ_CFB_COVERS_LAYER = True
+    if weather_league == "ncaaf":
+        builder.default_personnel = default_personnel
+        builder.run_week = run_week
+        builder._ensure_automatic_day_slate_incremental = incremental
+        # Persist history on the explicit Save action, never on the runtime guard's
+        # automatic projection helper. This preserves the CFB anti-quota behavior.
+        builder.save_result = save_result
+        builder._clear_automatic_state = clear_automatic_state
+        builder._EZPZ_CFB_COVERS_LAYER = True
+    else:
+        original_clear_nfl = original_clear
+        def clear_nfl_weather_state() -> None:
+            original_clear_nfl()
+            with _LOCK:
+                _WEATHER.pop(weather_league, None)
+        builder._clear_automatic_state = clear_nfl_weather_state
+        setattr(builder, layer_key, True)
 
 
 __all__ = [
