@@ -1,8 +1,8 @@
 """EZPZ Picks NFL model builder.
 
-Version 4.4 makes sportsbook player-prop projections conditional on the player
-being active, fixes the receiving-yard compound distribution, and keeps generic
-depth-chart priors from compressing established WR1/WR3 roles toward the middle.
+Version 4.5 adds a first-class Anytime TD market built from projected scoring
+environment, active-game workload, touchdown efficiency, and individual red-zone
+usage while preserving the active-player and receiving-role calibration fixes.
 
 Primary data source: nflverse through nflreadpy.
 """
@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.4-active-prop-role-calibration-2026-09-13"
+MODEL_VERSION = "nfl-v4.5-anytime-td-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -290,6 +290,13 @@ def _normalize_name(value: Any) -> str:
     text = _safe_text(value).lower()
     text = re.sub(r"[^a-z0-9 ]+", "", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _player_usage_key(player_id: Any, player_name: Any) -> str:
+    player_id_text = _safe_text(player_id)
+    if player_id_text and player_id_text.lower() not in ["nan", "none"]:
+        return player_id_text
+    return _normalize_name(player_name)
 
 
 def _column(df: pd.DataFrame, *names: str, default: Any = 0) -> pd.Series:
@@ -603,6 +610,95 @@ def _load_pbp_season(season: int) -> pd.DataFrame:
         st.session_state[f"nfl_pbp_error_{season}"] = str(exc)
         st.session_state[f"nfl_pbp_status_{season}"] = "Play-by-play unavailable; schedule fallback used."
         return pd.DataFrame()
+
+
+@st.cache_resource(ttl=21600, show_spinner=False)
+def _season_touchdown_usage(season: int, through_week: int | None = None) -> pd.DataFrame:
+    """Aggregate player goal-line/red-zone scoring usage from compact nflverse PBP."""
+    columns = [
+        "player_usage_key", "team", "goal_line_carries", "inside_10_carries",
+        "redzone_targets", "inside_10_targets", "endzone_targets",
+        "goal_line_carry_share", "inside_10_carry_share", "redzone_target_share",
+        "inside_10_target_share", "endzone_target_share",
+    ]
+    pbp = _load_pbp_season(int(season))
+    if pbp is None or pbp.empty:
+        return pd.DataFrame(columns=columns)
+    frame = pbp.copy()
+    del pbp
+    if "season_type" in frame.columns:
+        frame = frame[frame["season_type"].astype(str).str.upper() == "REG"].copy()
+    if through_week is not None and "week" in frame.columns:
+        frame = frame[pd.to_numeric(frame["week"], errors="coerce") <= int(through_week)].copy()
+    if frame.empty:
+        return pd.DataFrame(columns=columns)
+
+    frame["_yard"] = pd.to_numeric(_column(frame, "yardline_100", default=np.nan), errors="coerce")
+    frame["_td"] = pd.to_numeric(_column(frame, "touchdown", default=0), errors="coerce").fillna(0).gt(0.5)
+    frame["_rush"] = pd.to_numeric(_column(frame, "rush_attempt", default=0), errors="coerce").fillna(0).gt(0.5)
+    frame["_pass"] = pd.to_numeric(_column(frame, "pass_attempt", default=0), errors="coerce").fillna(0).gt(0.5)
+    frame["_air"] = pd.to_numeric(_column(frame, "air_yards", default=np.nan), errors="coerce")
+    frame = frame[(frame["_yard"] <= 20) | frame["_td"]].copy()
+    if frame.empty:
+        return pd.DataFrame(columns=columns)
+
+    rush = frame[frame["_rush"]].copy()
+    rush["_name"] = _column(rush, "rusher_player_name", default="").astype(str)
+    rush["_id"] = _column(rush, "rusher_player_id", default="").astype(str)
+    rush["player_usage_key"] = [
+        _player_usage_key(player_id, player_name) for player_id, player_name in zip(rush["_id"], rush["_name"])
+    ]
+    rush["team"] = _column(rush, "posteam", default="").map(_normalize_team)
+    rush = rush[rush["player_usage_key"].astype(str).str.len().gt(0)].copy()
+    if rush.empty:
+        rush_summary = pd.DataFrame(columns=["player_usage_key", "team", "goal_line_carries", "inside_10_carries"])
+    else:
+        rush["goal_line_carry"] = (rush["_yard"] <= 5).astype(float)
+        rush["inside_10_carry"] = (rush["_yard"] <= 10).astype(float)
+        rush_summary = rush.groupby(["player_usage_key", "team"], as_index=False).agg(
+            goal_line_carries=("goal_line_carry", "sum"),
+            inside_10_carries=("inside_10_carry", "sum"),
+        )
+
+    receiving = frame[frame["_pass"]].copy()
+    receiving["_name"] = _column(receiving, "receiver_player_name", default="").astype(str)
+    receiving["_id"] = _column(receiving, "receiver_player_id", default="").astype(str)
+    receiving["player_usage_key"] = [
+        _player_usage_key(player_id, player_name) for player_id, player_name in zip(receiving["_id"], receiving["_name"])
+    ]
+    receiving["team"] = _column(receiving, "posteam", default="").map(_normalize_team)
+    receiving = receiving[receiving["player_usage_key"].astype(str).str.len().gt(0)].copy()
+    if receiving.empty:
+        receiving_summary = pd.DataFrame(columns=[
+            "player_usage_key", "team", "redzone_targets", "inside_10_targets", "endzone_targets",
+        ])
+    else:
+        receiving["redzone_target"] = (receiving["_yard"] <= 20).astype(float)
+        receiving["inside_10_target"] = (receiving["_yard"] <= 10).astype(float)
+        receiving["endzone_target"] = (
+            receiving["_air"].notna() & receiving["_yard"].notna() & (receiving["_air"] >= receiving["_yard"] - 0.5)
+        ).astype(float)
+        receiving_summary = receiving.groupby(["player_usage_key", "team"], as_index=False).agg(
+            redzone_targets=("redzone_target", "sum"),
+            inside_10_targets=("inside_10_target", "sum"),
+            endzone_targets=("endzone_target", "sum"),
+        )
+
+    usage = rush_summary.merge(receiving_summary, on=["player_usage_key", "team"], how="outer")
+    count_columns = ["goal_line_carries", "inside_10_carries", "redzone_targets", "inside_10_targets", "endzone_targets"]
+    for column in count_columns:
+        usage[column] = pd.to_numeric(usage.get(column, 0), errors="coerce").fillna(0.0)
+    share_map = {
+        "goal_line_carries": "goal_line_carry_share",
+        "inside_10_carries": "inside_10_carry_share",
+        "redzone_targets": "redzone_target_share",
+        "inside_10_targets": "inside_10_target_share",
+        "endzone_targets": "endzone_target_share",
+    }
+    for source, destination in share_map.items():
+        team_total = usage.groupby("team")[source].transform("sum")
+        usage[destination] = usage[source] / team_total.replace(0, np.nan)
+    return usage[columns].replace([np.inf, -np.inf], np.nan)
 
 
 @st.cache_resource(ttl=21600, show_spinner=False)
@@ -3023,6 +3119,7 @@ def _season_player_profiles(season: int, through_week: int | None = None) -> pd.
         return pd.DataFrame()
     df["player_name"] = _player_name_column(df).astype(str)
     df["player_name_norm"] = df["player_name"].map(_normalize_name)
+    df["player_usage_key"] = [_player_usage_key(player_id, player_name) for player_id, player_name in zip(_player_id_column(df), df["player_name"])]
     df["team"] = _player_team_column(df)
     df["position"] = _player_position_column(df).map(_position_group)
     df["opponent"] = _column(df, "opponent_team", default="").map(_normalize_team)
@@ -3096,7 +3193,7 @@ def _season_player_profiles(season: int, through_week: int | None = None) -> pd.
     recent = pd.DataFrame(recent_rows)
 
     grouped = df.groupby("player_name_norm", as_index=False).agg(
-        player_name=("player_name", "last"), team=("team", "last"), position=("position", "last"),
+        player_name=("player_name", "last"), player_usage_key=("player_usage_key", "last"), team=("team", "last"), position=("position", "last"),
         games=("week_num", "nunique"), attempts=("attempts", "sum"), completions=("completions", "sum"),
         passing_yards=("passing_yards", "sum"), passing_tds=("passing_tds", "sum"), interceptions=("interceptions", "sum"),
         sacks=("sacks", "sum"), passing_air_yards=("passing_air_yards", "sum"),
@@ -3114,8 +3211,10 @@ def _season_player_profiles(season: int, through_week: int | None = None) -> pd.
     for total, output in [
         ("attempts", "attempts_pg"), ("completions", "completions_pg"), ("passing_yards", "passing_yards_pg"),
         ("passing_tds", "passing_tds_pg"), ("interceptions", "interceptions_pg"), ("carries", "carries_pg"),
-        ("rushing_yards", "rushing_yards_pg"), ("targets", "targets_pg"), ("receptions", "receptions_pg"),
-        ("receiving_yards", "receiving_yards_pg"), ("estimated_routes", "estimated_routes_pg"),
+        ("rushing_yards", "rushing_yards_pg"), ("rushing_tds", "rushing_tds_pg"),
+        ("targets", "targets_pg"), ("receptions", "receptions_pg"),
+        ("receiving_yards", "receiving_yards_pg"), ("receiving_tds", "receiving_tds_pg"),
+        ("estimated_routes", "estimated_routes_pg"),
     ]:
         grouped[output] = grouped[total] / games
     grouped["completion_rate"] = grouped["completions"] / grouped["attempts"].replace(0, np.nan)
@@ -3123,7 +3222,9 @@ def _season_player_profiles(season: int, through_week: int | None = None) -> pd.
     grouped["pass_td_rate"] = grouped["passing_tds"] / grouped["attempts"].replace(0, np.nan)
     grouped["interception_rate"] = grouped["interceptions"] / grouped["attempts"].replace(0, np.nan)
     grouped["rush_ypc"] = grouped["rushing_yards"] / grouped["carries"].replace(0, np.nan)
+    grouped["rush_td_rate"] = grouped["rushing_tds"] / grouped["carries"].replace(0, np.nan)
     grouped["catch_rate"] = grouped["receptions"] / grouped["targets"].replace(0, np.nan)
+    grouped["receiving_td_rate"] = grouped["receiving_tds"] / grouped["targets"].replace(0, np.nan)
     grouped["yards_per_target"] = grouped["receiving_yards"] / grouped["targets"].replace(0, np.nan)
     grouped["yards_per_reception"] = grouped["receiving_yards"] / grouped["receptions"].replace(0, np.nan)
     grouped["adot"] = grouped["receiving_air_yards"] / grouped["targets"].replace(0, np.nan)
@@ -3135,6 +3236,20 @@ def _season_player_profiles(season: int, through_week: int | None = None) -> pd.
     grouped["attempt_share"] = grouped["attempts_pg"] / grouped["team_attempts"].replace(0, np.nan)
     grouped["carry_share"] = grouped["carries_pg"] / grouped["team_carries"].replace(0, np.nan)
     grouped["target_share"] = grouped["targets_pg"] / grouped["team_targets"].replace(0, np.nan)
+
+    touchdown_usage = _season_touchdown_usage(int(season), through_week)
+    td_count_columns = ["goal_line_carries", "inside_10_carries", "redzone_targets", "inside_10_targets", "endzone_targets"]
+    td_share_columns = ["goal_line_carry_share", "inside_10_carry_share", "redzone_target_share", "inside_10_target_share", "endzone_target_share"]
+    if touchdown_usage is not None and not touchdown_usage.empty:
+        grouped = grouped.merge(touchdown_usage, on=["player_usage_key", "team"], how="left")
+    for column in td_count_columns:
+        if column not in grouped.columns:
+            grouped[column] = 0.0
+        grouped[column] = pd.to_numeric(grouped[column], errors="coerce").fillna(0.0)
+    for column in td_share_columns:
+        if column not in grouped.columns:
+            grouped[column] = np.nan
+        grouped[column] = pd.to_numeric(grouped[column], errors="coerce")
 
     for stat_type, columns in [
         ("passing", ["completion_percentage_above_expectation", "avg_intended_air_yards", "avg_time_to_throw"]),
@@ -3179,12 +3294,15 @@ def _blended_player_profiles(season: int, projection_week: int) -> pd.DataFrame:
     current_map = {row["player_name_norm"]: row.to_dict() for _, row in current_df.iterrows()} if not current_df.empty else {}
     role_metrics = [
         "attempts_pg", "completions_pg", "passing_yards_pg", "passing_tds_pg", "interceptions_pg",
-        "carries_pg", "rushing_yards_pg", "targets_pg", "receptions_pg", "receiving_yards_pg",
-        "attempt_share", "carry_share", "target_share", "snap_share", "estimated_routes_pg",
-        "route_participation", "targets_per_route",
+        "carries_pg", "rushing_yards_pg", "rushing_tds_pg", "targets_pg", "receptions_pg",
+        "receiving_yards_pg", "receiving_tds_pg", "attempt_share", "carry_share", "target_share",
+        "snap_share", "estimated_routes_pg", "route_participation", "targets_per_route",
+        "goal_line_carry_share", "inside_10_carry_share", "redzone_target_share",
+        "inside_10_target_share", "endzone_target_share",
     ]
     efficiency_metrics = [
-        "completion_rate", "pass_ypa", "pass_td_rate", "interception_rate", "rush_ypc", "catch_rate",
+        "completion_rate", "pass_ypa", "pass_td_rate", "interception_rate", "rush_ypc", "rush_td_rate",
+        "catch_rate", "receiving_td_rate",
         "yards_per_target", "yards_per_reception", "adot", "yac_per_reception",
         "ngs_passing_completion_percentage_above_expectation", "ngs_passing_avg_intended_air_yards",
         "ngs_passing_avg_time_to_throw", "ngs_rushing_rush_yards_over_expected_per_att",
@@ -3196,7 +3314,7 @@ def _blended_player_profiles(season: int, projection_week: int) -> pd.DataFrame:
         "qb_fault_sack_rate", "pressure_rate_faced", "deep_attempt_rate", "explosive_rush_rate",
         "stuff_rate", "outside_rush_rate",
     ]
-    total_metrics = ["attempts", "completions", "passing_yards", "passing_tds", "interceptions", "carries", "rushing_yards", "targets", "receptions", "receiving_yards", "chart_targets", "man_targets", "zone_targets"]
+    total_metrics = ["attempts", "completions", "passing_yards", "passing_tds", "interceptions", "carries", "rushing_yards", "rushing_tds", "targets", "receptions", "receiving_yards", "receiving_tds", "goal_line_carries", "inside_10_carries", "redzone_targets", "inside_10_targets", "endzone_targets", "chart_targets", "man_targets", "zone_targets"]
     rows = []
     for name in sorted(set(prior_map) | set(current_map)):
         prior, current = prior_map.get(name, {}), current_map.get(name, {})
@@ -3532,6 +3650,109 @@ def _regressed_rate(raw: float, volume: float, prior: float, prior_volume: float
     return (raw * volume + prior * prior_volume) / max(volume + prior_volume, 1.0)
 
 
+TD_SLOT_LAMBDA_PRIORS = {
+    "QB": 0.14, "RB1": 0.50, "RB2": 0.21, "WR1": 0.40,
+    "WR2": 0.29, "WR3": 0.18, "TE": 0.30,
+}
+TD_RUSH_RATE_PRIORS = {"QB": 0.038, "RB": 0.036, "WR": 0.012, "TE": 0.006}
+TD_RECEIVING_RATE_PRIORS = {"QB": 0.005, "RB": 0.048, "WR": 0.066, "TE": 0.078}
+
+
+def _team_touchdown_context(
+    profiles: pd.DataFrame, team: str, team_rating: dict[str, Any],
+    opponent_rating: dict[str, Any], pregame_team_total: float,
+) -> dict[str, float]:
+    implied_points = clamp(_num(pregame_team_total, 22.5), 6.0, 48.0)
+    offensive_rz = _num(team_rating.get("Red Zone TD Rate", 0.56), 0.56)
+    defensive_edge = _num(opponent_rating.get("Red Zone Def Edge", 0.0), 0.0)
+    rz_factor = clamp(1.0 + 0.70 * (offensive_rz - 0.56) - 0.55 * defensive_edge, 0.86, 1.14)
+    expected_team_tds = clamp((implied_points / 8.75) * rz_factor, 0.55, 5.0)
+
+    historical_team_tds = np.nan
+    if profiles is not None and not profiles.empty:
+        subset = profiles[profiles["team"].astype(str).map(_normalize_team) == _normalize_team(team)].copy()
+        if not subset.empty:
+            rushing = pd.to_numeric(subset.get("rushing_tds_pg", 0), errors="coerce").fillna(0.0)
+            receiving = pd.to_numeric(subset.get("receiving_tds_pg", 0), errors="coerce").fillna(0.0)
+            historical_team_tds = float((rushing + receiving).sum())
+    if not math.isfinite(_num(historical_team_tds, np.nan)) or historical_team_tds < 0.80:
+        historical_team_tds = 2.55
+    scoring_scale = clamp(expected_team_tds / max(historical_team_tds, 0.80), 0.72, 1.35)
+    return {
+        "expected_team_tds": float(expected_team_tds),
+        "historical_team_tds": float(historical_team_tds),
+        "scoring_scale": float(scoring_scale),
+    }
+
+
+def _anytime_touchdown_lambda(
+    profile: dict[str, Any], profiles: pd.DataFrame, team: str, position: str, slot: str,
+    projected_carries: float, projected_targets: float, role: dict[str, Any],
+    team_rating: dict[str, Any], opponent_rating: dict[str, Any], pregame_team_total: float,
+) -> tuple[float, str, float]:
+    pos = _position_group(position)
+    carries = max(0.0, _num(projected_carries, 0.0))
+    targets = max(0.0, _num(projected_targets, 0.0))
+    games = max(0.0, _num(profile.get("games", 0.0), 0.0))
+
+    rush_prior = TD_RUSH_RATE_PRIORS.get(pos, 0.012)
+    receiving_prior = TD_RECEIVING_RATE_PRIORS.get(pos, 0.050)
+    rush_rate = _regressed_rate(
+        _num(profile.get("rush_td_rate", rush_prior), rush_prior),
+        _num(profile.get("carries", 0.0), 0.0), rush_prior, 85.0,
+    )
+    receiving_rate = _regressed_rate(
+        _num(profile.get("receiving_td_rate", receiving_prior), receiving_prior),
+        _num(profile.get("targets", 0.0), 0.0), receiving_prior, 90.0,
+    )
+
+    carry_share = clamp(_num(role.get("carry_share", profile.get("carry_share", 0.0)), 0.0), 0.0, 0.95)
+    target_share = clamp(_num(role.get("target_share", profile.get("target_share", 0.0)), 0.0), 0.0, 0.45)
+    goal_line_share = _num(profile.get("goal_line_carry_share", np.nan), np.nan)
+    inside_10_carry_share = _num(profile.get("inside_10_carry_share", np.nan), np.nan)
+    redzone_target_share = _num(profile.get("redzone_target_share", np.nan), np.nan)
+    inside_10_target_share = _num(profile.get("inside_10_target_share", np.nan), np.nan)
+    endzone_target_share = _num(profile.get("endzone_target_share", np.nan), np.nan)
+
+    rushing_priority = np.nan
+    if math.isfinite(goal_line_share) or math.isfinite(inside_10_carry_share):
+        rushing_priority = (
+            0.68 * (goal_line_share if math.isfinite(goal_line_share) else inside_10_carry_share)
+            + 0.32 * (inside_10_carry_share if math.isfinite(inside_10_carry_share) else goal_line_share)
+        )
+    receiving_priority = np.nan
+    if math.isfinite(endzone_target_share) or math.isfinite(inside_10_target_share) or math.isfinite(redzone_target_share):
+        endzone_value = endzone_target_share if math.isfinite(endzone_target_share) else (inside_10_target_share if math.isfinite(inside_10_target_share) else redzone_target_share)
+        inside_value = inside_10_target_share if math.isfinite(inside_10_target_share) else (redzone_target_share if math.isfinite(redzone_target_share) else endzone_value)
+        receiving_priority = 0.62 * endzone_value + 0.38 * inside_value
+
+    rush_slot_factor = {"QB": 1.08, "RB1": 1.16, "RB2": 0.88}.get(slot, 0.88 if pos not in ["RB", "QB"] else 1.0)
+    receiving_slot_factor = {"RB1": 1.00, "RB2": 0.88, "WR1": 1.10, "WR2": 1.00, "WR3": 0.90, "TE": 1.08}.get(slot, 1.0)
+    if math.isfinite(rushing_priority) and carry_share > 0.01:
+        rush_role_factor = clamp(1.0 + 0.30 * (rushing_priority - carry_share) / max(carry_share, 0.10), 0.74, 1.36)
+    else:
+        rush_role_factor = rush_slot_factor
+    if math.isfinite(receiving_priority) and target_share > 0.01:
+        receiving_role_factor = clamp(1.0 + 0.28 * (receiving_priority - target_share) / max(target_share, 0.08), 0.76, 1.34)
+    else:
+        receiving_role_factor = receiving_slot_factor
+
+    workload_lambda = carries * rush_rate * rush_role_factor + targets * receiving_rate * receiving_role_factor
+    historical_td_pg = max(0.0, _num(profile.get("rushing_tds_pg", 0.0), 0.0) + _num(profile.get("receiving_tds_pg", 0.0), 0.0))
+    slot_prior = TD_SLOT_LAMBDA_PRIORS.get(slot, 0.20 if pos in ["WR", "TE"] else 0.12)
+    history_weight = clamp(games / (games + 8.0), 0.0, 0.78)
+    history_anchor = history_weight * historical_td_pg + (1.0 - history_weight) * slot_prior
+    base_lambda = 0.76 * workload_lambda + 0.24 * history_anchor
+
+    team_context = _team_touchdown_context(profiles, team, team_rating, opponent_rating, pregame_team_total)
+    td_lambda = clamp(base_lambda * team_context["scoring_scale"], 0.01, 1.45)
+    reason = (
+        f"Projected {team_context['expected_team_tds']:.2f} team TDs • active carry/target workload • "
+        "goal-line/end-zone role • regressed rushing/receiving TD efficiency"
+    )
+    return float(td_lambda), reason, float(team_context["expected_team_tds"])
+
+
 def _pregame_implied_team_total(
     home_away: str,
     market_total: float | None,
@@ -3579,13 +3800,15 @@ def _qb_passing_yards_regression_layer(
 
 
 def _prop_sd(market: str, projection: float, reliability: float) -> float:
-    base = {"Passing Attempts": 5.2, "Passing Completions": 4.2, "Passing Yards": 55.0, "Passing TDs": 1.0, "Interceptions": 0.68, "Rushing Attempts": 4.0, "Rushing Yards": 23.0, "Targets": 2.5, "Receptions": 1.9, "Receiving Yards": 25.0}.get(market, max(1.0, projection * 0.32))
+    base = {"Passing Attempts": 5.2, "Passing Completions": 4.2, "Passing Yards": 55.0, "Passing TDs": 1.0, "Interceptions": 0.68, "Rushing Attempts": 4.0, "Rushing Yards": 23.0, "Targets": 2.5, "Receptions": 1.9, "Receiving Yards": 25.0, "Anytime TD": 0.65}.get(market, max(1.0, projection * 0.32))
     if market in ["Rushing Yards", "Receiving Yards"]:
         base = max(base, projection * 0.34)
     return float(base * (1.0 + max(0.0, 74.0 - reliability) / 145.0))
 
 
 def _fair_line(projection: float, market: str) -> float:
+    if market == "Anytime TD":
+        return 0.5
     return round(math.floor(projection) + 0.5, 1) if market in ["Passing TDs", "Interceptions", "Receptions", "Targets", "Passing Attempts", "Passing Completions", "Rushing Attempts"] else round(round(projection * 2) / 2, 1)
 
 
@@ -3623,7 +3846,7 @@ def _prop_calibration_adjustment(player: str, position: str, market: str, oppone
     pl, npl = shrunk(market_rows[market_rows["player_norm"] == _normalize_name(player)], 12)
     op, nop = shrunk(market_rows[(market_rows["opponent_norm"] == _normalize_team(opponent)) & (market_rows["position_norm"] == _position_group(position))], 22)
     adjustment = 0.42 * g + 0.25 * p + 0.20 * pl + 0.13 * op
-    caps = {"Passing Attempts": 2.2, "Passing Completions": 1.8, "Passing Yards": 18.0, "Passing TDs": 0.25, "Interceptions": 0.20, "Rushing Attempts": 2.0, "Rushing Yards": 10.0, "Targets": 1.3, "Receptions": 0.85, "Receiving Yards": 10.0}
+    caps = {"Passing Attempts": 2.2, "Passing Completions": 1.8, "Passing Yards": 18.0, "Passing TDs": 0.25, "Interceptions": 0.20, "Rushing Attempts": 2.0, "Rushing Yards": 10.0, "Targets": 1.3, "Receptions": 0.85, "Receiving Yards": 10.0, "Anytime TD": 0.15}
     adjustment = clamp(adjustment, -caps.get(market, 8.0), caps.get(market, 8.0)) if ng >= 8 else 0.0
     residual_sd = float(pd.to_numeric(market_rows["Projection Residual"], errors="coerce").std(ddof=1)) if ng >= 15 else np.nan
     return {"adjustment": float(adjustment), "sample": int(ng), "residual_sd": residual_sd}
@@ -3680,6 +3903,9 @@ def _simulate_prop_distribution(item: dict[str, Any], draws: int = 12000) -> tup
     elif market == "Targets":
         samples = _draw_negative_binomial(rng, projection, 10 / low_conf, draws).astype(float)
         distribution = "Negative binomial targets"
+    elif market == "Anytime TD":
+        samples = rng.poisson(projection, size=draws).astype(float)
+        distribution = "Poisson anytime-touchdown count"
     elif market in ["Passing TDs", "Interceptions"]:
         dispersion = 4.2 if market == "Passing TDs" else 2.8
         samples = _draw_negative_binomial(rng, projection, dispersion / low_conf, draws).astype(float)
@@ -3865,6 +4091,14 @@ def _project_player_markets(
         add_market("Interceptions", interceptions, _num(opponent_rating.get("Takeaway Rate", 0.024), 0.024) / 0.024, attempts=pass_attempts, efficiency=blended_int_rate, reason="Attempts • INT-worthy charting • opponent takeaways")
         add_market("Rushing Attempts", rush_attempts, rush_index, attempts=rush_attempts, efficiency=1.0, reason="Designed usage • pressure/scramble environment • game script")
         add_market("Rushing Yards", rush_attempts * qb_rush_ypc, rush_index, attempts=rush_attempts, efficiency=qb_rush_ypc, reason="Rush attempts × adjusted YPC • pressure • run defense")
+        td_lambda, td_reason, expected_team_tds = _anytime_touchdown_lambda(
+            profile, profiles, team, pos, slot, rush_attempts, 0.0, role,
+            team_rating, opponent_rating, pregame_team_total,
+        )
+        add_market(
+            "Anytime TD", td_lambda, expected_team_tds / 2.55, attempts=rush_attempts,
+            efficiency=td_lambda / max(rush_attempts, 0.25), reason=td_reason,
+        )
 
     elif pos == "RB":
         carry_share = _num(role.get("carry_share", profile.get("carry_share", defaults["carry_share"])), defaults["carry_share"])
@@ -3903,6 +4137,15 @@ def _project_player_markets(
         add_market("Targets", targets, _num(defense.get("targets_index", 1.0), 1.0), targets=targets, routes=routes, route_participation=route_part, tprr=tprr, efficiency=1.0, reason="Estimated routes × TPRR blended with team target share")
         add_market("Receptions", receptions, _num(defense.get("receptions_index", 1.0), 1.0), targets=targets, receptions=receptions, routes=routes, route_participation=route_part, tprr=tprr, efficiency=catch_rate, reason="Target distribution × charting-adjusted catch probability")
         add_market("Receiving Yards", receiving_yards, rec_index, targets=targets, receptions=receptions, routes=routes, route_participation=route_part, tprr=tprr, efficiency=adjusted_ypt, coverage_matchup=short_index, reason="Targets × adjusted YPT • checkdown/short coverage matchup")
+        td_lambda, td_reason, expected_team_tds = _anytime_touchdown_lambda(
+            profile, profiles, team, pos, slot, carries, targets, role,
+            team_rating, opponent_rating, pregame_team_total,
+        )
+        add_market(
+            "Anytime TD", td_lambda, expected_team_tds / 2.55, attempts=carries, targets=targets,
+            receptions=receptions, routes=routes, route_participation=route_part, tprr=tprr,
+            efficiency=td_lambda / max(carries + targets, 0.25), reason=td_reason,
+        )
 
     else:
         route_part = clamp(_num(role.get("route_participation", profile.get("route_participation", defaults["route_participation"])), defaults["route_participation"]), 0.20, 0.98)
@@ -3938,6 +4181,15 @@ def _project_player_markets(
         add_market("Targets", targets, _num(defense.get("targets_index", 1.0), 1.0), targets=targets, routes=routes, route_participation=route_part, tprr=tprr, efficiency=1.0, coverage_matchup=coverage_factor, reason="Estimated routes × TPRR • current role • man/zone tendency")
         add_market("Receptions", receptions, _num(defense.get("receptions_index", 1.0), 1.0), targets=targets, receptions=receptions, routes=routes, route_participation=route_part, tprr=tprr, efficiency=catch_rate, coverage_matchup=coverage_factor, reason="Target distribution × catchability/drop/separation • man/zone coverage")
         add_market("Receiving Yards", receiving_yards, rec_index, targets=targets, receptions=receptions, routes=routes, route_participation=route_part, tprr=tprr, efficiency=adjusted_ypt, coverage_matchup=coverage_factor, reason="Targets × adjusted YPT • depth/YAC • coverage shell • pressure/weather")
+        td_lambda, td_reason, expected_team_tds = _anytime_touchdown_lambda(
+            profile, profiles, team, pos, slot, 0.0, targets, role,
+            team_rating, opponent_rating, pregame_team_total,
+        )
+        add_market(
+            "Anytime TD", td_lambda, expected_team_tds / 2.55, targets=targets, receptions=receptions,
+            routes=routes, route_participation=route_part, tprr=tprr,
+            efficiency=td_lambda / max(targets, 0.25), reason=td_reason,
+        )
     return rows
 
 
@@ -3953,6 +4205,20 @@ def _grade_prop(probability: float, probability_edge_value: float, reliability: 
     return "Non-Edge Prop"
 
 
+def _grade_anytime_td(
+    probability: float, probability_edge_value: float, expected_value: float,
+    reliability: float, role_confidence: float,
+) -> str:
+    # TD props are high variance, so initial A/B gates are deliberately stricter than yardage props.
+    if probability >= 0.25 and probability_edge_value >= 0.075 and expected_value >= 0.12 and reliability >= 78 and role_confidence >= 76:
+        return "A Prop"
+    if probability >= 0.20 and probability_edge_value >= 0.050 and expected_value >= 0.08 and reliability >= 70 and role_confidence >= 68:
+        return "B Prop"
+    if probability_edge_value >= 0.030 and expected_value > 0 and reliability >= 62:
+        return "Lean"
+    return "Non-Edge Prop"
+
+
 def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
     if rows is None or rows.empty:
         return pd.DataFrame()
@@ -3964,6 +4230,42 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         item["Distribution"] = distribution
         item["Fair Line"] = _fair_line(float(np.median(samples)), _safe_text(item.get("Market", "")))
         item["_sd"] = float(np.std(samples, ddof=1))
+        market = _safe_text(item.get("Market", ""))
+        if market == "Anytime TD":
+            td_probability = float(1.0 - math.exp(-projection))
+            odds_raw = _num(item.get("Over Odds", np.nan), np.nan)
+            item["Market Line"] = 0.5
+            item["Fair Line"] = 0.5
+            if not (math.isfinite(odds_raw) and abs(odds_raw) >= 100):
+                item.update({
+                    "Pick": "Enter odds", "Pick Odds": np.nan, "Model Probability": round(td_probability, 4),
+                    "Push Probability": 0.0, "Implied Probability": np.nan, "Probability Edge": np.nan,
+                    "Projection Edge": np.nan, "Expected Value": np.nan, "Grade": "Missing odds", "Track": False,
+                })
+                output.append(item)
+                continue
+            odds = int(round(odds_raw))
+            implied = american_implied_probability(odds)
+            probability_edge_value = td_probability - implied
+            settled_ev = expected_value_per_unit(td_probability, odds)
+            grade = _grade_anytime_td(
+                td_probability, probability_edge_value, settled_ev,
+                _num(item.get("Reliability", 50), 50), _num(item.get("Role Confidence", 50), 50),
+            )
+            if probability_edge_value <= 0 or settled_ev <= 0:
+                grade = "Non-Edge Prop"
+            if _num(item.get("_play_probability", 1.0), 1.0) < MIN_GRADED_PROP_PLAY_PROBABILITY:
+                grade = "Injury hold"
+            item.update({
+                "Line Source": "Manual anytime TD price", "Pick": "Anytime TD", "Pick Odds": odds,
+                "Model Probability": round(td_probability, 4), "Push Probability": 0.0,
+                "Implied Probability": round(implied, 4), "Probability Edge": round(probability_edge_value, 4),
+                "Projection Edge": round(probability_edge_value, 4), "Expected Value": round(settled_ev, 4),
+                "Grade": grade, "Track": grade in ["A Prop", "B Prop"],
+            })
+            output.append(item)
+            continue
+
         line = _num(item.get("Market Line", np.nan), np.nan)
         if not (math.isfinite(line) and line >= 0):
             item.update({"Pick": "Projection only", "Pick Odds": np.nan, "Model Probability": np.nan, "Push Probability": np.nan, "Implied Probability": np.nan, "Probability Edge": np.nan, "Projection Edge": np.nan, "Expected Value": np.nan, "Grade": "No market line", "Track": False})
@@ -4295,11 +4597,15 @@ def _actual_market_values(stat_row: dict[str, Any], market: str) -> tuple[float 
         "Targets": targets,
         "Receptions": receptions,
         "Receiving Yards": _num(stat_row.get("receiving_yards", 0), 0),
+        "Anytime TD": _num(stat_row.get("rushing_tds", 0), 0) + _num(stat_row.get("receiving_tds", 0), 0),
     }
     if market not in values:
         return None, None, None
     actual = values[market]
-    if market in ["Passing Attempts", "Passing Completions", "Passing Yards", "Passing TDs", "Interceptions"]:
+    if market == "Anytime TD":
+        opportunity = carries + targets
+        efficiency = actual / opportunity if opportunity > 0 else 0.0
+    elif market in ["Passing Attempts", "Passing Completions", "Passing Yards", "Passing TDs", "Interceptions"]:
         opportunity = attempts
         efficiency = actual / attempts if attempts > 0 and market != "Passing Attempts" else (1.0 if market == "Passing Attempts" else 0.0)
     elif market in ["Rushing Attempts", "Rushing Yards"]:
@@ -4317,12 +4623,16 @@ def _actual_market_values(stat_row: dict[str, Any], market: str) -> tuple[float 
 
 
 def _projected_opportunity_for_market(row: dict[str, Any], market: str) -> float:
+    if market == "Anytime TD":
+        return _num(row.get("Projected Player Attempts", 0), 0) + _num(row.get("Projected Targets", 0), 0)
     if market in ["Passing Attempts", "Passing Completions", "Passing Yards", "Passing TDs", "Interceptions", "Rushing Attempts", "Rushing Yards"]:
         return _num(row.get("Projected Player Attempts", 0), 0)
     return _num(row.get("Projected Targets", 0), 0)
 
 
 def _bet_result_from_actual(pick: str, line: float, actual: float) -> str:
+    if _safe_text(pick).lower().startswith("anytime td"):
+        return "Win" if actual >= 1.0 else "Loss"
     if abs(actual - line) < 1e-9:
         return "Push"
     direction = _safe_text(pick).split(" ", 1)[0].lower()
@@ -4487,7 +4797,7 @@ def _auto_update_prop_tracker() -> tuple[int, str]:
             market = values["market"]
             if market.startswith("Passing") or market == "Interceptions":
                 tracker.at[index, "Actual Attempts"] = _num(stat_row.get("attempts", 0), 0)
-            elif market.startswith("Rushing"):
+            elif market.startswith("Rushing") or market == "Anytime TD":
                 tracker.at[index, "Actual Attempts"] = _num(stat_row.get("carries", 0), 0)
             else:
                 tracker.at[index, "Actual Attempts"] = ""
@@ -5115,12 +5425,17 @@ def _render_build() -> None:
 
         yard_inputs = prop_inputs.loc[wager_mask].copy()
         slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE": 6}
-        market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2}
+        market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2, "Anytime TD": 3}
         team_order = {away_team: 0, home_team: 1}
         yard_inputs["_team_order"] = yard_inputs["Team"].map(team_order).fillna(99)
         yard_inputs["_slot_order"] = yard_inputs["Slot"].map(slot_order).fillna(99)
         yard_inputs["_market_order"] = yard_inputs["Market"].map(market_order).fillna(99)
         yard_inputs = yard_inputs.sort_values(["_team_order", "_slot_order", "_market_order", "Player"])
+
+        yard_player_keys = {
+            (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", "")))
+            for _, row in yard_inputs.iterrows()
+        }
 
         for team in [away_team, home_team]:
             team_rows = yard_inputs[yard_inputs["Team"].astype(str) == str(team)]
@@ -5156,10 +5471,57 @@ def _render_build() -> None:
                 if line_value is not None and over_value is not None and under_value is not None:
                     prop_inputs.at[idx, "Line Source"] = "Manual market line"
 
+        td_inputs = prop_inputs[
+            (prop_inputs["Market"].astype(str) == "Anytime TD")
+            & prop_inputs.apply(
+                lambda row: (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", ""))) in yard_player_keys,
+                axis=1,
+            )
+        ].copy()
+        td_inputs["_team_order"] = td_inputs["Team"].map(team_order).fillna(99)
+        td_inputs["_slot_order"] = td_inputs["Slot"].map(slot_order).fillna(99)
+        td_inputs = td_inputs.sort_values(["_team_order", "_slot_order", "Player"])
+
+        if not td_inputs.empty:
+            st.markdown("#### Anytime TD odds")
+            st.caption("Same players as the yardage section above. Enter one American-odds price per player; no second price is required.")
+            for team in [away_team, home_team]:
+                team_td_rows = td_inputs[td_inputs["Team"].astype(str) == str(team)]
+                if team_td_rows.empty:
+                    continue
+                st.markdown(f"**{team}**")
+                for idx, row in team_td_rows.iterrows():
+                    player = _safe_text(row.get("Player", ""))
+                    slot = _safe_text(row.get("Slot", ""))
+                    td_lambda = max(0.0, _num(row.get("Projection", 0), 0))
+                    td_probability = 1.0 - math.exp(-td_lambda)
+                    st.markdown(f"**{slot} — {player}**")
+                    st.caption(f"EZPZ anytime TD probability: {td_probability:.1%} • expected TDs λ={td_lambda:.2f}")
+                    odds_value = st.number_input(
+                        "Anytime TD odds", value=None, step=5,
+                        key=f"nfl_anytime_td_odds_{market_key}_{idx}",
+                    )
+                    if odds_value is not None:
+                        prop_inputs.at[idx, "Market Line"] = 0.5
+                        prop_inputs.at[idx, "Over Odds"] = int(odds_value)
+                        prop_inputs.at[idx, "Line Source"] = "Manual anytime TD price"
+
         evaluated_props = _evaluate_prop_rows(prop_inputs)
         if not evaluated_props.empty:
             st.markdown("#### Prop grades")
-            evaluated_wagers = evaluated_props.loc[wager_mask].copy()
+            evaluated_yard_mask = (
+                ((evaluated_props["Position"].astype(str) == "QB") & (evaluated_props["Market"].astype(str) == "Passing Yards"))
+                | ((evaluated_props["Position"].astype(str) == "RB") & (evaluated_props["Market"].astype(str).isin(["Rushing Yards", "Receiving Yards"])))
+                | ((evaluated_props["Position"].astype(str) == "WR") & (evaluated_props["Market"].astype(str) == "Receiving Yards"))
+            )
+            evaluated_td_mask = (
+                (evaluated_props["Market"].astype(str) == "Anytime TD")
+                & evaluated_props.apply(
+                    lambda row: (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", ""))) in yard_player_keys,
+                    axis=1,
+                )
+            )
+            evaluated_wagers = evaluated_props.loc[evaluated_yard_mask | evaluated_td_mask].copy()
             evaluated_wagers["_team_order"] = evaluated_wagers["Team"].map(team_order).fillna(99)
             evaluated_wagers["_slot_order"] = evaluated_wagers["Slot"].map(slot_order).fillna(99)
             evaluated_wagers["_market_order"] = evaluated_wagers["Market"].map(market_order).fillna(99)
@@ -5170,15 +5532,21 @@ def _render_build() -> None:
                 slot = _safe_text(row.get("Slot", ""))
                 market = _safe_text(row.get("Market", ""))
                 projection_value = _num(row.get("Projection", 0), 0)
+                probability = _num(row.get("Model Probability", np.nan), np.nan)
                 if grade in ["No market line", "Missing odds"]:
-                    st.caption(f"{slot} — {player} · {market}: projection {projection_value:.1f} • {grade}")
+                    if market == "Anytime TD" and math.isfinite(probability):
+                        st.caption(f"{slot} — {player} · Anytime TD: model {probability:.1%} • {grade}")
+                    else:
+                        st.caption(f"{slot} — {player} · {market}: projection {projection_value:.1f} • {grade}")
                     continue
                 pick = _safe_text(row.get("Pick", ""))
                 pick_odds = _int(row.get("Pick Odds", 0), 0)
-                probability = _num(row.get("Model Probability", 0), 0)
                 edge = _num(row.get("Probability Edge", 0), 0)
                 st.markdown(f"**{slot} — {player} · {market}: {pick} ({pick_odds:+d}) — {grade}**")
-                st.caption(f"Projection {projection_value:.1f} • model {probability:.1%} • price edge {edge:+.1%}")
+                if market == "Anytime TD":
+                    st.caption(f"Expected TDs λ={projection_value:.2f} • model {probability:.1%} • price edge {edge:+.1%}")
+                else:
+                    st.caption(f"Projection {projection_value:.1f} • model {probability:.1%} • price edge {edge:+.1%}")
 
     st.divider()
     st.caption("This single action saves the game, lineup snapshot and every prop projection. Only qualifying graded bets are placed in the trackers.")
