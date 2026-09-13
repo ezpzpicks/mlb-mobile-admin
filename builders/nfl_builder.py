@@ -127,7 +127,7 @@ SCHEDULE_COLUMNS = [
 
 LINEUP_COLUMNS = [
     "Date", "Season", "Week", "Game ID", "Team", "Unit", "Slot", "Player", "Position",
-    "Depth Rank", "Injury Status", "Auto Play Probability", "Manual Play Probability",
+    "Depth Rank", "Depth Downgrade", "Injury Status", "Auto Play Probability", "Manual Play Probability",
     "Manual Role Share", "Base Impact", "Manual Impact", "Effective Play Probability", "Absence Cost",
     "Model Version",
 ]
@@ -785,6 +785,124 @@ def _load_espn_depth_charts() -> pd.DataFrame:
     except Exception as exc:
         st.session_state["nfl_espn_depth_error"] = str(exc)
         st.session_state["nfl_espn_depth_status"] = "ESPN depth charts unavailable; nflverse fallback used."
+        return pd.DataFrame()
+
+
+@st.cache_resource(ttl=900, show_spinner=False)
+def _load_espn_injuries() -> pd.DataFrame:
+    """Load ESPN's current NFL injury report every 15 minutes.
+
+    This is the same current-status family that powers ESPN's team injury/depth
+    pages. Depth order stays in the ESPN depth-chart loader; this function owns
+    live availability labels such as O, Q, D, IR and suspended.
+    """
+    url = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+    headers = {"User-Agent": "EZPZ-Picks/1.0"}
+
+    def status_text(value: Any) -> str:
+        if isinstance(value, dict):
+            for key in ["abbreviation", "shortName", "name", "description", "displayName"]:
+                candidate = _safe_text(value.get(key, ""))
+                if candidate:
+                    return candidate
+            return ""
+        return _safe_text(value)
+
+    def normalize_status(value: Any) -> str:
+        raw = status_text(value).strip()
+        upper = raw.upper()
+        aliases = {
+            "O": "Out", "OUT": "Out",
+            "Q": "Questionable", "QUESTIONABLE": "Questionable",
+            "D": "Doubtful", "DOUBTFUL": "Doubtful",
+            "IR": "IR", "INJURED RESERVE": "IR",
+            "PUP": "PUP", "PHYSICALLY UNABLE TO PERFORM": "PUP",
+            "SSPD": "Suspended", "SUSP": "Suspended", "SUSPENDED": "Suspended",
+            "ACTIVE": "Active", "HEALTHY": "Healthy",
+        }
+        if upper in aliases:
+            return aliases[upper]
+        for token, normalized in [
+            ("INJURED RESERVE", "IR"), ("QUESTIONABLE", "Questionable"),
+            ("DOUBTFUL", "Doubtful"), ("SUSPEND", "Suspended"),
+            ("OUT", "Out"), ("PUP", "PUP"),
+        ]:
+            if token in upper:
+                return normalized
+        return raw.title() if raw else ""
+
+    try:
+        response = requests.get(url, headers=headers, timeout=25)
+        response.raise_for_status()
+        payload = response.json()
+        groups = payload.get("injuries", []) if isinstance(payload, dict) else []
+        rows: list[dict[str, Any]] = []
+        for group in groups:
+            if not isinstance(group, dict):
+                continue
+            team_data = group.get("team", {})
+            if not isinstance(team_data, dict):
+                team_data = {}
+            team = _normalize_team(team_data.get("abbreviation", ""))
+            if not team or team not in NFL_TEAMS:
+                continue
+            injuries = group.get("injuries", [])
+            if not isinstance(injuries, list):
+                continue
+            for item in injuries:
+                if not isinstance(item, dict):
+                    continue
+                athlete = item.get("athlete", {})
+                if not isinstance(athlete, dict):
+                    athlete = {}
+                player_name = _safe_text(
+                    athlete.get("displayName", athlete.get("fullName", athlete.get("name", "")))
+                )
+                if not player_name:
+                    continue
+
+                status = normalize_status(item.get("status", ""))
+                if not status:
+                    candidate = normalize_status(item.get("type", ""))
+                    if candidate.upper() in {
+                        "OUT", "QUESTIONABLE", "DOUBTFUL", "IR", "PUP", "SUSPENDED"
+                    }:
+                        status = candidate
+                if not status:
+                    status = "Questionable"
+
+                details = item.get("details", {})
+                if not isinstance(details, dict):
+                    details = {}
+                injury = (
+                    _safe_text(details.get("type", ""))
+                    or _safe_text(details.get("detail", ""))
+                    or _safe_text(item.get("shortComment", ""))
+                    or _safe_text(item.get("longComment", ""))
+                )
+                rows.append({
+                    "team_norm": team,
+                    "player_name_display": player_name,
+                    "name_norm": _normalize_name(player_name),
+                    "status": status,
+                    "injury": injury,
+                    "source": "ESPN current injury report",
+                })
+
+        output = pd.DataFrame(rows)
+        if output.empty:
+            st.session_state["nfl_espn_injury_status"] = "ESPN returned no current NFL injury rows."
+            return output
+        output = output[
+            output["team_norm"].isin(NFL_TEAMS)
+            & output["name_norm"].astype(str).str.len().gt(0)
+        ].drop_duplicates(["team_norm", "name_norm"], keep="last")
+        st.session_state["nfl_espn_injury_status"] = f"ESPN current injuries loaded for {len(output):,} players."
+        st.session_state.pop("nfl_espn_injury_error", None)
+        return output.reset_index(drop=True)
+    except Exception as exc:
+        st.session_state["nfl_espn_injury_error"] = str(exc)
+        st.session_state["nfl_espn_injury_status"] = "ESPN injuries unavailable; nflverse/Sleeper fallback used."
         return pd.DataFrame()
 
 
@@ -1507,7 +1625,7 @@ def _latest_depth_chart(season: int) -> pd.DataFrame:
 
 
 def _injury_lookup(season: int, week: int) -> dict[tuple[str, str], dict[str, Any]]:
-    """Merge historical nflverse reports with a daily Sleeper status fallback."""
+    """Merge nflverse/Sleeper fallbacks with ESPN as live-season authority."""
     lookup: dict[tuple[str, str], dict[str, Any]] = {}
     injuries = _load_injuries_season(season)
     if not injuries.empty:
@@ -1551,6 +1669,23 @@ def _injury_lookup(season: int, week: int) -> dict[tuple[str, str], dict[str, An
                 "auto_probability": _status_probability(status),
                 "source": "Sleeper daily players",
             }
+
+    # ESPN's current injury page is the final authority for the current season.
+    if int(season) == int(DEFAULT_SEASON):
+        espn = _load_espn_injuries()
+        if espn is not None and not espn.empty:
+            for _, row in espn.iterrows():
+                team = _normalize_team(row.get("team_norm", ""))
+                name = _normalize_name(row.get("name_norm", row.get("player_name_display", "")))
+                status = _safe_text(row.get("status", "")) or "Questionable"
+                if not team or not name:
+                    continue
+                lookup[(team, name)] = {
+                    "status": status,
+                    "injury": _safe_text(row.get("injury", "")),
+                    "auto_probability": _status_probability(status),
+                    "source": "ESPN current injury report",
+                }
     return lookup
 
 
@@ -1567,24 +1702,54 @@ def _slot_player(
     team: str,
     position_options: list[str],
     occurrence: int,
+    injury_lookup: dict[tuple[str, str], dict[str, Any]],
     used_names: set[str],
-) -> tuple[str, str, int]:
+) -> tuple[str, str, int, list[str]]:
     if depth is None or depth.empty:
-        return "", position_options[0], occurrence + 1
-    team_rows = depth[depth["team_norm"] == _normalize_team(team)].copy()
+        return "", position_options[0], occurrence + 1, []
+    team_norm = _normalize_team(team)
+    team_rows = depth[depth["team_norm"] == team_norm].copy()
     if team_rows.empty:
-        return "", position_options[0], occurrence + 1
+        return "", position_options[0], occurrence + 1, []
     rows = team_rows[team_rows["pos_norm"].isin([p.upper() for p in position_options])].copy()
     if rows.empty:
-        return "", position_options[0], occurrence + 1
+        return "", position_options[0], occurrence + 1, []
     rows = rows.sort_values(["pos_rank_num", "pos_slot_num", "player_name_display"])
     available = rows[~rows["player_name_display"].map(_normalize_name).isin(used_names)]
     if available.empty:
         available = rows
-    # Used names already remove earlier selections, so take the best remaining player.
-    row = available.iloc[0]
-    player = _safe_text(row.get("player_name_display", ""))
-    return player, _safe_text(row.get("pos_norm", position_options[0])), _int(row.get("pos_rank_num", occurrence + 1), occurrence + 1)
+
+    skipped_unavailable: list[str] = []
+    for _, row in available.iterrows():
+        player = _safe_text(row.get("player_name_display", ""))
+        name = _normalize_name(player)
+        if not name:
+            continue
+        injury = injury_lookup.get((team_norm, name), {})
+        play_probability = _num(injury.get("auto_probability", 1.0), 1.0)
+        if play_probability <= 0.05:
+            # Mark the inactive player used so a later RB/WR slot does not try
+            # to recycle the same unavailable player.
+            used_names.add(name)
+            skipped_unavailable.append(name)
+            continue
+        return (
+            player,
+            _safe_text(row.get("pos_norm", position_options[0])),
+            _int(row.get("pos_rank_num", occurrence + 1), occurrence + 1),
+            skipped_unavailable,
+        )
+
+    # If every listed player is unavailable, retain the top listed player so the
+    # normal zero play-probability absence logic still flags the position.
+    fallback = available.iloc[0]
+    player = _safe_text(fallback.get("player_name_display", ""))
+    return (
+        player,
+        _safe_text(fallback.get("pos_norm", position_options[0])),
+        _int(fallback.get("pos_rank_num", occurrence + 1), occurrence + 1),
+        [],
+    )
 
 
 def _auto_lineup(
@@ -1602,7 +1767,9 @@ def _auto_lineup(
         for slot, positions in slot_specs:
             family = positions[0]
             occurrence = position_seen.get(family, 0)
-            player, position, depth_rank = _slot_player(depth, team, positions, occurrence, used)
+            player, position, depth_rank, skipped_unavailable = _slot_player(
+                depth, team, positions, occurrence, injury_lookup, used
+            )
             position_seen[family] = occurrence + 1
             if player:
                 used.add(_normalize_name(player))
@@ -1620,6 +1787,23 @@ def _auto_lineup(
                 base = max(base, player_value * multiplier)
             elif slot == "TE" and player_value > 0:
                 base = max(base, player_value)
+
+            # A healthy backup replacing a definite out should still cost the
+            # team points. Use the existing position impact as the cap, with the
+            # skipped depth count as a fallback and historical player-value gap
+            # as a refinement when both players have meaningful data.
+            position_cap = POSITION_BASE_IMPACT.get(slot, 0.35)
+            fallback_penalty = position_cap * min(0.85, 0.30 * len(skipped_unavailable))
+            known_skipped_values = [
+                _num(player_values.get(name, 0.0), 0.0)
+                for name in skipped_unavailable
+                if _num(player_values.get(name, 0.0), 0.0) > 0
+            ]
+            value_gap = 0.0
+            if player_value > 0 and known_skipped_values:
+                value_gap = max(0.0, max(known_skipped_values) - player_value) * 0.75
+            depth_downgrade = clamp(max(fallback_penalty, value_gap), 0.0, position_cap)
+
             if depth_rank > 1:
                 base *= max(0.45, 1.0 - 0.18 * (depth_rank - 1))
             rows.append({
@@ -1628,6 +1812,7 @@ def _auto_lineup(
                 "Player": player or "TBD",
                 "Position": position,
                 "Depth Rank": depth_rank,
+                "Depth Downgrade": round(depth_downgrade, 3),
                 "Injury Status": status,
                 "Auto Play Probability": round(auto_probability, 2),
                 "Manual Play Probability": np.nan,
@@ -1654,7 +1839,9 @@ def _finalize_lineup(lineup: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, floa
     manual_impact = pd.to_numeric(out.get("Manual Impact", 0.0), errors="coerce").fillna(0.0)
     impact = (base + manual_impact).clip(lower=0.0)
     out["Effective Play Probability"] = effective.round(3)
-    out["Absence Cost"] = ((1.0 - effective) * impact).round(3)
+    depth_downgrade = pd.to_numeric(out.get("Depth Downgrade", 0.0), errors="coerce").fillna(0.0).clip(lower=0.0)
+    out["Depth Downgrade"] = depth_downgrade.round(3)
+    out["Absence Cost"] = (((1.0 - effective) * impact) + depth_downgrade).round(3)
     offense_absence = float(out.loc[out["Unit"].astype(str) == "Offense", "Absence Cost"].sum())
     defense_absence = float(out.loc[out["Unit"].astype(str) == "Defense", "Absence Cost"].sum())
     player_known = (~out["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"])).mean()
@@ -2207,7 +2394,7 @@ def _lineup_editor(
     if "Manual Role Share" not in lineup.columns:
         lineup["Manual Role Share"] = np.nan
     visible_columns = [
-        "Unit", "Slot", "Player", "Position", "Injury Status",
+        "Unit", "Slot", "Player", "Position", "Depth Rank", "Depth Downgrade", "Injury Status",
         "Manual Play Probability", "Manual Role Share", "Manual Impact",
     ]
     edited = st.data_editor(
@@ -2216,15 +2403,20 @@ def _lineup_editor(
         hide_index=True,
         key=f"nfl_lineup_{game_key}_{team}",
         column_order=visible_columns,
-        disabled=["Unit", "Slot"],
+        disabled=["Unit", "Slot", "Depth Rank", "Depth Downgrade"],
         column_config={
             "Unit": st.column_config.TextColumn("Unit", disabled=True, width="small"),
             "Slot": st.column_config.TextColumn("Slot", disabled=True, width="small"),
+            "Depth Rank": st.column_config.NumberColumn("Depth", disabled=True, width="small", format="%d"),
+            "Depth Downgrade": st.column_config.NumberColumn(
+                "Depth pts", disabled=True, width="small", format="%.2f",
+                help="Automatic points deducted when a deeper player is promoted because higher depth-chart players are unavailable.",
+            ),
             "Player": st.column_config.TextColumn("Player", width="medium"),
             "Position": st.column_config.TextColumn("Pos", width="small"),
             "Injury Status": st.column_config.SelectboxColumn(
                 "Status",
-                options=["Healthy", "Active", "Full", "Limited", "Questionable", "Doubtful", "Out", "IR", "PUP", "Unknown"],
+                options=["Healthy", "Active", "Full", "Limited", "Questionable", "Doubtful", "Out", "IR", "PUP", "Suspended", "Unknown"],
                 width="medium",
             ),
             "Manual Play Probability": st.column_config.NumberColumn(
@@ -4310,7 +4502,8 @@ def _render_build() -> None:
         if st.button("Force refresh automatic NFL data", use_container_width=True, key="nfl_force_refresh"):
             for cached_loader in [
                 _load_schedule_live, _load_schedule_csv_fallback, _load_player_stats_season,
-                _load_depth_charts_season, _load_injuries_season, _load_sleeper_players, _load_snap_counts_season,
+                _load_depth_charts_season, _load_injuries_season, _load_sleeper_players,
+                _load_espn_depth_charts, _load_espn_injuries, _load_snap_counts_season,
                 _load_nextgen_season, _load_ftn_charting_season, _load_participation_season,
                 _season_charting_features, _season_player_profiles, _blended_player_profiles,
                 _defense_position_profiles, _prop_calibration_data, _rolling_home_field_model,
@@ -4520,9 +4713,11 @@ def _render_build() -> None:
     home_seed_lineup = _auto_lineup(home_team, season, week, depth, injury_lookup, player_values)
 
     with st.expander("Lineups, injuries and role overrides", expanded=False):
-        st.caption("Current QB/RB/WR/TE teams and depth order use the daily Sleeper player feed, with nflverse depth charts retained for detailed line positions. Injury status is merged automatically; manual play probability remains the final override.")
-        if st.session_state.get("nfl_sleeper_error"):
-            st.warning("The daily Sleeper roster/injury fallback is unavailable on this run. Verify current teams, starters and play probabilities manually before saving.")
+        st.caption("Current QB/RB/WR/TE depth order comes from ESPN. ESPN current injury status is applied to that depth chart automatically, so definite outs are skipped and the next available player is promoted with a depth-based point deduction. nflverse/Sleeper remain fallbacks; manual play probability remains the final override.")
+        if st.session_state.get("nfl_espn_depth_error"):
+            st.warning("ESPN depth charts are unavailable on this run; nflverse depth fallback is active.")
+        if st.session_state.get("nfl_espn_injury_error"):
+            st.warning("ESPN current injuries are unavailable on this run; nflverse/Sleeper injury fallback is active.")
         away_tab, home_tab = st.tabs([f"{away_team} lineup", f"{home_team} lineup"])
         with away_tab:
             away_lineup, away_lineup_summary = _lineup_editor(
