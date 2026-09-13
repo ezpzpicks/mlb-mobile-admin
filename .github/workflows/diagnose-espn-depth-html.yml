@@ -1,4 +1,4 @@
-name: Diagnose ESPN depth chart API ordering
+name: Diagnose ESPN core depth chart API
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Inspect ESPN depth API
+      - name: Inspect ESPN core depth API
         shell: bash
         run: |
           python - <<'PY'
@@ -24,22 +24,25 @@ jobs:
           headers={"User-Agent":"EZPZ-Picks/1.0"}
           teams={"ATL":"1","PIT":"23"}
           for abbr,team_id in teams.items():
-              url=f"https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/{team_id}/depthcharts"
+              url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/teams/{team_id}/depthcharts"
               r=requests.get(url,headers=headers,timeout=30)
-              print("TEAM",abbr,"status",r.status_code,"len",len(r.text))
+              print("TEAM",abbr,"status",r.status_code,"len",len(r.text),"ct",r.headers.get("content-type"))
+              print(r.text[:300])
+              if r.status_code != 200:
+                  continue
               data=r.json()
-              for chart in data.get("depthCharts",[]):
-                  print("CHART", chart.get("name"), chart.get("displayName"), chart.get("type"))
+              for chart in data.get("items",[]):
+                  print("CHART", chart.get("name"), chart.get("id"))
                   positions=chart.get("positions",{})
-                  items=list(positions.values()) if isinstance(positions,dict) else positions
-                  for p in items:
+                  items=list(positions.items()) if isinstance(positions,dict) else []
+                  for key,p in items:
                       info=p.get("position",{}) if isinstance(p,dict) else {}
-                      pos=(info.get("abbreviation") or p.get("abbreviation") or "") if isinstance(p,dict) else ""
+                      pos=(info.get("abbreviation") or key or "").upper()
                       if pos not in {"QB","RB","HB","FB","WR","LWR","RWR","SWR","TE"}:
                           continue
-                      print(" POSITION",pos,"key/order fields",{k:p.get(k) for k in p.keys() if k not in {"athletes","position"}})
+                      print(" POSITION",key,pos,"meta",{k:p.get(k) for k in p.keys() if k not in {"athletes","position"}})
                       for i,a in enumerate(p.get("athletes",[]),1):
                           ath=a.get("athlete",a)
-                          print("  ",i,ath.get("displayName") or ath.get("fullName") or ath.get("name"),"entry rank",a.get("rank"),"entry slot",a.get("slot"),"entry keys",sorted(a.keys()),"ath status",ath.get("status"),"ath injuries",ath.get("injuries"))
+                          print("  ",i,ath.get("displayName") or ath.get("fullName") or ath.get("name"),"rank",a.get("rank"),"keys",sorted(a.keys()),"status",ath.get("status"),"injuries",ath.get("injuries"))
               print("="*80)
           PY
