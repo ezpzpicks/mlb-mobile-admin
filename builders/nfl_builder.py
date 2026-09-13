@@ -1,8 +1,8 @@
 """EZPZ Picks NFL model builder.
 
-Version 3.3 adds the validated QB passing-yards regression layer: calibrated
-attempts multiplied by calibrated YPA, with a capped pregame implied-team-total
-adjustment. Other player-prop markets retain their v3.2 formulas.
+Version 4.4 makes sportsbook player-prop projections conditional on the player
+being active, fixes the receiving-yard compound distribution, and keeps generic
+depth-chart priors from compressing established WR1/WR3 roles toward the middle.
 
 Primary data source: nflverse through nflreadpy.
 """
@@ -53,9 +53,10 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v3.5-espn-only-depth-injury-2026-09-13"
+MODEL_VERSION = "nfl-v4.4-active-prop-role-calibration-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
+MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
 HOME_FIELD_LOOKBACK_SEASONS = 5
 HOME_FIELD_PRIOR_POINTS = 1.5
 HOME_FIELD_PRIOR_GAMES = 48.0
@@ -3371,7 +3372,7 @@ def _role_defaults(position: str, slot: str) -> dict[str, float]:
         return {"carry_share": 0.62 if starter else 0.27, "target_share": 0.12 if starter else 0.07, "snap_share": 0.64 if starter else 0.34, "route_participation": 0.50 if starter else 0.27, "targets_per_route": 0.235}
     if pos == "WR":
         rank = {"WR1": 0, "WR2": 1, "WR3": 2}.get(slot, 2)
-        return {"target_share": [0.24, 0.19, 0.14][rank], "snap_share": [0.92, 0.85, 0.73][rank], "route_participation": [0.91, 0.83, 0.68][rank], "targets_per_route": [0.235, 0.205, 0.185][rank]}
+        return {"target_share": [0.25, 0.19, 0.12][rank], "snap_share": [0.92, 0.85, 0.70][rank], "route_participation": [0.92, 0.83, 0.64][rank], "targets_per_route": [0.245, 0.205, 0.175][rank]}
     return {"target_share": 0.16, "snap_share": 0.79, "route_participation": 0.72, "targets_per_route": 0.19}
 
 
@@ -3401,12 +3402,22 @@ def _expected_role_metric(
     current_value = _num(profile.get(f"current_{metric}", np.nan), np.nan)
     blended_value = _num(profile.get(metric, np.nan), np.nan)
     profile_team = _normalize_team(profile.get("team", ""))
+    changed_team = bool(profile_team and profile_team != _normalize_team(team))
     top_slot = slot in ["QB", "RB1", "WR1", "TE"]
 
     if current_games > 0 and math.isfinite(current_value) and current_value > 0:
         current_weight = clamp(0.55 + 0.10 * max(0.0, current_games - 1.0), 0.55, 0.92)
-        value = current_weight * current_value + (1.0 - current_weight) * default
-        note = "Current-season usage weighted above prior role"
+        remaining_weight = 1.0 - current_weight
+        historical = prior_value if math.isfinite(prior_value) and prior_value > 0 else blended_value
+        if math.isfinite(historical) and historical > 0:
+            historical_share = 0.25 if changed_team else 0.70
+            historical_weight = remaining_weight * historical_share
+            default_weight = remaining_weight - historical_weight
+            value = current_weight * current_value + historical_weight * historical + default_weight * default
+            note = "Current-season usage blended with player history and depth-chart role"
+        else:
+            value = current_weight * current_value + remaining_weight * default
+            note = "Current-season usage blended with depth-chart role"
         transition = abs(current_value - default) >= max(0.04, default * 0.25)
         return value, note, transition
 
@@ -3414,24 +3425,20 @@ def _expected_role_metric(
     if not math.isfinite(historical) or historical <= 0:
         return default, "Depth-chart role prior", True
 
-    changed_team = bool(profile_team and profile_team != _normalize_team(team))
     promoted = bool(top_slot and historical < default * 0.78)
     demoted = bool(not top_slot and historical > default * 1.22)
     if changed_team:
-        anchor_weight = 0.90
-        note = "New-team depth-chart role replaces prior-team workload"
+        anchor_weight = 0.82
+        note = "New-team depth-chart role weighted above prior-team workload"
     elif promoted:
-        anchor_weight = 0.86
-        note = "Promoted starter role replaces last season's smaller workload"
+        anchor_weight = 0.72
+        note = "Promoted starter role weighted above last season's smaller workload"
     elif demoted:
-        anchor_weight = 0.78
-        note = "Lower depth-chart role reduces last season's workload"
-    elif top_slot:
-        anchor_weight = 0.64
-        note = "Starter role blended with prior usage"
+        anchor_weight = 0.68
+        note = "Lower depth-chart role weighted above last season's workload"
     else:
-        anchor_weight = 0.56
-        note = "Depth-chart role blended with prior usage"
+        anchor_weight = 0.30
+        note = "Returning-player usage weighted above depth-chart prior"
     value = anchor_weight * default + (1.0 - anchor_weight) * historical
     return value, note, changed_team or promoted or demoted
 
@@ -3539,19 +3546,13 @@ def _pregame_implied_team_total(
 def _qb_passing_yards_regression_layer(
     raw_pass_attempts: float,
     raw_adjusted_ypa: float,
-    play_probability: float,
     pregame_team_total: float,
 ) -> dict[str, float]:
-    """Calibrate the two passing-yards components without changing other markets."""
-    availability = clamp(_num(play_probability, 0.0), 0.0, 1.0)
-    if availability > 0:
-        active_raw_attempts = max(0.0, _num(raw_pass_attempts, 0.0)) / availability
-        calibrated_attempts = (
-            QB_PASSING_ATTEMPT_CALIBRATION_INTERCEPT
-            + QB_PASSING_ATTEMPT_CALIBRATION_SLOPE * active_raw_attempts
-        ) * availability
-    else:
-        calibrated_attempts = 0.0
+    """Calibrate active-game passing components without an availability multiplier."""
+    calibrated_attempts = (
+        QB_PASSING_ATTEMPT_CALIBRATION_INTERCEPT
+        + QB_PASSING_ATTEMPT_CALIBRATION_SLOPE * max(0.0, _num(raw_pass_attempts, 0.0))
+    )
 
     calibrated_base_ypa = (
         QB_PASSING_YPA_CALIBRATION_INTERCEPT
@@ -3641,40 +3642,43 @@ def _draw_negative_binomial(rng: np.random.Generator, mean: float, dispersion: f
 
 
 def _simulate_prop_distribution(item: dict[str, Any], draws: int = 12000) -> tuple[np.ndarray, str]:
+    """Simulate a settled player prop conditional on the player being active.
+
+    Sportsbook props void when a player does not play, so availability belongs in
+    grading eligibility and confidence rather than as zero-yard Under outcomes.
+    All projection/opportunity fields entering this function are active-game values.
+    """
     market = _safe_text(item.get("Market", ""))
     projection = max(0.0, _num(item.get("Projection", 0), 0))
     reliability = _num(item.get("Reliability", 65), 65)
-    play_probability = clamp(_num(item.get("_play_probability", 1.0), 1.0), 0.02, 1.0)
     seed_text = f"{MODEL_VERSION}|{item.get('Team','')}|{item.get('Player','')}|{market}|{projection:.4f}"
     seed = int(hashlib.sha256(seed_text.encode()).hexdigest()[:16], 16) % (2**32 - 1)
     rng = np.random.default_rng(seed)
-    active = rng.random(draws) < play_probability
-    active_projection = projection / play_probability
-    attempts = max(0.0, _num(item.get("Projected Player Attempts", 0), 0) / play_probability)
-    targets = max(0.0, _num(item.get("Projected Targets", 0), 0) / play_probability)
-    receptions = max(0.0, _num(item.get("Projected Receptions", 0), 0) / play_probability)
+    attempts = max(0.0, _num(item.get("Projected Player Attempts", 0), 0))
+    targets = max(0.0, _num(item.get("Projected Targets", 0), 0))
+    receptions = max(0.0, _num(item.get("Projected Receptions", 0), 0))
     efficiency = max(0.0, _num(item.get("Efficiency", 0), 0))
     low_conf = 1.0 + max(0.0, 75.0 - reliability) / 120.0
 
     if market == "Passing Attempts":
-        samples = _draw_negative_binomial(rng, active_projection, 48 / low_conf, draws).astype(float)
+        samples = _draw_negative_binomial(rng, projection, 48 / low_conf, draws).astype(float)
         distribution = "Negative binomial attempts"
     elif market == "Passing Completions":
         a = _draw_negative_binomial(rng, attempts, 48 / low_conf, draws)
-        comp_p = clamp(active_projection / max(attempts, 0.25), 0.35, 0.82)
+        comp_p = clamp(projection / max(attempts, 0.25), 0.35, 0.82)
         concentration = clamp(35 + reliability, 65, 130)
         beta_p = rng.beta(max(0.5, comp_p * concentration), max(0.5, (1 - comp_p) * concentration), size=draws)
         samples = rng.binomial(a, beta_p).astype(float)
         distribution = "Attempt count + beta-binomial completions"
     elif market == "Rushing Attempts":
-        samples = _draw_negative_binomial(rng, active_projection, 14 / low_conf, draws).astype(float)
+        samples = _draw_negative_binomial(rng, projection, 14 / low_conf, draws).astype(float)
         distribution = "Negative binomial carries"
     elif market == "Targets":
-        samples = _draw_negative_binomial(rng, active_projection, 10 / low_conf, draws).astype(float)
+        samples = _draw_negative_binomial(rng, projection, 10 / low_conf, draws).astype(float)
         distribution = "Negative binomial targets"
     elif market in ["Passing TDs", "Interceptions"]:
         dispersion = 4.2 if market == "Passing TDs" else 2.8
-        samples = _draw_negative_binomial(rng, active_projection, dispersion / low_conf, draws).astype(float)
+        samples = _draw_negative_binomial(rng, projection, dispersion / low_conf, draws).astype(float)
         distribution = "Poisson-gamma count"
     elif market == "Receptions":
         t = _draw_negative_binomial(rng, targets, 10 / low_conf, draws)
@@ -3701,7 +3705,7 @@ def _simulate_prop_distribution(item: dict[str, Any], draws: int = 12000) -> tup
         concentration = clamp(20 + reliability * 0.80, 32, 100)
         beta_p = rng.beta(max(0.5, catch_p * concentration), max(0.5, (1 - catch_p) * concentration), size=draws)
         catches = rng.binomial(t, beta_p)
-        ypr_mean = active_projection / max(receptions / play_probability, 0.35)
+        ypr_mean = projection / max(receptions, 0.35)
         ypr_sd = max(2.5, ypr_mean * 0.38 * low_conf)
         shape = max(1.2, (ypr_mean / ypr_sd) ** 2)
         scale = max(0.1, ypr_sd**2 / max(ypr_mean, 0.1))
@@ -3710,9 +3714,8 @@ def _simulate_prop_distribution(item: dict[str, Any], draws: int = 12000) -> tup
         distribution = "Targets + beta-binomial catches + gamma YPR"
     else:
         sd = _prop_sd(market, projection, reliability)
-        samples = np.maximum(0, rng.normal(active_projection, sd, size=draws))
+        samples = np.maximum(0, rng.normal(projection, sd, size=draws))
         distribution = "Normal fallback"
-    samples = samples * active.astype(float)
     return samples, distribution
 
 
@@ -3744,6 +3747,8 @@ def _project_player_markets(
     defaults = _role_defaults(pos, slot)
     role = (role_context or {}).get(_normalize_name(player), {})
     play_probability = _num(role.get("play_probability", _lineup_player_probability(lineup, player)), 0.85)
+    # Sportsbook player props are void on a DNP. Build active-game volume here;
+    # availability remains a confidence and grade-eligibility input below.
     role_note = _safe_text(role.get("role_note", ""))
     role_profile = {**profile, "snap_share": role.get("snap_share", profile.get("snap_share", np.nan)), "route_participation": role.get("route_participation", profile.get("route_participation", np.nan)), "role_transition": bool(role.get("transition", False))}
     defense = _defense_profile_lookup(defense_profiles, opponent, pos)
@@ -3788,6 +3793,7 @@ def _project_player_markets(
         route_conf = clamp(35 + 48 * clamp(route_participation, 0, 1) + min(17, games * 2.0), 35, 96) if pos in ["RB", "WR", "TE"] else role_conf
         cal_conf = clamp(35 + min(55, calibration["sample"] * 1.8), 35, 90)
         reliability = clamp(0.38 * role_conf + 0.22 * route_conf + 0.20 * data_confidence + 0.12 * matchup_confidence + 0.08 * cal_conf, 35, 95)
+        availability_note = f" • active-game projection ({play_probability:.0%} availability)" if play_probability < 0.995 else ""
         rows.append({
             "Team": team, "Opponent": opponent, "Home/Away": home_away, "Player": player, "Position": pos, "Slot": slot,
             "Market": market, "Raw Projection": round(max(0.0, raw_projection), 2), "Calibration Adjustment": round(calibration["adjustment"], 2),
@@ -3800,13 +3806,13 @@ def _project_player_markets(
             "Projected Pass Attempts": round(team_pass_attempts, 1), "Projected Rush Attempts": round(team_rush_attempts, 1),
             "Projected Routes": round(routes, 2), "Route Participation": round(route_participation, 3), "Targets Per Route": round(tprr, 3),
             "Projected Player Attempts": round(attempts, 2), "Projected Completions": round(completions, 2), "Projected Targets": round(targets, 2), "Projected Receptions": round(receptions, 2),
-            "Efficiency": round(efficiency, 3), "Confluence": f"{reason}{' • ' + role_note if role_note else ''}",
+            "Efficiency": round(efficiency, 3), "Confluence": f"{reason}{' • ' + role_note if role_note else ''}{availability_note}",
             "_sd": _prop_sd(market, projection, reliability), "_play_probability": play_probability,
         })
 
     if pos == "QB":
         attempt_share = _num(role.get("attempt_share", profile.get("attempt_share", defaults["attempt_share"])), defaults["attempt_share"])
-        pass_attempts = team_pass_attempts * clamp(attempt_share, 0.78, 1.0) * play_probability
+        pass_attempts = team_pass_attempts * clamp(attempt_share, 0.78, 1.0)
         comp_prior = _position_prior(pos, "completion_rate", 0.645)
         completion_rate = _regressed_rate(_num(profile.get("completion_rate", comp_prior), comp_prior), _num(profile.get("attempts", 0)), comp_prior, 190)
         cpoe = _num(profile.get("ngs_passing_completion_percentage_above_expectation", 0), 0)
@@ -3819,7 +3825,7 @@ def _project_player_markets(
         pass_yards_index = _num(defense.get("passing_yards_index", 1.0), 1.0)
         adjusted_ypa = clamp(pass_ypa * pass_matchup_factor * pressure_efficiency_factor * (0.58 + 0.22 * pass_yards_index + 0.20 * depth_index) * weather_factor, 5.0, 9.6)
         passing_yards_layer = _qb_passing_yards_regression_layer(
-            pass_attempts, adjusted_ypa, play_probability, pregame_team_total
+            pass_attempts, adjusted_ypa, pregame_team_total
         )
         passing_yards_attempts = passing_yards_layer["attempts"]
         passing_yards_ypa = passing_yards_layer["ypa"]
@@ -3834,11 +3840,11 @@ def _project_player_markets(
         interceptions = pass_attempts * blended_int_rate * clamp(1.0 + 8 * (_num(opponent_rating.get("Takeaway Rate", 0.024)) - 0.024), 0.74, 1.38)
         qb_carry_share = _num(role.get("carry_share", profile.get("carry_share", defaults["carry_share"])), defaults["carry_share"])
         rush_attempts = max(_num(profile.get("carries_pg", 3.5), 3.5), team_rush_attempts * clamp(qb_carry_share, 0.04, 0.32))
-        rush_attempts *= play_probability * clamp(1.0 + _num(opponent_rating.get("Sack/Pressure Edge", 0)) * 1.5 - margin * 0.004, 0.78, 1.28)
+        rush_attempts *= clamp(1.0 + _num(opponent_rating.get("Sack/Pressure Edge", 0)) * 1.5 - margin * 0.004, 0.78, 1.28)
         qb_ypc = _regressed_rate(_num(profile.get("rush_ypc", 4.6), 4.6), _num(profile.get("carries", 0)), 4.6, 75)
         rush_index = _num(defense.get("rushing_yards_index", 1.0), 1.0)
         qb_rush_ypc = clamp(qb_ypc * rush_matchup_factor * (0.76 + 0.24 * rush_index), 2.2, 7.5)
-        add_market("Passing Attempts", pass_attempts, _num(defense.get("attempts_index", 1.0), 1.0), attempts=pass_attempts, efficiency=1.0, reason="Projected dropbacks minus sacks • game script • weather • starter probability")
+        add_market("Passing Attempts", pass_attempts, _num(defense.get("attempts_index", 1.0), 1.0), attempts=pass_attempts, efficiency=1.0, reason="Projected dropbacks minus sacks • game script • weather • active-game starter role")
         add_market("Passing Completions", completions, _num(defense.get("attempts_index", 1.0), 1.0), attempts=pass_attempts, completions=completions, efficiency=completion_rate, reason="Attempts × charting/coverage-adjusted completion probability")
         add_market(
             "Passing Yards", pass_yards, pass_yards_index,
@@ -3858,7 +3864,7 @@ def _project_player_markets(
 
     elif pos == "RB":
         carry_share = _num(role.get("carry_share", profile.get("carry_share", defaults["carry_share"])), defaults["carry_share"])
-        carries = team_rush_attempts * clamp(carry_share, 0.06, 0.82) * play_probability
+        carries = team_rush_attempts * clamp(carry_share, 0.06, 0.82)
         rush_prior = _position_prior(pos, "rush_ypc", 4.25)
         raw_ypc = _regressed_rate(_num(profile.get("rush_ypc", rush_prior), rush_prior), _num(profile.get("carries", 0)), rush_prior, 125)
         ryoe = _num(profile.get("ngs_rushing_rush_yards_over_expected_per_att", 0), 0)
@@ -3873,9 +3879,9 @@ def _project_player_markets(
         rushing_yards = carries * ypc
         route_part = clamp(_num(role.get("route_participation", profile.get("route_participation", defaults["route_participation"])), defaults["route_participation"]), 0.08, 0.82)
         tprr = clamp(_num(role.get("targets_per_route", profile.get("targets_per_route", defaults["targets_per_route"])), defaults["targets_per_route"]), 0.10, 0.38)
-        routes = dropbacks * route_part * play_probability
+        routes = dropbacks * route_part
         target_share = _num(role.get("target_share", profile.get("target_share", defaults["target_share"])), defaults["target_share"])
-        targets = 0.58 * (team_pass_attempts * clamp(target_share, 0.02, 0.28) * play_probability) + 0.42 * (routes * tprr)
+        targets = 0.58 * (team_pass_attempts * clamp(target_share, 0.02, 0.28)) + 0.42 * (routes * tprr)
         catch_prior = _position_prior(pos, "catch_rate", 0.755)
         catch_rate = _regressed_rate(_num(profile.get("catch_rate", catch_prior), catch_prior), _num(profile.get("targets", 0)), catch_prior, 85)
         catchable = _num(profile.get("catchable_target_rate", 0.79), 0.79)
@@ -3897,9 +3903,9 @@ def _project_player_markets(
     else:
         route_part = clamp(_num(role.get("route_participation", profile.get("route_participation", defaults["route_participation"])), defaults["route_participation"]), 0.20, 0.98)
         tprr = clamp(_num(role.get("targets_per_route", profile.get("targets_per_route", defaults["targets_per_route"])), defaults["targets_per_route"]), 0.08, 0.36)
-        routes = dropbacks * route_part * play_probability
+        routes = dropbacks * route_part
         target_share = _num(role.get("target_share", profile.get("target_share", defaults["target_share"])), defaults["target_share"])
-        targets = 0.56 * (team_pass_attempts * clamp(target_share, 0.04, 0.38) * play_probability) + 0.44 * (routes * tprr)
+        targets = 0.56 * (team_pass_attempts * clamp(target_share, 0.04, 0.38)) + 0.44 * (routes * tprr)
         catch_prior = _position_prior(pos, "catch_rate", 0.64)
         catch_rate = _regressed_rate(_num(profile.get("catch_rate", catch_prior), catch_prior), _num(profile.get("targets", 0)), catch_prior, 105)
         separation = _num(profile.get("ngs_receiving_avg_separation", 2.9), 2.9)
@@ -3977,7 +3983,12 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         p_push = max(0.0, 1.0 - p_over - p_under)
         ev_over = _expected_value_with_push(p_over, p_under, over_odds)
         ev_under = _expected_value_with_push(p_under, p_over, under_odds)
-        direction = "Over" if ev_over >= ev_under else "Under"
+        if projection > line:
+            direction = "Over"
+        elif projection < line:
+            direction = "Under"
+        else:
+            direction = "Over" if ev_over >= ev_under else "Under"
         probability = p_over if direction == "Over" else p_under
         lose_probability = p_under if direction == "Over" else p_over
         odds = over_odds if direction == "Over" else under_odds
@@ -3987,17 +3998,22 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         implied = over_novig if direction == "Over" else 1.0 - over_novig
         conditional_probability = probability / max(1.0 - p_push, 1e-9)
         probability_edge_value = conditional_probability - implied
+        settled_ev = _expected_value_with_push(probability, lose_probability, odds)
         grade = _grade_prop(
             conditional_probability, probability_edge_value,
             _num(item.get("Reliability", 50), 50), direction,
             _num(item.get("Role Confidence", 50), 50),
             _safe_text(item.get("Market", "")),
         )
+        if settled_ev <= 0:
+            grade = "Non-Edge Prop"
+        if _num(item.get("_play_probability", 1.0), 1.0) < MIN_GRADED_PROP_PLAY_PROBABILITY:
+            grade = "Injury hold"
         item.update({
             "Line Source": "Manual market line", "Pick": f"{direction} {line:.1f}", "Pick Odds": odds,
             "Model Probability": round(conditional_probability, 4), "Push Probability": round(p_push, 4), "Implied Probability": round(implied, 4),
             "Probability Edge": round(probability_edge_value, 4), "Projection Edge": round(abs(projection - line), 2),
-            "Expected Value": round(_expected_value_with_push(probability, lose_probability, odds), 4), "Grade": grade, "Track": grade in ["A Prop", "B Prop"],
+            "Expected Value": round(settled_ev, 4), "Grade": grade, "Track": grade in ["A Prop", "B Prop"],
         })
         output.append(item)
     return pd.DataFrame(output)
@@ -4847,7 +4863,7 @@ def _render_build() -> None:
     }
 
     st.markdown("### Manual player prop lines")
-    st.caption("Manual entry only. The model projection is shown first, followed by the sportsbook line and both prices. No Odds API values are loaded.")
+    st.caption("Manual entry only. Player projections are conditional on being active; availability below 90% is held out of A/B grades. No Odds API values are loaded.")
 
     prop_base = _build_game_prop_rows(
         away_team, home_team, away_lineup, home_lineup, profiles, defense_profiles,
@@ -5116,7 +5132,7 @@ def _ensure_public_database_contract() -> None:
 
 def render() -> None:
     _ensure_public_database_contract()
-    st.caption("NFL v4.2 regression slate • manual sportsbook entry • regression QB/RB/WR yard props")
+    st.caption("NFL v4.4 regression slate • active-game player projections • manual sportsbook entry")
     page = st.radio(
         "NFL section",
         ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],

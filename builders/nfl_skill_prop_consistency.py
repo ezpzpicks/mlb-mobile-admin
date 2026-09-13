@@ -1,4 +1,4 @@
-"""Production guardrails for the NFL v4.1 RB/WR regression layer.
+"""Production guardrails for the NFL v4.4 RB/WR regression layer.
 
 Keeps receiving-yard simulation inputs internally consistent after target-volume
 regression and caches normalized historical stat frames so the same player data
@@ -67,11 +67,11 @@ def install_skill_prop_consistency(nfl_builder: Any) -> None:
             return rows
 
         new_targets = max(0.0, _num(receiving_yards.get("Projected Targets"), 0.0))
-        legacy_targets = _num(receptions_market.get("Projected Targets"), 0.0) if receptions_market else 0.0
-        legacy_receptions = _num(receptions_market.get("Projected Receptions"), 0.0) if receptions_market else 0.0
+        base_targets = _num(receptions_market.get("Projected Targets"), 0.0) if receptions_market else 0.0
+        base_receptions = _num(receptions_market.get("Projected Receptions"), 0.0) if receptions_market else 0.0
 
-        if legacy_targets > 0:
-            catch_rate = float(np.clip(legacy_receptions / legacy_targets, 0.25, 0.94))
+        if base_targets > 0:
+            catch_rate = float(np.clip(base_receptions / base_targets, 0.25, 0.94))
         else:
             profile_receptions = _num(receiving_yards.get("Projected Receptions"), 0.0)
             prior_targets = max(new_targets, 0.25)

@@ -1,7 +1,10 @@
-"""Smoke tests for the NFL v4.1 RB/WR regression prop layer."""
+"""Smoke tests for the NFL v4.4 player-prop and RB/WR regression layers."""
 from __future__ import annotations
 
 import math
+
+import numpy as np
+import pandas as pd
 
 from builders import nfl_builder
 import builders.nfl_skill_prop_regression as skill
@@ -57,6 +60,26 @@ def _fake_original(player, position, slot, *args, **kwargs):
     ]
 
 
+def _receiving_row(play_probability: float, line: float = 39.5) -> dict[str, float | str]:
+    return {
+        "Team": "CHI",
+        "Player": "Simulation Test WR",
+        "Position": "WR",
+        "Slot": "WR1",
+        "Market": "Receiving Yards",
+        "Projection": 45.13,
+        "Projected Targets": 5.6,
+        "Projected Receptions": 3.7,
+        "Efficiency": 8.06,
+        "Reliability": 86.0,
+        "Role Confidence": 86.0,
+        "Market Line": line,
+        "Over Odds": -110,
+        "Under Odds": -110,
+        "_play_probability": play_probability,
+    }
+
+
 def main() -> None:
     rb_carries, rb_ypc = skill.project_rb_rushing(_context("RB"))
     rb_targets, rb_ypt = skill.project_rb_receiving(_context("RB"))
@@ -64,6 +87,75 @@ def main() -> None:
     assert 0 < rb_carries < 35 and 2 <= rb_ypc <= 7
     assert 0 < rb_targets < 15 and 2.5 <= rb_ypt <= 12
     assert 0 < wr_targets < 20 and 3 <= wr_ypt <= 16
+
+    # Established high- and low-volume receivers should retain more separation
+    # than the generic depth-chart middle. WR3's no-history fallback is also
+    # intentionally lower than the old 14% / 68% / 18.5% role assumption.
+    wr1_default = nfl_builder._role_defaults("WR", "WR1")
+    wr3_default = nfl_builder._role_defaults("WR", "WR3")
+    assert wr1_default["target_share"] / wr3_default["target_share"] > 2.0
+    assert wr3_default["route_participation"] == 0.64
+    returning_wr1, _, _ = nfl_builder._expected_role_metric(
+        {"current_games": 0, "prior_target_share": 0.31, "team": "BUF"},
+        "BUF", "WR", "WR1", "target_share", wr1_default["target_share"],
+    )
+    returning_wr3, _, _ = nfl_builder._expected_role_metric(
+        {"current_games": 0, "prior_target_share": 0.07, "team": "BUF"},
+        "BUF", "WR", "WR3", "target_share", wr3_default["target_share"],
+    )
+    assert returning_wr1 > 0.285
+    assert returning_wr3 < 0.09
+
+    # The projection itself must be an active-game estimate. Availability can
+    # lower confidence, but it cannot multiply projected routes/targets/yards.
+    original_calibration = nfl_builder._prop_calibration_adjustment
+    nfl_builder._prop_calibration_adjustment = lambda *args: {"adjustment": 0.0, "sample": 0, "residual_sd": np.nan}
+    active_rows = {}
+    try:
+        for availability in (1.0, 0.65):
+            role = {
+                "test wr": {
+                    "play_probability": availability,
+                    "target_share": 0.25,
+                    "snap_share": 0.92,
+                    "route_participation": 0.92,
+                    "targets_per_route": 0.245,
+                    "role_note": "test role",
+                }
+            }
+            rows = nfl_builder._project_player_markets(
+                "Test WR", "WR", "WR1", "BUF", "MIA", "Home",
+                pd.DataFrame(), pd.DataFrame(), pd.DataFrame(),
+                {"Pace": 64.0, "Data Confidence": 80.0}, {},
+                {"home_score": 24.0, "away_score": 21.0, "total": 45.0}, 0.0,
+                role_context=role, pregame_team_total=24.0,
+            )
+            active_rows[availability] = next(row for row in rows if row["Market"] == "Receiving Yards")
+    finally:
+        nfl_builder._prop_calibration_adjustment = original_calibration
+    assert active_rows[1.0]["Projection"] == active_rows[0.65]["Projection"]
+    assert active_rows[1.0]["Projected Targets"] == active_rows[0.65]["Projected Targets"]
+    assert active_rows[0.65]["Reliability"] < active_rows[1.0]["Reliability"]
+
+    # Player-prop settlement is conditional on the player being active. A 65%
+    # availability tag must not inject 35% zero-yard Under outcomes or change YPR.
+    healthy_samples, _ = nfl_builder._simulate_prop_distribution(_receiving_row(1.0))
+    questionable_samples, _ = nfl_builder._simulate_prop_distribution(_receiving_row(0.65))
+    assert np.array_equal(healthy_samples, questionable_samples)
+    assert math.isclose(float(np.mean(healthy_samples)), 45.13, rel_tol=0.06)
+
+    questionable = nfl_builder._evaluate_prop_rows(pd.DataFrame([_receiving_row(0.65)])).iloc[0]
+    assert str(questionable["Pick"]).startswith("Over 39.5")
+    assert questionable["Grade"] == "Injury hold"
+    assert not bool(questionable["Track"])
+    assert float(questionable["Fair Line"]) > 20.0
+
+    # A skewed distribution may lower the median, but it may never flip the bet
+    # direction against the active-game projection shown to the user.
+    projection_over = nfl_builder._evaluate_prop_rows(pd.DataFrame([_receiving_row(1.0, 40.0)])).iloc[0]
+    projection_under = nfl_builder._evaluate_prop_rows(pd.DataFrame([_receiving_row(1.0, 54.5)])).iloc[0]
+    assert str(projection_over["Pick"]).startswith("Over 40.0")
+    assert str(projection_under["Pick"]).startswith("Under 54.5")
 
     nfl_builder._project_player_markets = _fake_original
     skill._CONTEXT_CACHE.clear()
@@ -92,7 +184,7 @@ def main() -> None:
     wr_rec = next(row for row in wr_rows if row["Market"] == "Receiving Yards")
     for row in [rb_rush, rb_rec, wr_rec]:
         assert math.isfinite(float(row["Projection"])) and float(row["Projection"]) >= 0
-        assert "v4.1 regression" in str(row["Confluence"])
+        assert "v4.4 regression" in str(row["Confluence"])
 
     # Receiving-yard simulations need a catch count that matches the newly
     # regressed target count. Preserve the live model's catch probability.
@@ -100,7 +192,7 @@ def main() -> None:
     assert math.isclose(float(wr_rec["Projected Receptions"]) / float(wr_rec["Projected Targets"]), 5.0 / 7.5, rel_tol=0.02)
     assert "live catch-rate" in str(rb_rec["Confluence"])
     assert "live catch-rate" in str(wr_rec["Confluence"])
-    print("NFL v4.1 RB/WR regression smoke test passed")
+    print("NFL v4.4 active-game prop and RB/WR regression smoke test passed")
 
 
 if __name__ == "__main__":

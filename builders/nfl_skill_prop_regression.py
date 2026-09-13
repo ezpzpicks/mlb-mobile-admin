@@ -7,9 +7,9 @@ Historical design:
 - untouched 2025 holdout
 
 The regression establishes the stable historical baseline. The production
-builder's current depth-chart, injury/play-probability, route/role, matchup and
-weather information is then retained as a capped live overlay so unexpected
-same-week personnel changes are not ignored.
+builder's current depth-chart, route/role, matchup and weather information is
+then retained as a capped live overlay. Injury availability controls confidence
+and grade eligibility without reducing active-game sportsbook projections.
 
 Final player-prop projections remain model-native: no post-projection residual
 calibration is allowed to pull the regression output back toward a historical
@@ -23,7 +23,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.3-model-native-player-props-2026-08-25"
+MODEL_VERSION = "nfl-v4.4-active-prop-role-calibration-2026-09-13"
 RESEARCH_VERSION = "nfl-rb-wr-opportunity-efficiency-regression-2026-08-20"
 
 RB_RUSH_OPP_INTERCEPT = 1.6934778404401407
@@ -367,7 +367,7 @@ def install_skill_prop_regression(nfl_builder: Any) -> None:
             _finish_count_row(nfl_builder, _row(rows, "Rushing Attempts"), carries, "Projected Player Attempts")
             _finish_yards_row(
                 nfl_builder, old_rush, carries, ypc, "Projected Player Attempts",
-                f"v4.1 regression carries × YPC • 2025 holdout MAE -5.5% • live role/injury overlay {carry_overlay:.2f}x"
+                f"v4.4 regression carries × YPC • 2025 holdout MAE -5.5% • live role overlay {carry_overlay:.2f}x"
             )
 
             old_rec = _row(rows, "Receiving Yards")
@@ -381,7 +381,7 @@ def install_skill_prop_regression(nfl_builder: Any) -> None:
             _finish_count_row(nfl_builder, _row(rows, "Targets"), targets, "Projected Targets")
             _finish_yards_row(
                 nfl_builder, old_rec, targets, ypt, "Projected Targets",
-                f"v4.1 regression targets × YPT • 2025 holdout MAE -7.9% • live role/injury overlay {target_overlay:.2f}x"
+                f"v4.4 regression targets × YPT • 2025 holdout MAE -7.9% • live role overlay {target_overlay:.2f}x"
             )
 
         elif pos == "WR":
@@ -396,7 +396,7 @@ def install_skill_prop_regression(nfl_builder: Any) -> None:
             _finish_count_row(nfl_builder, _row(rows, "Targets"), targets, "Projected Targets")
             _finish_yards_row(
                 nfl_builder, old_rec, targets, ypt, "Projected Targets",
-                f"v4.1 regression targets × YPT • 2025 holdout MAE -3.8% • live role/injury overlay {target_overlay:.2f}x"
+                f"v4.4 regression targets × YPT • 2025 holdout MAE -3.8% • live role overlay {target_overlay:.2f}x"
             )
         return rows
 
