@@ -5727,7 +5727,7 @@ def _ensure_public_database_contract() -> None:
 
 def render() -> None:
     _ensure_public_database_contract()
-    st.caption("NFL v4.4 regression slate • active-game player projections • manual sportsbook entry")
+    st.caption("NFL v4.5 regression slate • active-game player projections • yardage + Anytime TD entry")
     page = st.radio(
         "NFL section",
         ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],
