@@ -1,4 +1,4 @@
-name: Diagnose ESPN core depth chart API
+name: Diagnose ESPN core athlete refs and injuries
 
 on:
   push:
@@ -16,33 +16,46 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Inspect ESPN core depth API
+      - name: Inspect ESPN core data
         shell: bash
         run: |
           python - <<'PY'
-          import requests, json
+          import requests, re
           headers={"User-Agent":"EZPZ-Picks/1.0"}
+          s=requests.Session(); s.headers.update(headers)
           teams={"ATL":"1","PIT":"23"}
           for abbr,team_id in teams.items():
-              url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/teams/{team_id}/depthcharts"
-              r=requests.get(url,headers=headers,timeout=30)
-              print("TEAM",abbr,"status",r.status_code,"len",len(r.text),"ct",r.headers.get("content-type"))
-              print(r.text[:300])
-              if r.status_code != 200:
-                  continue
-              data=r.json()
+              print("###",abbr)
+              depth_url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/teams/{team_id}/depthcharts"
+              d=s.get(depth_url,timeout=30); print("depth",d.status_code,len(d.text)); data=d.json()
               for chart in data.get("items",[]):
-                  print("CHART", chart.get("name"), chart.get("id"))
-                  positions=chart.get("positions",{})
-                  items=list(positions.items()) if isinstance(positions,dict) else []
-                  for key,p in items:
-                      info=p.get("position",{}) if isinstance(p,dict) else {}
+                  if chart.get("name") != "3WR 1TE":
+                      continue
+                  for key,p in chart.get("positions",{}).items():
+                      info=p.get("position",{})
                       pos=(info.get("abbreviation") or key or "").upper()
                       if pos not in {"QB","RB","HB","FB","WR","LWR","RWR","SWR","TE"}:
                           continue
-                      print(" POSITION",key,pos,"meta",{k:p.get(k) for k in p.keys() if k not in {"athletes","position"}})
-                      for i,a in enumerate(p.get("athletes",[]),1):
-                          ath=a.get("athlete",a)
-                          print("  ",i,ath.get("displayName") or ath.get("fullName") or ath.get("name"),"rank",a.get("rank"),"keys",sorted(a.keys()),"status",ath.get("status"),"injuries",ath.get("injuries"))
-              print("="*80)
+                      print("POSITION",key,pos)
+                      for a in p.get("athletes",[]):
+                          ref=(a.get("athlete") or {}).get("$ref","")
+                          ref=ref.replace("http://","https://")
+                          ar=s.get(ref,timeout=30) if ref else None
+                          payload=ar.json() if ar is not None and ar.status_code==200 else {}
+                          print(" rank",a.get("rank"),"slot",a.get("slot"),"ref",ref)
+                          print("  athlete",payload.get("displayName"),payload.get("fullName"),"status",payload.get("status"),"injuries",payload.get("injuries"),"team",payload.get("team"),"position",payload.get("position"))
+              inj_url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/teams/{team_id}/injuries?limit=100"
+              ir=s.get(inj_url,timeout=30); print("injuries",ir.status_code,len(ir.text),ir.text[:200])
+              if ir.status_code==200:
+                  ip=ir.json(); print("inj count",ip.get("count"))
+                  for item in ip.get("items",[]):
+                      athlete=item.get("athlete",{})
+                      ref=athlete.get("$ref","").replace("http://","https://") if isinstance(athlete,dict) else ""
+                      name=""
+                      if ref:
+                          rr=s.get(ref,timeout=30)
+                          if rr.status_code==200: name=rr.json().get("displayName","")
+                      status=item.get("status") or item.get("type")
+                      print(" injury item",name,"status",status,"keys",sorted(item.keys()))
+              print("="*60)
           PY
