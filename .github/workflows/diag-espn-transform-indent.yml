@@ -1,0 +1,38 @@
+name: Diagnose ESPN transform indentation
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/diag-espn-transform-indent.yml"]
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Transform and inspect
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          builder = Path('builders/nfl_builder.py')
+          text = builder.read_text(encoding='utf-8')
+          text = text.replace(
+              '                _load_depth_charts_season, _load_injuries_season, _load_sleeper_players,\n',
+              '                _load_depth_charts_season, _load_injuries_season,\n',
+          )
+          text = text.replace(
+              '            try:\n                _load_sleeper_players.clear()\n            except Exception:\n                pass\n',
+              '',
+          )
+          builder.write_text(text, encoding='utf-8')
+          workflow = Path('.github/workflows/apply-espn-only-nfl-depth.yml').read_text(encoding='utf-8')
+          start_marker = "      - name: Replace current NFL depth and injury authority\n        shell: bash\n        run: |\n          python - <<'PY'\n"
+          end_marker = "\n          PY\n\n      - name: Validate builder and live ESPN source"
+          start = workflow.find(start_marker) + len(start_marker)
+          end = workflow.find(end_marker, start)
+          script = workflow[start:end]
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in script.splitlines())
+          exec(compile(script, 'migration', 'exec'), {'__name__':'__main__'})
+          PY
+          nl -ba builders/nfl_builder.py | sed -n '635,670p'
+          echo '--- latest depth area ---'
+          nl -ba builders/nfl_builder.py | sed -n '1540,1660p'
