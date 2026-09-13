@@ -1,0 +1,49 @@
+name: One-time NFL Anytime TD implementation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/implement-nfl-anytime-td.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  implement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate implementation script
+        run: python -m py_compile scripts/implement_nfl_anytime_td.py
+
+      - name: Implement Anytime TD in the permanent NFL builder
+        run: python scripts/implement_nfl_anytime_td.py
+
+      - name: Verify permanent builder
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py
+          grep -q 'nfl-v4.5-anytime-td-2026-09-13' builders/nfl_builder.py
+          grep -q 'def _season_touchdown_usage' builders/nfl_builder.py
+          grep -q 'def _anytime_touchdown_lambda' builders/nfl_builder.py
+          grep -q '#### Anytime TD odds' builders/nfl_builder.py
+          grep -q 'nfl_anytime_td_odds_' builders/nfl_builder.py
+          grep -q 'Poisson anytime-touchdown count' builders/nfl_builder.py
+          git diff --check
+
+      - name: Commit permanent builder and remove migration files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py
+          git rm scripts/implement_nfl_anytime_td.py .github/workflows/implement-nfl-anytime-td.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Add NFL Anytime TD model and manual odds entry"
+          git push
