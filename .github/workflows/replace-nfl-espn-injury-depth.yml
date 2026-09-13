@@ -16,6 +16,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Correct migration boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/scripts/replace_nfl_espn_injury_depth_logic.py')
+          s = p.read_text(encoding='utf-8')
+          old = 'end = text.find("\\ndef _finalize_lineup(\\n", start)'
+          new = 'end = text.find("\\ndef _finalize_lineup(", start)'
+          if old not in s:
+              raise SystemExit('auto-lineup boundary anchor not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Replace NFL injury and depth logic
         run: python .github/scripts/replace_nfl_espn_injury_depth_logic.py
 
