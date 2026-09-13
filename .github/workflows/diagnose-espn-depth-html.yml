@@ -1,0 +1,38 @@
+name: Diagnose ESPN rendered depth chart tables
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/diagnose-espn-depth-html.yml"
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas requests lxml html5lib beautifulsoup4
+      - name: Inspect ESPN depth pages
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          import requests
+          from io import StringIO
+
+          headers={"User-Agent":"Mozilla/5.0"}
+          for team in ["atl","pit"]:
+              url=f"https://www.espn.com/nfl/team/depth/_/name/{team}"
+              r=requests.get(url, headers=headers, timeout=30)
+              print("TEAM", team, "status", r.status_code, "len", len(r.text))
+              tables=pd.read_html(StringIO(r.text))
+              print("tables", len(tables))
+              for i,t in enumerate(tables[:5]):
+                  print("TABLE", i, "shape", t.shape)
+                  print(t.to_string(index=False))
+                  print("---")
+          PY
