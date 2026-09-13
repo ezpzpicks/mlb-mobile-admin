@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install validation dependency
+        run: pip install requests
+
       - name: Replace NFL depth source in actual builder
         run: python .github/scripts/replace_nfl_espn_core_depth.py
 
