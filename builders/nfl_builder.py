@@ -4723,6 +4723,13 @@ def _render_build() -> None:
     st.subheader("NFL Automated Slate + Prop Builder")
     st.caption("Opening this page automatically resolves the slate, ratings, current roles, estimated routes, charting/coverage matchups and calibrated player projections.")
 
+    try:
+        updated, message = _auto_update_prop_tracker()
+        if updated:
+            st.success(message)
+    except Exception as exc:
+        st.warning(f"Automatic completed-projection calibration could not finish: {exc}")
+
     auto_season = _current_nfl_season()
     with st.expander("Slate controls and test mode", expanded=False):
         season = int(st.number_input(
