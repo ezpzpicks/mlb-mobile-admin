@@ -1,4 +1,4 @@
-name: Diagnose ESPN core athlete refs and injuries
+name: Diagnose ESPN enriched athlete index
 
 on:
   push:
@@ -11,51 +11,31 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install requests
-      - name: Inspect ESPN core data
+      - name: Inspect enriched athlete index
         shell: bash
         run: |
           python - <<'PY'
-          import requests, re
-          headers={"User-Agent":"EZPZ-Picks/1.0"}
-          s=requests.Session(); s.headers.update(headers)
-          teams={"ATL":"1","PIT":"23"}
-          for abbr,team_id in teams.items():
-              print("###",abbr)
-              depth_url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/teams/{team_id}/depthcharts"
-              d=s.get(depth_url,timeout=30); print("depth",d.status_code,len(d.text)); data=d.json()
-              for chart in data.get("items",[]):
-                  if chart.get("name") != "3WR 1TE":
-                      continue
-                  for key,p in chart.get("positions",{}).items():
-                      info=p.get("position",{})
-                      pos=(info.get("abbreviation") or key or "").upper()
-                      if pos not in {"QB","RB","HB","FB","WR","LWR","RWR","SWR","TE"}:
-                          continue
-                      print("POSITION",key,pos)
-                      for a in p.get("athletes",[]):
-                          ref=(a.get("athlete") or {}).get("$ref","")
-                          ref=ref.replace("http://","https://")
-                          ar=s.get(ref,timeout=30) if ref else None
-                          payload=ar.json() if ar is not None and ar.status_code==200 else {}
-                          print(" rank",a.get("rank"),"slot",a.get("slot"),"ref",ref)
-                          print("  athlete",payload.get("displayName"),payload.get("fullName"),"status",payload.get("status"),"injuries",payload.get("injuries"),"team",payload.get("team"),"position",payload.get("position"))
-              inj_url=f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/teams/{team_id}/injuries?limit=100"
-              ir=s.get(inj_url,timeout=30); print("injuries",ir.status_code,len(ir.text),ir.text[:200])
-              if ir.status_code==200:
-                  ip=ir.json(); print("inj count",ip.get("count"))
-                  for item in ip.get("items",[]):
-                      athlete=item.get("athlete",{})
-                      ref=athlete.get("$ref","").replace("http://","https://") if isinstance(athlete,dict) else ""
-                      name=""
-                      if ref:
-                          rr=s.get(ref,timeout=30)
-                          if rr.status_code==200: name=rr.json().get("displayName","")
-                      status=item.get("status") or item.get("type")
-                      print(" injury item",name,"status",status,"keys",sorted(item.keys()))
-              print("="*60)
+          import requests
+          s=requests.Session(); s.headers.update({"User-Agent":"EZPZ-Picks/1.0"})
+          urls=[
+            "https://sports.core.api.espn.com/v3/sports/football/nfl/athletes?active=true&limit=2000",
+            "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/athletes?active=true&limit=1000",
+            "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/1/roster",
+          ]
+          for url in urls:
+              r=s.get(url,timeout=60)
+              print("URL",url,"STATUS",r.status_code,"LEN",len(r.text),"CT",r.headers.get("content-type"))
+              print(r.text[:500])
+              if r.status_code==200:
+                  p=r.json()
+                  print("TOP KEYS",list(p)[:20] if isinstance(p,dict) else type(p))
+                  items=p.get("items",[]) if isinstance(p,dict) else []
+                  print("ITEM COUNT",len(items))
+                  if items:
+                      print("FIRST ITEM",items[0])
+              print("="*80)
           PY
