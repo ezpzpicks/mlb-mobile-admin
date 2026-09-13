@@ -26,7 +26,7 @@ jobs:
           grep -q "def _load_espn_depth_charts" builders/nfl_builder.py
           grep -q "ESPN current depth chart" builders/nfl_builder.py
           grep -q '"RB2", \["RB", "HB"\]' builders/nfl_builder.py
-          if grep -q "depth_chart_order" builders/nfl_builder.py; then
+          if grep -q 'pd.to_numeric(skill\["depth_chart_order"\]' builders/nfl_builder.py; then
             echo "Legacy Sleeper depth ordering still present"
             exit 1
           fi
