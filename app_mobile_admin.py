@@ -314,14 +314,14 @@ elif selected_sport == "CFB":
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
     from builders import nfl_builder
-    from builders.cfb_covers import install_covers_layer
+    from builders.nfl_covers import install_covers_weather
     from builders.nfl_game_regression import install_regression_layer
     from builders.nfl_skill_prop_regression import install_skill_prop_regression
     from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
     install_regression_layer(nfl_builder)
     install_skill_prop_regression(nfl_builder)
     install_skill_prop_consistency(nfl_builder)
-    install_covers_layer(nfl_builder, league="nfl")
+    install_covers_weather(nfl_builder)
     nfl_builder.MODEL_VERSION = "nfl-v4.2-price-aware-odds-2026-08-21"
     nfl_builder.render()
 elif selected_sport == "CBB":
