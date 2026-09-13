@@ -1,0 +1,46 @@
+name: Replace NFL ESPN injury depth logic
+
+on:
+  push:
+    paths:
+      - ".github/workflows/replace-nfl-espn-injury-depth.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace NFL injury and depth logic
+        run: python .github/scripts/replace_nfl_espn_injury_depth_logic.py
+
+      - name: Validate NFL builder
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py
+          grep -q "def _load_espn_injuries" builders/nfl_builder.py
+          grep -q '"Depth Downgrade"' builders/nfl_builder.py
+          grep -q "ESPN current injury report" builders/nfl_builder.py
+          grep -q "skipped_unavailable" builders/nfl_builder.py
+          grep -q "_load_espn_depth_charts, _load_espn_injuries" builders/nfl_builder.py
+          git diff --check
+
+      - name: Commit permanent builder replacement
+        shell: bash
+        run: |
+          rm -f .github/workflows/replace-nfl-espn-injury-depth.yml
+          rm -f .github/scripts/replace_nfl_espn_injury_depth_logic.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py .github/workflows/replace-nfl-espn-injury-depth.yml .github/scripts/replace_nfl_espn_injury_depth_logic.py
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use ESPN injury status for NFL depth adjustments"
+          git push
