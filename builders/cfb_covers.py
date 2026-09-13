@@ -694,7 +694,9 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
     def build_environment(game: pd.Series, season: int, manual_roof: str | None = None):
         base = original_build_environment(game, season, manual_roof)
         try:
-            card = _match_weather(builder, str(game.get("Away Team", "")), str(game.get("Home Team", "")), weather_league)
+            away_team = str(game.get("Away Team", ""))
+            home_team = str(game.get("Home Team", ""))
+            card = _match_weather(builder, away_team, home_team) if weather_league == "ncaaf" else _match_weather(builder, away_team, home_team, weather_league)
             if not card:
                 return base
             values = [float(card.get("temperature", math.nan)), float(card.get("wind", math.nan)), float(card.get("precipitation", math.nan))]
