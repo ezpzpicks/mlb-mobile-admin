@@ -19,9 +19,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.7-touchdown-slot-matchups-2026-09-13"
+MODEL_VERSION = "nfl-v4.8-te1-yardage-2026-09-13"
 
-TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"}
+TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
     "QB": ("QB",),
     "RB1": ("RB1", "RB2"),
@@ -29,7 +29,7 @@ SLOT_FAMILIES = {
     "WR1": ("WR1", "WR2", "WR3"),
     "WR2": ("WR1", "WR2", "WR3"),
     "WR3": ("WR1", "WR2", "WR3"),
-    "TE": ("TE",),
+    "TE1": ("TE1",),
 }
 
 MARKET_STATS = {
@@ -50,10 +50,10 @@ MARKET_SLOTS = {
     "Passing Yards": {"QB"},
     "Rushing Attempts": {"QB", "RB1", "RB2"},
     "Rushing Yards": {"QB", "RB1", "RB2"},
-    "Targets": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
-    "Receptions": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
-    "Receiving Yards": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
-    "Anytime TD": {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
+    "Targets": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE1"},
+    "Receptions": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE1"},
+    "Receiving Yards": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE1"},
+    "Anytime TD": {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"},
 }
 
 # The broad position model is already doing most of the matchup work. These
@@ -95,7 +95,8 @@ def _num(value: Any, default: float = 0.0) -> float:
 
 
 def _slot(value: Any) -> str:
-    return str(value or "").strip().upper()
+    raw = str(value or "").strip().upper()
+    return "TE1" if raw == "TE" else raw
 
 
 def _market_allowed_for_slot(market: str, slot: str) -> bool:
@@ -126,7 +127,7 @@ def _slot_history(nfl_builder: Any, season: int, through_week: int) -> pd.DataFr
     lineup = lineups.copy()
     lineup["_season"] = pd.to_numeric(lineup.get("Season"), errors="coerce")
     lineup["_week"] = pd.to_numeric(lineup.get("Week"), errors="coerce")
-    lineup["_slot"] = lineup.get("Slot", "").astype(str).str.upper().str.strip()
+    lineup["_slot"] = lineup.get("Slot", "").map(_slot)
     lineup["_unit"] = lineup.get("Unit", "").astype(str).str.lower().str.strip()
     lineup["_team"] = lineup.get("Team", "").map(nfl_builder._normalize_team)
     lineup["_player"] = lineup.get("Player", "").map(nfl_builder._normalize_name)

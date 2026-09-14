@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.5-anytime-td-2026-09-13"
+MODEL_VERSION = "nfl-v4.8-te1-yardage-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -196,7 +196,7 @@ OFFENSE_SLOTS = [
     ("WR1", ["WR"]),
     ("WR2", ["WR"]),
     ("WR3", ["WR"]),
-    ("TE", ["TE"]),
+    ("TE1", ["TE"]),
     ("LT", ["LT", "T"]),
     ("LG", ["LG", "G"]),
     ("C", ["C"]),
@@ -222,7 +222,7 @@ POSITION_BASE_IMPACT = {
     "QB": 4.5,
     "RB1": 0.9, "RB2": 0.35,
     "WR1": 1.15, "WR2": 0.75, "WR3": 0.40,
-    "TE": 0.65,
+    "TE1": 0.65,
     "LT": 0.85, "LG": 0.45, "C": 0.55, "RG": 0.45, "RT": 0.75,
     "EDGE1": 0.90, "EDGE2": 0.65,
     "DT1": 0.55, "DT2": 0.35,
@@ -1888,7 +1888,7 @@ def _auto_lineup(
             elif slot.startswith("WR") and player_value > 0:
                 multiplier = {"WR1": 1.0, "WR2": 0.75, "WR3": 0.50}.get(slot, 1.0)
                 base = max(base, player_value * multiplier)
-            elif slot == "TE" and player_value > 0:
+            elif slot == "TE1" and player_value > 0:
                 base = max(base, player_value)
 
             # A healthy backup replacing a definite out should still cost the
@@ -2401,7 +2401,7 @@ def _render_prop_projection_cards(evaluated: pd.DataFrame) -> None:
         return
     teams = list(dict.fromkeys(evaluated["Team"].astype(str).tolist()))
     tabs = st.tabs(teams) if len(teams) > 1 else [st.container()]
-    slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE": 6}
+    slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE1": 6}
     market_order = {
         "Passing Attempts": 0, "Passing Completions": 1, "Passing Yards": 2, "Passing TDs": 3, "Interceptions": 4,
         "Rushing Attempts": 5, "Rushing Yards": 6,
@@ -3525,7 +3525,7 @@ def _expected_role_metric(
     blended_value = _num(profile.get(metric, np.nan), np.nan)
     profile_team = _normalize_team(profile.get("team", ""))
     changed_team = bool(profile_team and profile_team != _normalize_team(team))
-    top_slot = slot in ["QB", "RB1", "WR1", "TE"]
+    top_slot = slot in ["QB", "RB1", "WR1", "TE1"]
 
     if current_games > 0 and math.isfinite(current_value) and current_value > 0:
         current_weight = clamp(0.55 + 0.10 * max(0.0, current_games - 1.0), 0.55, 0.92)
@@ -3568,7 +3568,7 @@ def _expected_role_metric(
 def _expected_lineup_roles(lineup: pd.DataFrame, profiles: pd.DataFrame, team: str) -> dict[str, dict[str, Any]]:
     if lineup is None or lineup.empty:
         return {}
-    skill = lineup[(lineup["Unit"].astype(str) == "Offense") & (lineup["Slot"].astype(str).isin(["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"])) & (~lineup["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]))].copy()
+    skill = lineup[(lineup["Unit"].astype(str) == "Offense") & (lineup["Slot"].astype(str).isin(["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"])) & (~lineup["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]))].copy()
     roles: dict[str, dict[str, Any]] = {}
     for _, row in skill.iterrows():
         player, slot = _safe_text(row.get("Player", "")), _safe_text(row.get("Slot", ""))
@@ -3652,7 +3652,7 @@ def _regressed_rate(raw: float, volume: float, prior: float, prior_volume: float
 
 TD_SLOT_LAMBDA_PRIORS = {
     "QB": 0.14, "RB1": 0.50, "RB2": 0.21, "WR1": 0.40,
-    "WR2": 0.29, "WR3": 0.18, "TE": 0.30,
+    "WR2": 0.29, "WR3": 0.18, "TE1": 0.30,
 }
 TD_RUSH_RATE_PRIORS = {"QB": 0.038, "RB": 0.036, "WR": 0.012, "TE": 0.006}
 TD_RECEIVING_RATE_PRIORS = {"QB": 0.005, "RB": 0.048, "WR": 0.066, "TE": 0.078}
@@ -3727,7 +3727,7 @@ def _anytime_touchdown_lambda(
         receiving_priority = 0.62 * endzone_value + 0.38 * inside_value
 
     rush_slot_factor = {"QB": 1.08, "RB1": 1.16, "RB2": 0.88}.get(slot, 0.88 if pos not in ["RB", "QB"] else 1.0)
-    receiving_slot_factor = {"RB1": 1.00, "RB2": 0.88, "WR1": 1.10, "WR2": 1.00, "WR3": 0.90, "TE": 1.08}.get(slot, 1.0)
+    receiving_slot_factor = {"RB1": 1.00, "RB2": 0.88, "WR1": 1.10, "WR2": 1.00, "WR3": 0.90, "TE1": 1.08}.get(slot, 1.0)
     if math.isfinite(rushing_priority) and carry_share > 0.01:
         rush_role_factor = clamp(1.0 + 0.30 * (rushing_priority - carry_share) / max(carry_share, 0.10), 0.74, 1.36)
     else:
@@ -4340,7 +4340,7 @@ def _build_game_prop_rows(
     ]:
         skill = lineup[
             (lineup["Unit"].astype(str) == "Offense")
-            & (lineup["Slot"].astype(str).isin(["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"]))
+            & (lineup["Slot"].astype(str).isin(["QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"]))
             & (~lineup["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]))
         ] if lineup is not None and not lineup.empty else pd.DataFrame()
         fallback_team_score = projection["home_score"] if home_away == "Home" else projection["away_score"]
@@ -5424,7 +5424,7 @@ def _render_build() -> None:
         prop_inputs["Line Source"] = ""
 
         yard_inputs = prop_inputs.loc[wager_mask].copy()
-        slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE": 6}
+        slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE1": 6}
         market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2, "Anytime TD": 3}
         team_order = {away_team: 0, home_team: 1}
         yard_inputs["_team_order"] = yard_inputs["Team"].map(team_order).fillna(99)

@@ -266,13 +266,13 @@ if selected_sport not in valid_sports:
                     _set_sport(sport)
                     st.rerun()
 
-    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models. CFB now combines the validated spread-margin regression with an independent pace/efficiency totals regression, derives team scores algebraically, and retains live personnel/weather overlays plus calibrated market evaluation. CBB remains a foundation model for setup and shadow testing.")
+    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models plus TE1 receiving-yard projections. CFB now combines the validated spread-margin regression with an independent pace/efficiency totals regression, derives team scores algebraically, and retains live personnel/weather overlays plus calibrated market evaluation. CBB remains a foundation model for setup and shadow testing.")
     st.stop()
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.4-covers-personnel-weather-2026-09-11",
-    "NFL": "nfl-v4.7-touchdown-slot-matchups-2026-09-13",
+    "NFL": "nfl-v4.8-te1-yardage-2026-09-13",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":

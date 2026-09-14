@@ -57,7 +57,7 @@ def build_td_history() -> pd.DataFrame:
             rb2_td = 0.10 if defense == "NYG" else 0.15
             qb_td = 0.10 if defense == "NYG" else 0.15
             rows.extend([
-                _row(week, defense, "TE", "Anytime TD", te_td, team),
+                _row(week, defense, "TE1", "Anytime TD", te_td, team),
                 _row(week, defense, "WR1", "Anytime TD", wr1_td, team),
                 _row(week, defense, "WR2", "Anytime TD", wr2_td, team),
                 _row(week, defense, "WR3", "Anytime TD", wr3_td, team),
@@ -69,6 +69,9 @@ def build_td_history() -> pd.DataFrame:
 
 
 def main() -> None:
+    assert slot_model._slot("TE") == "TE1"
+    assert slot_model._slot("TE1") == "TE1"
+    assert "TE1" in slot_model.TRACKED_SLOTS and "TE" not in slot_model.TRACKED_SLOTS
     history = build_history()
 
     wr2 = slot_model._profile_from_history(history, "NYG", "WR2", "Receiving Yards")
@@ -95,21 +98,21 @@ def main() -> None:
 
     # Single-slot positions are already handled by the broad position layer.
     te_rows = pd.DataFrame([
-        _row(1, "NYG", "TE", "Receiving Yards", 90.0, "A"),
-        _row(1, "DAL", "TE", "Receiving Yards", 45.0, "B"),
-        _row(1, "PHI", "TE", "Receiving Yards", 45.0, "C"),
-        _row(1, "WAS", "TE", "Receiving Yards", 45.0, "D"),
-        _row(1, "GB", "TE", "Receiving Yards", 45.0, "E"),
-        _row(1, "MIN", "TE", "Receiving Yards", 45.0, "F"),
-        _row(1, "DET", "TE", "Receiving Yards", 45.0, "G"),
-        _row(1, "CHI", "TE", "Receiving Yards", 45.0, "H"),
+        _row(1, "NYG", "TE1", "Receiving Yards", 90.0, "A"),
+        _row(1, "DAL", "TE1", "Receiving Yards", 45.0, "B"),
+        _row(1, "PHI", "TE1", "Receiving Yards", 45.0, "C"),
+        _row(1, "WAS", "TE1", "Receiving Yards", 45.0, "D"),
+        _row(1, "GB", "TE1", "Receiving Yards", 45.0, "E"),
+        _row(1, "MIN", "TE1", "Receiving Yards", 45.0, "F"),
+        _row(1, "DET", "TE1", "Receiving Yards", 45.0, "G"),
+        _row(1, "CHI", "TE1", "Receiving Yards", 45.0, "H"),
     ])
-    te = slot_model._profile_from_history(te_rows, "NYG", "TE", "Receiving Yards")
+    te = slot_model._profile_from_history(te_rows, "NYG", "TE1", "Receiving Yards")
     assert te["adjustment_pct"] == 0.0
 
 
     td_history = build_td_history()
-    te_td = slot_model._profile_from_history(td_history, "NYG", "TE", "Anytime TD")
+    te_td = slot_model._profile_from_history(td_history, "NYG", "TE1", "Anytime TD")
     assert int(te_td["sample"]) == 4
     assert te_td["defense_slot_avg"] > te_td["league_slot_avg"]
     assert te_td["slot_outlier_pct"] > 0.20
@@ -119,11 +122,11 @@ def main() -> None:
     # TD distribution by slot remains proportional to league expectations.
     proportional = td_history.copy()
     nyg = proportional["opponent"] == "NYG"
-    baseline = {"TE": 0.25, "WR1": 0.45, "WR2": 0.35, "WR3": 0.20, "RB1": 0.45, "RB2": 0.15, "QB": 0.15}
+    baseline = {"TE1": 0.25, "WR1": 0.45, "WR2": 0.35, "WR3": 0.20, "RB1": 0.45, "RB2": 0.15, "QB": 0.15}
     for slot, value in baseline.items():
         mask = nyg & (proportional["slot"] == slot)
         proportional.loc[mask, "actual"] = value * 1.8
-    proportional_te = slot_model._profile_from_history(proportional, "NYG", "TE", "Anytime TD")
+    proportional_te = slot_model._profile_from_history(proportional, "NYG", "TE1", "Anytime TD")
     assert abs(proportional_te["adjustment_pct"]) < 0.01
 
     high_rz_te = {
@@ -138,8 +141,8 @@ def main() -> None:
         "inside_10_target_share": 0.07,
         "endzone_target_share": 0.06,
     }
-    high_usage = slot_model._touchdown_usage_multiplier(high_rz_te, "TE")
-    low_usage = slot_model._touchdown_usage_multiplier(low_rz_te, "TE")
+    high_usage = slot_model._touchdown_usage_multiplier(high_rz_te, "TE1")
+    low_usage = slot_model._touchdown_usage_multiplier(low_rz_te, "TE1")
     assert high_usage["usage_ratio"] > 1.5
     assert high_usage["multiplier"] > 1.0
     assert low_usage["usage_ratio"] < 0.7
