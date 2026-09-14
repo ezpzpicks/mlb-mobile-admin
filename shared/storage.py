@@ -19,6 +19,7 @@ from shared.public_contract import (
     PUBLIC_SPLIT_TAB,
     PUBLIC_TRACKER_TAB,
 )
+from shared.turso_storage import is_turso_ready, replace_dataset
 
 
 _ACTIVE_SPORT = ""
@@ -30,20 +31,11 @@ _DEFAULT_DATABASE_NAMES = {
     "NCAAM": "CBB Model Database",
 }
 
-# Streamlit reruns the script for every widget interaction. Looking up the same
-# worksheet by name on every rerun costs one Google Sheets read request each
-# time and can exhaust the per-user read quota during a busy CFB slate. Cache
-# worksheet objects for the lifetime of the Render process; the objects still
-# perform live reads/writes when their data methods are called.
 _WORKSHEET_CACHE: dict[tuple[str, str], object] = {}
 _WORKSHEET_CACHE_LOCK = threading.Lock()
 _SHEETS_QUOTA_COOLDOWN_UNTIL = 0.0
 _SHEETS_QUOTA_COOLDOWN_SECONDS = 65.0
 
-# Create a small, MLB-compatible public contract immediately when a new sport
-# workbook is first created. The full builder headers replace/expand the slate
-# and tracker rows when that model saves its first slate, while the trend/split
-# tables already use their final shared schemas from day one.
 _BOOTSTRAP_PUBLIC_TABS = {
     PUBLIC_SLATE_TAB: ["Date", "Game", "Away Team", "Home Team"],
     PUBLIC_TRACKER_TAB: ["Date", "Game", "Bet Type", "Selection", "Odds/Line", "Result"],
@@ -113,9 +105,6 @@ def storage_database_config(sport: str | None = None) -> dict[str, str]:
         sheet_name = _sport_setting(selected, "NAME") or _DEFAULT_DATABASE_NAMES[selected]
         return {"sport": selected, "sheet_id": sheet_id, "sheet_name": sheet_name}
 
-    # Backwards-compatible/default path. MLB's existing builder still reads its
-    # own GOOGLE_SHEET_NAME directly, but keeping this fallback avoids breaking
-    # older shared-storage callers and local utilities.
     sheet_id = _sport_setting(selected, "ID") if selected else ""
     sheet_name = _sport_setting(selected, "NAME") if selected else ""
     return {
@@ -169,6 +158,19 @@ def _start_quota_cooldown() -> None:
         pass
 
 
+def _mirror_turso(tab_name: str, dataframe: pd.DataFrame, columns: list[str]) -> None:
+    """Mirror a successful legacy write while Sheets remains authoritative."""
+    sport = get_storage_sport()
+    if not sport or not is_turso_ready():
+        return
+    try:
+        replace_dataset(sport, tab_name, dataframe, columns)
+    except Exception as exc:
+        # Migration safety: Turso must never turn a successful legacy save into
+        # a failed builder action while the dual-write validation window is open.
+        print(f"[turso-dual-write] {sport}/{tab_name} mirror failed: {exc}")
+
+
 @st.cache_resource(show_spinner=False)
 def _authorized_client(credentials_json: str):
     credentials = Credentials.from_service_account_info(
@@ -219,13 +221,7 @@ def _initialize_sport_workbooks_cached(
 
 
 def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[str, str]:
-    """Ensure dedicated sport databases exist before any sport page is opened.
-
-    This is deliberately independent of ``_ACTIVE_SPORT`` so startup can create
-    NFL and CFB safely without changing which model the current admin session is
-    viewing. It also means the public Vercel service never needs permission to
-    create Drive files; it only reads/writes these already-owned spreadsheets.
-    """
+    """Ensure dedicated sport databases exist before any sport page is opened."""
     credentials_json = _secret_or_env("GOOGLE_CREDENTIALS")
     if not credentials_json:
         return {}
@@ -259,9 +255,6 @@ def _connect_to_sheets_for(credentials_json: str, sport: str, sheet_id: str, she
     try:
         return client.open(sheet_name)
     except gspread.SpreadsheetNotFound:
-        # Football databases are intentionally created on first use. This makes
-        # the model/admin the database owner instead of requiring a manual Sheet
-        # setup before the season starts.
         if sport in {"NFL", "CFB", "CBB"}:
             return client.create(sheet_name)
         raise
@@ -299,9 +292,6 @@ def get_or_create_worksheet(tab_name: str, columns: Iterable[str]):
     if cached is not None:
         return cached
 
-    # A 429 applies to the service account/user, so once Google tells us to
-    # throttle, avoid hammering the API with the rest of the tabs on the same
-    # Streamlit rerun. Cached worksheet objects are returned before this check.
     if _quota_cooldown_active():
         return None
 
@@ -362,9 +352,6 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
 
 def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) -> bool:
     columns = list(columns)
-    # If a read just failed with 429, do not allow a follow-up write based on an
-    # empty fallback DataFrame to clear valid rows from Google Sheets. The user
-    # can retry the save after the short cooldown with the real sheet reloaded.
     if _quota_cooldown_active():
         st.warning(
             "Google Sheets is temporarily rate-limited. This save was not attempted; "
@@ -391,6 +378,7 @@ def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) 
         out = out[columns].fillna("").astype(str)
         worksheet.clear()
         worksheet.update([columns] + out.values.tolist())
+        _mirror_turso(tab_name, out, columns)
         return True
     except gspread.exceptions.APIError as exc:
         if _is_quota_error(exc):
