@@ -270,6 +270,7 @@ def main() -> None:
             ((prop_base["Position"].astype(str) == "QB") & (prop_base["Market"].astype(str) == "Passing Yards"))
             | ((prop_base["Position"].astype(str) == "RB") & (prop_base["Market"].astype(str).isin(["Rushing Yards", "Receiving Yards"])))
             | ((prop_base["Position"].astype(str) == "WR") & (prop_base["Market"].astype(str) == "Receiving Yards"))
+            | ((prop_base["Position"].astype(str) == "TE") & (prop_base["Slot"].astype(str) == "TE1") & (prop_base["Market"].astype(str) == "Receiving Yards"))
         )
         prop_inputs = prop_base.copy()
         prop_inputs["Market Line"] = np.nan

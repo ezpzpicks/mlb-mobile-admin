@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.9-te1-yardage-matchups-2026-09-13"
+MODEL_VERSION = "nfl-v4.10-te1-prop-surface-2026-09-13"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {

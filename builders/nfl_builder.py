@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.9-te1-yardage-matchups-2026-09-13"
+MODEL_VERSION = "nfl-v4.10-te1-prop-surface-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -5416,6 +5416,7 @@ def _render_build() -> None:
             ((prop_base["Position"].astype(str) == "QB") & (prop_base["Market"].astype(str) == "Passing Yards"))
             | ((prop_base["Position"].astype(str) == "RB") & (prop_base["Market"].astype(str).isin(["Rushing Yards", "Receiving Yards"])))
             | ((prop_base["Position"].astype(str) == "WR") & (prop_base["Market"].astype(str) == "Receiving Yards"))
+            | ((prop_base["Position"].astype(str) == "TE") & (prop_base["Slot"].astype(str) == "TE1") & (prop_base["Market"].astype(str) == "Receiving Yards"))
         )
         prop_inputs = prop_base.copy()
         prop_inputs["Market Line"] = np.nan
