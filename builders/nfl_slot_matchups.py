@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.6-slot-defense-matchups-2026-09-13"
+MODEL_VERSION = "nfl-v4.7-touchdown-slot-matchups-2026-09-13"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"}
 SLOT_FAMILIES = {
@@ -41,6 +41,7 @@ MARKET_STATS = {
     "Targets": "targets",
     "Receptions": "receptions",
     "Receiving Yards": "receiving_yards",
+    "Anytime TD": "anytime_tds",
 }
 
 MARKET_SLOTS = {
@@ -52,6 +53,7 @@ MARKET_SLOTS = {
     "Targets": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
     "Receptions": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
     "Receiving Yards": {"RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
+    "Anytime TD": {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE"},
 }
 
 # The broad position model is already doing most of the matchup work. These
@@ -65,6 +67,7 @@ MARKET_STRENGTH = {
     "Targets": 0.38,
     "Receptions": 0.38,
     "Receiving Yards": 0.52,
+    "Anytime TD": 0.72,
 }
 
 MARKET_CAP = {
@@ -76,6 +79,7 @@ MARKET_CAP = {
     "Targets": 0.08,
     "Receptions": 0.08,
     "Receiving Yards": 0.12,
+    "Anytime TD": 0.18,
 }
 
 _HISTORY_CACHE: dict[tuple[int, int], pd.DataFrame] = {}
@@ -167,8 +171,14 @@ def _slot_history(nfl_builder: Any, season: int, through_week: int) -> pd.DataFr
     frame["_team"] = nfl_builder._player_team_column(frame).map(nfl_builder._normalize_team)
     frame["_player"] = nfl_builder._player_name_column(frame).map(nfl_builder._normalize_name)
     frame["_opponent"] = nfl_builder._column(frame, "opponent_team", default="").map(nfl_builder._normalize_team)
-    for stat in set(MARKET_STATS.values()):
+    base_stats = set(MARKET_STATS.values()) - {"anytime_tds"}
+    base_stats.update({"rushing_tds", "receiving_tds"})
+    for stat in base_stats:
         frame[stat] = nfl_builder._numeric_frame_column(frame, stat)
+    frame["anytime_tds"] = (
+        pd.to_numeric(frame["rushing_tds"], errors="coerce").fillna(0.0)
+        + pd.to_numeric(frame["receiving_tds"], errors="coerce").fillna(0.0)
+    )
 
     aggregate = frame.groupby(["_week", "_team", "_opponent", "_player"], as_index=False).agg(
         **{stat: (stat, "sum") for stat in set(MARKET_STATS.values())}
@@ -208,10 +218,82 @@ def _slot_history(nfl_builder: Any, season: int, through_week: int) -> pd.DataFr
     return history.copy()
 
 
+def _touchdown_profile_from_history(history: pd.DataFrame, opponent: str, slot: str) -> dict[str, float]:
+    """Learn where a defense funnels TDs after removing its general TD allowance."""
+    slot = _slot(slot)
+    opponent = str(opponent or "").strip().upper()
+    if history is None or history.empty or slot not in TRACKED_SLOTS:
+        return {"adjustment_pct": 0.0, "sample": 0.0}
+
+    market_rows = history[history["market"].astype(str) == "Anytime TD"].copy()
+    slot_rows = market_rows[market_rows["slot"].astype(str) == slot].copy()
+    defense_slot = slot_rows[slot_rows["opponent"].astype(str) == opponent].copy()
+    if market_rows.empty or slot_rows.empty or defense_slot.empty:
+        return {"adjustment_pct": 0.0, "sample": 0.0}
+
+    league_slot = float(pd.to_numeric(slot_rows["actual"], errors="coerce").mean())
+    league_slot_n = int(pd.to_numeric(slot_rows["actual"], errors="coerce").notna().sum())
+    defense_slot_values = pd.to_numeric(defense_slot["actual"], errors="coerce").dropna()
+    defense_slot_avg = float(defense_slot_values.mean()) if not defense_slot_values.empty else 0.0
+    sample = int(defense_slot[["week", "team"]].drop_duplicates().shape[0])
+    if not (math.isfinite(league_slot) and league_slot > 0.04 and math.isfinite(defense_slot_avg)) or league_slot_n < 8:
+        return {"adjustment_pct": 0.0, "sample": float(sample)}
+
+    game_totals = market_rows.groupby(
+        ["season", "week", "team", "opponent"], as_index=False
+    )["actual"].sum()
+    league_total = float(pd.to_numeric(game_totals["actual"], errors="coerce").mean()) if not game_totals.empty else 0.0
+    defense_totals = game_totals[game_totals["opponent"].astype(str) == opponent].copy()
+    defense_total_values = pd.to_numeric(defense_totals["actual"], errors="coerce").dropna()
+    defense_total_avg = float(defense_total_values.mean()) if not defense_total_values.empty else league_total
+    defense_games = int(defense_totals[["week", "team"]].drop_duplicates().shape[0]) if not defense_totals.empty else sample
+    if not (math.isfinite(league_total) and league_total > 0.10 and math.isfinite(defense_total_avg)):
+        return {"adjustment_pct": 0.0, "sample": float(sample)}
+
+    # Touchdowns are sparse. Four league-average games act as a Bayesian prior
+    # before the observed defense-specific rates can move the model materially.
+    prior_games = 4.0
+    shrunk_slot_rate = (
+        float(defense_slot_values.sum()) + prior_games * league_slot
+    ) / max(sample + prior_games, 1.0)
+    shrunk_total_rate = (
+        float(defense_total_values.sum()) + prior_games * league_total
+    ) / max(defense_games + prior_games, 1.0)
+
+    slot_index = shrunk_slot_rate / max(league_slot, 0.04)
+    general_td_index = shrunk_total_rate / max(league_total, 0.10)
+    outlier_index = slot_index / max(general_td_index, 0.35)
+    raw_outlier = float(np.clip(outlier_index - 1.0, -1.0, 1.0))
+    sample_weight = float(sample / (sample + 3.5)) if sample > 0 else 0.0
+    league_coverage = float(np.clip(league_slot_n / 24.0, 0.40, 1.0))
+    adjustment_pct = float(np.clip(
+        raw_outlier * sample_weight * league_coverage * MARKET_STRENGTH["Anytime TD"],
+        -MARKET_CAP["Anytime TD"], MARKET_CAP["Anytime TD"],
+    ))
+
+    absolute_index = defense_slot_avg / max(league_slot, 0.04)
+    general_index_raw = defense_total_avg / max(league_total, 0.10)
+    return {
+        "adjustment_pct": adjustment_pct,
+        "sample": float(sample),
+        "league_sample": float(league_slot_n),
+        "defense_slot_avg": defense_slot_avg,
+        "league_slot_avg": league_slot,
+        "defense_total_avg": defense_total_avg,
+        "league_total_avg": league_total,
+        "absolute_edge_pct": absolute_index - 1.0,
+        "family_edge_pct": general_index_raw - 1.0,
+        "slot_outlier_pct": outlier_index - 1.0,
+        "sample_weight": sample_weight,
+    }
+
+
 def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, market: str) -> dict[str, float]:
     """Measure an exact-slot outlier after removing broad position weakness."""
     slot = _slot(slot)
     opponent = str(opponent or "").strip().upper()
+    if market == "Anytime TD":
+        return _touchdown_profile_from_history(history, opponent, slot)
     if history is None or history.empty or slot not in TRACKED_SLOTS or not _market_allowed_for_slot(market, slot):
         return {"adjustment_pct": 0.0, "sample": 0.0}
 
@@ -278,6 +360,62 @@ def slot_matchup_profile(nfl_builder: Any, season: int, projection_week: int, op
     return profile
 
 
+def _weighted_profile_share(profile: dict[str, Any], weights: tuple[tuple[str, float], ...]) -> float:
+    values: list[tuple[float, float]] = []
+    for key, weight in weights:
+        value = _num(profile.get(key, np.nan), np.nan)
+        if math.isfinite(value) and value >= 0:
+            values.append((value, weight))
+    if not values:
+        return math.nan
+    total_weight = sum(weight for _, weight in values)
+    return sum(value * weight for value, weight in values) / max(total_weight, 1e-9)
+
+
+def _touchdown_usage_multiplier(profile: dict[str, Any], slot: str) -> dict[str, float]:
+    """Scale only the matchup edge by how concentrated this player's red-zone role is."""
+    slot = _slot(slot)
+    target_share = _num(profile.get("target_share", np.nan), np.nan)
+    carry_share = _num(profile.get("carry_share", np.nan), np.nan)
+
+    receiving_rz_share = _weighted_profile_share(profile, (
+        ("redzone_target_share", 0.45),
+        ("inside_10_target_share", 0.30),
+        ("endzone_target_share", 0.25),
+    ))
+    rushing_rz_share = _weighted_profile_share(profile, (
+        ("goal_line_carry_share", 0.55),
+        ("inside_10_carry_share", 0.45),
+    ))
+
+    receiving_ratio = (
+        receiving_rz_share / target_share
+        if math.isfinite(receiving_rz_share) and math.isfinite(target_share) and target_share > 0.015
+        else 1.0
+    )
+    rushing_ratio = (
+        rushing_rz_share / carry_share
+        if math.isfinite(rushing_rz_share) and math.isfinite(carry_share) and carry_share > 0.015
+        else 1.0
+    )
+
+    if slot.startswith("RB"):
+        usage_ratio = 0.60 * rushing_ratio + 0.40 * receiving_ratio
+    elif slot == "QB":
+        usage_ratio = rushing_ratio
+    else:
+        usage_ratio = receiving_ratio
+
+    usage_ratio = float(np.clip(usage_ratio, 0.35, 2.50))
+    multiplier = float(np.clip(1.0 + 0.35 * (usage_ratio - 1.0), 0.75, 1.35))
+    return {
+        "usage_ratio": usage_ratio,
+        "multiplier": multiplier,
+        "receiving_ratio": float(np.clip(receiving_ratio, 0.20, 3.0)),
+        "rushing_ratio": float(np.clip(rushing_ratio, 0.20, 3.0)),
+    }
+
+
 def _factor(profile: dict[str, float] | None) -> float:
     return 1.0 + _num((profile or {}).get("adjustment_pct"), 0.0)
 
@@ -291,10 +429,22 @@ def _append_reason(row: dict[str, Any], opponent: str, slot: str, market: str, p
     league_avg = _num(profile.get("league_slot_avg"), 0.0)
     absolute = _num(profile.get("absolute_edge_pct"), 0.0)
     outlier = _num(profile.get("slot_outlier_pct"), 0.0)
-    note = (
-        f"slot matchup {opponent} vs {slot} {market}: {defense_avg:.1f} vs {league_avg:.1f} league "
-        f"({absolute:+.0%}); slot outlier {outlier:+.0%}; {sample}g; applied {adjustment:+.1%}"
-    )
+    if market == "Anytime TD":
+        team_edge = _num(profile.get("family_edge_pct"), 0.0)
+        usage_ratio = _num(profile.get("usage_ratio"), 1.0)
+        usage_multiplier = _num(profile.get("usage_multiplier"), 1.0)
+        base_adjustment = _num(profile.get("base_adjustment_pct"), adjustment)
+        note = (
+            f"TD matchup {opponent} vs {slot}: {defense_avg:.2f} TD/g vs {league_avg:.2f} league "
+            f"({absolute:+.0%}); general TD environment {team_edge:+.0%}; slot concentration {outlier:+.0%}; "
+            f"{sample}g; red-zone role {usage_ratio:.2f}x (matchup amp {usage_multiplier:.2f}x); "
+            f"base {base_adjustment:+.1%}, applied {adjustment:+.1%}"
+        )
+    else:
+        note = (
+            f"slot matchup {opponent} vs {slot} {market}: {defense_avg:.1f} vs {league_avg:.1f} league "
+            f"({absolute:+.0%}); slot outlier {outlier:+.0%}; {sample}g; applied {adjustment:+.1%}"
+        )
     current = str(row.get("Confluence", "") or "").strip()
     row["Confluence"] = f"{current} • {note}".strip(" •")
 
@@ -306,6 +456,7 @@ def _apply_slot_overlay(
     projection_week: int,
     opponent: str,
     slot: str,
+    player_profile: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     slot = _slot(slot)
     if slot not in TRACKED_SLOTS or not rows or projection_week <= 1:
@@ -316,6 +467,21 @@ def _apply_slot_overlay(
         for market in MARKET_STATS
         if _market_allowed_for_slot(market, slot)
     }
+    td_profile = profiles.get("Anytime TD")
+    if td_profile is not None:
+        usage = _touchdown_usage_multiplier(player_profile or {}, slot)
+        base_adjustment = _num(td_profile.get("adjustment_pct"), 0.0)
+        final_adjustment = float(np.clip(
+            base_adjustment * usage["multiplier"],
+            -MARKET_CAP["Anytime TD"], MARKET_CAP["Anytime TD"],
+        ))
+        td_profile = dict(td_profile)
+        td_profile["base_adjustment_pct"] = base_adjustment
+        td_profile["adjustment_pct"] = final_adjustment
+        td_profile["usage_ratio"] = usage["usage_ratio"]
+        td_profile["usage_multiplier"] = usage["multiplier"]
+        profiles["Anytime TD"] = td_profile
+
     factors = {market: _factor(profile) for market, profile in profiles.items()}
 
     pass_attempt_factor = factors.get("Passing Attempts", 1.0)
@@ -383,7 +549,7 @@ def clear_slot_matchup_cache() -> None:
 
 
 def install_slot_matchup_layer(nfl_builder: Any) -> None:
-    """Install the final current-season slot-vs-defense projection layer."""
+    """Install current-season slot-vs-defense learning, including TD distribution outliers."""
     if getattr(nfl_builder, "_SLOT_MATCHUP_LAYER_INSTALLED", False):
         nfl_builder.MODEL_VERSION = MODEL_VERSION
         return
@@ -392,8 +558,10 @@ def install_slot_matchup_layer(nfl_builder: Any) -> None:
 
     def wrapped(*args, **kwargs):
         rows = original(*args, **kwargs)
+        player = str(args[0] if len(args) > 0 else kwargs.get("player", "") or "")
         slot = str(args[2] if len(args) > 2 else kwargs.get("slot", "") or "")
         opponent = str(args[4] if len(args) > 4 else kwargs.get("opponent", "") or "")
+        profiles_frame = args[7] if len(args) > 7 else kwargs.get("profiles", pd.DataFrame())
         team_rating = args[9] if len(args) > 9 else kwargs.get("team_rating", {})
         if not isinstance(team_rating, dict):
             team_rating = {}
@@ -401,7 +569,13 @@ def install_slot_matchup_layer(nfl_builder: Any) -> None:
         projection_week = int(_num(team_rating.get("Projection Week"), 0.0))
         if season <= 0 or projection_week <= 0:
             return rows
-        return _apply_slot_overlay(nfl_builder, rows, season, projection_week, opponent, slot)
+        try:
+            player_profile = nfl_builder._profile_lookup(profiles_frame, player)
+        except Exception:
+            player_profile = {}
+        return _apply_slot_overlay(
+            nfl_builder, rows, season, projection_week, opponent, slot, player_profile
+        )
 
     nfl_builder._project_player_markets = wrapped
     nfl_builder.MODEL_VERSION = MODEL_VERSION

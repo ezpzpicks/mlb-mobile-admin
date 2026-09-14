@@ -40,6 +40,34 @@ def build_history() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+
+def build_td_history() -> pd.DataFrame:
+    rows = []
+    defenses = ["NYG", "DAL", "PHI", "WAS", "GB", "MIN", "DET", "CHI"]
+    for week in [1, 2, 3, 4]:
+        for index, defense in enumerate(defenses):
+            team = f"TD{week}{index}"
+            # Keep total tracked anytime TDs near 2.0/game for every defense,
+            # but make NYG distribute a much larger share of those TDs to TE.
+            te_td = 1.00 if defense == "NYG" else 0.25
+            wr1_td = 0.20 if defense == "NYG" else 0.45
+            wr2_td = 0.20 if defense == "NYG" else 0.35
+            wr3_td = 0.10 if defense == "NYG" else 0.20
+            rb1_td = 0.30 if defense == "NYG" else 0.45
+            rb2_td = 0.10 if defense == "NYG" else 0.15
+            qb_td = 0.10 if defense == "NYG" else 0.15
+            rows.extend([
+                _row(week, defense, "TE", "Anytime TD", te_td, team),
+                _row(week, defense, "WR1", "Anytime TD", wr1_td, team),
+                _row(week, defense, "WR2", "Anytime TD", wr2_td, team),
+                _row(week, defense, "WR3", "Anytime TD", wr3_td, team),
+                _row(week, defense, "RB1", "Anytime TD", rb1_td, team),
+                _row(week, defense, "RB2", "Anytime TD", rb2_td, team),
+                _row(week, defense, "QB", "Anytime TD", qb_td, team),
+            ])
+    return pd.DataFrame(rows)
+
+
 def main() -> None:
     history = build_history()
 
@@ -78,6 +106,44 @@ def main() -> None:
     ])
     te = slot_model._profile_from_history(te_rows, "NYG", "TE", "Receiving Yards")
     assert te["adjustment_pct"] == 0.0
+
+
+    td_history = build_td_history()
+    te_td = slot_model._profile_from_history(td_history, "NYG", "TE", "Anytime TD")
+    assert int(te_td["sample"]) == 4
+    assert te_td["defense_slot_avg"] > te_td["league_slot_avg"]
+    assert te_td["slot_outlier_pct"] > 0.20
+    assert 0.02 < te_td["adjustment_pct"] <= slot_model.MARKET_CAP["Anytime TD"]
+
+    # A generally high-TD defense should not create a false slot signal if its
+    # TD distribution by slot remains proportional to league expectations.
+    proportional = td_history.copy()
+    nyg = proportional["opponent"] == "NYG"
+    baseline = {"TE": 0.25, "WR1": 0.45, "WR2": 0.35, "WR3": 0.20, "RB1": 0.45, "RB2": 0.15, "QB": 0.15}
+    for slot, value in baseline.items():
+        mask = nyg & (proportional["slot"] == slot)
+        proportional.loc[mask, "actual"] = value * 1.8
+    proportional_te = slot_model._profile_from_history(proportional, "NYG", "TE", "Anytime TD")
+    assert abs(proportional_te["adjustment_pct"]) < 0.01
+
+    high_rz_te = {
+        "target_share": 0.16,
+        "redzone_target_share": 0.30,
+        "inside_10_target_share": 0.34,
+        "endzone_target_share": 0.38,
+    }
+    low_rz_te = {
+        "target_share": 0.16,
+        "redzone_target_share": 0.08,
+        "inside_10_target_share": 0.07,
+        "endzone_target_share": 0.06,
+    }
+    high_usage = slot_model._touchdown_usage_multiplier(high_rz_te, "TE")
+    low_usage = slot_model._touchdown_usage_multiplier(low_rz_te, "TE")
+    assert high_usage["usage_ratio"] > 1.5
+    assert high_usage["multiplier"] > 1.0
+    assert low_usage["usage_ratio"] < 0.7
+    assert low_usage["multiplier"] < 1.0
 
     print("NFL slot matchup tests passed")
 
