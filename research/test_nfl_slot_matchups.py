@@ -36,6 +36,8 @@ def build_history() -> pd.DataFrame:
                 _row(week, defense, "WR1", "Targets", 8.0, team),
                 _row(week, defense, "WR2", "Targets", 10.0 if defense == "NYG" else 6.0, team),
                 _row(week, defense, "WR3", "Targets", 4.0, team),
+                _row(week, defense, "TE1", "Receiving Yards", 92.0 if defense == "NYG" else 45.0, team),
+                _row(week, defense, "TE_ALL", "Receiving Yards", 72.0 if defense == "NYG" else 55.0, team),
             ])
     return pd.DataFrame(rows)
 
@@ -96,19 +98,14 @@ def main() -> None:
     broad_wr2 = slot_model._profile_from_history(broad, "NYG", "WR2", "Receiving Yards")
     assert abs(broad_wr2["adjustment_pct"]) < 0.02
 
-    # Single-slot positions are already handled by the broad position layer.
-    te_rows = pd.DataFrame([
-        _row(1, "NYG", "TE1", "Receiving Yards", 90.0, "A"),
-        _row(1, "DAL", "TE1", "Receiving Yards", 45.0, "B"),
-        _row(1, "PHI", "TE1", "Receiving Yards", 45.0, "C"),
-        _row(1, "WAS", "TE1", "Receiving Yards", 45.0, "D"),
-        _row(1, "GB", "TE1", "Receiving Yards", 45.0, "E"),
-        _row(1, "MIN", "TE1", "Receiving Yards", 45.0, "F"),
-        _row(1, "DET", "TE1", "Receiving Yards", 45.0, "G"),
-        _row(1, "CHI", "TE1", "Receiving Yards", 45.0, "H"),
-    ])
-    te = slot_model._profile_from_history(te_rows, "NYG", "TE1", "Receiving Yards")
-    assert te["adjustment_pct"] == 0.0
+    # TE1 now compares its exact production against the defense's all-TE
+    # allowance, so a primary-TE funnel can add a residual without double counting.
+    te = slot_model._profile_from_history(history, "NYG", "TE1", "Receiving Yards")
+    assert int(te["sample"]) == 3
+    assert te["defense_slot_avg"] > te["league_slot_avg"]
+    assert te["family_edge_pct"] > 0
+    assert te["slot_outlier_pct"] > 0
+    assert te["adjustment_pct"] > 0
 
 
     td_history = build_td_history()

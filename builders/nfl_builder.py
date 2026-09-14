@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.8-te1-yardage-2026-09-13"
+MODEL_VERSION = "nfl-v4.9-te1-yardage-matchups-2026-09-13"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90

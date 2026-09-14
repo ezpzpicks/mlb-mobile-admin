@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.8-te1-yardage-2026-09-13"
+MODEL_VERSION = "nfl-v4.9-te1-yardage-matchups-2026-09-13"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -172,6 +172,7 @@ def _slot_history(nfl_builder: Any, season: int, through_week: int) -> pd.DataFr
     frame["_team"] = nfl_builder._player_team_column(frame).map(nfl_builder._normalize_team)
     frame["_player"] = nfl_builder._player_name_column(frame).map(nfl_builder._normalize_name)
     frame["_opponent"] = nfl_builder._column(frame, "opponent_team", default="").map(nfl_builder._normalize_team)
+    frame["_position"] = nfl_builder._player_position_column(frame).map(nfl_builder._position_group)
     base_stats = set(MARKET_STATS.values()) - {"anytime_tds"}
     base_stats.update({"rushing_tds", "receiving_tds"})
     for stat in base_stats:
@@ -206,6 +207,29 @@ def _slot_history(nfl_builder: Any, season: int, through_week: int) -> pd.DataFr
             "actual": pd.to_numeric(eligible[stat], errors="coerce"),
         })
         rows.append(part)
+
+    # TE1 is the only modeled tight-end depth slot, while the broad defensive
+    # TE matchup already includes every tight end on the opponent. Preserve
+    # that broad all-TE production as a pseudo-slot so TE1 can learn only the
+    # residual primary-TE tendency instead of double counting general TE weakness.
+    te_all = frame[frame["_position"].astype(str) == "TE"].copy()
+    if not te_all.empty:
+        te_all = te_all.groupby(["_week", "_team", "_opponent"], as_index=False).agg(
+            targets=("targets", "sum"),
+            receptions=("receptions", "sum"),
+            receiving_yards=("receiving_yards", "sum"),
+        )
+        for market, stat in (("Targets", "targets"), ("Receptions", "receptions"), ("Receiving Yards", "receiving_yards")):
+            rows.append(pd.DataFrame({
+                "season": season,
+                "week": pd.to_numeric(te_all["_week"], errors="coerce"),
+                "team": te_all["_team"].astype(str),
+                "opponent": te_all["_opponent"].astype(str),
+                "slot": "TE_ALL",
+                "player": "ALL TIGHT ENDS",
+                "market": market,
+                "actual": pd.to_numeric(te_all[stat], errors="coerce"),
+            }))
 
     history = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
         columns=["season", "week", "team", "opponent", "slot", "player", "market", "actual"]
@@ -319,9 +343,19 @@ def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, marke
     defense_family_avg = float(pd.to_numeric(defense_family["actual"], errors="coerce").mean()) if not defense_family.empty else defense_slot_avg
     family_index = defense_family_avg / league_family if math.isfinite(league_family) and league_family > 0.20 else 1.0
 
-    # QB and TE each have a single slot. Their exact-slot tendency is already
-    # the broad position tendency, so applying it again would double count.
-    if len(family_slots) == 1:
+    if slot == "TE1":
+        broad_rows = market_rows[market_rows["slot"].astype(str) == "TE_ALL"].copy()
+        defense_broad = broad_rows[broad_rows["opponent"].astype(str) == opponent].copy()
+        league_broad = float(pd.to_numeric(broad_rows["actual"], errors="coerce").mean()) if not broad_rows.empty else math.nan
+        defense_broad_avg = float(pd.to_numeric(defense_broad["actual"], errors="coerce").mean()) if not defense_broad.empty else math.nan
+        if math.isfinite(league_broad) and league_broad > 0.20 and math.isfinite(defense_broad_avg):
+            family_index = defense_broad_avg / league_broad
+            outlier_index = absolute_index / max(family_index, 0.25)
+        else:
+            # Without an all-TE baseline, broad TE defense already owns this signal.
+            outlier_index = 1.0
+    elif len(family_slots) == 1:
+        # QB has no separate same-position depth slot to normalize against.
         outlier_index = 1.0
     else:
         outlier_index = absolute_index / max(family_index, 0.25)
