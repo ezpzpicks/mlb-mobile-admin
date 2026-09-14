@@ -272,7 +272,7 @@ if selected_sport not in valid_sports:
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.4-covers-personnel-weather-2026-09-11",
-    "NFL": "nfl-v4.4-active-prop-role-calibration-2026-09-13",
+    "NFL": "nfl-v4.6-slot-defense-matchups-2026-09-13",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":
@@ -318,9 +318,11 @@ elif selected_sport == "NFL":
     from builders.nfl_game_regression import install_regression_layer
     from builders.nfl_skill_prop_regression import install_skill_prop_regression
     from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
+    from builders.nfl_slot_matchups import install_slot_matchup_layer
     install_regression_layer(nfl_builder)
     install_skill_prop_regression(nfl_builder)
     install_skill_prop_consistency(nfl_builder)
+    install_slot_matchup_layer(nfl_builder)
     install_covers_weather(nfl_builder)
     nfl_builder.render()
 elif selected_sport == "CBB":
