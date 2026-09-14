@@ -1,17 +1,29 @@
 from pathlib import Path
-
-from shared.mlb_k_runtime_patch import run_mlb_builder_with_locked_k_regression
+import importlib.util
 
 
 BUILDER = Path("builders/mlb_builder.py")
 PUBLIC_APP = Path("public_app.py")
+ADMIN_APP = Path("app_mobile_admin.py")
+CFB_GUARD = Path("builders/cfb_runtime_guard.py")
 INIT = Path("shared/__init__.py")
 REQUIREMENTS = Path("requirements.txt")
+RUNTIME_PATCH = Path("shared/mlb_k_runtime_patch.py")
+
+
+def _load_runtime_materializer():
+    spec = importlib.util.spec_from_file_location("ezpz_mlb_k_runtime_patch", RUNTIME_PATCH)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Could not load MLB V16.5 runtime source materializer")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.run_mlb_builder_with_locked_k_regression
 
 
 def finalize_mlb_builder():
     # Permanently materialize the currently validated V16.5 runtime logic into
     # the real builder source so there is no launch-time monkey patch anymore.
+    run_mlb_builder_with_locked_k_regression = _load_runtime_materializer()
     source = run_mlb_builder_with_locked_k_regression(BUILDER, compile_only=True)
 
     strict_start = source.find("def _read_pitcher_recent_form_strict():")
@@ -137,6 +149,62 @@ def read_sheet(tab_name, columns):
     PUBLIC_APP.write_text(source, encoding="utf-8")
 
 
+def finalize_admin_entrypoint():
+    source = ADMIN_APP.read_text(encoding="utf-8")
+    start = source.find("def _install_mlb_sheet_read_cache() -> None:")
+    end = source.find("\nvalid_sports = set(SPORT_META)", start)
+    if start >= 0 and end >= 0:
+        source = source[:start] + source[end + 1:]
+    source = source.replace(
+        '    # Keep the production builder itself unchanged; only avoid redundant Sheet\n'
+        '    # downloads while Streamlit reruns the same controls and tracking helpers.\n'
+        '    _install_mlb_sheet_read_cache()\n',
+        '',
+    )
+    if "gspread" in source or "_install_mlb_sheet_read_cache" in source:
+        raise RuntimeError("Legacy MLB Google read-cache hook remains in app_mobile_admin.py")
+    compile(source, str(ADMIN_APP), "exec")
+    ADMIN_APP.write_text(source, encoding="utf-8")
+
+
+def finalize_cfb_runtime_guard():
+    source = CFB_GUARD.read_text(encoding="utf-8")
+
+    # The shared CFB writer is now Turso-native. Remove the old worksheet-specific
+    # replacement so the guard cannot intercept writes and route them through a
+    # nonexistent gspread worksheet object.
+    start_marker = "    # CFB writes are full-table snapshots. One update is sufficient; clearing the\n"
+    end_marker = "    # ------------------------------------------------------------------\n    # 2) Save-path type safety and MLB-matching button copy.\n"
+    start = source.find(start_marker)
+    end = source.find(end_marker, start)
+    if start < 0 or end < 0:
+        raise RuntimeError("Could not locate legacy CFB worksheet write override")
+    source = source[:start] + end_marker + source[end + len(end_marker):]
+
+    source = source.replace(
+        "patches keep those reruns read-mostly, avoid unnecessary Google Sheets writes,\n",
+        "guards keep those reruns read-mostly, avoid unnecessary persistence writes,\n",
+    )
+    source = source.replace(
+        "    # 1) Google Sheets: interactive edits are read-only until Save is pressed.\n",
+        "    # 1) Interactive edits are read-only until Save is pressed.\n",
+    )
+    source = source.replace(
+        "    # worksheet writes and hit Google's 429 quota. Explicit Save buttons and the\n",
+        "    # persistence writes. Explicit Save buttons and the\n",
+    )
+    source = source.replace(
+        "    # Google Sheets snapshots are string-backed, so rating rows loaded from the\n",
+        "    # Persisted snapshots are string-backed, so rating rows loaded from the\n",
+    )
+
+    for token in ("GOOGLE_CREDENTIALS", "import gspread", "google.oauth2"):
+        if token in source:
+            raise RuntimeError(f"Legacy Google runtime reference remains in CFB guard: {token}")
+    compile(source, str(CFB_GUARD), "exec")
+    CFB_GUARD.write_text(source, encoding="utf-8")
+
+
 def clean_runtime_dependencies_and_hooks():
     # Importing shared should now have no data-migration or source-rewriting side effects.
     INIT.write_text('''"""Shared EZPZ helpers. Production storage is Turso-only."""\n''', encoding="utf-8")
@@ -160,6 +228,8 @@ def clean_runtime_dependencies_and_hooks():
 def main():
     finalize_mlb_builder()
     finalize_legacy_public_app()
+    finalize_admin_entrypoint()
+    finalize_cfb_runtime_guard()
     clean_runtime_dependencies_and_hooks()
 
     # One-time migration machinery removes itself; only permanent source remains.
