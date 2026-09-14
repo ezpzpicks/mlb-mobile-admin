@@ -1,13 +1,9 @@
-import json
-import os
-import threading
-import time
+from __future__ import annotations
+
 from typing import Iterable
 
-import gspread
 import pandas as pd
 import streamlit as st
-from google.oauth2.service_account import Credentials
 
 from shared.public_contract import (
     ALL_GAME_TRENDS_COLUMNS,
@@ -23,18 +19,13 @@ from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
 
 
 _ACTIVE_SPORT = ""
-_DEFAULT_DATABASE_NAMES = {
-    "NFL": "NFL Model Database",
-    "CFB": "CFB Model Database",
-    "NCAAF": "CFB Model Database",
-    "CBB": "CBB Model Database",
-    "NCAAM": "CBB Model Database",
+_TURSO_SPORT = {
+    "NFL": "NFL",
+    "CFB": "NCAAF",
+    "NCAAF": "NCAAF",
+    "CBB": "NCAAM",
+    "NCAAM": "NCAAM",
 }
-
-_WORKSHEET_CACHE: dict[tuple[str, str], object] = {}
-_WORKSHEET_CACHE_LOCK = threading.Lock()
-_SHEETS_QUOTA_COOLDOWN_UNTIL = 0.0
-_SHEETS_QUOTA_COOLDOWN_SECONDS = 65.0
 
 _BOOTSTRAP_PUBLIC_TABS = {
     PUBLIC_SLATE_TAB: ["Date", "Game", "Away Team", "Home Team"],
@@ -43,16 +34,6 @@ _BOOTSTRAP_PUBLIC_TABS = {
     PUBLIC_SPLIT_TAB: PUBLIC_SPLIT_COLUMNS,
     ODDS_SNAPSHOT_TAB: ODDS_SNAPSHOT_COLUMNS,
 }
-
-
-def _secret_or_env(name: str) -> str:
-    value = os.environ.get(name, "")
-    if value:
-        return value
-    try:
-        return str(st.secrets.get(name, "") or "")
-    except Exception:
-        return ""
 
 
 def _canonical_sport(sport: str | None) -> str:
@@ -64,13 +45,19 @@ def _canonical_sport(sport: str | None) -> str:
     return value
 
 
-def set_storage_sport(sport: str | None) -> str:
-    """Select the workbook used by the shared non-MLB storage layer.
+def _dataset_sport(sport: str | None = None) -> str:
+    selected = _canonical_sport(sport if sport is not None else _ACTIVE_SPORT)
+    return _TURSO_SPORT.get(selected, selected)
 
-    MLB keeps its long-standing direct storage implementation and generic
-    GOOGLE_SHEET_NAME contract. NFL/CFB/CBB use separate workbooks so each
-    sport owns its own daily_slate, bet_tracker, trend history, and model data.
-    """
+
+def _require_turso() -> None:
+    if not is_turso_ready():
+        raise RuntimeError(
+            "Turso is not configured or reachable. Google Sheets is no longer a production fallback."
+        )
+
+
+def set_storage_sport(sport: str | None) -> str:
     global _ACTIVE_SPORT
     _ACTIVE_SPORT = _canonical_sport(sport)
     return _ACTIVE_SPORT
@@ -80,332 +67,132 @@ def get_storage_sport() -> str:
     return _ACTIVE_SPORT
 
 
-def _sport_setting(sport: str, suffix: str) -> str:
-    sport = _canonical_sport(sport)
-    names: list[str] = []
-    if sport == "CFB":
-        names.extend([f"CFB_GOOGLE_SHEET_{suffix}", f"NCAAF_GOOGLE_SHEET_{suffix}"])
-    elif sport == "CBB":
-        names.extend([f"CBB_GOOGLE_SHEET_{suffix}", f"NCAAM_GOOGLE_SHEET_{suffix}"])
-    elif sport:
-        names.append(f"{sport}_GOOGLE_SHEET_{suffix}")
-    for name in names:
-        value = _secret_or_env(name)
-        if value:
-            return value
-    return ""
-
-
 def storage_database_config(sport: str | None = None) -> dict[str, str]:
-    """Return the resolved workbook contract without making a network request."""
     selected = _canonical_sport(sport if sport is not None else _ACTIVE_SPORT)
-
-    if selected in {"NFL", "CFB", "CBB"}:
-        sheet_id = _sport_setting(selected, "ID")
-        sheet_name = _sport_setting(selected, "NAME") or _DEFAULT_DATABASE_NAMES[selected]
-        return {"sport": selected, "sheet_id": sheet_id, "sheet_name": sheet_name}
-
-    sheet_id = _sport_setting(selected, "ID") if selected else ""
-    sheet_name = _sport_setting(selected, "NAME") if selected else ""
+    dataset_sport = _dataset_sport(selected)
     return {
         "sport": selected,
-        "sheet_id": sheet_id or _secret_or_env("GOOGLE_SHEET_ID"),
-        "sheet_name": sheet_name or _secret_or_env("GOOGLE_SHEET_NAME"),
+        "dataset_sport": dataset_sport,
+        "sheet_id": f"turso:{dataset_sport}" if dataset_sport else "",
+        "sheet_name": f"Turso {dataset_sport}" if dataset_sport else "Turso",
+        "namespace": "",
     }
 
 
 def storage_database_name(sport: str | None = None) -> str:
-    config = storage_database_config(sport)
-    return config["sheet_name"] or config["sheet_id"]
+    return storage_database_config(sport)["sheet_name"]
 
 
-def _worksheet_cache_key(workbook, tab_name: str) -> tuple[str, str]:
-    workbook_id = str(getattr(workbook, "id", "") or "")
-    if not workbook_id:
-        workbook_id = f"object:{id(workbook)}"
-    return workbook_id, str(tab_name)
+def storage_database_identity(sport: str | None = None) -> str:
+    dataset_sport = _dataset_sport(sport)
+    return f"turso:{dataset_sport}" if dataset_sport else "turso"
 
 
-def _is_quota_error(exc: Exception) -> bool:
-    response = getattr(exc, "response", None)
-    if getattr(response, "status_code", None) == 429:
-        return True
-    text = str(exc).lower()
-    return "429" in text and "quota" in text
+def _normalize_frame(dataframe: pd.DataFrame | None, columns: list[str]) -> pd.DataFrame:
+    out = dataframe.copy() if dataframe is not None else pd.DataFrame(columns=columns)
+    for column in columns:
+        if column not in out.columns:
+            out[column] = ""
+    if columns:
+        out = out[columns]
+    return out.fillna("").astype(str)
 
 
-def _quota_cooldown_active() -> bool:
-    return time.monotonic() < _SHEETS_QUOTA_COOLDOWN_UNTIL
-
-
-def _start_quota_cooldown() -> None:
-    global _SHEETS_QUOTA_COOLDOWN_UNTIL
-    with _WORKSHEET_CACHE_LOCK:
-        _SHEETS_QUOTA_COOLDOWN_UNTIL = max(
-            _SHEETS_QUOTA_COOLDOWN_UNTIL,
-            time.monotonic() + _SHEETS_QUOTA_COOLDOWN_SECONDS,
-        )
-    try:
-        now = time.monotonic()
-        last_warning = float(st.session_state.get("_ezpz_sheets_quota_warning_at", 0.0) or 0.0)
-        if now - last_warning >= 5.0:
-            st.warning(
-                "Google Sheets read limit was reached. The admin is cooling down Sheets reads "
-                "for about a minute instead of crashing; already cached tabs remain usable."
-            )
-            st.session_state["_ezpz_sheets_quota_warning_at"] = now
-    except Exception:
-        pass
-
-
-def _mirror_turso(tab_name: str, dataframe: pd.DataFrame, columns: list[str]) -> None:
-    """Mirror a successful legacy write while Sheets remains authoritative."""
-    sport = get_storage_sport()
-    if not sport or not is_turso_ready():
-        return
-    try:
-        replace_dataset(sport, tab_name, dataframe, columns)
-    except Exception as exc:
-        print(f"[turso-dual-write] {sport}/{tab_name} mirror failed: {exc}")
-
-
-def _read_turso_fallback(tab_name: str, columns: list[str]) -> pd.DataFrame | None:
-    """Return the last mirrored dataset only when Sheets cannot be read safely."""
-    sport = get_storage_sport()
-    if not sport or not is_turso_ready():
-        return None
-    try:
-        dataframe = read_dataset(sport, tab_name, columns)
-        if dataframe is None or dataframe.empty:
-            return None
-        print(f"[turso-read-fallback] {sport}/{tab_name}: {len(dataframe)} rows")
-        return dataframe
-    except Exception as exc:
-        print(f"[turso-read-fallback] {sport}/{tab_name} failed: {exc}")
-        return None
-
-
-@st.cache_resource(show_spinner=False)
-def _authorized_client(credentials_json: str):
-    credentials = Credentials.from_service_account_info(
-        json.loads(credentials_json),
-        scopes=[
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive",
-        ],
-    )
-    return gspread.authorize(credentials)
-
-
-@st.cache_resource(show_spinner=False)
-def _initialize_sport_workbooks_cached(
-    credentials_json: str,
-    configurations: tuple[tuple[str, str, str], ...],
-):
-    client = _authorized_client(credentials_json)
-    initialized: dict[str, str] = {}
-
-    for sport, sheet_id, sheet_name in configurations:
-        if sheet_id:
-            workbook = client.open_by_key(sheet_id)
-        else:
-            try:
-                workbook = client.open(sheet_name)
-            except gspread.SpreadsheetNotFound:
-                workbook = client.create(sheet_name)
-
-        for tab_name, columns in _BOOTSTRAP_PUBLIC_TABS.items():
-            try:
-                worksheet = workbook.worksheet(tab_name)
-            except gspread.WorksheetNotFound:
-                worksheet = workbook.add_worksheet(
-                    title=tab_name,
-                    rows=2000,
-                    cols=max(20, len(columns) + 5),
-                )
-            if columns:
-                values = worksheet.get_all_values()
-                if not values:
-                    worksheet.update([list(columns)])
-
-        initialized[sport] = str(getattr(workbook, "id", "") or sheet_id or sheet_name)
-
-    return initialized
+def _ensure_dataset(tab_name: str, columns: list[str], sport: str | None = None) -> None:
+    _require_turso()
+    dataset_sport = _dataset_sport(sport)
+    if not dataset_sport:
+        raise RuntimeError("No active sport is selected for Turso storage.")
+    current = read_dataset(dataset_sport, tab_name, columns)
+    if current is None:
+        replace_dataset(dataset_sport, tab_name, pd.DataFrame(columns=columns), columns)
 
 
 def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[str, str]:
-    credentials_json = _secret_or_env("GOOGLE_CREDENTIALS")
-    if not credentials_json:
-        return {}
+    """Initialize the permanent Turso datasets used by each sport.
 
-    configurations: list[tuple[str, str, str]] = []
+    The legacy function name is kept so existing builder imports remain stable.
+    It no longer creates or touches Google workbooks.
+    """
+    if not is_turso_ready():
+        return {}
+    initialized: dict[str, str] = {}
     for sport in sports:
-        config = storage_database_config(sport)
-        if config["sport"] not in {"NFL", "CFB", "CBB"}:
+        canonical = _canonical_sport(sport)
+        dataset_sport = _dataset_sport(canonical)
+        if dataset_sport not in {"NFL", "NCAAF", "NCAAM"}:
             continue
-        if not (config["sheet_id"] or config["sheet_name"]):
-            continue
-        configurations.append(
-            (config["sport"], config["sheet_id"], config["sheet_name"])
-        )
-
-    if not configurations:
-        return {}
-    return _initialize_sport_workbooks_cached(
-        credentials_json,
-        tuple(configurations),
-    )
-
-
-@st.cache_resource(show_spinner=False)
-def _connect_to_sheets_for(credentials_json: str, sport: str, sheet_id: str, sheet_name: str):
-    if not credentials_json or not (sheet_id or sheet_name):
-        return None
-    client = _authorized_client(credentials_json)
-    if sheet_id:
-        return client.open_by_key(sheet_id)
-    try:
-        return client.open(sheet_name)
-    except gspread.SpreadsheetNotFound:
-        if sport in {"NFL", "CFB", "CBB"}:
-            return client.create(sheet_name)
-        raise
+        for tab_name, columns in _BOOTSTRAP_PUBLIC_TABS.items():
+            current = read_dataset(dataset_sport, tab_name, list(columns))
+            if current is None:
+                replace_dataset(
+                    dataset_sport,
+                    tab_name,
+                    pd.DataFrame(columns=list(columns)),
+                    list(columns),
+                )
+        initialized[canonical] = f"turso:{dataset_sport}"
+    return initialized
 
 
 def connect_to_sheets():
-    credentials_json = _secret_or_env("GOOGLE_CREDENTIALS")
-    config = storage_database_config()
-    if not credentials_json or not (config["sheet_id"] or config["sheet_name"]):
-        return None
-    return _connect_to_sheets_for(
-        credentials_json,
-        config["sport"],
-        config["sheet_id"],
-        config["sheet_name"],
-    )
+    """Removed storage backend compatibility hook.
+
+    Returning None is intentional: production persistence is Turso-only.
+    New code must use read_sheet/write_sheet rather than a worksheet object.
+    """
+    return None
 
 
 def sheets_ready() -> bool:
-    try:
-        return connect_to_sheets() is not None
-    except Exception:
-        return False
+    """Historical function name retained for builder compatibility."""
+    return is_turso_ready()
 
 
 def get_or_create_worksheet(tab_name: str, columns: Iterable[str]):
-    workbook = connect_to_sheets()
-    if workbook is None:
-        return None
+    """Historical bootstrap hook retained for builder compatibility.
+
+    It ensures the Turso dataset exists and deliberately returns None so no new
+    code can depend on a Google/gspread worksheet object.
+    """
     columns = list(columns)
-    cache_key = _worksheet_cache_key(workbook, tab_name)
-
-    with _WORKSHEET_CACHE_LOCK:
-        cached = _WORKSHEET_CACHE.get(cache_key)
-    if cached is not None:
-        return cached
-
-    if _quota_cooldown_active():
-        return None
-
     try:
-        try:
-            worksheet = workbook.worksheet(tab_name)
-        except gspread.WorksheetNotFound:
-            worksheet = workbook.add_worksheet(
-                title=tab_name,
-                rows=2000,
-                cols=max(20, len(columns) + 5),
-            )
-            if columns:
-                worksheet.update([columns])
-    except gspread.exceptions.APIError as exc:
-        if _is_quota_error(exc):
-            _start_quota_cooldown()
-            return None
-        raise
-
-    with _WORKSHEET_CACHE_LOCK:
-        _WORKSHEET_CACHE[cache_key] = worksheet
-    return worksheet
+        _ensure_dataset(tab_name, columns)
+    except Exception as exc:
+        st.error(f"Could not initialize Turso dataset '{tab_name}': {exc}")
+    return None
 
 
 def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
     columns = list(columns)
-    try:
-        worksheet = get_or_create_worksheet(tab_name, columns)
-        if worksheet is None:
-            fallback = _read_turso_fallback(tab_name, columns)
-            return fallback if fallback is not None else pd.DataFrame(columns=columns)
-        values = worksheet.get_all_values()
-        if not values:
-            return pd.DataFrame(columns=columns)
-        header = [str(x).strip() for x in values[0]]
-        rows = []
-        for source_row in values[1:]:
-            row = {}
-            for column in columns:
-                if column in header:
-                    idx = header.index(column)
-                    row[column] = source_row[idx] if idx < len(source_row) else ""
-                else:
-                    row[column] = ""
-            if any(str(value).strip() for value in row.values()):
-                rows.append(row)
-        return pd.DataFrame(rows, columns=columns)
-    except gspread.exceptions.APIError as exc:
-        if _is_quota_error(exc):
-            _start_quota_cooldown()
-            fallback = _read_turso_fallback(tab_name, columns)
-            return fallback if fallback is not None else pd.DataFrame(columns=columns)
-        st.error(f"Could not read Google Sheets tab '{tab_name}': {exc}")
+    dataset_sport = _dataset_sport()
+    if not dataset_sport:
         return pd.DataFrame(columns=columns)
+    try:
+        _require_turso()
+        dataframe = read_dataset(dataset_sport, tab_name, columns)
+        if dataframe is None:
+            replace_dataset(dataset_sport, tab_name, pd.DataFrame(columns=columns), columns)
+            return pd.DataFrame(columns=columns)
+        return _normalize_frame(dataframe, columns)
     except Exception as exc:
-        st.error(f"Could not read Google Sheets tab '{tab_name}': {exc}")
+        st.error(f"Could not read Turso dataset '{dataset_sport}/{tab_name}': {exc}")
         return pd.DataFrame(columns=columns)
 
 
 def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) -> bool:
     columns = list(columns)
-    if _quota_cooldown_active():
-        st.warning(
-            "Google Sheets is temporarily rate-limited. This save was not attempted; "
-            "wait about a minute and try again."
-        )
+    dataset_sport = _dataset_sport()
+    if not dataset_sport:
+        st.error("No active sport is selected for Turso storage.")
         return False
     try:
-        worksheet = get_or_create_worksheet(tab_name, columns)
-        if worksheet is None:
-            if _quota_cooldown_active():
-                st.warning(
-                    "Google Sheets is temporarily rate-limited. This save was not attempted; "
-                    "wait about a minute and try again."
-                )
-            else:
-                st.warning(
-                    "Google Sheets is not configured. Add GOOGLE_CREDENTIALS and the sport database setting."
-                )
-            return False
-        out = dataframe.copy() if dataframe is not None else pd.DataFrame(columns=columns)
-        for column in columns:
-            if column not in out.columns:
-                out[column] = ""
-        out = out[columns].fillna("").astype(str)
-        worksheet.clear()
-        worksheet.update([columns] + out.values.tolist())
-        _mirror_turso(tab_name, out, columns)
+        _require_turso()
+        out = _normalize_frame(dataframe, columns)
+        replace_dataset(dataset_sport, tab_name, out, columns)
         return True
-    except gspread.exceptions.APIError as exc:
-        if _is_quota_error(exc):
-            _start_quota_cooldown()
-            st.warning(
-                "Google Sheets is temporarily rate-limited. This save did not complete; "
-                "wait about a minute and try again."
-            )
-            return False
-        st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
-        return False
     except Exception as exc:
-        st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
+        st.error(f"Could not write Turso dataset '{dataset_sport}/{tab_name}': {exc}")
         return False
 
 
@@ -415,3 +202,20 @@ def append_row(tab_name: str, row: dict, columns: Iterable[str]) -> bool:
     payload = {column: row.get(column, "") for column in columns}
     dataframe = pd.concat([dataframe, pd.DataFrame([payload])], ignore_index=True)
     return write_sheet(tab_name, dataframe, columns)
+
+
+class sport_storage:
+    """Context manager for temporarily selecting a sport storage namespace."""
+
+    def __init__(self, sport: str):
+        self.sport = sport
+        self.previous = ""
+
+    def __enter__(self):
+        self.previous = get_storage_sport()
+        set_storage_sport(self.sport)
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        set_storage_sport(self.previous)
+        return False
