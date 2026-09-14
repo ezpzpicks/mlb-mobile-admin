@@ -23,7 +23,6 @@ MODEL_VERSION = "v15.8.1-under-market-repair-2026-08-08"
 K_MODEL_VERSION = "v16.5-top2-whiff-refit-2026-09-02"
 TRACKER_TAB = "bet_tracker"
 SLATE_TAB = "daily_slate"
-ALL_GAME_TRENDS_TAB = "all_game_trends"
 ODDS_SNAPSHOT_TAB = "odds_snapshot"
 MATCHUP_DETAILS_TAB = "matchup_details_today"
 GAME_PROJECTION_HISTORY_TAB = "game_projection_history"
@@ -302,6 +301,10 @@ LAST_YEAR = LAST_SEASON
 # TURSO STORAGE
 # -----------------------
 
+from shared.public_contract import (
+    ALL_GAME_TRENDS_COLUMNS,
+    ALL_GAME_TRENDS_TAB,
+)
 from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
 
 
