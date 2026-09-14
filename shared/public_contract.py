@@ -43,6 +43,14 @@ ALL_GAME_TRENDS_COLUMNS = [
     "Trend Exact Sample", "Trend Score Details",
 ]
 
+# Builder re-saves may refresh model-side fields, but must never erase data that
+# was populated later by grading, DraftKings/public-split snapshots, or trend scoring.
+# Keep this boundary tied to the canonical schema so every field from Result onward
+# remains preserved when an existing all_game_trends row is upserted.
+ALL_GAME_TRENDS_PERSISTENT_COLUMNS = ALL_GAME_TRENDS_COLUMNS[
+    ALL_GAME_TRENDS_COLUMNS.index("Result"):
+]
+
 ODDS_SNAPSHOT_COLUMNS = [
     "Snapshot Time ET", "Date", "Game ID", "Game", "Away Team", "Home Team",
     "Market", "Selection", "Line", "Odds", "Source",
