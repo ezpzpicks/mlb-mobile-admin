@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Materialize permanent source and remove Google runtime
-        run: python scripts/finalize_turso_cutover.py
+        run: PYTHONPATH=. python scripts/finalize_turso_cutover.py
       - name: Verify Python source
         run: |
           python -m py_compile app_mobile_admin.py public_app.py sitecustomize.py shared/storage.py shared/turso_storage.py builders/mlb_builder.py builders/nfl_builder.py builders/cfb_builder.py builders/cbb_builder.py
