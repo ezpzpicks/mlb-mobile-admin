@@ -12,8 +12,6 @@ import statistics
 import time
 import urllib.parse
 import xml.etree.ElementTree as ET
-import gspread
-from google.oauth2.service_account import Credentials
 from datetime import date, datetime
 from concurrent.futures import ThreadPoolExecutor
 try:
@@ -301,193 +299,53 @@ LAST_YEAR = LAST_SEASON
 
 
 # -----------------------
-# GOOGLE SHEETS STORAGE
+# TURSO STORAGE
 # -----------------------
 
-def get_google_credentials_json():
-    """Read service account JSON from Render env vars or Streamlit secrets."""
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
-
-    if not creds_json:
-        try:
-            creds_json = st.secrets.get("GOOGLE_CREDENTIALS", "")
-        except Exception:
-            creds_json = ""
-
-    return creds_json
+from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
 
 
-def get_google_sheet_name():
-    sheet_name = os.environ.get("GOOGLE_SHEET_NAME", "")
-
-    if not sheet_name:
-        try:
-            sheet_name = st.secrets.get("GOOGLE_SHEET_NAME", "")
-        except Exception:
-            sheet_name = ""
-
-    return sheet_name
-
-
-@st.cache_resource
-def connect_to_sheets():
-    creds_json = get_google_credentials_json()
-    sheet_name = get_google_sheet_name()
-
-    if not creds_json:
-        st.error("Missing GOOGLE_CREDENTIALS environment variable in Render.")
-        st.stop()
-
-    if not sheet_name:
-        st.error("Missing GOOGLE_SHEET_NAME environment variable in Render.")
-        st.stop()
-
-    try:
-        creds_dict = json.loads(creds_json)
-    except Exception as e:
-        st.error(f"GOOGLE_CREDENTIALS is not valid JSON: {e}")
-        st.stop()
-
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
-
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-    client = gspread.authorize(creds)
-    return client.open(sheet_name)
-
-
-@st.cache_resource(show_spinner=False)
-def _get_or_create_worksheet_cached(tab_name, columns_tuple=()):
-    """Reuse worksheet handles so each save step does not refetch sheet metadata."""
-    workbook = connect_to_sheets()
-    columns = list(columns_tuple or ())
-
-    try:
-        worksheet = workbook.worksheet(tab_name)
-    except gspread.WorksheetNotFound:
-        worksheet = workbook.add_worksheet(title=tab_name, rows=1000, cols=max(20, len(columns or [])))
-        if columns:
-            worksheet.update([columns])
-
-    return worksheet
-
-
-def get_or_create_worksheet(tab_name, columns=None):
-    return _get_or_create_worksheet_cached(str(tab_name), tuple(columns or ()))
-
-
-def _read_mlb_turso_fallback(tab_name, columns, read_error=None):
-    """Use the last mirrored MLB dataset only when the authoritative Sheet read fails."""
-    try:
-        from shared.turso_storage import is_turso_ready, read_dataset
-
-        if not is_turso_ready():
-            return None
-        fallback = read_dataset("MLB", str(tab_name), list(columns))
-        if fallback is None:
-            return None
-        for col in columns:
-            if col not in fallback.columns:
-                fallback[col] = ""
-        print(
-            f"[turso-read-fallback] MLB/{tab_name}: {len(fallback)} rows"
-            + (f" after Sheets error: {read_error}" if read_error else "")
+def _require_mlb_turso():
+    if not is_turso_ready():
+        raise RuntimeError(
+            "Turso is not configured or reachable. Google Sheets is no longer a production fallback."
         )
-        return fallback[list(columns)].astype(object)
-    except Exception as turso_error:
-        print(f"[turso-read-fallback] MLB/{tab_name} failed: {turso_error}")
-        return None
-
-
-def _mirror_mlb_turso(tab_name, dataframe, columns):
-    """Mirror a successful MLB Sheet write while Sheets remains authoritative."""
-    try:
-        from shared.turso_storage import is_turso_ready, replace_dataset
-
-        if not is_turso_ready():
-            return
-        saved = replace_dataset("MLB", str(tab_name), dataframe, list(columns))
-        print(f"[turso-dual-write] MLB/{tab_name}: mirrored {saved} rows")
-    except Exception as turso_error:
-        # Migration safety rule: Turso must never make a successful Sheets save fail.
-        print(f"[turso-dual-write] MLB/{tab_name} mirror failed; Sheets remains authoritative: {turso_error}")
 
 
 def read_sheet(tab_name, columns):
-    """Read a Google Sheet tab safely, even if the sheet has extra/blank/duplicate headers."""
+    """Read the MLB dataset from Turso using the builder's established table contract."""
+    columns = list(columns or [])
     try:
-        worksheet = get_or_create_worksheet(tab_name, columns)
-
-        try:
-            records = worksheet.get_all_records(expected_headers=columns)
-            df = pd.DataFrame(records)
-        except TypeError:
-            # Older gspread versions may not support expected_headers.
-            records = worksheet.get_all_records()
-            df = pd.DataFrame(records)
-        except Exception:
-            # Fallback for sheets with duplicate/blank header cells.
-            values = worksheet.get_all_values()
-            if not values:
-                return pd.DataFrame(columns=columns)
-
-            header = [str(x).strip() for x in values[0]]
-            data_rows = values[1:]
-            rows = []
-            for values_row in data_rows:
-                row_dict = {}
-                for col in columns:
-                    if col in header:
-                        idx = header.index(col)
-                        row_dict[col] = values_row[idx] if idx < len(values_row) else ""
-                    else:
-                        row_dict[col] = ""
-                # Keep non-empty rows only.
-                if any(str(v).strip() for v in row_dict.values()):
-                    rows.append(row_dict)
-            df = pd.DataFrame(rows)
-
+        _require_mlb_turso()
+        df = read_dataset("MLB", str(tab_name), columns)
+        if df is None:
+            empty = pd.DataFrame(columns=columns)
+            replace_dataset("MLB", str(tab_name), empty, columns)
+            return empty
+        out = df.copy()
         for col in columns:
-            if col not in df.columns:
-                df[col] = ""
-
-        if df.empty:
-            df = pd.DataFrame(columns=columns)
-
-        # Google Sheets commonly returns blank columns using Pandas' strict
-        # string dtype. Later result/tracking updaters need to place numeric values
-        # into those cells, so keep sheet-backed columns as object dtype. This
-        # prevents silent TypeError failures when new numeric tracking fields are
-        # assigned to previously blank columns.
-        return df[columns].astype(object)
-    except Exception as e:
-        fallback = _read_mlb_turso_fallback(tab_name, columns, e)
-        if fallback is not None:
-            return fallback
-        st.error(f"Could not read Google Sheet tab '{tab_name}': {e}")
+            if col not in out.columns:
+                out[col] = ""
+        return out[columns].fillna("").astype(object)
+    except Exception as exc:
+        st.error(f"Could not read Turso dataset 'MLB/{tab_name}': {exc}")
         return pd.DataFrame(columns=columns)
 
 
 def write_sheet(tab_name, df, columns):
+    """Replace the MLB dataset in Turso. No Google write or fallback is attempted."""
+    columns = list(columns or [])
     try:
-        worksheet = get_or_create_worksheet(tab_name, columns)
-
+        _require_mlb_turso()
         out = df.copy() if df is not None else pd.DataFrame(columns=columns)
         for col in columns:
             if col not in out.columns:
                 out[col] = ""
-        out = out[columns]
-        out = out.fillna("").astype(str)
-
-        worksheet.clear()
-        values = [columns] + out.values.tolist()
-        worksheet.update(values)
-        _mirror_mlb_turso(tab_name, out, columns)
+        out = out[columns].fillna("").astype(str)
+        replace_dataset("MLB", str(tab_name), out, columns)
         return True
-    except Exception as e:
-        st.error(f"Could not write Google Sheet tab '{tab_name}': {e}")
+    except Exception as exc:
+        st.error(f"Could not write Turso dataset 'MLB/{tab_name}': {exc}")
         return False
 
 
@@ -2265,99 +2123,10 @@ _HANDPICK_TRACKER_COLUMNS = [
 
 
 def save_handpick_tracker_row(tracker_df, row_idx, append_new=False):
-    """Persist only the handpicked change instead of rewriting all of bet_tracker."""
-    try:
-        worksheet = get_or_create_worksheet(TRACKER_TAB, TRACKER_COLUMNS)
-        if row_idx not in tracker_df.index:
-            return False
-
-        if append_new:
-            values = []
-            for col in TRACKER_COLUMNS:
-                value = tracker_df.loc[row_idx, col] if col in tracker_df.columns else ""
-                try:
-                    if pd.isna(value):
-                        value = ""
-                except Exception:
-                    pass
-                values.append(str(value))
-            worksheet.append_row(values, value_input_option="RAW")
-            return True
-
-        try:
-            position = int(tracker_df.index.get_loc(row_idx))
-        except Exception:
-            return False
-        sheet_row = position + 2
-
-        first_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[0]) + 1
-        last_col = TRACKER_COLUMNS.index(_HANDPICK_TRACKER_COLUMNS[-1]) + 1
-        start_cell = gspread.utils.rowcol_to_a1(sheet_row, first_col)
-        end_cell = gspread.utils.rowcol_to_a1(sheet_row, last_col)
-
-        values = []
-        for col in _HANDPICK_TRACKER_COLUMNS:
-            value = tracker_df.loc[row_idx, col] if col in tracker_df.columns else ""
-            try:
-                if pd.isna(value):
-                    value = ""
-            except Exception:
-                pass
-            values.append(str(value))
-
-        worksheet.update(
-            values=[values],
-            range_name=f"{start_cell}:{end_cell}",
-            value_input_option="RAW",
-        )
-        return True
-    except Exception as e:
-        st.error(f"Could not save the handpicked update to Google Sheets: {e}")
+    """Persist the canonical bet tracker after a handpick edit through Turso."""
+    if row_idx not in tracker_df.index:
         return False
-
-
-# Separate research table for both moneyline teams and both total directions from
-# every saved game. This intentionally does not change Bet Tracker, Best Plays,
-# or any model qualification logic.
-ALL_GAME_TRENDS_COLUMNS = [
-    "Date", "Game Key", "Game", "Game Time", "Away Team", "Home Team",
-    "Market", "Selection", "Side", "Line", "Odds", "Odds/Line",
-    "Model Grade", "Qualified", "Model %", "Implied %", "Edge %",
-    "Model Version", "Correlation Block",
-    "Result", "Actual Away Runs", "Actual Home Runs", "Actual Total", "Result Updated",
-    "Public Bets %", "Public Money %", "Public Gap %", "Public Warning",
-    "Public Warning Negative", "Public Split Source", "Public Split Market",
-    "Public Split Selection", "Public Split Line", "Public Split Odds",
-    "Public Split Match Confidence", "Public Split Snapshot Time",
-    "Opening Public %", "Current Public %", "Public Change %",
-    "Opening Sharp %", "Current Sharp %", "Sharp Change %",
-    "Opening Public Split Line", "Opening Public Split Odds",
-    "Opening Public Split Snapshot Time", "Opening Implied %", "Current Implied %",
-    "Line Movement Signal", "Line Movement Tone", "Line Movement Basis",
-    "Line Movement Value",
-    "Trend Play", "Trend Score", "Trend Tier", "Trend Signals",
-    "Trend All Time Record", "Trend Last 30 Record", "Trend Last 7 Record",
-    "Trend Exact Sample", "Trend Score Details",
-]
-
-_ALL_GAME_TRENDS_PERSISTENT_COLUMNS = [
-    "Result", "Actual Away Runs", "Actual Home Runs", "Actual Total", "Result Updated",
-    "Public Bets %", "Public Money %", "Public Gap %", "Public Warning",
-    "Public Warning Negative", "Public Split Source", "Public Split Market",
-    "Public Split Selection", "Public Split Line", "Public Split Odds",
-    "Public Split Match Confidence", "Public Split Snapshot Time",
-    "Opening Public %", "Current Public %", "Public Change %",
-    "Opening Sharp %", "Current Sharp %", "Sharp Change %",
-    "Opening Public Split Line", "Opening Public Split Odds",
-    "Opening Public Split Snapshot Time", "Opening Implied %", "Current Implied %",
-    "Line Movement Signal", "Line Movement Tone", "Line Movement Basis",
-    "Line Movement Value",
-    "Trend Play", "Trend Score", "Trend Tier", "Trend Signals",
-    "Trend All Time Record", "Trend Last 30 Record", "Trend Last 7 Record",
-    "Trend Exact Sample", "Trend Score Details",
-]
-
-
+    return write_sheet(TRACKER_TAB, tracker_df, TRACKER_COLUMNS)
 def load_all_game_trends():
     return read_sheet(ALL_GAME_TRENDS_TAB, ALL_GAME_TRENDS_COLUMNS)
 
