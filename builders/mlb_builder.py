@@ -20,7 +20,7 @@ except Exception:
     ZoneInfo = None
 
 MODEL_VERSION = "v15.8.1-under-market-repair-2026-08-08"
-K_MODEL_VERSION = "v16.3-mean-preserving-multi-k-tail-2026-08-09"
+K_MODEL_VERSION = "v16.5-top2-whiff-refit-2026-09-02"
 TRACKER_TAB = "bet_tracker"
 SLATE_TAB = "daily_slate"
 ALL_GAME_TRENDS_TAB = "all_game_trends"
@@ -1286,13 +1286,56 @@ RECENT_FORM_COLUMNS = [
 ]
 
 
+def _read_pitcher_recent_form_strict():
+    _require_mlb_turso()
+    existing = read_dataset("MLB", RECENT_FORM_TAB, RECENT_FORM_COLUMNS)
+    if existing is None:
+        return pd.DataFrame(columns=RECENT_FORM_COLUMNS)
+    out = existing.copy()
+    for col in RECENT_FORM_COLUMNS:
+        if col not in out.columns:
+            out[col] = ""
+    return out[RECENT_FORM_COLUMNS].fillna("").astype(object)
+
+
 def load_pitcher_recent_form():
-    return read_sheet(RECENT_FORM_TAB, RECENT_FORM_COLUMNS)
+    return _read_pitcher_recent_form_strict()
 
 
 def save_pitcher_recent_form(df):
-    return write_sheet(RECENT_FORM_TAB, df, RECENT_FORM_COLUMNS)
+    incoming = df.copy() if df is not None else pd.DataFrame(columns=RECENT_FORM_COLUMNS)
+    for col in RECENT_FORM_COLUMNS:
+        if col not in incoming.columns:
+            incoming[col] = ""
+    incoming = incoming[RECENT_FORM_COLUMNS].fillna("").astype(object)
 
+    existing = _read_pitcher_recent_form_strict()
+    if not existing.empty and incoming.empty:
+        raise RuntimeError("Refusing to replace non-empty pitcher history with an empty dataframe.")
+
+    combined = pd.concat([existing, incoming], ignore_index=True)
+    if not combined.empty:
+        def _history_key(row):
+            game_key = str(row.get("Game Key", "") or "").strip()
+            if not game_key:
+                game_key = "|".join([
+                    str(row.get("Team", "") or "").strip(),
+                    str(row.get("Opponent", "") or "").strip(),
+                ])
+            return "|".join([
+                str(row.get("Date", "") or "").strip(),
+                game_key,
+                normalize_name_for_match(row.get("Pitcher", "")),
+                str(row.get("Role", "") or "").strip().upper(),
+            ])
+
+        combined["_history_key"] = combined.apply(_history_key, axis=1)
+        combined = combined.drop_duplicates(subset=["_history_key"], keep="last")
+        combined = combined.drop(columns=["_history_key"]).reset_index(drop=True)
+
+    out = combined[RECENT_FORM_COLUMNS].fillna("").astype(str)
+    replace_dataset("MLB", RECENT_FORM_TAB, out, RECENT_FORM_COLUMNS)
+    return True
 
 def _blank_recent_form():
     return {
@@ -19393,8 +19436,8 @@ def _v15_5_apply_k_publication_rules(grade, role="Starter", lineup_details=None,
 # Team splits are fallbacks, not additional multipliers. Pitch quality, recent
 # form, game environment, and same-opponent history remain visible diagnostics
 # for AI review but do not add points to (or silently rewrite) the projection.
-K_MODEL_ARCHITECTURE = "v16.3_true_mean_x_mean_preserving_multi_k_tail_pmf"
-K_MODEL_OVERHAUL_DATE = "2026-08-09"
+K_MODEL_ARCHITECTURE = "v16.5_top2_whiff_refit_x_mean_preserving_multi_k_tail_pmf_x_under_tail_calibration"
+K_MODEL_OVERHAUL_DATE = "2026-09-02"
 
 # Locked 2025 confirmatory fits using only variables that also retained their
 # direction and significance in the 2026 holdout. Inputs are standardized with
@@ -19402,30 +19445,33 @@ K_MODEL_OVERHAUL_DATE = "2026-08-09"
 # coefficients. The individual hitter layer allocates the fitted lineup rate;
 # it does not multiply the lineup signal a second time.
 _V162_RATE_MODEL = {
-    "intercept": -1.302881464735849,
+    "intercept": -1.2949280364809683,
     "coefficients": {
-        "lineup_k_rate": 0.1162766112988796,
-        "pit_k_rate_l8": 0.14996542114827904,
-        "pit_fastball_velo_l8": 0.07444119896230725,
-        "home_pitcher": 0.03874743612640976,
-        "pit_release_extension_l8": 0.02912936521394763,
-        "pitcher_left": 0.03077487027939308,
+        "lineup_k_rate": 0.11789729882678486,
+        "pit_k_rate_l8": 0.12578267383476258,
+        "pit_fastball_velo_l8": 0.06549049674134155,
+        "home_pitcher": 0.04461784343986594,
+        "pit_release_extension_l8": 0.030721052008882185,
+        "pitcher_left": 0.033177181185853936,
+        "pitcher_top2_whiff": 0.05514715229839276,
     },
     "means": {
-        "lineup_k_rate": 0.21857695308699676,
-        "pit_k_rate_l8": 0.2190542922549709,
-        "pit_fastball_velo_l8": 93.24186441590436,
-        "home_pitcher": 0.4995363931386185,
-        "pit_release_extension_l8": 6.475216438390142,
-        "pitcher_left": 0.2573018080667594,
+        "lineup_k_rate": 0.2227793688749265,
+        "pit_k_rate_l8": 0.2191662521641847,
+        "pit_fastball_velo_l8": 93.77818826211985,
+        "home_pitcher": 0.49879306561334213,
+        "pit_release_extension_l8": 6.477459770881901,
+        "pitcher_left": 0.2589422865920562,
+        "pitcher_top2_whiff": 0.21297380470250624,
     },
     "stds": {
-        "lineup_k_rate": 0.021733731798831337,
-        "pit_k_rate_l8": 0.036888145829584454,
-        "pit_fastball_velo_l8": 2.3034743586088657,
-        "home_pitcher": 0.4999997850686318,
-        "pit_release_extension_l8": 0.38292921696361626,
-        "pitcher_left": 0.43714710067932044,
+        "lineup_k_rate": 0.022183060774291,
+        "pit_k_rate_l8": 0.0546488826310782,
+        "pit_fastball_velo_l8": 2.1419588597787538,
+        "home_pitcher": 0.49999854330726434,
+        "pit_release_extension_l8": 0.38363394019113894,
+        "pitcher_left": 0.4380538537743204,
+        "pitcher_top2_whiff": 0.04939686561234128,
     },
 }
 
@@ -19577,11 +19623,11 @@ RECENT_FORM_COLUMNS = list(dict.fromkeys(
 if isinstance(globals().get("MODEL_COMPONENT_VERSIONS"), dict):
     MODEL_COMPONENT_VERSIONS.update({
         "pitcher_k_projection": (
-            "V16.3 keeps the locked regression true mean, then applies the replicated "
+            "V16.5 refits the locked K-rate mean with usage-weighted Top-2 pitcher Whiff, then applies the replicated "
             "mean-preserving multi-K tail calibration within each batter/BF scenario"
         ),
         "pitcher_k_publication": (
-            "V16.3 starters only; confirmed order plus at least 8 usable hitter K profiles; "
+            "V16.5 current full-workload starters only; confirmed order plus at least 8 usable hitter K profiles; "
             "full-PMF probability and price edge select the side and grade"
         ),
         "build_performance": (
@@ -20402,6 +20448,70 @@ def _v162_pitcher_rate_components(season_profile, workload, recent_pitch):
     }
 
 
+
+
+_V165_TOP2_WHIFF_MEAN = 0.21297380470250624
+_V165_TOP2_WHIFF_STD = 0.04939686561234128
+_V165_TOP2_MIN_PITCHES = 85.0
+
+
+def _v165_top2_pitcher_whiff(pitcher, pitcher_arsenal_df):
+    """Season-to-date usage-weighted Whiff% across the pitcher's two primary pitches.
+
+    Live Savant arsenal rows expose pitch count but not swing count, so the 85-pitch
+    minimum is the validated live-data proxy for the historical 40-swing requirement.
+    Missing/insufficient history returns the 2025 training mean, making this term z=0.
+    """
+    neutral = {
+        "value": _V165_TOP2_WHIFF_MEAN,
+        "available": False,
+        "pitch_types": [],
+        "pitches": [],
+        "usage": [],
+        "whiff": [],
+        "status": "Top-2 Whiff neutral fallback: insufficient live arsenal history",
+    }
+    try:
+        rows = _pitcher_arsenal_rows(pitcher, pitcher_arsenal_df)
+        if rows is None or rows.empty:
+            return neutral
+        top = rows.head(2).copy()
+        if len(top) < 2:
+            return neutral
+        for col in ["Usage", "Whiff", "Pitches"]:
+            if col not in top.columns:
+                return neutral
+            top[col] = pd.to_numeric(top[col], errors="coerce")
+        if top[["Usage", "Whiff", "Pitches"]].isna().any().any():
+            return neutral
+        if (top["Pitches"] < _V165_TOP2_MIN_PITCHES).any():
+            neutral["pitch_types"] = top["Pitch Type"].astype(str).tolist()
+            neutral["pitches"] = top["Pitches"].astype(float).round(0).tolist()
+            neutral["status"] = "Top-2 Whiff neutral fallback: one or both primary pitches below 85 pitches"
+            return neutral
+        if (top["Usage"] <= 0).any() or (top["Whiff"] <= 0).any():
+            return neutral
+        usage_total = float(top["Usage"].sum())
+        if usage_total <= 0:
+            return neutral
+        value = float((top["Usage"] * top["Whiff"]).sum() / usage_total)
+        # Keep live extrapolation inside the support of the training distribution.
+        lower = _V165_TOP2_WHIFF_MEAN - (3.0 * _V165_TOP2_WHIFF_STD)
+        upper = _V165_TOP2_WHIFF_MEAN + (3.0 * _V165_TOP2_WHIFF_STD)
+        value = max(lower, min(upper, value))
+        return {
+            "value": value,
+            "available": True,
+            "pitch_types": top["Pitch Type"].astype(str).tolist(),
+            "pitches": top["Pitches"].astype(float).round(0).tolist(),
+            "usage": top["Usage"].astype(float).round(4).tolist(),
+            "whiff": top["Whiff"].astype(float).round(4).tolist(),
+            "status": "V16.5 usage-weighted season Top-2 Whiff active",
+        }
+    except Exception as exc:
+        neutral["status"] = f"Top-2 Whiff neutral fallback: {exc}"
+        return neutral
+
 def _v162_target_k_rate(lineup_k_rate, pitcher_hand, pitcher_is_home, season_profile, workload, recent_pitch):
     components = _v162_pitcher_rate_components(season_profile, workload, recent_pitch)
     rate_values = {
@@ -20411,6 +20521,7 @@ def _v162_target_k_rate(lineup_k_rate, pitcher_hand, pitcher_is_home, season_pro
         "home_pitcher": pitcher_is_home,
         "pit_release_extension_l8": components["release_extension"],
         "pitcher_left": 1.0 if str(pitcher_hand or "R").upper().startswith("L") else 0.0,
+        "pitcher_top2_whiff": _safe_float_or_none((recent_pitch or {}).get("pitcher_top2_whiff")),
     }
     production_rate, production_inputs = _v162_rate_projection(rate_values)
     prior_values = {
@@ -20460,6 +20571,10 @@ def expected_strikeouts(pitcher, opponent, pitcher_this_year, pitcher_last_year,
     recent_pitch = dict(recent_pitch or {})
     recent_pitch["diagnostic_rate_multiplier"] = recent_pitch.get("rate_multiplier", 1.0)
     recent_pitch["rate_multiplier"] = 1.0
+    top2_whiff_details = _v165_top2_pitcher_whiff(pitcher, pitcher_arsenal_df)
+    recent_pitch["pitcher_top2_whiff"] = top2_whiff_details["value"]
+    recent_pitch["pitcher_top2_whiff_available"] = bool(top2_whiff_details.get("available"))
+    recent_pitch["pitcher_top2_whiff_details"] = top2_whiff_details
     arsenal = dict(pitch_type_arsenal_adjustment(
         pitcher, opponent, pitcher_arsenal_df, team_pitch_type_df
     ) or {})
@@ -20519,6 +20634,10 @@ def expected_strikeouts(pitcher, opponent, pitcher_this_year, pitcher_last_year,
         "power_prior_weight": round(regression_rate.get("power_prior_weight", 0.0), 4),
         "fastball_velocity_input": regression_rate.get("fastball_velocity_l8", ""),
         "release_extension_input": regression_rate.get("release_extension_l8", ""),
+        "pitcher_top2_whiff_input": round(float(top2_whiff_details.get("value", _V165_TOP2_WHIFF_MEAN)), 5),
+        "pitcher_top2_whiff_available": bool(top2_whiff_details.get("available")),
+        "pitcher_top2_whiff_status": top2_whiff_details.get("status", ""),
+        "pitcher_top2_pitch_types": list(top2_whiff_details.get("pitch_types", []) or []),
         "structural_std": round(structural_std, 3),
         "k_distribution": distribution,
         "under_support_count": 0,
@@ -21108,7 +21227,9 @@ def pitcher_projection_reliability(pitcher, volatility, lineup_details, calibrat
 def calibrate_pitcher_projection(raw_projection, pitcher, opponent, volatility, lineup_details, recent_form=None, role="Starter", bulk_confidence="", archetype="", data_health=None):
     raw = max(0.0, float(raw_projection or 0.0))
     global_fit = get_global_k_calibration()
-    global_projection = max(0.0, float(global_fit["intercept"]) + float(global_fit["slope"]) * raw)
+    # V16.4: replay testing showed the rolling mean calibration slightly worsened MAE/RMSE.
+    # Keep the locked regression as the production mean; the PMF remains mean-preserving.
+    global_projection = raw
     distribution = dict((data_health or {}).get("k_distribution", {}) or {})
     old_expected_bf = _v16_distribution_expected_bf(distribution) if distribution else 0.0
     old_rate = _safe_float_or_none(distribution.get("k_rate")) if distribution else None
@@ -21145,7 +21266,7 @@ def calibrate_pitcher_projection(raw_projection, pitcher, opponent, volatility, 
         "data_health": data_health or {},
         "distribution": distribution,
         "status": (
-            f"V16.3 true-mean regression projection {raw:.2f} → global calibration {global_projection:.2f}; "
+            f"V16.4 locked regression projection {raw:.2f} is the production mean; "
             "the multi-K layer reshapes the count PMF but preserves that mean. Pitcher, opponent, "
             f"archetype and recent-result point adjustments remain disabled. Mixture SD {expected_std:.2f}."
         ),
@@ -21234,7 +21355,8 @@ def select_k_market_side(probabilities, over_odds=-110, under_odds=None, require
     parsed_under = parsed_under if parsed_under is not None else -110
     push = max(0.0, min(1.0, float(probabilities.get("push", 0.0) or 0.0)))
     over_probability = max(0.0, min(1.0, float(probabilities.get("over", 0.5) or 0.0)))
-    under_probability = max(0.0, min(1.0, float(probabilities.get("under", 0.5) or 0.0)))
+    raw_under_probability = max(0.0, min(1.0, float(probabilities.get("under", 0.5) or 0.0)))
+    under_probability = max(0.0, raw_under_probability - 0.05)
     over_edge = over_probability - american_odds_to_implied_prob(parsed_over) * (1.0 - push)
     under_edge = under_probability - american_odds_to_implied_prob(parsed_under) * (1.0 - push)
     if require_quoted and not over_available:
@@ -21315,7 +21437,7 @@ def pitcher_k_strength_score(exp_k, six_k, line, volatility, ipg_this, ipg_last,
 
 
 def _v15_5_apply_k_publication_rules(grade, role="Starter", lineup_details=None, arsenal_details=None, volatility="", game_environment=None):
-    """V16 live publication: traditional starters and 8 usable profiles only."""
+    """V16 live publication: current full-workload starters and 8 usable profiles."""
     original = str(grade or "PASS").upper().strip()
     published = original
     reasons = []
@@ -21340,9 +21462,9 @@ def _v15_5_apply_k_publication_rules(grade, role="Starter", lineup_details=None,
     if original != "PASS" and role_upper != "STARTER":
         published = "PASS"
         reasons.append(f"V16 publishes traditional starter props only; {role_upper.title()} retained as projection-only")
-    if published != "PASS" and hybrid_or_reliever:
+    if published != "PASS" and hybrid_or_reliever and not (role_upper == "STARTER" and workload_supported):
         published = "PASS"
-        reasons.append("V16 publishes established traditional starters only; hybrid/reliever workload is projection-only")
+        reasons.append("V16 requires a current starter role with full starter workload; hybrid/reliever workload without full support is projection-only")
     if published != "PASS" and not eight_hitter_passed:
         published = "PASS"
         reasons.append(
@@ -21350,22 +21472,14 @@ def _v15_5_apply_k_publication_rules(grade, role="Starter", lineup_details=None,
             f"found {confirmed_count} order entries and {profiles} profiles"
         )
     if published in ["LEAN OVER", "OVER", "STRONG OVER"]:
-        if not partial_workload_support:
-            published = "PASS"
-            reasons.append(
-                f"Starter workload lacks support: normal regime {normal_pitches:.1f} pitches / {normal_bf:.1f} BF"
-            )
-        elif not workload_supported and published in ["OVER", "STRONG OVER"]:
-            published = "LEAN OVER"
-            reasons.append(
-                f"Partial workload support ({normal_pitches:.1f} pitches / {normal_bf:.1f} BF); capped at Lean Over"
-            )
-        if early_exit_risk == "High" and published in ["STRONG OVER", "OVER"]:
-            published = "LEAN OVER"
-            reasons.append("High modeled early-exit risk caps Over at Lean Over")
-        elif published == "STRONG OVER" and early_exit_risk == "Medium":
-            published = "OVER"
-            reasons.append(f"{early_exit_risk} modeled early-exit risk prevents Strong Over")
+        # Workload and early-exit risk already enter the normal/early-exit BF
+        # mixture that generates the PMF. A second Over-only veto double-counted
+        # the same downside and suppressed 12-4 historical Over candidates.
+        reasons.append(
+            f"V16.4 symmetric publication: workload/early-exit risk already priced into the BF-mixture PMF "
+            f"({normal_pitches:.1f} pitches / {normal_bf:.1f} BF; {early_exit_risk} early-exit risk); "
+            "no second Over-only penalty"
+        )
     if published != "PASS" and eight_hitter_passed:
         reasons.append(
             f"V16 8-profile rule passed ({profiles}/9); {fallback_slots} debut/missing slot(s) use team K/PA"
@@ -21373,7 +21487,7 @@ def _v15_5_apply_k_publication_rules(grade, role="Starter", lineup_details=None,
     support = "FULL" if workload_supported else "PARTIAL" if partial_workload_support else "NO"
     meta = {
         "published_grade": published,
-        "shadow_grade": published,
+        "shadow_grade": original,
         "grade_restriction_reason": " | ".join(reasons),
         "workload_support": support if role_upper == "STARTER" else "ROLE-INELIGIBLE",
         # Legacy tracking key/column name retained so old sheet schemas keep working.
@@ -21405,11 +21519,12 @@ def ensure_model_version_logged():
             rows.append({
                 "Version": K_MODEL_VERSION, "Effective Date": today_et_string(),
                 "Changes": (
-                    "V16.3 pitcher strikeouts: V16.2 locked true-mean K-rate/BF regressions retained; "
-                    "nine confirmed batter probabilities with uncapped repeated-PA expected counts; "
-                    "replicated mean-preserving P(2+) calibration and convolved 0/1/2/3+ batter PMFs "
-                    "over normal/early-exit BF; probability/price-edge side selection; true mean, mode, "
-                    "median and both tail probabilities tracked; unreplicated archetype boosts excluded."
+                    "V16.5 pitcher strikeouts: the K-rate mean is jointly refit with usage-weighted season-to-date "
+                    "Top-2 pitcher Whiff% using an 85-pitch minimum per primary pitch; insufficient Top-2 history "
+                    "is neutral at the locked training mean. The feature replicated directionally in 2024-to-2025 "
+                    "and improved the untouched 2026 holdout. V16.4 protections are retained: locked regression "
+                    "mean, mean-preserving multi-K PMF, -5 point Under decision calibration, BF-mixture workload/" 
+                    "early-exit handling, symmetric publication, and current full-workload starter eligibility."
                 ),
                 "Created Time ET": _recent_form_time_label(),
             })

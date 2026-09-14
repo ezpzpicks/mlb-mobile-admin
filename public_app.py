@@ -7,11 +7,10 @@ from urllib.parse import quote
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-import gspread
 import pandas as pd
 import requests
 import streamlit as st
-from google.oauth2.service_account import Credentials
+from shared.turso_storage import is_turso_ready, read_dataset
 
 try:
     from PIL import Image
@@ -244,7 +243,7 @@ def today_str():
 
 
 def normalize_date_key(value):
-    # Handles Google Sheets dates whether they come in as 2026-04-30,
+    # Handles stored dates whether they come in as 2026-04-30,
     # 4/30/2026, datetime-like values, or plain strings.
     text = safe_text(value)
     if not text:
@@ -258,62 +257,22 @@ def normalize_date_key(value):
         return text
 
 
-def get_google_credentials_json():
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS", "")
-    if not creds_json:
-        try:
-            creds_json = st.secrets.get("GOOGLE_CREDENTIALS", "")
-        except Exception:
-            creds_json = ""
-    return creds_json
-
-
-def get_google_sheet_name():
-    sheet_name = os.environ.get("GOOGLE_SHEET_NAME", "")
-    if not sheet_name:
-        try:
-            sheet_name = st.secrets.get("GOOGLE_SHEET_NAME", "")
-        except Exception:
-            sheet_name = ""
-    return sheet_name
-
-
-@st.cache_resource
-def connect_to_sheets():
-    creds_json = get_google_credentials_json()
-    sheet_name = get_google_sheet_name()
-    if not creds_json:
-        st.error("Missing GOOGLE_CREDENTIALS environment variable.")
-        st.stop()
-    if not sheet_name:
-        st.error("Missing GOOGLE_SHEET_NAME environment variable.")
-        st.stop()
-    try:
-        creds_dict = json.loads(creds_json)
-    except Exception as e:
-        st.error(f"GOOGLE_CREDENTIALS is not valid JSON: {e}")
-        st.stop()
-    scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-    client = gspread.authorize(creds)
-    return client.open(sheet_name)
-
-
 @st.cache_data(ttl=60)
 def read_sheet(tab_name, columns):
-    try:
-        worksheet = connect_to_sheets().worksheet(tab_name)
-        df = pd.DataFrame(worksheet.get_all_records())
-        if df.empty:
-            return pd.DataFrame(columns=columns)
-        for col in columns:
-            if col not in df.columns:
-                df[col] = ""
-        return df[columns].copy()
-    except gspread.WorksheetNotFound:
+    if not is_turso_ready():
+        st.error("Turso is not configured or reachable.")
         return pd.DataFrame(columns=columns)
-    except Exception as e:
-        st.error(f"Could not read Google Sheet tab '{tab_name}': {e}")
+    try:
+        df = read_dataset("MLB", str(tab_name), list(columns))
+        if df is None or df.empty:
+            return pd.DataFrame(columns=columns)
+        out = df.copy()
+        for col in columns:
+            if col not in out.columns:
+                out[col] = ""
+        return out[list(columns)].copy()
+    except Exception as exc:
+        st.error(f"Could not read Turso dataset 'MLB/{tab_name}': {exc}")
         return pd.DataFrame(columns=columns)
 
 

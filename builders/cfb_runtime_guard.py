@@ -1,7 +1,7 @@
 """Runtime safety guards for the interactive CFB builder.
 
 The college builder is rerun by Streamlit on every widget interaction. These
-patches keep those reruns read-mostly, avoid unnecessary Google Sheets writes,
+guards keep those reruns read-mostly, avoid unnecessary persistence writes,
 and keep large SportsDataverse parquet reads below the Render memory ceiling.
 """
 from __future__ import annotations
@@ -73,81 +73,21 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         return
 
     # ------------------------------------------------------------------
-    # 1) Google Sheets: interactive edits are read-only until Save is pressed.
+    # 1) Interactive edits are read-only until Save is pressed.
     # ------------------------------------------------------------------
     # The old helper upserted daily_slate after every +/- click. Streamlit reruns
     # on every widget change, so that behavior could generate a burst of full
-    # worksheet writes and hit Google's 429 quota. Explicit Save buttons and the
+    # persistence writes. Explicit Save buttons and the
     # automatic Slate batch still use the normal persistence paths.
     def _no_auto_save_selected_projection(result: dict[str, Any]) -> None:
         return None
 
     cfb_builder._auto_save_selected_projection = _no_auto_save_selected_projection
 
-    # CFB writes are full-table snapshots. One update is sufficient; clearing the
-    # worksheet first doubled request volume. Upsert tables normally grow or keep
-    # the same row count. When a snapshot becomes shorter, clear only the stale
-    # trailing rows with a single batch_clear after the main update.
-    def _guarded_write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) -> bool:
-        columns = list(columns)
-        if _shared_storage_cooling_down():
-            # shared.storage already displayed the quota/cooldown explanation.
-            # Do not misreport an active cooldown as missing credentials.
-            return False
-        try:
-            worksheet = cfb_builder.get_or_create_worksheet(tab_name, columns)
-            if worksheet is None:
-                if _shared_storage_cooling_down():
-                    return False
-                st.warning(
-                    "Google Sheets is not configured. Add GOOGLE_CREDENTIALS and the sport database setting."
-                )
-                return False
-
-            out = dataframe.copy() if dataframe is not None else pd.DataFrame(columns=columns)
-            for column in columns:
-                if column not in out.columns:
-                    out[column] = ""
-            out = out[columns].fillna("").astype(str)
-            values = [columns] + out.values.tolist()
-
-            # Read only the used-row count so a rare shrinking snapshot can remove
-            # stale rows without paying for clear()+update() on every normal save.
-            previous_rows = 0
-            try:
-                previous_rows = len(_retry(lambda: worksheet.col_values(1)))
-            except Exception as exc:
-                if _quota_error(exc):
-                    _start_shared_storage_cooldown()
-                    return False
-                previous_rows = 0
-
-            _retry(lambda: worksheet.update(values))
-
-            new_rows = len(values)
-            if previous_rows > new_rows:
-                try:
-                    _retry(lambda: worksheet.batch_clear([f"A{new_rows + 1}:ZZ{previous_rows}"]))
-                except Exception as exc:
-                    if _quota_error(exc):
-                        _start_shared_storage_cooldown()
-                    # Stale trailing rows are preferable to turning a successful
-                    # model save into a visible error during a quota burst.
-                    pass
-            return True
-        except Exception as exc:
-            if _quota_error(exc):
-                _start_shared_storage_cooldown()
-                return False
-            st.error(f"Could not write Google Sheets tab '{tab_name}': {exc}")
-            return False
-
-    cfb_builder.write_sheet = _guarded_write_sheet
-
     # ------------------------------------------------------------------
     # 2) Save-path type safety and MLB-matching button copy.
     # ------------------------------------------------------------------
-    # Google Sheets snapshots are string-backed, so rating rows loaded from the
+    # Persisted snapshots are string-backed, so rating rows loaded from the
     # workbook can carry season weights such as "1.0". The original slate_row()
     # averaged those values before coercing them, which produced a str/int
     # TypeError only when Save was pressed. Coerce the two persistence fields at
