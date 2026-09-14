@@ -303,6 +303,7 @@ LAST_YEAR = LAST_SEASON
 
 from shared.public_contract import (
     ALL_GAME_TRENDS_COLUMNS,
+    ALL_GAME_TRENDS_PERSISTENT_COLUMNS,
     ALL_GAME_TRENDS_TAB,
 )
 from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
@@ -2230,7 +2231,7 @@ def upsert_all_game_trend_rows(rows):
         if matches:
             idx = matches[-1]
             existing = df.loc[idx].to_dict()
-            for col in _ALL_GAME_TRENDS_PERSISTENT_COLUMNS:
+            for col in ALL_GAME_TRENDS_PERSISTENT_COLUMNS:
                 if str(existing.get(col, "")).strip():
                     new_row[col] = existing.get(col, "")
             for col in ALL_GAME_TRENDS_COLUMNS:
