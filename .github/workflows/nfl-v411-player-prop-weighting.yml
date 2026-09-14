@@ -1,0 +1,108 @@
+name: Install progressive NFL player prop season weighting
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nfl-v411-player-prop-weighting.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Apply permanent progressive weighting
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          OLD_VERSION = "nfl-v4.10-te1-prop-surface-2026-09-13"
+          NEW_VERSION = "nfl-v4.11-progressive-prop-season-weight-2026-09-14"
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected 1 match, found {count}")
+              return text.replace(old, new, 1)
+
+          builder_path = Path("builders/nfl_builder.py")
+          text = builder_path.read_text(encoding="utf-8")
+          text = replace_once(
+              text,
+              f'MODEL_VERSION = "{OLD_VERSION}"',
+              f'MODEL_VERSION = "{NEW_VERSION}"',
+              "builder version",
+          )
+
+          anchor = '''def _expected_role_metric(\n    profile: dict[str, Any], team: str, position: str, slot: str, metric: str, default: float,\n) -> tuple[float, str, bool]:\n'''
+          helper = '''def _current_season_role_weight(current_games: float) -> float:\n    """Progressively trust current-season player usage as the sample matures.\n\n    One unusual opener should not overpower an established player baseline.\n    Weight is based on completed current-season games, so byes do not advance it.\n    """\n    completed_games = max(0, int(math.floor(_num(current_games, 0))))\n    if completed_games <= 0:\n        return 0.0\n    if completed_games == 1:\n        return 0.25\n    if completed_games == 2:\n        return 0.50\n    if completed_games == 3:\n        return 0.75\n    return 0.90\n\n\n'''
+          if "def _current_season_role_weight(" not in text:
+              text = replace_once(text, anchor, helper + anchor, "role-weight helper anchor")
+
+          old_weight = '        current_weight = clamp(0.55 + 0.10 * max(0.0, current_games - 1.0), 0.55, 0.92)\n'
+          new_weight = '        current_weight = _current_season_role_weight(current_games)\n'
+          text = replace_once(text, old_weight, new_weight, "current-season player role weight")
+          text = replace_once(
+              text,
+              '            note = "Current-season usage blended with player history and depth-chart role"\n',
+              '            note = f"Current-season usage {current_weight:.0%} blended with player history and depth-chart role"\n',
+              "history role note",
+          )
+          text = replace_once(
+              text,
+              '            note = "Current-season usage blended with depth-chart role"\n',
+              '            note = f"Current-season usage {current_weight:.0%} blended with depth-chart role"\n',
+              "depth role note",
+          )
+          builder_path.write_text(text, encoding="utf-8")
+
+          slot_path = Path("builders/nfl_slot_matchups.py")
+          slot_text = slot_path.read_text(encoding="utf-8")
+          slot_text = replace_once(
+              slot_text,
+              f'MODEL_VERSION = "{OLD_VERSION}"',
+              f'MODEL_VERSION = "{NEW_VERSION}"',
+              "slot-layer version",
+          )
+          slot_path.write_text(slot_text, encoding="utf-8")
+
+          app_path = Path("app_mobile_admin.py")
+          app_text = app_path.read_text(encoding="utf-8")
+          app_text = replace_once(
+              app_text,
+              f'"NFL": "{OLD_VERSION}"',
+              f'"NFL": "{NEW_VERSION}"',
+              "admin version",
+          )
+          app_path.write_text(app_text, encoding="utf-8")
+
+          test_path = Path("research/test_nfl_progressive_prop_weighting.py")
+          test_path.write_text('''import ast\nimport math\nfrom pathlib import Path\n\n\ndef main() -> None:\n    source = Path("builders/nfl_builder.py").read_text(encoding="utf-8")\n    tree = ast.parse(source)\n    function = next(\n        node for node in tree.body\n        if isinstance(node, ast.FunctionDef) and node.name == "_current_season_role_weight"\n    )\n    module = ast.Module(body=[function], type_ignores=[])\n    ast.fix_missing_locations(module)\n    scope = {\n        "math": math,\n        "_num": lambda value, default=0: float(value) if value is not None else float(default),\n    }\n    exec(compile(module, "<role-weight-test>", "exec"), scope)\n    weight = scope["_current_season_role_weight"]\n    expected = {0: 0.0, 1: 0.25, 2: 0.50, 3: 0.75, 4: 0.90, 8: 0.90, 17: 0.90}\n    for games, target in expected.items():\n        actual = weight(games)\n        assert abs(actual - target) < 1e-12, (games, actual, target)\n    assert "current_weight = _current_season_role_weight(current_games)" in source\n    assert "Current-season usage {current_weight:.0%}" in source\n    print("NFL progressive player-prop season weighting validation passed")\n\n\nif __name__ == "__main__":\n    main()\n''', encoding="utf-8")
+          PY
+
+      - name: Validate
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py builders/nfl_slot_matchups.py app_mobile_admin.py research/test_nfl_progressive_prop_weighting.py
+          python research/test_nfl_progressive_prop_weighting.py
+
+      - name: Commit permanent source upgrade
+        shell: bash
+        run: |
+          git config user.name "EZPZ NFL Model Upgrade"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/nfl-v411-player-prop-weighting.yml
+          git add builders/nfl_builder.py builders/nfl_slot_matchups.py app_mobile_admin.py research/test_nfl_progressive_prop_weighting.py
+          git commit -m "Progressively weight current-season NFL player usage"
+          git push origin HEAD:main
