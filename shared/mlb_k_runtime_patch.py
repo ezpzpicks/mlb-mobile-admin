@@ -155,6 +155,9 @@ def save_pitcher_recent_form(df):
     try:
         values = worksheet.get_all_values()
     except Exception as exc:
+        fallback = _read_mlb_turso_fallback(RECENT_FORM_TAB, RECENT_FORM_COLUMNS, exc)
+        if fallback is not None:
+            return fallback
         raise RuntimeError(f"Could not safely read persistent pitcher history: {exc}") from exc
 
     if not values:
@@ -240,6 +243,7 @@ def save_pitcher_recent_form(df):
         # Do not clear this history worksheet. The merged table is monotonic, so
         # an in-place update preserves prior rows even if a later write fails.
         worksheet.update(values)
+        _mirror_mlb_turso(RECENT_FORM_TAB, out, RECENT_FORM_COLUMNS)
         return True
     except Exception as exc:
         st.error(f"Could not safely update persistent pitcher history: {exc}")
