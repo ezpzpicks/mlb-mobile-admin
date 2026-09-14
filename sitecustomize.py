@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import sys
+from urllib.parse import urlparse
 
 
 def _is_streamlit_runtime() -> bool:
@@ -16,7 +17,7 @@ def _is_streamlit_runtime() -> bool:
 
 
 def _log_turso_env_visibility() -> None:
-    """Log only Turso env key presence/length, never secret values."""
+    """Log only Turso env key presence/length and safe URL hostname, never secret values."""
     names = (
         "TURSO_DATABASE_URL",
         "TURSO_URL",
@@ -34,6 +35,18 @@ def _log_turso_env_visibility() -> None:
         value = str(os.environ.get(name, "") or "")
         details.append(f"{name}=present:{present},len:{len(value)}")
     print("Turso env visibility: " + " | ".join(details))
+
+    for name in ("TURSO_DATABASE_URL", "TURSO_URL", "turso_TURSO_DATABASE_URL", "DATABASE_URL"):
+        raw = str(os.environ.get(name, "") or "").strip()
+        if not raw:
+            continue
+        normalized = "https://" + raw[len("libsql://") :] if raw.startswith("libsql://") else raw
+        try:
+            host = urlparse(normalized).netloc or "invalid-url"
+        except Exception:
+            host = "invalid-url"
+        print(f"Turso URL target: key={name}, host={host}")
+        break
 
 
 if _is_streamlit_runtime():
