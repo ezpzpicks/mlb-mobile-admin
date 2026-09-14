@@ -19,7 +19,7 @@ from shared.public_contract import (
     PUBLIC_SPLIT_TAB,
     PUBLIC_TRACKER_TAB,
 )
-from shared.turso_storage import is_turso_ready, replace_dataset
+from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
 
 
 _ACTIVE_SPORT = ""
@@ -169,6 +169,27 @@ def _mirror_turso(tab_name: str, dataframe: pd.DataFrame, columns: list[str]) ->
         # Migration safety: Turso must never turn a successful legacy save into
         # a failed builder action while the dual-write validation window is open.
         print(f"[turso-dual-write] {sport}/{tab_name} mirror failed: {exc}")
+
+
+def _read_turso_fallback(tab_name: str, columns: list[str]) -> pd.DataFrame | None:
+    """Return the last mirrored dataset only when Sheets cannot be read safely.
+
+    Sheets stays authoritative during the validation window. Turso is used here
+    only as a continuity fallback for quota/cooldown failures, so a legitimate
+    empty Sheet is never replaced with stale database rows.
+    """
+    sport = get_storage_sport()
+    if not sport or not is_turso_ready():
+        return None
+    try:
+        dataframe = read_dataset(sport, tab_name, columns)
+        if dataframe is None or dataframe.empty:
+            return None
+        print(f"[turso-read-fallback] {sport}/{tab_name}: {len(dataframe)} rows")
+        return dataframe
+    except Exception as exc:
+        print(f"[turso-read-fallback] {sport}/{tab_name} failed: {exc}")
+        return None
 
 
 @st.cache_resource(show_spinner=False)
@@ -322,7 +343,8 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
     try:
         worksheet = get_or_create_worksheet(tab_name, columns)
         if worksheet is None:
-            return pd.DataFrame(columns=columns)
+            fallback = _read_turso_fallback(tab_name, columns)
+            return fallback if fallback is not None else pd.DataFrame(columns=columns)
         values = worksheet.get_all_values()
         if not values:
             return pd.DataFrame(columns=columns)
@@ -342,7 +364,8 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
     except gspread.exceptions.APIError as exc:
         if _is_quota_error(exc):
             _start_quota_cooldown()
-            return pd.DataFrame(columns=columns)
+            fallback = _read_turso_fallback(tab_name, columns)
+            return fallback if fallback is not None else pd.DataFrame(columns=columns)
         st.error(f"Could not read Google Sheets tab '{tab_name}': {exc}")
         return pd.DataFrame(columns=columns)
     except Exception as exc:
