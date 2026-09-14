@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.10-te1-prop-surface-2026-09-13"
+MODEL_VERSION = "nfl-v4.11-progressive-prop-season-weight-2026-09-14"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -3510,6 +3510,24 @@ def _manual_role_share(lineup: pd.DataFrame, player: str) -> float:
     return value if math.isfinite(value) and 0.0 <= value <= 1.0 else math.nan
 
 
+def _current_season_role_weight(current_games: float) -> float:
+    """Progressively trust current-season player usage as the sample matures.
+
+    One unusual opener should not overpower an established player baseline.
+    Weight is based on completed current-season games, so byes do not advance it.
+    """
+    completed_games = max(0, int(math.floor(_num(current_games, 0))))
+    if completed_games <= 0:
+        return 0.0
+    if completed_games == 1:
+        return 0.25
+    if completed_games == 2:
+        return 0.50
+    if completed_games == 3:
+        return 0.75
+    return 0.90
+
+
 def _expected_role_metric(
     profile: dict[str, Any], team: str, position: str, slot: str, metric: str, default: float,
 ) -> tuple[float, str, bool]:
@@ -3528,7 +3546,7 @@ def _expected_role_metric(
     top_slot = slot in ["QB", "RB1", "WR1", "TE1"]
 
     if current_games > 0 and math.isfinite(current_value) and current_value > 0:
-        current_weight = clamp(0.55 + 0.10 * max(0.0, current_games - 1.0), 0.55, 0.92)
+        current_weight = _current_season_role_weight(current_games)
         remaining_weight = 1.0 - current_weight
         historical = prior_value if math.isfinite(prior_value) and prior_value > 0 else blended_value
         if math.isfinite(historical) and historical > 0:
@@ -3536,10 +3554,10 @@ def _expected_role_metric(
             historical_weight = remaining_weight * historical_share
             default_weight = remaining_weight - historical_weight
             value = current_weight * current_value + historical_weight * historical + default_weight * default
-            note = "Current-season usage blended with player history and depth-chart role"
+            note = f"Current-season usage {current_weight:.0%} blended with player history and depth-chart role"
         else:
             value = current_weight * current_value + remaining_weight * default
-            note = "Current-season usage blended with depth-chart role"
+            note = f"Current-season usage {current_weight:.0%} blended with depth-chart role"
         transition = abs(current_value - default) >= max(0.04, default * 0.25)
         return value, note, transition
 

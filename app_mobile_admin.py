@@ -272,7 +272,7 @@ if selected_sport not in valid_sports:
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.4-covers-personnel-weather-2026-09-11",
-    "NFL": "nfl-v4.10-te1-prop-surface-2026-09-13",
+    "NFL": "nfl-v4.11-progressive-prop-season-weight-2026-09-14",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":
