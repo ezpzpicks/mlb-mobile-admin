@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from typing import Iterable, Mapping
@@ -31,6 +32,19 @@ _TOKEN_NAMES = (
     "turso_TURSO_AUTH_TOKEN",
     "TURSO_TOKEN",
     "DATABASE_AUTH_TOKEN",
+)
+
+_TRANSIENT_HTTP_CODES = {409, 429, 500, 502, 503, 504}
+_TRANSIENT_TURSO_MARKERS = (
+    "sqlite_busy",
+    "database is locked",
+    "database is busy",
+    "transaction busy",
+    "transaction is busy",
+    "write conflict",
+    "temporarily unavailable",
+    "too many requests",
+    "rate limit",
 )
 
 
@@ -55,37 +69,70 @@ def is_turso_ready() -> bool:
     return bool(_first_env(_URL_NAMES) and _first_env(_TOKEN_NAMES))
 
 
-def _pipeline(requests: list[dict], timeout: float = 30.0) -> list[dict]:
+def _is_transient_turso_error(message: object) -> bool:
+    text = str(message or "").lower()
+    return any(marker in text for marker in _TRANSIENT_TURSO_MARKERS)
+
+
+def _pipeline(requests: list[dict], timeout: float = 30.0, max_attempts: int = 4) -> list[dict]:
     url = _endpoint(_first_env(_URL_NAMES))
     token = _first_env(_TOKEN_NAMES)
     if not url or not token:
         raise RuntimeError("Turso is not configured.")
 
     payload = {"requests": [*requests, {"type": "close"}]}
-    request = urllib.request.Request(
-        f"{url}/v2/pipeline",
-        data=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            raw = response.read().decode("utf-8")
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Turso HTTP {exc.code}: {body[:800]}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"Could not reach Turso: {exc}") from exc
+    encoded_payload = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    attempts = max(1, int(max_attempts or 1))
+    last_error: Exception | None = None
 
-    decoded = json.loads(raw or "{}")
-    results = list(decoded.get("results") or [])
-    for result in results:
-        if result.get("type") == "error" or (result.get("response") or {}).get("type") == "error":
-            raise RuntimeError(f"Turso statement failed: {json.dumps(result)[:1000]}")
-    return results
+    for attempt in range(1, attempts + 1):
+        request = urllib.request.Request(
+            f"{url}/v2/pipeline",
+            data=encoded_payload,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                raw = response.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            error = RuntimeError(f"Turso HTTP {exc.code}: {body[:800]}")
+            last_error = error
+            if attempt < attempts and (exc.code in _TRANSIENT_HTTP_CODES or _is_transient_turso_error(body)):
+                time.sleep(0.20 * (2 ** (attempt - 1)))
+                continue
+            raise error from exc
+        except urllib.error.URLError as exc:
+            error = RuntimeError(f"Could not reach Turso: {exc}")
+            last_error = error
+            if attempt < attempts:
+                time.sleep(0.20 * (2 ** (attempt - 1)))
+                continue
+            raise error from exc
+
+        decoded = json.loads(raw or "{}")
+        results = list(decoded.get("results") or [])
+        statement_error = None
+        for result in results:
+            if result.get("type") == "error" or (result.get("response") or {}).get("type") == "error":
+                statement_error = RuntimeError(f"Turso statement failed: {json.dumps(result)[:1000]}")
+                break
+        if statement_error is None:
+            return results
+
+        last_error = statement_error
+        if attempt < attempts and _is_transient_turso_error(statement_error):
+            time.sleep(0.20 * (2 ** (attempt - 1)))
+            continue
+        raise statement_error
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Turso request failed without a response.")
 
 
 def _execute(sql: str) -> dict:
