@@ -1,0 +1,91 @@
+name: Fix MLB persistent trend contract
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-mlb-trend-persistent-contract.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace stale MLB persistent-columns reference
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("builders/mlb_builder.py")
+          text = path.read_text()
+
+          old_import = (
+              "from shared.public_contract import (\n"
+              "    ALL_GAME_TRENDS_COLUMNS,\n"
+              "    ALL_GAME_TRENDS_TAB,\n"
+              ")\n"
+          )
+          new_import = (
+              "from shared.public_contract import (\n"
+              "    ALL_GAME_TRENDS_COLUMNS,\n"
+              "    ALL_GAME_TRENDS_PERSISTENT_COLUMNS,\n"
+              "    ALL_GAME_TRENDS_TAB,\n"
+              ")\n"
+          )
+
+          if old_import in text:
+              text = text.replace(old_import, new_import, 1)
+          elif new_import not in text:
+              raise SystemExit("Expected MLB public_contract import block not found")
+
+          stale = "_ALL_GAME_TRENDS_PERSISTENT_COLUMNS"
+          canonical = "ALL_GAME_TRENDS_PERSISTENT_COLUMNS"
+          if stale in text:
+              text = text.replace(stale, canonical)
+
+          if stale in text:
+              raise SystemExit("Stale private persistent-columns symbol remains")
+          if canonical not in text:
+              raise SystemExit("Canonical persistent-columns symbol not installed")
+
+          path.write_text(text)
+          PY
+
+      - name: Validate trend persistence contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from shared.public_contract import (
+              ALL_GAME_TRENDS_COLUMNS,
+              ALL_GAME_TRENDS_PERSISTENT_COLUMNS,
+          )
+
+          assert ALL_GAME_TRENDS_PERSISTENT_COLUMNS
+          assert ALL_GAME_TRENDS_PERSISTENT_COLUMNS[0] == "Result"
+          assert ALL_GAME_TRENDS_PERSISTENT_COLUMNS == ALL_GAME_TRENDS_COLUMNS[
+              ALL_GAME_TRENDS_COLUMNS.index("Result"):
+          ]
+
+          text = Path("builders/mlb_builder.py").read_text()
+          assert "_ALL_GAME_TRENDS_PERSISTENT_COLUMNS" not in text
+          assert "    ALL_GAME_TRENDS_PERSISTENT_COLUMNS,\n" in text
+          assert "for col in ALL_GAME_TRENDS_PERSISTENT_COLUMNS:" in text
+          PY
+          python -m py_compile builders/mlb_builder.py shared/public_contract.py
+
+      - name: Commit permanent source fix
+        run: |
+          if git diff --quiet -- builders/mlb_builder.py; then
+            echo "No source change needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/mlb_builder.py
+          git commit -m "Use canonical MLB persistent trend contract"
+          git push
