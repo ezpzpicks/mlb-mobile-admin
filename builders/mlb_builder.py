@@ -13443,19 +13443,47 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
 
     st.divider()
     st.subheader("Market Inputs")
-    st.caption("Moneyline defaults come from the saved odds snapshot. Enter both pitcher-K side prices; V16.3 selects the better full-distribution probability edge. NRFI/YRFI remains manual.")
+    st.caption(
+        "Enter all standard lines and prices below, then tap Apply Lines & Odds once. "
+        "The builder will not rerun the full matchup model while you edit each field."
+    )
 
-    input_col1, input_col2 = st.columns(2)
-    with input_col1:
-        home_k_line = st.number_input(f"{home_pitcher} K Line", value=float(home_k_defaults["line"]), step=0.5, key=f"home_k_{game.get('game_pk')}")
-        home_k_over_odds = st.number_input(f"{home_pitcher} Over Odds", value=int(home_k_defaults["odds"]), step=5, key=f"home_k_over_odds_{game.get('game_pk')}")
-        home_k_under_odds = st.number_input(f"{home_pitcher} Under Odds", value=int(home_k_defaults["odds"]), step=5, key=f"home_k_under_odds_{game.get('game_pk')}")
-        home_ml_odds = st.number_input(f"{home_team} Moneyline Odds", value=int(home_ml_default), step=5, key=f"home_ml_{game.get('game_pk')}")
-    with input_col2:
-        away_k_line = st.number_input(f"{away_pitcher} K Line", value=float(away_k_defaults["line"]), step=0.5, key=f"away_k_{game.get('game_pk')}")
-        away_k_over_odds = st.number_input(f"{away_pitcher} Over Odds", value=int(away_k_defaults["odds"]), step=5, key=f"away_k_over_odds_{game.get('game_pk')}")
-        away_k_under_odds = st.number_input(f"{away_pitcher} Under Odds", value=int(away_k_defaults["odds"]), step=5, key=f"away_k_under_odds_{game.get('game_pk')}")
-        away_ml_odds = st.number_input(f"{away_team} Moneyline Odds", value=int(away_ml_default), step=5, key=f"away_ml_{game.get('game_pk')}")
+    with st.form(key=f"mlb_market_inputs_{game.get('game_pk')}", clear_on_submit=False):
+        input_col1, input_col2 = st.columns(2)
+        with input_col1:
+            home_k_line = st.number_input(f"{home_pitcher} K Line", value=float(home_k_defaults["line"]), step=0.5, key=f"home_k_{game.get('game_pk')}")
+            home_k_over_odds = st.number_input(f"{home_pitcher} Over Odds", value=int(home_k_defaults["odds"]), step=5, key=f"home_k_over_odds_{game.get('game_pk')}")
+            home_k_under_odds = st.number_input(f"{home_pitcher} Under Odds", value=int(home_k_defaults["odds"]), step=5, key=f"home_k_under_odds_{game.get('game_pk')}")
+            home_ml_odds = st.number_input(f"{home_team} Moneyline Odds", value=int(home_ml_default), step=5, key=f"home_ml_{game.get('game_pk')}")
+        with input_col2:
+            away_k_line = st.number_input(f"{away_pitcher} K Line", value=float(away_k_defaults["line"]), step=0.5, key=f"away_k_{game.get('game_pk')}")
+            away_k_over_odds = st.number_input(f"{away_pitcher} Over Odds", value=int(away_k_defaults["odds"]), step=5, key=f"away_k_over_odds_{game.get('game_pk')}")
+            away_k_under_odds = st.number_input(f"{away_pitcher} Under Odds", value=int(away_k_defaults["odds"]), step=5, key=f"away_k_under_odds_{game.get('game_pk')}")
+            away_ml_odds = st.number_input(f"{away_team} Moneyline Odds", value=int(away_ml_default), step=5, key=f"away_ml_{game.get('game_pk')}")
+
+        st.markdown("**Game Total / First Inning**")
+        total_input_col1, total_input_col2, total_input_col3 = st.columns(3)
+        with total_input_col1:
+            total_runs_line = st.number_input("Game Total Line", value=8.5, step=0.5, key=f"total_runs_line_{game.get('game_pk')}")
+        with total_input_col2:
+            total_over_odds = st.number_input("Game Total Over Odds", value=-110, step=5, key=f"total_over_odds_{game.get('game_pk')}")
+        with total_input_col3:
+            total_under_odds = st.number_input("Game Total Under Odds", value=-110, step=5, key=f"total_under_odds_{game.get('game_pk')}")
+        nrfi_price_col, yrfi_price_col = st.columns(2)
+        with nrfi_price_col:
+            nrfi_odds = st.number_input("NRFI Odds", value=-110, step=5, key=f"nrfi_odds_{game.get('game_pk')}")
+        with yrfi_price_col:
+            yrfi_odds = st.number_input("YRFI Odds", value=-110, step=5, key=f"yrfi_odds_{game.get('game_pk')}")
+
+        market_inputs_submitted = st.form_submit_button(
+            "Apply Lines & Odds",
+            type="primary",
+            use_container_width=True,
+        )
+
+    st.caption("Moneyline edges are graded against no-vig fair prices. Total Over/Under and NRFI/YRFI grades use their own entered prices and require positive EV.")
+    if market_inputs_submitted:
+        st.success("Lines and odds applied. The market grades below are updated.")
 
     # Compute the shared six-inning pace before opener controls so an opener can
     # be scaled to its announced workload without referencing an undefined value.
@@ -13510,20 +13538,6 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
         c1, c2 = st.columns(2)
         with c1: away_bulk_k_line = st.number_input(f"{away_bulk_projection['pitcher']} K Line", value=max(0.5, round(away_bulk_projection['projection']*2)/2), step=0.5, key=f"away_bulk_k_line_{game_key}")
         with c2: away_bulk_k_odds = st.number_input(f"{away_bulk_projection['pitcher']} K Odds", value=-110, step=5, key=f"away_bulk_k_odds_{game_key}")
-
-    total_input_col1, total_input_col2, total_input_col3 = st.columns(3)
-    with total_input_col1:
-        total_runs_line = st.number_input("Game Total Line", value=8.5, step=0.5, key=f"total_runs_line_{game.get('game_pk')}")
-    with total_input_col2:
-        total_over_odds = st.number_input("Game Total Over Odds", value=-110, step=5, key=f"total_over_odds_{game.get('game_pk')}")
-    with total_input_col3:
-        total_under_odds = st.number_input("Game Total Under Odds", value=-110, step=5, key=f"total_under_odds_{game.get('game_pk')}")
-    nrfi_price_col, yrfi_price_col = st.columns(2)
-    with nrfi_price_col:
-        nrfi_odds = st.number_input("NRFI Odds", value=-110, step=5, key=f"nrfi_odds_{game.get('game_pk')}")
-    with yrfi_price_col:
-        yrfi_odds = st.number_input("YRFI Odds", value=-110, step=5, key=f"yrfi_odds_{game.get('game_pk')}")
-    st.caption("Moneyline edges are graded against no-vig fair prices. Total Over/Under and NRFI/YRFI grades use their own entered prices and require positive EV.")
 
     home_k_6ip = home_k_6ip_precal
     away_k_6ip = away_k_6ip_precal
