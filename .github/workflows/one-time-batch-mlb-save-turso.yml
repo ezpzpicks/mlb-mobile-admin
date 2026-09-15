@@ -1,0 +1,37 @@
+name: One-time MLB batched save
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-time-batch-mlb-save-turso.yml
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply MLB batched-save optimization
+        run: python scripts/one_time_batch_mlb_save_turso.py
+      - name: Validate Python
+        run: |
+          python -m py_compile shared/turso_storage.py builders/mlb_builder.py
+          git diff --check
+      - name: Commit permanent save optimization
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared/turso_storage.py builders/mlb_builder.py
+          git commit -m "Batch MLB matchup save writes"
+          git push origin main
