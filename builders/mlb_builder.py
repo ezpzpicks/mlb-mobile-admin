@@ -306,7 +306,7 @@ from shared.public_contract import (
     ALL_GAME_TRENDS_PERSISTENT_COLUMNS,
     ALL_GAME_TRENDS_TAB,
 )
-from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
+from shared.turso_storage import batch_dataset_writes, is_turso_ready, read_dataset, replace_dataset
 
 
 def _require_mlb_turso():
@@ -14326,568 +14326,569 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
 
     if st.button("Save Matchup Summary", key=f"save_auto_{game.get('game_pk')}"):
         save_started_at = time.perf_counter()
-        ml_tag = ""
-        if better_ml_grade == "A Moneyline":
-            ml_tag = " [A]"
-        elif better_ml_grade == "B Moneyline":
-            ml_tag = " [B]"
-        better_ml_text = f"{better_ml_team} ({better_ml_prob * 100:.1f}%){ml_tag}"
-        away_k_summary = k_summary_text(away_pitcher, away_k, away_k_grade, away_k_line, away_k_odds)
-        home_k_summary = k_summary_text(home_pitcher, home_k, home_k_grade, home_k_line, home_k_odds)
-        public_context = {
-            "status": "PENDING PREGAME",
-            "updated_at": "",
-            "error": "Final DraftKings data will be captured automatically before first pitch.",
-        }
-
-        add_slate_row(
-            away_team,
-            home_team,
-            better_ml_text,
-            better_ml_odds,
-            better_ml_grade,
-            nrfi_grade,
-            away_k_summary,
-            away_k_score,
-            home_k_summary,
-            home_k_score,
-            total_run_details.get("projected_total", ""),
-            total_run_details.get("grade", ""),
-            total_runs_line,
-            total_runs_odds=total_run_details.get("selected_odds", ""),
-            game_id=game_key,
-            game_label=game_label,
-            game_time=str(game.get("game_time", "")),
-            slate_date=slate_date,
-            nrfi_score_value=round(selected_first_inning_score, 1),
-            nrfi_probability_value=f"{selected_first_inning_probability * 100:.1f}%",
-            nrfi_odds_value=selected_first_inning_odds,
-            away_k_reliability=away_k_calibration["reliability"]["score"],
-            away_k_probability=f"{away_selected_prob*100:.1f}%",
-            home_k_reliability=home_k_calibration["reliability"]["score"],
-            home_k_probability=f"{home_selected_prob*100:.1f}%",
-            away_most_likely_k=away_k_probs.get("mode", ""),
-            home_most_likely_k=home_k_probs.get("mode", ""),
-            away_bulk_summary=(k_summary_text(away_bulk_projection['pitcher'], away_bulk_projection['projection'], away_bulk_projection['grade'], away_bulk_projection['line'], away_bulk_projection['odds']) if away_bulk_projection else ""),
-            away_bulk_score=(away_bulk_projection.get('score','') if away_bulk_projection else ""),
-            away_bulk_reliability=(away_bulk_projection['calibration']['reliability']['score'] if away_bulk_projection else ""),
-            away_bulk_most_likely_k=(away_bulk_projection.get('probabilities', {}).get('mode', '') if away_bulk_projection else ""),
-            home_bulk_summary=(k_summary_text(home_bulk_projection['pitcher'], home_bulk_projection['projection'], home_bulk_projection['grade'], home_bulk_projection['line'], home_bulk_projection['odds']) if home_bulk_projection else ""),
-            home_bulk_score=(home_bulk_projection.get('score','') if home_bulk_projection else ""),
-            home_bulk_reliability=(home_bulk_projection['calibration']['reliability']['score'] if home_bulk_projection else ""),
-            home_bulk_most_likely_k=(home_bulk_projection.get('probabilities', {}).get('mode', '') if home_bulk_projection else ""),
-            total_selected_probability=f"{total_run_details.get('selected_probability',0)*100:.1f}%",
-            total_reliability=total_run_details.get('reliability',''),
-            correlation_block=correlation_block,
-            correlation_reason=correlation_warning,
-            correlation_play_count=len(qualifying_directions),
-            public_context=public_context,
-        )
-
-        # Save both moneyline teams and both total directions for every matchup.
-        # These rows are research-only: the model-selected side, model grades,
-        # Best Plays, Bet Tracker, and all qualification rules remain unchanged.
-        total_side = str(total_run_details.get("side", "") or "").strip().upper()
-        if total_side not in ["OVER", "UNDER"]:
-            try:
-                _saved_total_projection = float(total_run_details.get("projected_total", 0) or 0)
-                _saved_total_line = float(total_runs_line or 0)
-                total_side = "OVER" if _saved_total_projection > _saved_total_line else "UNDER" if _saved_total_projection < _saved_total_line else ""
-            except Exception:
-                total_side = ""
-
-        moneyline_research = [
-            {
-                "team": away_team,
-                "prob": away_win_prob,
-                "odds": away_ml_odds,
-                "grade": away_ml_grade,
-                "implied": away_implied,
-                "edge": away_ml_edge,
-            },
-            {
-                "team": home_team,
-                "prob": home_win_prob,
-                "odds": home_ml_odds,
-                "grade": home_ml_grade,
-                "implied": home_implied,
-                "edge": home_ml_edge,
-            },
-        ]
-        trend_rows = []
-        for ml_item in moneyline_research:
-            trend_rows.append({
-                "Date": slate_date,
-                "Game Key": game_key,
-                "Game": game_label,
-                "Game Time": str(game.get("game_time", "")),
-                "Away Team": away_team,
-                "Home Team": home_team,
-                "Market": "Moneyline",
-                "Selection": ml_item["team"],
-                "Side": "",
-                "Line": "",
-                "Odds": ml_item["odds"],
-                "Odds/Line": ml_item["odds"],
-                "Model Grade": ml_item["grade"],
-                "Qualified": "TRUE" if ((not correlation_block) and ml_item["grade"] in ["A Moneyline", "B Moneyline"] and ml_item["team"] == better_ml_team) else "FALSE",
-                "Model %": f"{ml_item['prob'] * 100:.1f}%",
-                "Implied %": f"{ml_item['implied'] * 100:.1f}%",
-                "Edge %": f"{ml_item['edge'] * 100:.1f}%",
-                "Model Version": MODEL_VERSION,
-                "Correlation Block": "TRUE" if correlation_block else "FALSE",
-                "Result": "Pending",
-            })
-
-        for research_side in ["OVER", "UNDER"]:
-            is_model_side = research_side == total_side
-            research_odds = total_over_odds if research_side == "OVER" else total_under_odds
-            trend_rows.append({
-                "Date": slate_date,
-                "Game Key": game_key,
-                "Game": game_label,
-                "Game Time": str(game.get("game_time", "")),
-                "Away Team": away_team,
-                "Home Team": home_team,
-                "Market": "Total",
-                "Selection": f"{research_side.title()} {total_runs_line}".strip(),
-                "Side": research_side.title(),
-                "Line": total_runs_line,
-                "Odds": research_odds,
-                "Odds/Line": f"{total_runs_line} / {research_odds}",
-                "Model Grade": total_run_details.get("grade", "PASS") if is_model_side else "RESEARCH ONLY",
-                "Qualified": "TRUE" if (is_model_side and (not correlation_block) and total_run_details.get("grade") in ["TOTAL OVER", "TOTAL UNDER"]) else "FALSE",
-                "Model %": f"{total_run_details.get('selected_probability', 0) * 100:.1f}%" if is_model_side else "",
-                "Implied %": f"{american_odds_to_implied_prob(research_odds) * 100:.1f}%",
-                "Edge %": f"{total_run_details.get('price_edge', 0) * 100:.1f}%" if is_model_side else "",
-                "Model Version": MODEL_VERSION,
-                "Correlation Block": "TRUE" if correlation_block else "FALSE",
-                "Result": "Pending",
-            })
-
-        upsert_all_game_trend_rows(trend_rows)
-
-        away_recent_decision_note = " | ".join(
-            x for x in [away_recent_form_note, away_recent_accuracy_note, away_six_inning_override_note, away_v15_5_note] if str(x).strip()
-        )
-        home_recent_decision_note = " | ".join(
-            x for x in [home_recent_form_note, home_recent_accuracy_note, home_six_inning_override_note, home_v15_5_note] if str(x).strip()
-        )
-        def _pitcher_history_metadata(cal, arsenal, lineup, role, odds, selected_prob, price_edge, expected_ip, opener="", bulk_context=None, archetype="", skill_snapshot=None, data_health=None, publication=None, selected_side="", probabilities=None, over_odds="", under_odds=""):
-            workload = (arsenal or {}).get("workload", {}) or {}
-            pitcher_disc = (arsenal or {}).get("pitcher_discipline", {}) or {}
-            opponent_disc = (arsenal or {}).get("opponent_discipline", {}) or {}
-            recent_pitch = (arsenal or {}).get("recent_pitch_profile", {}) or {}
-            rate_mults = (arsenal or {}).get("rate_multipliers", {}) or {}
-            projected_bf = float(workload.get("projected_bf", _projected_batters_faced(expected_ip)) or _projected_batters_faced(expected_ip))
-            projected_pitches_value = _safe_float_or_none(workload.get("projected_pitches", ""))
-            projected_pitches = float(projected_pitches_value) if projected_pitches_value is not None else ""
-            skill_snapshot = skill_snapshot or {}
-            data_health = data_health or cal.get("data_health", {}) or {}
-            publication = publication or {}
-            probabilities = probabilities or {}
-            return {
-                "role": role, "model_version": K_MODEL_VERSION, "raw_projection": cal.get("raw_projection"),
-                "global_calibrated_projection": cal.get("global_projection"), "pitcher_adjustment": cal.get("pitcher_adjustment"),
-                "opponent_adjustment": cal.get("opponent_adjustment"), "shadow_projection": cal.get("shadow_projection"),
-                "odds": odds, "reliability_score": cal["reliability"]["score"], "expected_std_dev": cal.get("expected_std"),
-                "selected_probability": selected_prob, "market_implied_probability": american_odds_to_implied_prob(odds), "price_edge": price_edge,
-                "true_projection": cal.get("final_projection"),
-                "tail_decision_mode": probabilities.get("mode", ""),
-                "tail_distribution_median": probabilities.get("median", ""),
-                "tail_selected_side": selected_side,
-                "tail_over_probability": probabilities.get("over", ""),
-                "tail_under_probability": probabilities.get("under", ""),
-                "tail_push_probability": probabilities.get("push", ""),
-                "tail_probability_edge": price_edge,
-                "tail_model_version": probabilities.get("tail_model_version", ""),
-                "k_over_odds": over_odds, "k_under_odds": under_odds,
-                "projected_ip": expected_ip, "projected_pitches": projected_pitches, "projected_bf": projected_bf,
-                "projected_k_rate": (float(cal.get("final_projection",0))/projected_bf if projected_bf>0 else 0),
-                "projection_architecture": (arsenal or {}).get("projection_architecture", K_MODEL_ARCHITECTURE),
-                "projected_pitches_per_bf": workload.get("projected_pitches_per_bf", ""),
-                "opponent_pitches_per_pa": workload.get("opponent_pitches_per_pa", ""),
-                "pitcher_pitches_per_bf": workload.get("pitcher_pitches_per_bf", ""),
-                "third_time_probability": workload.get("third_time_probability", ""),
-                "normal_workload_bf": workload.get("normal_bf", ""),
-                "early_exit_workload_bf": workload.get("early_bf", ""),
-                "early_exit_probability": workload.get("early_exit_probability", ""),
-                "normal_workload_pitches": workload.get("normal_pitches", ""),
-                "lineup_fallback_slots": (lineup or {}).get("fallback_hitter_slots", ""),
-                "k_distribution": (cal.get("distribution", {}) or {}).get("architecture", ""),
-                "base_k_rate": (arsenal or {}).get("base_k_rate", ""),
-                "team_split_k_rate": (arsenal or {}).get("team_split_k_rate", ""),
-                "lineup_k_rate": (lineup or {}).get("lineup_k_rate", (arsenal or {}).get("lineup_k_rate", "")),
-                "matchup_k_rate": (lineup or {}).get("batter_matchup_k_rate", (arsenal or {}).get("matchup_k_rate", "")),
-                "regression_target_k_rate": (lineup or {}).get(
-                    "regression_target_k_rate", (arsenal or {}).get("regression_target_k_rate", "")
-                ),
-                "power_prior_weight": (lineup or {}).get(
-                    "power_prior_weight", (arsenal or {}).get("power_prior_weight", "")
-                ),
-                "fastball_velocity_input": (arsenal or {}).get("fastball_velocity_input", ""),
-                "release_extension_input": (arsenal or {}).get("release_extension_input", ""),
-                "lineup_pitches_per_pa": workload.get("lineup_pitches_per_pa", ""),
-                "arsenal_rate_multiplier": rate_mults.get("arsenal", (arsenal or {}).get("k_rate_multiplier", "")),
-                "lineup_rate_multiplier": (lineup or {}).get("projection_multiplier", (arsenal or {}).get("lineup_rate_multiplier", "")),
-                "batter_matchup_expected_ks": (lineup or {}).get("batter_matchup_expected_ks", ""),
-                "batter_matchup_hitters": (lineup or {}).get("batter_matchup_hitters", ""),
-                "handed_split_hitters": (lineup or {}).get("split_hitters_found", ""),
-                "batter_matchup_coverage": (lineup or {}).get("batter_matchup_coverage", ""),
-                "six_ip_batter_matchup_k_rate": (lineup or {}).get("six_ip_batter_matchup_k_rate", ""),
-                "skill_rate_multiplier": rate_mults.get("pitcher_skill", ""),
-                "opponent_discipline_multiplier": rate_mults.get("opponent_discipline", ""),
-                "recent_pitch_multiplier": rate_mults.get("recent_pitch", ""),
-                "pitcher_csw_pct": pitcher_disc.get("csw_pct", ""),
-                "pitcher_called_strike_pct": pitcher_disc.get("called_strike_pct", ""),
-                "pitcher_chase_pct": pitcher_disc.get("chase_pct", ""),
-                "pitcher_zone_contact_pct": pitcher_disc.get("zone_contact_pct", ""),
-                "pitcher_chase_contact_pct": pitcher_disc.get("chase_contact_pct", ""),
-                "pitcher_first_strike_pct": pitcher_disc.get("first_strike_pct", ""),
-                "opponent_whiff_pct": opponent_disc.get("whiff_pct", ""),
-                "opponent_zone_contact_pct": opponent_disc.get("zone_contact_pct", ""),
-                "opponent_chase_contact_pct": opponent_disc.get("chase_contact_pct", ""),
-                "recent_velocity_delta": recent_pitch.get("velocity_delta", ""),
-                "recent_csw_delta": recent_pitch.get("csw_delta", ""),
-                "recent_whiff_delta": recent_pitch.get("whiff_delta", ""),
-                "recent_usage_quality_shift": recent_pitch.get("usage_quality_shift", ""),
-                "recent_shape_change": recent_pitch.get("shape_change_inches", ""),
-                "recent_release_change": recent_pitch.get("release_change_inches", ""),
-                "under_support_count": (arsenal or {}).get("under_support_count", ""),
-                "under_support_notes": (arsenal or {}).get("under_support_notes", []),
-                "projection_structural_std": (arsenal or {}).get("structural_std", ""),
-                "pitcher_archetype": archetype,
-                "archetype_shadow_adjustment": (cal.get("archetype_shadow", {}) or {}).get("adjustment", 0),
-                "season_k_pct_snapshot": skill_snapshot.get("k_pct", ""), "season_whiff_pct_snapshot": skill_snapshot.get("whiff_pct", ""),
-                "arsenal_score": skill_snapshot.get("arsenal_score", arsenal.get("score", "")), "weapon_count": skill_snapshot.get("weapon_count", arsenal.get("weapon_count", 0)),
-                "weather_source": str(auto_weather.get("source", "") or ""), "data_health_score": data_health.get("score", ""),
-                "data_health_notes": data_health.get("status", ""),
-                "lineup_confirmed": "TRUE" if "confirmed" in str((lineup or {}).get("source","")).lower() else "FALSE",
-                "lineup_hitters_found": (lineup or {}).get("hitters_found",0), "opener": opener,
-                "bulk_pitcher": (bulk_context or {}).get("bulk_pitcher",""), "bulk_confidence": (bulk_context or {}).get("confidence",""),
-                "bulk_source": (bulk_context or {}).get("source",""), "calibration_notes": cal.get("status",""),
-                "published_grade": publication.get("published_grade", ""),
-                "shadow_grade": publication.get("shadow_grade", ""),
-                "grade_restriction_reason": publication.get("grade_restriction_reason", ""),
-                "workload_support": publication.get("workload_support", ""),
-                "nine_hitter_passed": publication.get("nine_hitter_passed", ""),
-                "under_shadow_only": publication.get("under_shadow_only", ""),
-                "early_exit_risk": publication.get("early_exit_risk", ""),
+        with batch_dataset_writes():
+            ml_tag = ""
+            if better_ml_grade == "A Moneyline":
+                ml_tag = " [A]"
+            elif better_ml_grade == "B Moneyline":
+                ml_tag = " [B]"
+            better_ml_text = f"{better_ml_team} ({better_ml_prob * 100:.1f}%){ml_tag}"
+            away_k_summary = k_summary_text(away_pitcher, away_k, away_k_grade, away_k_line, away_k_odds)
+            home_k_summary = k_summary_text(home_pitcher, home_k, home_k_grade, home_k_line, home_k_odds)
+            public_context = {
+                "status": "PENDING PREGAME",
+                "updated_at": "",
+                "error": "Final DraftKings data will be captured automatically before first pitch.",
             }
 
-        away_expected_ip = float((away_arsenal_details.get("workload",{}) or {}).get("projected_start_ip", away_ipg_this or away_ipg_last or 5.0) or 5.0)
-        home_expected_ip = float((home_arsenal_details.get("workload",{}) or {}).get("projected_start_ip", home_ipg_this or home_ipg_last or 5.0) or 5.0)
-        if use_away_bullpen: away_expected_ip = float(away_bulk_context.get("expected_opener_ip",1.3) or 1.3)
-        if use_home_bullpen: home_expected_ip = float(home_bulk_context.get("expected_opener_ip",1.3) or 1.3)
-        # Build all pitcher-history rows in memory and rewrite the tab once.
-        # Previously every starter/bulk pitcher caused its own full read/clear/write cycle.
-        recent_form_batch = load_pitcher_recent_form()
-        recent_form_batch = record_pitcher_recent_form_start(
-            slate_date, game_key, away_pitcher, away_team, home_team, away_k,
-            away_k_line, away_k_grade, away_recent_decision_note,
-            _pitcher_history_metadata(away_k_calibration, away_arsenal_details, away_lineup_details, "Opener" if use_away_bullpen else "Starter", away_k_odds, away_selected_prob, away_k_price_edge, away_expected_ip, opener=away_pitcher if use_away_bullpen else "", bulk_context=away_bulk_context, archetype=away_archetype, skill_snapshot=away_skill_snapshot, data_health=away_data_health, publication=away_k_publication, selected_side=away_selected_side, probabilities=away_k_probs, over_odds=away_k_over_odds, under_odds=away_k_under_odds),
-            existing_df=recent_form_batch, defer_save=True,
-        )
-        recent_form_batch = record_pitcher_recent_form_start(
-            slate_date, game_key, home_pitcher, home_team, away_team, home_k,
-            home_k_line, home_k_grade, home_recent_decision_note,
-            _pitcher_history_metadata(home_k_calibration, home_arsenal_details, home_lineup_details, "Opener" if use_home_bullpen else "Starter", home_k_odds, home_selected_prob, home_k_price_edge, home_expected_ip, opener=home_pitcher if use_home_bullpen else "", bulk_context=home_bulk_context, archetype=home_archetype, skill_snapshot=home_skill_snapshot, data_health=home_data_health, publication=home_k_publication, selected_side=home_selected_side, probabilities=home_k_probs, over_odds=home_k_over_odds, under_odds=home_k_under_odds),
-            existing_df=recent_form_batch, defer_save=True,
-        )
-        for pdata, bctx in [(away_bulk_projection, away_bulk_context), (home_bulk_projection, home_bulk_context)]:
-            if not pdata: continue
+            add_slate_row(
+                away_team,
+                home_team,
+                better_ml_text,
+                better_ml_odds,
+                better_ml_grade,
+                nrfi_grade,
+                away_k_summary,
+                away_k_score,
+                home_k_summary,
+                home_k_score,
+                total_run_details.get("projected_total", ""),
+                total_run_details.get("grade", ""),
+                total_runs_line,
+                total_runs_odds=total_run_details.get("selected_odds", ""),
+                game_id=game_key,
+                game_label=game_label,
+                game_time=str(game.get("game_time", "")),
+                slate_date=slate_date,
+                nrfi_score_value=round(selected_first_inning_score, 1),
+                nrfi_probability_value=f"{selected_first_inning_probability * 100:.1f}%",
+                nrfi_odds_value=selected_first_inning_odds,
+                away_k_reliability=away_k_calibration["reliability"]["score"],
+                away_k_probability=f"{away_selected_prob*100:.1f}%",
+                home_k_reliability=home_k_calibration["reliability"]["score"],
+                home_k_probability=f"{home_selected_prob*100:.1f}%",
+                away_most_likely_k=away_k_probs.get("mode", ""),
+                home_most_likely_k=home_k_probs.get("mode", ""),
+                away_bulk_summary=(k_summary_text(away_bulk_projection['pitcher'], away_bulk_projection['projection'], away_bulk_projection['grade'], away_bulk_projection['line'], away_bulk_projection['odds']) if away_bulk_projection else ""),
+                away_bulk_score=(away_bulk_projection.get('score','') if away_bulk_projection else ""),
+                away_bulk_reliability=(away_bulk_projection['calibration']['reliability']['score'] if away_bulk_projection else ""),
+                away_bulk_most_likely_k=(away_bulk_projection.get('probabilities', {}).get('mode', '') if away_bulk_projection else ""),
+                home_bulk_summary=(k_summary_text(home_bulk_projection['pitcher'], home_bulk_projection['projection'], home_bulk_projection['grade'], home_bulk_projection['line'], home_bulk_projection['odds']) if home_bulk_projection else ""),
+                home_bulk_score=(home_bulk_projection.get('score','') if home_bulk_projection else ""),
+                home_bulk_reliability=(home_bulk_projection['calibration']['reliability']['score'] if home_bulk_projection else ""),
+                home_bulk_most_likely_k=(home_bulk_projection.get('probabilities', {}).get('mode', '') if home_bulk_projection else ""),
+                total_selected_probability=f"{total_run_details.get('selected_probability',0)*100:.1f}%",
+                total_reliability=total_run_details.get('reliability',''),
+                correlation_block=correlation_block,
+                correlation_reason=correlation_warning,
+                correlation_play_count=len(qualifying_directions),
+                public_context=public_context,
+            )
+
+            # Save both moneyline teams and both total directions for every matchup.
+            # These rows are research-only: the model-selected side, model grades,
+            # Best Plays, Bet Tracker, and all qualification rules remain unchanged.
+            total_side = str(total_run_details.get("side", "") or "").strip().upper()
+            if total_side not in ["OVER", "UNDER"]:
+                try:
+                    _saved_total_projection = float(total_run_details.get("projected_total", 0) or 0)
+                    _saved_total_line = float(total_runs_line or 0)
+                    total_side = "OVER" if _saved_total_projection > _saved_total_line else "UNDER" if _saved_total_projection < _saved_total_line else ""
+                except Exception:
+                    total_side = ""
+
+            moneyline_research = [
+                {
+                    "team": away_team,
+                    "prob": away_win_prob,
+                    "odds": away_ml_odds,
+                    "grade": away_ml_grade,
+                    "implied": away_implied,
+                    "edge": away_ml_edge,
+                },
+                {
+                    "team": home_team,
+                    "prob": home_win_prob,
+                    "odds": home_ml_odds,
+                    "grade": home_ml_grade,
+                    "implied": home_implied,
+                    "edge": home_ml_edge,
+                },
+            ]
+            trend_rows = []
+            for ml_item in moneyline_research:
+                trend_rows.append({
+                    "Date": slate_date,
+                    "Game Key": game_key,
+                    "Game": game_label,
+                    "Game Time": str(game.get("game_time", "")),
+                    "Away Team": away_team,
+                    "Home Team": home_team,
+                    "Market": "Moneyline",
+                    "Selection": ml_item["team"],
+                    "Side": "",
+                    "Line": "",
+                    "Odds": ml_item["odds"],
+                    "Odds/Line": ml_item["odds"],
+                    "Model Grade": ml_item["grade"],
+                    "Qualified": "TRUE" if ((not correlation_block) and ml_item["grade"] in ["A Moneyline", "B Moneyline"] and ml_item["team"] == better_ml_team) else "FALSE",
+                    "Model %": f"{ml_item['prob'] * 100:.1f}%",
+                    "Implied %": f"{ml_item['implied'] * 100:.1f}%",
+                    "Edge %": f"{ml_item['edge'] * 100:.1f}%",
+                    "Model Version": MODEL_VERSION,
+                    "Correlation Block": "TRUE" if correlation_block else "FALSE",
+                    "Result": "Pending",
+                })
+
+            for research_side in ["OVER", "UNDER"]:
+                is_model_side = research_side == total_side
+                research_odds = total_over_odds if research_side == "OVER" else total_under_odds
+                trend_rows.append({
+                    "Date": slate_date,
+                    "Game Key": game_key,
+                    "Game": game_label,
+                    "Game Time": str(game.get("game_time", "")),
+                    "Away Team": away_team,
+                    "Home Team": home_team,
+                    "Market": "Total",
+                    "Selection": f"{research_side.title()} {total_runs_line}".strip(),
+                    "Side": research_side.title(),
+                    "Line": total_runs_line,
+                    "Odds": research_odds,
+                    "Odds/Line": f"{total_runs_line} / {research_odds}",
+                    "Model Grade": total_run_details.get("grade", "PASS") if is_model_side else "RESEARCH ONLY",
+                    "Qualified": "TRUE" if (is_model_side and (not correlation_block) and total_run_details.get("grade") in ["TOTAL OVER", "TOTAL UNDER"]) else "FALSE",
+                    "Model %": f"{total_run_details.get('selected_probability', 0) * 100:.1f}%" if is_model_side else "",
+                    "Implied %": f"{american_odds_to_implied_prob(research_odds) * 100:.1f}%",
+                    "Edge %": f"{total_run_details.get('price_edge', 0) * 100:.1f}%" if is_model_side else "",
+                    "Model Version": MODEL_VERSION,
+                    "Correlation Block": "TRUE" if correlation_block else "FALSE",
+                    "Result": "Pending",
+                })
+
+            upsert_all_game_trend_rows(trend_rows)
+
+            away_recent_decision_note = " | ".join(
+                x for x in [away_recent_form_note, away_recent_accuracy_note, away_six_inning_override_note, away_v15_5_note] if str(x).strip()
+            )
+            home_recent_decision_note = " | ".join(
+                x for x in [home_recent_form_note, home_recent_accuracy_note, home_six_inning_override_note, home_v15_5_note] if str(x).strip()
+            )
+            def _pitcher_history_metadata(cal, arsenal, lineup, role, odds, selected_prob, price_edge, expected_ip, opener="", bulk_context=None, archetype="", skill_snapshot=None, data_health=None, publication=None, selected_side="", probabilities=None, over_odds="", under_odds=""):
+                workload = (arsenal or {}).get("workload", {}) or {}
+                pitcher_disc = (arsenal or {}).get("pitcher_discipline", {}) or {}
+                opponent_disc = (arsenal or {}).get("opponent_discipline", {}) or {}
+                recent_pitch = (arsenal or {}).get("recent_pitch_profile", {}) or {}
+                rate_mults = (arsenal or {}).get("rate_multipliers", {}) or {}
+                projected_bf = float(workload.get("projected_bf", _projected_batters_faced(expected_ip)) or _projected_batters_faced(expected_ip))
+                projected_pitches_value = _safe_float_or_none(workload.get("projected_pitches", ""))
+                projected_pitches = float(projected_pitches_value) if projected_pitches_value is not None else ""
+                skill_snapshot = skill_snapshot or {}
+                data_health = data_health or cal.get("data_health", {}) or {}
+                publication = publication or {}
+                probabilities = probabilities or {}
+                return {
+                    "role": role, "model_version": K_MODEL_VERSION, "raw_projection": cal.get("raw_projection"),
+                    "global_calibrated_projection": cal.get("global_projection"), "pitcher_adjustment": cal.get("pitcher_adjustment"),
+                    "opponent_adjustment": cal.get("opponent_adjustment"), "shadow_projection": cal.get("shadow_projection"),
+                    "odds": odds, "reliability_score": cal["reliability"]["score"], "expected_std_dev": cal.get("expected_std"),
+                    "selected_probability": selected_prob, "market_implied_probability": american_odds_to_implied_prob(odds), "price_edge": price_edge,
+                    "true_projection": cal.get("final_projection"),
+                    "tail_decision_mode": probabilities.get("mode", ""),
+                    "tail_distribution_median": probabilities.get("median", ""),
+                    "tail_selected_side": selected_side,
+                    "tail_over_probability": probabilities.get("over", ""),
+                    "tail_under_probability": probabilities.get("under", ""),
+                    "tail_push_probability": probabilities.get("push", ""),
+                    "tail_probability_edge": price_edge,
+                    "tail_model_version": probabilities.get("tail_model_version", ""),
+                    "k_over_odds": over_odds, "k_under_odds": under_odds,
+                    "projected_ip": expected_ip, "projected_pitches": projected_pitches, "projected_bf": projected_bf,
+                    "projected_k_rate": (float(cal.get("final_projection",0))/projected_bf if projected_bf>0 else 0),
+                    "projection_architecture": (arsenal or {}).get("projection_architecture", K_MODEL_ARCHITECTURE),
+                    "projected_pitches_per_bf": workload.get("projected_pitches_per_bf", ""),
+                    "opponent_pitches_per_pa": workload.get("opponent_pitches_per_pa", ""),
+                    "pitcher_pitches_per_bf": workload.get("pitcher_pitches_per_bf", ""),
+                    "third_time_probability": workload.get("third_time_probability", ""),
+                    "normal_workload_bf": workload.get("normal_bf", ""),
+                    "early_exit_workload_bf": workload.get("early_bf", ""),
+                    "early_exit_probability": workload.get("early_exit_probability", ""),
+                    "normal_workload_pitches": workload.get("normal_pitches", ""),
+                    "lineup_fallback_slots": (lineup or {}).get("fallback_hitter_slots", ""),
+                    "k_distribution": (cal.get("distribution", {}) or {}).get("architecture", ""),
+                    "base_k_rate": (arsenal or {}).get("base_k_rate", ""),
+                    "team_split_k_rate": (arsenal or {}).get("team_split_k_rate", ""),
+                    "lineup_k_rate": (lineup or {}).get("lineup_k_rate", (arsenal or {}).get("lineup_k_rate", "")),
+                    "matchup_k_rate": (lineup or {}).get("batter_matchup_k_rate", (arsenal or {}).get("matchup_k_rate", "")),
+                    "regression_target_k_rate": (lineup or {}).get(
+                        "regression_target_k_rate", (arsenal or {}).get("regression_target_k_rate", "")
+                    ),
+                    "power_prior_weight": (lineup or {}).get(
+                        "power_prior_weight", (arsenal or {}).get("power_prior_weight", "")
+                    ),
+                    "fastball_velocity_input": (arsenal or {}).get("fastball_velocity_input", ""),
+                    "release_extension_input": (arsenal or {}).get("release_extension_input", ""),
+                    "lineup_pitches_per_pa": workload.get("lineup_pitches_per_pa", ""),
+                    "arsenal_rate_multiplier": rate_mults.get("arsenal", (arsenal or {}).get("k_rate_multiplier", "")),
+                    "lineup_rate_multiplier": (lineup or {}).get("projection_multiplier", (arsenal or {}).get("lineup_rate_multiplier", "")),
+                    "batter_matchup_expected_ks": (lineup or {}).get("batter_matchup_expected_ks", ""),
+                    "batter_matchup_hitters": (lineup or {}).get("batter_matchup_hitters", ""),
+                    "handed_split_hitters": (lineup or {}).get("split_hitters_found", ""),
+                    "batter_matchup_coverage": (lineup or {}).get("batter_matchup_coverage", ""),
+                    "six_ip_batter_matchup_k_rate": (lineup or {}).get("six_ip_batter_matchup_k_rate", ""),
+                    "skill_rate_multiplier": rate_mults.get("pitcher_skill", ""),
+                    "opponent_discipline_multiplier": rate_mults.get("opponent_discipline", ""),
+                    "recent_pitch_multiplier": rate_mults.get("recent_pitch", ""),
+                    "pitcher_csw_pct": pitcher_disc.get("csw_pct", ""),
+                    "pitcher_called_strike_pct": pitcher_disc.get("called_strike_pct", ""),
+                    "pitcher_chase_pct": pitcher_disc.get("chase_pct", ""),
+                    "pitcher_zone_contact_pct": pitcher_disc.get("zone_contact_pct", ""),
+                    "pitcher_chase_contact_pct": pitcher_disc.get("chase_contact_pct", ""),
+                    "pitcher_first_strike_pct": pitcher_disc.get("first_strike_pct", ""),
+                    "opponent_whiff_pct": opponent_disc.get("whiff_pct", ""),
+                    "opponent_zone_contact_pct": opponent_disc.get("zone_contact_pct", ""),
+                    "opponent_chase_contact_pct": opponent_disc.get("chase_contact_pct", ""),
+                    "recent_velocity_delta": recent_pitch.get("velocity_delta", ""),
+                    "recent_csw_delta": recent_pitch.get("csw_delta", ""),
+                    "recent_whiff_delta": recent_pitch.get("whiff_delta", ""),
+                    "recent_usage_quality_shift": recent_pitch.get("usage_quality_shift", ""),
+                    "recent_shape_change": recent_pitch.get("shape_change_inches", ""),
+                    "recent_release_change": recent_pitch.get("release_change_inches", ""),
+                    "under_support_count": (arsenal or {}).get("under_support_count", ""),
+                    "under_support_notes": (arsenal or {}).get("under_support_notes", []),
+                    "projection_structural_std": (arsenal or {}).get("structural_std", ""),
+                    "pitcher_archetype": archetype,
+                    "archetype_shadow_adjustment": (cal.get("archetype_shadow", {}) or {}).get("adjustment", 0),
+                    "season_k_pct_snapshot": skill_snapshot.get("k_pct", ""), "season_whiff_pct_snapshot": skill_snapshot.get("whiff_pct", ""),
+                    "arsenal_score": skill_snapshot.get("arsenal_score", arsenal.get("score", "")), "weapon_count": skill_snapshot.get("weapon_count", arsenal.get("weapon_count", 0)),
+                    "weather_source": str(auto_weather.get("source", "") or ""), "data_health_score": data_health.get("score", ""),
+                    "data_health_notes": data_health.get("status", ""),
+                    "lineup_confirmed": "TRUE" if "confirmed" in str((lineup or {}).get("source","")).lower() else "FALSE",
+                    "lineup_hitters_found": (lineup or {}).get("hitters_found",0), "opener": opener,
+                    "bulk_pitcher": (bulk_context or {}).get("bulk_pitcher",""), "bulk_confidence": (bulk_context or {}).get("confidence",""),
+                    "bulk_source": (bulk_context or {}).get("source",""), "calibration_notes": cal.get("status",""),
+                    "published_grade": publication.get("published_grade", ""),
+                    "shadow_grade": publication.get("shadow_grade", ""),
+                    "grade_restriction_reason": publication.get("grade_restriction_reason", ""),
+                    "workload_support": publication.get("workload_support", ""),
+                    "nine_hitter_passed": publication.get("nine_hitter_passed", ""),
+                    "under_shadow_only": publication.get("under_shadow_only", ""),
+                    "early_exit_risk": publication.get("early_exit_risk", ""),
+                }
+
+            away_expected_ip = float((away_arsenal_details.get("workload",{}) or {}).get("projected_start_ip", away_ipg_this or away_ipg_last or 5.0) or 5.0)
+            home_expected_ip = float((home_arsenal_details.get("workload",{}) or {}).get("projected_start_ip", home_ipg_this or home_ipg_last or 5.0) or 5.0)
+            if use_away_bullpen: away_expected_ip = float(away_bulk_context.get("expected_opener_ip",1.3) or 1.3)
+            if use_home_bullpen: home_expected_ip = float(home_bulk_context.get("expected_opener_ip",1.3) or 1.3)
+            # Build all pitcher-history rows in memory and rewrite the tab once.
+            # Previously every starter/bulk pitcher caused its own full read/clear/write cycle.
+            recent_form_batch = load_pitcher_recent_form()
             recent_form_batch = record_pitcher_recent_form_start(
-                slate_date, game_key, pdata['pitcher'], pdata['team'], pdata['opponent'],
-                pdata['projection'], pdata['line'], pdata['grade'], pdata.get('recent_note',''),
-                _pitcher_history_metadata(pdata['calibration'], pdata['arsenal'], pdata['lineup'], "Bulk", pdata['odds'], pdata['selected_probability'], pdata['price_edge'], pdata['expected_ip'], opener=bctx.get('opener',''), bulk_context=bctx, archetype=pdata.get('archetype',''), skill_snapshot=pdata.get('skill_snapshot',{}), data_health=pdata.get('data_health',{}), publication=pdata.get('publication',{}), selected_side=pdata.get('selected_side',''), probabilities=pdata.get('probabilities',{}), over_odds=pdata.get('odds',''), under_odds=pdata.get('odds','')),
+                slate_date, game_key, away_pitcher, away_team, home_team, away_k,
+                away_k_line, away_k_grade, away_recent_decision_note,
+                _pitcher_history_metadata(away_k_calibration, away_arsenal_details, away_lineup_details, "Opener" if use_away_bullpen else "Starter", away_k_odds, away_selected_prob, away_k_price_edge, away_expected_ip, opener=away_pitcher if use_away_bullpen else "", bulk_context=away_bulk_context, archetype=away_archetype, skill_snapshot=away_skill_snapshot, data_health=away_data_health, publication=away_k_publication, selected_side=away_selected_side, probabilities=away_k_probs, over_odds=away_k_over_odds, under_odds=away_k_under_odds),
                 existing_df=recent_form_batch, defer_save=True,
             )
-        save_pitcher_recent_form(recent_form_batch)
+            recent_form_batch = record_pitcher_recent_form_start(
+                slate_date, game_key, home_pitcher, home_team, away_team, home_k,
+                home_k_line, home_k_grade, home_recent_decision_note,
+                _pitcher_history_metadata(home_k_calibration, home_arsenal_details, home_lineup_details, "Opener" if use_home_bullpen else "Starter", home_k_odds, home_selected_prob, home_k_price_edge, home_expected_ip, opener=home_pitcher if use_home_bullpen else "", bulk_context=home_bulk_context, archetype=home_archetype, skill_snapshot=home_skill_snapshot, data_health=home_data_health, publication=home_k_publication, selected_side=home_selected_side, probabilities=home_k_probs, over_odds=home_k_over_odds, under_odds=home_k_under_odds),
+                existing_df=recent_form_batch, defer_save=True,
+            )
+            for pdata, bctx in [(away_bulk_projection, away_bulk_context), (home_bulk_projection, home_bulk_context)]:
+                if not pdata: continue
+                recent_form_batch = record_pitcher_recent_form_start(
+                    slate_date, game_key, pdata['pitcher'], pdata['team'], pdata['opponent'],
+                    pdata['projection'], pdata['line'], pdata['grade'], pdata.get('recent_note',''),
+                    _pitcher_history_metadata(pdata['calibration'], pdata['arsenal'], pdata['lineup'], "Bulk", pdata['odds'], pdata['selected_probability'], pdata['price_edge'], pdata['expected_ip'], opener=bctx.get('opener',''), bulk_context=bctx, archetype=pdata.get('archetype',''), skill_snapshot=pdata.get('skill_snapshot',{}), data_health=pdata.get('data_health',{}), publication=pdata.get('publication',{}), selected_side=pdata.get('selected_side',''), probabilities=pdata.get('probabilities',{}), over_odds=pdata.get('odds',''), under_odds=pdata.get('odds','')),
+                    existing_df=recent_form_batch, defer_save=True,
+                )
+            save_pitcher_recent_form(recent_form_batch)
 
-        def _k_grade_diagnostic(final_grade, raw_grade, projection, six_ip, line, selected_side, selected_prob, odds, reliability, publication, price_edge):
-            """Explain the exact limiting rule without changing the projection or grade."""
-            try:
-                projection = float(projection); six_ip = float(six_ip); line = float(line)
-                selected_prob = float(selected_prob); reliability = float(reliability); price_edge = float(price_edge)
-            except Exception:
-                return "Strikeout grade inputs were incomplete or invalid."
-            restriction = str((publication or {}).get("grade_restriction_reason", "") or "").strip()
-            if restriction:
-                return restriction
-            if str(final_grade).upper() != "PASS":
-                return "Qualified under the active full-distribution probability and price-edge rules."
-            side = str(selected_side or "").upper()
-            reasons = []
-            if selected_prob < 0.60:
-                reasons.append(f"{side.title()} probability {selected_prob*100:.1f}% is below 60.0%")
-            if price_edge < 0.025:
-                reasons.append(f"{side.title()} price edge {price_edge*100:+.1f}% is below +2.5% at odds {odds}")
-            return "Pass because " + "; ".join(reasons) + "." if reasons else f"Raw grade {raw_grade} was changed to Pass by a downstream safety rule."
+            def _k_grade_diagnostic(final_grade, raw_grade, projection, six_ip, line, selected_side, selected_prob, odds, reliability, publication, price_edge):
+                """Explain the exact limiting rule without changing the projection or grade."""
+                try:
+                    projection = float(projection); six_ip = float(six_ip); line = float(line)
+                    selected_prob = float(selected_prob); reliability = float(reliability); price_edge = float(price_edge)
+                except Exception:
+                    return "Strikeout grade inputs were incomplete or invalid."
+                restriction = str((publication or {}).get("grade_restriction_reason", "") or "").strip()
+                if restriction:
+                    return restriction
+                if str(final_grade).upper() != "PASS":
+                    return "Qualified under the active full-distribution probability and price-edge rules."
+                side = str(selected_side or "").upper()
+                reasons = []
+                if selected_prob < 0.60:
+                    reasons.append(f"{side.title()} probability {selected_prob*100:.1f}% is below 60.0%")
+                if price_edge < 0.025:
+                    reasons.append(f"{side.title()} price edge {price_edge*100:+.1f}% is below +2.5% at odds {odds}")
+                return "Pass because " + "; ".join(reasons) + "." if reasons else f"Raw grade {raw_grade} was changed to Pass by a downstream safety rule."
 
-        matchup_details = {
-            "game_environment": game_environment,
-            "pitchers": {
-                "away": {
-                    "pitcher": away_pitcher,
-                    "team": away_team,
-                    "opponent": home_team,
-                    "expected_ks": round(away_k, 2),
-                    "raw_expected_ks": round(away_k_precalibration, 2),
-                    "calibration": away_k_calibration,
-                    "six_ip_ks": round(away_k_6ip, 2),
-                    "line": away_k_line,
-                    "odds": away_k_odds,
-                    "edge": round(away_k_edge, 2),
-                    "under_first_loss_cushion": away_under_loss_cushion if away_under_loss_cushion is not None else "",
-                    "variance": round(away_k - away_k_6ip, 2),
-                    "volatility": away_vol,
-                    "recent_form": away_recent_form,
-                    "recent_form_note": away_recent_form_note,
-                    "recent_accuracy_note": away_recent_accuracy_note,
-                    "six_inning_override_note": away_six_inning_override_note,
-                    "weapon_floor_note": away_weapon_floor_note,
-                    "k_context_note": away_k_context_note,
-                    "k_context": away_k_context,
-                    "grade": away_k_grade,
-                    "raw_grade": away_k_grade_raw,
-                    "true_projection": round(away_k, 3),
-                    "tail_selected_side": away_selected_side,
-                    "tail_over_probability": f"{away_k_probs.get('over',0)*100:.1f}%",
-                    "tail_under_probability": f"{away_k_probs.get('under',0)*100:.1f}%",
-                    "tail_push_probability": f"{away_k_probs.get('push',0)*100:.1f}%",
-                    "most_likely_ks": away_k_probs.get("mode", ""),
-                    "distribution_median": away_k_probs.get("median", ""),
-                    "tail_model_version": away_k_probs.get("tail_model_version", ""),
-                    "selected_probability": f"{away_selected_prob*100:.1f}%",
-                    "implied_probability": f"{american_odds_to_implied_prob(away_k_odds)*100:.1f}%",
-                    "price_edge": f"{away_k_price_edge*100:+.1f}%",
-                    "publication_note": away_v15_5_note,
-                    "grade_restriction_reason": away_k_publication.get("grade_restriction_reason", ""),
-                    "workload_support": away_k_publication.get("workload_support", ""),
-                    "nine_hitter_passed": away_k_publication.get("nine_hitter_passed", ""),
-                    "lineup_hitters_found": away_lineup_details.get("hitters_found", 0),
-                    "early_exit_risk": away_k_publication.get("early_exit_risk", ""),
-                    "grade_diagnostic": _k_grade_diagnostic(away_k_grade, away_k_grade_raw, away_k, away_k_6ip, away_k_line, away_selected_side, away_selected_prob, away_k_odds, away_k_calibration["reliability"]["score"], away_k_publication, away_k_price_edge),
-                    "k_score": away_k_score,
-                    "arsenal": away_arsenal_details,
-                    "lineup": away_lineup_details
+            matchup_details = {
+                "game_environment": game_environment,
+                "pitchers": {
+                    "away": {
+                        "pitcher": away_pitcher,
+                        "team": away_team,
+                        "opponent": home_team,
+                        "expected_ks": round(away_k, 2),
+                        "raw_expected_ks": round(away_k_precalibration, 2),
+                        "calibration": away_k_calibration,
+                        "six_ip_ks": round(away_k_6ip, 2),
+                        "line": away_k_line,
+                        "odds": away_k_odds,
+                        "edge": round(away_k_edge, 2),
+                        "under_first_loss_cushion": away_under_loss_cushion if away_under_loss_cushion is not None else "",
+                        "variance": round(away_k - away_k_6ip, 2),
+                        "volatility": away_vol,
+                        "recent_form": away_recent_form,
+                        "recent_form_note": away_recent_form_note,
+                        "recent_accuracy_note": away_recent_accuracy_note,
+                        "six_inning_override_note": away_six_inning_override_note,
+                        "weapon_floor_note": away_weapon_floor_note,
+                        "k_context_note": away_k_context_note,
+                        "k_context": away_k_context,
+                        "grade": away_k_grade,
+                        "raw_grade": away_k_grade_raw,
+                        "true_projection": round(away_k, 3),
+                        "tail_selected_side": away_selected_side,
+                        "tail_over_probability": f"{away_k_probs.get('over',0)*100:.1f}%",
+                        "tail_under_probability": f"{away_k_probs.get('under',0)*100:.1f}%",
+                        "tail_push_probability": f"{away_k_probs.get('push',0)*100:.1f}%",
+                        "most_likely_ks": away_k_probs.get("mode", ""),
+                        "distribution_median": away_k_probs.get("median", ""),
+                        "tail_model_version": away_k_probs.get("tail_model_version", ""),
+                        "selected_probability": f"{away_selected_prob*100:.1f}%",
+                        "implied_probability": f"{american_odds_to_implied_prob(away_k_odds)*100:.1f}%",
+                        "price_edge": f"{away_k_price_edge*100:+.1f}%",
+                        "publication_note": away_v15_5_note,
+                        "grade_restriction_reason": away_k_publication.get("grade_restriction_reason", ""),
+                        "workload_support": away_k_publication.get("workload_support", ""),
+                        "nine_hitter_passed": away_k_publication.get("nine_hitter_passed", ""),
+                        "lineup_hitters_found": away_lineup_details.get("hitters_found", 0),
+                        "early_exit_risk": away_k_publication.get("early_exit_risk", ""),
+                        "grade_diagnostic": _k_grade_diagnostic(away_k_grade, away_k_grade_raw, away_k, away_k_6ip, away_k_line, away_selected_side, away_selected_prob, away_k_odds, away_k_calibration["reliability"]["score"], away_k_publication, away_k_price_edge),
+                        "k_score": away_k_score,
+                        "arsenal": away_arsenal_details,
+                        "lineup": away_lineup_details
+                    },
+                    "home": {
+                        "pitcher": home_pitcher,
+                        "team": home_team,
+                        "opponent": away_team,
+                        "expected_ks": round(home_k, 2),
+                        "raw_expected_ks": round(home_k_precalibration, 2),
+                        "calibration": home_k_calibration,
+                        "six_ip_ks": round(home_k_6ip, 2),
+                        "line": home_k_line,
+                        "odds": home_k_odds,
+                        "edge": round(home_k_edge, 2),
+                        "under_first_loss_cushion": home_under_loss_cushion if home_under_loss_cushion is not None else "",
+                        "variance": round(home_k - home_k_6ip, 2),
+                        "volatility": home_vol,
+                        "recent_form": home_recent_form,
+                        "recent_form_note": home_recent_form_note,
+                        "recent_accuracy_note": home_recent_accuracy_note,
+                        "six_inning_override_note": home_six_inning_override_note,
+                        "weapon_floor_note": home_weapon_floor_note,
+                        "k_context_note": home_k_context_note,
+                        "k_context": home_k_context,
+                        "grade": home_k_grade,
+                        "raw_grade": home_k_grade_raw,
+                        "true_projection": round(home_k, 3),
+                        "tail_selected_side": home_selected_side,
+                        "tail_over_probability": f"{home_k_probs.get('over',0)*100:.1f}%",
+                        "tail_under_probability": f"{home_k_probs.get('under',0)*100:.1f}%",
+                        "tail_push_probability": f"{home_k_probs.get('push',0)*100:.1f}%",
+                        "most_likely_ks": home_k_probs.get("mode", ""),
+                        "distribution_median": home_k_probs.get("median", ""),
+                        "tail_model_version": home_k_probs.get("tail_model_version", ""),
+                        "selected_probability": f"{home_selected_prob*100:.1f}%",
+                        "implied_probability": f"{american_odds_to_implied_prob(home_k_odds)*100:.1f}%",
+                        "price_edge": f"{home_k_price_edge*100:+.1f}%",
+                        "publication_note": home_v15_5_note,
+                        "grade_restriction_reason": home_k_publication.get("grade_restriction_reason", ""),
+                        "workload_support": home_k_publication.get("workload_support", ""),
+                        "nine_hitter_passed": home_k_publication.get("nine_hitter_passed", ""),
+                        "lineup_hitters_found": home_lineup_details.get("hitters_found", 0),
+                        "early_exit_risk": home_k_publication.get("early_exit_risk", ""),
+                        "grade_diagnostic": _k_grade_diagnostic(home_k_grade, home_k_grade_raw, home_k, home_k_6ip, home_k_line, home_selected_side, home_selected_prob, home_k_odds, home_k_calibration["reliability"]["score"], home_k_publication, home_k_price_edge),
+                        "k_score": home_k_score,
+                        "arsenal": home_arsenal_details,
+                        "lineup": home_lineup_details
+                    }
                 },
-                "home": {
-                    "pitcher": home_pitcher,
-                    "team": home_team,
-                    "opponent": away_team,
-                    "expected_ks": round(home_k, 2),
-                    "raw_expected_ks": round(home_k_precalibration, 2),
-                    "calibration": home_k_calibration,
-                    "six_ip_ks": round(home_k_6ip, 2),
-                    "line": home_k_line,
-                    "odds": home_k_odds,
-                    "edge": round(home_k_edge, 2),
-                    "under_first_loss_cushion": home_under_loss_cushion if home_under_loss_cushion is not None else "",
-                    "variance": round(home_k - home_k_6ip, 2),
-                    "volatility": home_vol,
-                    "recent_form": home_recent_form,
-                    "recent_form_note": home_recent_form_note,
-                    "recent_accuracy_note": home_recent_accuracy_note,
-                    "six_inning_override_note": home_six_inning_override_note,
-                    "weapon_floor_note": home_weapon_floor_note,
-                    "k_context_note": home_k_context_note,
-                    "k_context": home_k_context,
-                    "grade": home_k_grade,
-                    "raw_grade": home_k_grade_raw,
-                    "true_projection": round(home_k, 3),
-                    "tail_selected_side": home_selected_side,
-                    "tail_over_probability": f"{home_k_probs.get('over',0)*100:.1f}%",
-                    "tail_under_probability": f"{home_k_probs.get('under',0)*100:.1f}%",
-                    "tail_push_probability": f"{home_k_probs.get('push',0)*100:.1f}%",
-                    "most_likely_ks": home_k_probs.get("mode", ""),
-                    "distribution_median": home_k_probs.get("median", ""),
-                    "tail_model_version": home_k_probs.get("tail_model_version", ""),
-                    "selected_probability": f"{home_selected_prob*100:.1f}%",
-                    "implied_probability": f"{american_odds_to_implied_prob(home_k_odds)*100:.1f}%",
-                    "price_edge": f"{home_k_price_edge*100:+.1f}%",
-                    "publication_note": home_v15_5_note,
-                    "grade_restriction_reason": home_k_publication.get("grade_restriction_reason", ""),
-                    "workload_support": home_k_publication.get("workload_support", ""),
-                    "nine_hitter_passed": home_k_publication.get("nine_hitter_passed", ""),
-                    "lineup_hitters_found": home_lineup_details.get("hitters_found", 0),
-                    "early_exit_risk": home_k_publication.get("early_exit_risk", ""),
-                    "grade_diagnostic": _k_grade_diagnostic(home_k_grade, home_k_grade_raw, home_k, home_k_6ip, home_k_line, home_selected_side, home_selected_prob, home_k_odds, home_k_calibration["reliability"]["score"], home_k_publication, home_k_price_edge),
-                    "k_score": home_k_score,
-                    "arsenal": home_arsenal_details,
-                    "lineup": home_lineup_details
-                }
-            },
-            "bulk_pitching": {"home": home_bulk_context, "away": away_bulk_context, "home_projection": home_bulk_projection, "away_projection": away_bulk_projection},
-            "data_health": {"home": home_data_health, "away": away_data_health},
-            "correlation_warning": correlation_warning,
-            "model_version": MODEL_VERSION,
-            "moneyline": {
-                "better_team": better_ml_team,
-                "better_probability": f"{better_ml_prob * 100:.1f}%",
-                "better_odds": better_ml_odds,
-                "better_grade": better_ml_grade,
-                "bullpen_context": " | ".join(bullpen_context_note),
-                "home": {
-                    "team": home_team,
-                    "model_win_pct": f"{home_win_prob * 100:.1f}%",
-                    "book_implied_pct": f"{home_implied * 100:.1f}%",
-                    "no_vig_implied_pct": f"{home_fair_implied * 100:.1f}%",
-                    "edge_pct": f"{home_ml_edge * 100:.1f}%",
-                    "confidence_score": home_ml_confidence.get("confidence_score", ""),
-                    "confluence": f"{home_ml_confidence.get('confluence', 0)}/4",
-                    "confidence_reasons": home_ml_confidence.get("reason_lines", []),
-                    "grade": home_ml_grade,
-                    "bullpen_game_checked": use_home_bullpen
+                "bulk_pitching": {"home": home_bulk_context, "away": away_bulk_context, "home_projection": home_bulk_projection, "away_projection": away_bulk_projection},
+                "data_health": {"home": home_data_health, "away": away_data_health},
+                "correlation_warning": correlation_warning,
+                "model_version": MODEL_VERSION,
+                "moneyline": {
+                    "better_team": better_ml_team,
+                    "better_probability": f"{better_ml_prob * 100:.1f}%",
+                    "better_odds": better_ml_odds,
+                    "better_grade": better_ml_grade,
+                    "bullpen_context": " | ".join(bullpen_context_note),
+                    "home": {
+                        "team": home_team,
+                        "model_win_pct": f"{home_win_prob * 100:.1f}%",
+                        "book_implied_pct": f"{home_implied * 100:.1f}%",
+                        "no_vig_implied_pct": f"{home_fair_implied * 100:.1f}%",
+                        "edge_pct": f"{home_ml_edge * 100:.1f}%",
+                        "confidence_score": home_ml_confidence.get("confidence_score", ""),
+                        "confluence": f"{home_ml_confidence.get('confluence', 0)}/4",
+                        "confidence_reasons": home_ml_confidence.get("reason_lines", []),
+                        "grade": home_ml_grade,
+                        "bullpen_game_checked": use_home_bullpen
+                    },
+                    "away": {
+                        "team": away_team,
+                        "model_win_pct": f"{away_win_prob * 100:.1f}%",
+                        "book_implied_pct": f"{away_implied * 100:.1f}%",
+                        "no_vig_implied_pct": f"{away_fair_implied * 100:.1f}%",
+                        "edge_pct": f"{away_ml_edge * 100:.1f}%",
+                        "confidence_score": away_ml_confidence.get("confidence_score", ""),
+                        "confluence": f"{away_ml_confidence.get('confluence', 0)}/4",
+                        "confidence_reasons": away_ml_confidence.get("reason_lines", []),
+                        "grade": away_ml_grade,
+                        "bullpen_game_checked": use_away_bullpen
+                    }
                 },
-                "away": {
-                    "team": away_team,
-                    "model_win_pct": f"{away_win_prob * 100:.1f}%",
-                    "book_implied_pct": f"{away_implied * 100:.1f}%",
-                    "no_vig_implied_pct": f"{away_fair_implied * 100:.1f}%",
-                    "edge_pct": f"{away_ml_edge * 100:.1f}%",
-                    "confidence_score": away_ml_confidence.get("confidence_score", ""),
-                    "confluence": f"{away_ml_confidence.get('confluence', 0)}/4",
-                    "confidence_reasons": away_ml_confidence.get("reason_lines", []),
-                    "grade": away_ml_grade,
-                    "bullpen_game_checked": use_away_bullpen
-                }
-            },
-            "nrfi": {
-                "grade": nrfi_grade,
-                "probability": f"{nrfi_prob * 100:.1f}%",
-                "nrfi_score": round(nrfi_score, 1),
-                "yrfi_score": round(yrfi_score, 1),
-                "nrfi_odds": nrfi_odds,
-                "yrfi_odds": yrfi_odds,
-                "pricing": nrfi_environment,
-                "first_inning_model": nrfi_model_details
-            },
-            "total_runs": total_run_details
-        }
+                "nrfi": {
+                    "grade": nrfi_grade,
+                    "probability": f"{nrfi_prob * 100:.1f}%",
+                    "nrfi_score": round(nrfi_score, 1),
+                    "yrfi_score": round(yrfi_score, 1),
+                    "nrfi_odds": nrfi_odds,
+                    "yrfi_odds": yrfi_odds,
+                    "pricing": nrfi_environment,
+                    "first_inning_model": nrfi_model_details
+                },
+                "total_runs": total_run_details
+            }
 
-        add_matchup_detail_row(
-            game_key,
-            game_label,
-            away_team,
-            home_team,
-            away_pitcher,
-            home_pitcher,
-            f"ML: {better_ml_team} {better_ml_grade} | Away K: {away_k_grade} {away_k_score} | Home K: {home_k_grade} {home_k_score} | {nrfi_grade}",
-            matchup_details,
-            details_date=slate_date
-        )
-
-
-        save_game_projection_history({
-            "Date": slate_date, "Game Key": game_key, "Game Label": game_label, "Away Team": away_team, "Home Team": home_team, "Model Version": MODEL_VERSION,
-            "Away Runs Projection": total_run_details.get("away_projected_runs",""), "Home Runs Projection": total_run_details.get("home_projected_runs",""),
-            "Total Projection": total_run_details.get("projected_total",""),
-            "Raw Total Projection": total_run_details.get("raw_projected_total", total_run_details.get("projected_total","")),
-            "Calibrated Total Projection": total_run_details.get("calibrated_projected_total",""),
-            "Market Total": total_runs_line,
-            "Raw Total Edge": total_run_details.get("raw_edge", total_run_details.get("edge","")),
-            "Calibrated Total Edge": total_run_details.get("calibrated_edge",""),
-            "Total Grade": total_run_details.get("grade",""),
-            "Total Shadow Grade": total_run_details.get("shadow_grade", total_run_details.get("grade","")),
-            "Total Side": total_run_details.get("side", ""),
-            "Total Selection Basis": total_run_details.get("selection_basis", ""),
-            "Total Selected Odds": total_run_details.get("selected_odds", ""),
-            "Total Confluence": total_run_details.get("confluence", ""),
-            "Total Gate Results": json.dumps(total_run_details.get("gate_results", {}), sort_keys=True),
-            "Total Restriction Reason": total_run_details.get("grade_restriction_reason",""),
-            "Total Selected Probability": total_run_details.get("selected_probability",""), "Home Win Probability": home_win_prob, "Away Win Probability": away_win_prob,
-            "Better ML": better_ml_team, "ML Grade": better_ml_grade, "NRFI Probability": nrfi_prob, "YRFI Probability": 1-nrfi_prob,
-            "First Inning Grade": nrfi_grade, "First Inning Selected Probability": selected_first_inning_probability,
-            "Correlation Block": "TRUE" if correlation_block else "FALSE", "Correlation Reason": correlation_warning,
-            "Correlation Play Count": len(qualifying_directions),
-            "Home Opener": home_pitcher if use_home_bullpen else "", "Home Bulk Pitcher": home_bulk_context.get("bulk_pitcher",""), "Home Bulk Confidence": home_bulk_context.get("confidence",""),
-            "Away Opener": away_pitcher if use_away_bullpen else "", "Away Bulk Pitcher": away_bulk_context.get("bulk_pitcher",""), "Away Bulk Confidence": away_bulk_context.get("confidence","")
-        })
-
-        # Correlation-blocked games are shadow-only. Remove any pending rows from
-        # an earlier save, then keep all qualifying projections out of Bet Tracker.
-        removed_blocked_rows = 0
-        if correlation_block:
-            removed_blocked_rows = remove_pending_tracker_rows_for_game(game_key, slate_date)
-        tracker_bet_batch = []
-
-        # Only add the higher model probability moneyline side to the Bet Tracker.
-        # This prevents both teams from showing in Pending Bets.
-        if (not correlation_block) and better_ml_prob > 0.50 and better_ml_grade in ["A Moneyline", "B Moneyline"]:
-            better_implied = home_implied if better_ml_team == home_team else away_implied
-            better_fair_implied = home_fair_implied if better_ml_team == home_team else away_fair_implied
-            better_edge = home_ml_edge if better_ml_team == home_team else away_ml_edge
-            queue_bet(tracker_bet_batch,
-                better_ml_grade,
-                better_ml_team,
-                "Moneyline",
-                better_ml_odds,
-                f"{better_ml_prob * 100:.1f}%",
-                f"{better_implied * 100:.1f}%",
-                f"{better_edge * 100:.1f}%",
-                metadata={"selected_probability": f"{better_ml_prob*100:.1f}%", "model_version": MODEL_VERSION, "game_key": game_key, "team": better_ml_team, "opponent": away_team if better_ml_team == home_team else home_team, "role": "Game"}
+            add_matchup_detail_row(
+                game_key,
+                game_label,
+                away_team,
+                home_team,
+                away_pitcher,
+                home_pitcher,
+                f"ML: {better_ml_team} {better_ml_grade} | Away K: {away_k_grade} {away_k_score} | Home K: {home_k_grade} {home_k_score} | {nrfi_grade}",
+                matchup_details,
+                details_date=slate_date
             )
 
-        if (not correlation_block) and nrfi_grade == "ELITE NRFI":
-            queue_bet(tracker_bet_batch,
-                nrfi_grade, f"{away_team} at {home_team}", "NRFI/YRFI", nrfi_environment.get("selected_odds", nrfi_odds),
-                f"{nrfi_prob * 100:.1f}%", f"{nrfi_environment.get('nrfi_implied', 0) * 100:.1f}%",
-                f"Edge {nrfi_environment.get('nrfi_edge', 0) * 100:+.1f}%",
-                metadata={"selected_probability": f"{nrfi_prob*100:.1f}%", "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "First Inning"}
-            )
-        if (not correlation_block) and nrfi_grade == "ELITE YRFI":
-            yrfi_prob_value = 1.0 - nrfi_prob
-            queue_bet(tracker_bet_batch,
-                nrfi_grade, f"{away_team} at {home_team}", "NRFI/YRFI", nrfi_environment.get("selected_odds", yrfi_odds),
-                f"{yrfi_prob_value * 100:.1f}%", f"{nrfi_environment.get('yrfi_implied', 0) * 100:.1f}%",
-                f"Edge {nrfi_environment.get('yrfi_edge', 0) * 100:+.1f}%",
-                metadata={"selected_probability": f"{yrfi_prob_value*100:.1f}%", "reliability_score": nrfi_environment.get("yrfi_score", ""), "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "First Inning"}
-            )
-        if (not correlation_block) and total_run_details.get("grade") in ["TOTAL OVER", "TOTAL UNDER"]:
-            queue_bet(tracker_bet_batch,
-                total_run_details.get("grade"),
-                f"{away_team} at {home_team}",
-                "Game Total",
-                f"{total_runs_line} / {total_run_details.get('selected_odds', '')}",
-                f"{total_run_details.get('projected_total', '')}",
-                "",
-                f"Edge {total_run_details.get('edge', '')}",
-                metadata={"selected_probability": f"{total_run_details.get('selected_probability',0)*100:.1f}%", "reliability_score": total_run_details.get('reliability',''), "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "Game Total"}
-            )
-        if (not correlation_block) and home_k_grade != "PASS":
-            queue_bet(tracker_bet_batch,
-                home_k_grade,
-                f"{home_pitcher} {home_k_grade}",
-                "Pitcher Strikeouts",
-                f"{home_k_line} / {format_american_odds(home_k_odds)}",
-                f"{home_selected_prob*100:.1f}%",
-                f"{american_odds_to_implied_prob(home_k_odds)*100:.1f}%",
-                f"{home_k_price_edge*100:+.1f}%",
-                metadata={"raw_projection":round(home_k_precalibration,2),"calibrated_projection":round(home_k,2),"true_projection":round(home_k,3),"selected_side":home_selected_side,"distribution_mode":home_k_probs.get("mode",""),"distribution_median":home_k_probs.get("median",""),"reliability_score":home_k_calibration["reliability"]["score"],"expected_std_dev":home_k_calibration["expected_std"],"selected_probability":f"{home_selected_prob*100:.1f}%","price_edge":home_k_price_edge,"model_version":K_MODEL_VERSION,"game_key":game_key,"team":home_team,"opponent":away_team,"role":"Opener" if use_home_bullpen else "Starter"}
-            )
-        if (not correlation_block) and away_k_grade != "PASS":
-            queue_bet(tracker_bet_batch,
-                away_k_grade,
-                f"{away_pitcher} {away_k_grade}",
-                "Pitcher Strikeouts",
-                f"{away_k_line} / {format_american_odds(away_k_odds)}",
-                f"{away_selected_prob*100:.1f}%",
-                f"{american_odds_to_implied_prob(away_k_odds)*100:.1f}%",
-                f"{away_k_price_edge*100:+.1f}%",
-                metadata={"raw_projection":round(away_k_precalibration,2),"calibrated_projection":round(away_k,2),"true_projection":round(away_k,3),"selected_side":away_selected_side,"distribution_mode":away_k_probs.get("mode",""),"distribution_median":away_k_probs.get("median",""),"reliability_score":away_k_calibration["reliability"]["score"],"expected_std_dev":away_k_calibration["expected_std"],"selected_probability":f"{away_selected_prob*100:.1f}%","price_edge":away_k_price_edge,"model_version":K_MODEL_VERSION,"game_key":game_key,"team":away_team,"opponent":home_team,"role":"Opener" if use_away_bullpen else "Starter"}
-            )
 
-        for pdata in [home_bulk_projection, away_bulk_projection]:
-            if (not correlation_block) and pdata and pdata.get("grade") != "PASS":
+            save_game_projection_history({
+                "Date": slate_date, "Game Key": game_key, "Game Label": game_label, "Away Team": away_team, "Home Team": home_team, "Model Version": MODEL_VERSION,
+                "Away Runs Projection": total_run_details.get("away_projected_runs",""), "Home Runs Projection": total_run_details.get("home_projected_runs",""),
+                "Total Projection": total_run_details.get("projected_total",""),
+                "Raw Total Projection": total_run_details.get("raw_projected_total", total_run_details.get("projected_total","")),
+                "Calibrated Total Projection": total_run_details.get("calibrated_projected_total",""),
+                "Market Total": total_runs_line,
+                "Raw Total Edge": total_run_details.get("raw_edge", total_run_details.get("edge","")),
+                "Calibrated Total Edge": total_run_details.get("calibrated_edge",""),
+                "Total Grade": total_run_details.get("grade",""),
+                "Total Shadow Grade": total_run_details.get("shadow_grade", total_run_details.get("grade","")),
+                "Total Side": total_run_details.get("side", ""),
+                "Total Selection Basis": total_run_details.get("selection_basis", ""),
+                "Total Selected Odds": total_run_details.get("selected_odds", ""),
+                "Total Confluence": total_run_details.get("confluence", ""),
+                "Total Gate Results": json.dumps(total_run_details.get("gate_results", {}), sort_keys=True),
+                "Total Restriction Reason": total_run_details.get("grade_restriction_reason",""),
+                "Total Selected Probability": total_run_details.get("selected_probability",""), "Home Win Probability": home_win_prob, "Away Win Probability": away_win_prob,
+                "Better ML": better_ml_team, "ML Grade": better_ml_grade, "NRFI Probability": nrfi_prob, "YRFI Probability": 1-nrfi_prob,
+                "First Inning Grade": nrfi_grade, "First Inning Selected Probability": selected_first_inning_probability,
+                "Correlation Block": "TRUE" if correlation_block else "FALSE", "Correlation Reason": correlation_warning,
+                "Correlation Play Count": len(qualifying_directions),
+                "Home Opener": home_pitcher if use_home_bullpen else "", "Home Bulk Pitcher": home_bulk_context.get("bulk_pitcher",""), "Home Bulk Confidence": home_bulk_context.get("confidence",""),
+                "Away Opener": away_pitcher if use_away_bullpen else "", "Away Bulk Pitcher": away_bulk_context.get("bulk_pitcher",""), "Away Bulk Confidence": away_bulk_context.get("confidence","")
+            })
+
+            # Correlation-blocked games are shadow-only. Remove any pending rows from
+            # an earlier save, then keep all qualifying projections out of Bet Tracker.
+            removed_blocked_rows = 0
+            if correlation_block:
+                removed_blocked_rows = remove_pending_tracker_rows_for_game(game_key, slate_date)
+            tracker_bet_batch = []
+
+            # Only add the higher model probability moneyline side to the Bet Tracker.
+            # This prevents both teams from showing in Pending Bets.
+            if (not correlation_block) and better_ml_prob > 0.50 and better_ml_grade in ["A Moneyline", "B Moneyline"]:
+                better_implied = home_implied if better_ml_team == home_team else away_implied
+                better_fair_implied = home_fair_implied if better_ml_team == home_team else away_fair_implied
+                better_edge = home_ml_edge if better_ml_team == home_team else away_ml_edge
                 queue_bet(tracker_bet_batch,
-                    pdata["grade"], f"{pdata['pitcher']} {pdata['grade']}", "Pitcher Strikeouts",
-                    f"{pdata['line']} / {format_american_odds(pdata['odds'])}", f"{pdata['projection']:.2f}", "", f"{pdata['edge']:.2f}",
-                    metadata={"raw_projection":round(pdata['raw_projection'],2),"calibrated_projection":round(pdata['projection'],2),"reliability_score":pdata['calibration']['reliability']['score'],"expected_std_dev":pdata['calibration']['expected_std'],"selected_probability":f"{pdata['selected_probability']*100:.1f}%","model_version":K_MODEL_VERSION,"game_key":game_key,"team":pdata['team'],"opponent":pdata['opponent'],"role":"Bulk"}
+                    better_ml_grade,
+                    better_ml_team,
+                    "Moneyline",
+                    better_ml_odds,
+                    f"{better_ml_prob * 100:.1f}%",
+                    f"{better_implied * 100:.1f}%",
+                    f"{better_edge * 100:.1f}%",
+                    metadata={"selected_probability": f"{better_ml_prob*100:.1f}%", "model_version": MODEL_VERSION, "game_key": game_key, "team": better_ml_team, "opponent": away_team if better_ml_team == home_team else home_team, "role": "Game"}
                 )
 
-        # Qualifying bets share one tracker download and one tracker rewrite.
-        add_bets_batch(tracker_bet_batch)
+            if (not correlation_block) and nrfi_grade == "ELITE NRFI":
+                queue_bet(tracker_bet_batch,
+                    nrfi_grade, f"{away_team} at {home_team}", "NRFI/YRFI", nrfi_environment.get("selected_odds", nrfi_odds),
+                    f"{nrfi_prob * 100:.1f}%", f"{nrfi_environment.get('nrfi_implied', 0) * 100:.1f}%",
+                    f"Edge {nrfi_environment.get('nrfi_edge', 0) * 100:+.1f}%",
+                    metadata={"selected_probability": f"{nrfi_prob*100:.1f}%", "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "First Inning"}
+                )
+            if (not correlation_block) and nrfi_grade == "ELITE YRFI":
+                yrfi_prob_value = 1.0 - nrfi_prob
+                queue_bet(tracker_bet_batch,
+                    nrfi_grade, f"{away_team} at {home_team}", "NRFI/YRFI", nrfi_environment.get("selected_odds", yrfi_odds),
+                    f"{yrfi_prob_value * 100:.1f}%", f"{nrfi_environment.get('yrfi_implied', 0) * 100:.1f}%",
+                    f"Edge {nrfi_environment.get('yrfi_edge', 0) * 100:+.1f}%",
+                    metadata={"selected_probability": f"{yrfi_prob_value*100:.1f}%", "reliability_score": nrfi_environment.get("yrfi_score", ""), "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "First Inning"}
+                )
+            if (not correlation_block) and total_run_details.get("grade") in ["TOTAL OVER", "TOTAL UNDER"]:
+                queue_bet(tracker_bet_batch,
+                    total_run_details.get("grade"),
+                    f"{away_team} at {home_team}",
+                    "Game Total",
+                    f"{total_runs_line} / {total_run_details.get('selected_odds', '')}",
+                    f"{total_run_details.get('projected_total', '')}",
+                    "",
+                    f"Edge {total_run_details.get('edge', '')}",
+                    metadata={"selected_probability": f"{total_run_details.get('selected_probability',0)*100:.1f}%", "reliability_score": total_run_details.get('reliability',''), "model_version": MODEL_VERSION, "game_key": game_key, "team": f"{away_team} at {home_team}", "role": "Game Total"}
+                )
+            if (not correlation_block) and home_k_grade != "PASS":
+                queue_bet(tracker_bet_batch,
+                    home_k_grade,
+                    f"{home_pitcher} {home_k_grade}",
+                    "Pitcher Strikeouts",
+                    f"{home_k_line} / {format_american_odds(home_k_odds)}",
+                    f"{home_selected_prob*100:.1f}%",
+                    f"{american_odds_to_implied_prob(home_k_odds)*100:.1f}%",
+                    f"{home_k_price_edge*100:+.1f}%",
+                    metadata={"raw_projection":round(home_k_precalibration,2),"calibrated_projection":round(home_k,2),"true_projection":round(home_k,3),"selected_side":home_selected_side,"distribution_mode":home_k_probs.get("mode",""),"distribution_median":home_k_probs.get("median",""),"reliability_score":home_k_calibration["reliability"]["score"],"expected_std_dev":home_k_calibration["expected_std"],"selected_probability":f"{home_selected_prob*100:.1f}%","price_edge":home_k_price_edge,"model_version":K_MODEL_VERSION,"game_key":game_key,"team":home_team,"opponent":away_team,"role":"Opener" if use_home_bullpen else "Starter"}
+                )
+            if (not correlation_block) and away_k_grade != "PASS":
+                queue_bet(tracker_bet_batch,
+                    away_k_grade,
+                    f"{away_pitcher} {away_k_grade}",
+                    "Pitcher Strikeouts",
+                    f"{away_k_line} / {format_american_odds(away_k_odds)}",
+                    f"{away_selected_prob*100:.1f}%",
+                    f"{american_odds_to_implied_prob(away_k_odds)*100:.1f}%",
+                    f"{away_k_price_edge*100:+.1f}%",
+                    metadata={"raw_projection":round(away_k_precalibration,2),"calibrated_projection":round(away_k,2),"true_projection":round(away_k,3),"selected_side":away_selected_side,"distribution_mode":away_k_probs.get("mode",""),"distribution_median":away_k_probs.get("median",""),"reliability_score":away_k_calibration["reliability"]["score"],"expected_std_dev":away_k_calibration["expected_std"],"selected_probability":f"{away_selected_prob*100:.1f}%","price_edge":away_k_price_edge,"model_version":K_MODEL_VERSION,"game_key":game_key,"team":away_team,"opponent":home_team,"role":"Opener" if use_away_bullpen else "Starter"}
+                )
+
+            for pdata in [home_bulk_projection, away_bulk_projection]:
+                if (not correlation_block) and pdata and pdata.get("grade") != "PASS":
+                    queue_bet(tracker_bet_batch,
+                        pdata["grade"], f"{pdata['pitcher']} {pdata['grade']}", "Pitcher Strikeouts",
+                        f"{pdata['line']} / {format_american_odds(pdata['odds'])}", f"{pdata['projection']:.2f}", "", f"{pdata['edge']:.2f}",
+                        metadata={"raw_projection":round(pdata['raw_projection'],2),"calibrated_projection":round(pdata['projection'],2),"reliability_score":pdata['calibration']['reliability']['score'],"expected_std_dev":pdata['calibration']['expected_std'],"selected_probability":f"{pdata['selected_probability']*100:.1f}%","model_version":K_MODEL_VERSION,"game_key":game_key,"team":pdata['team'],"opponent":pdata['opponent'],"role":"Bulk"}
+                    )
+
+            # Qualifying bets share one tracker download and one tracker rewrite.
+            add_bets_batch(tracker_bet_batch)
         save_elapsed = time.perf_counter() - save_started_at
         save_time_note = f" Save completed in {save_elapsed:.1f} seconds."
 

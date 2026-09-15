@@ -9,12 +9,14 @@ implementation can be removed.
 
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import json
 import os
 import time
 import urllib.error
 import urllib.request
+from contextlib import contextmanager
 from typing import Iterable, Mapping
 
 import pandas as pd
@@ -198,6 +200,121 @@ def _normalize_records(dataframe: pd.DataFrame | None, columns: Iterable[str]) -
     ]
 
 
+_DATASET_WRITE_BATCH = contextvars.ContextVar("ezpz_turso_dataset_write_batch", default=None)
+
+
+def _dataset_replace_requests(
+    sport: str,
+    dataset: str,
+    records: list[dict[str, str]],
+    headers: list[str],
+    saved_at: str,
+) -> list[dict]:
+    """Build the statements for one logical dataset replacement without opening a transaction."""
+    requests: list[dict] = [
+        {
+            "type": "execute",
+            "stmt": {
+                "sql": f"DELETE FROM dataset_rows WHERE sport={_sql_text(sport)} AND dataset={_sql_text(dataset)}",
+                "args": [],
+            },
+        },
+    ]
+
+    prefix = (
+        "INSERT OR REPLACE INTO dataset_rows "
+        "(sport,dataset,row_index,payload_json,source_hash,date_key,game_key,game,market,selection,result,snapshot_time,imported_at) VALUES "
+    )
+    tuples: list[str] = []
+    size = len(prefix)
+
+    def flush() -> None:
+        nonlocal tuples, size
+        if not tuples:
+            return
+        requests.append(
+            {"type": "execute", "stmt": {"sql": prefix + ",".join(tuples), "args": []}}
+        )
+        tuples = []
+        size = len(prefix)
+
+    for index, row in enumerate(records, start=1):
+        payload = json.dumps(row, separators=(",", ":"), ensure_ascii=False)
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        info = _metadata(row)
+        values = (
+            _sql_text(sport),
+            _sql_text(dataset),
+            str(index),
+            _sql_text(payload),
+            _sql_text(digest),
+            _sql_text(info["date_key"]),
+            _sql_text(info["game_key"]),
+            _sql_text(info["game"]),
+            _sql_text(info["market"]),
+            _sql_text(info["selection"]),
+            _sql_text(info["result"]),
+            _sql_text(info["snapshot_time"]),
+            _sql_text(saved_at),
+        )
+        item = "(" + ",".join(values) + ")"
+        if tuples and (len(tuples) >= 100 or size + len(item) > 350_000):
+            flush()
+        tuples.append(item)
+        size += len(item) + 1
+    flush()
+
+    manifest_sql = (
+        "INSERT OR REPLACE INTO dataset_manifest "
+        "(sport,dataset,source_workbook,source_worksheet,headers_json,row_count,imported_at,source_kind) VALUES ("
+        f"{_sql_text(sport)},{_sql_text(dataset)},'admin-turso-native',{_sql_text(dataset)},"
+        f"{_sql_text(json.dumps(headers, separators=(',', ':')))},"
+        f"{len(records)},{_sql_text(saved_at)},'turso')"
+    )
+    requests.append({"type": "execute", "stmt": {"sql": manifest_sql, "args": []}})
+    return requests
+
+
+@contextmanager
+def batch_dataset_writes():
+    """Commit multiple replace_dataset calls in one atomic Turso transaction.
+
+    Reads inside the block see the latest queued version of a dataset, so existing
+    read-modify-write helpers keep their current semantics even when the same
+    dataset (for example Bet Tracker) is updated more than once during one save.
+    """
+    existing = _DATASET_WRITE_BATCH.get()
+    if existing is not None:
+        yield
+        return
+
+    pending: dict[tuple[str, str], dict] = {}
+    token = _DATASET_WRITE_BATCH.set(pending)
+    try:
+        yield
+        if not pending:
+            return
+
+        requests: list[dict] = [
+            {"type": "execute", "stmt": {"sql": "BEGIN IMMEDIATE", "args": []}},
+        ]
+        saved_at = pd.Timestamp.utcnow().isoformat()
+        for (sport, dataset), entry in pending.items():
+            requests.extend(
+                _dataset_replace_requests(
+                    sport,
+                    dataset,
+                    list(entry.get("records") or []),
+                    list(entry.get("headers") or []),
+                    saved_at,
+                )
+            )
+        requests.append({"type": "execute", "stmt": {"sql": "COMMIT", "args": []}})
+        _pipeline(requests, timeout=90.0)
+    finally:
+        _DATASET_WRITE_BATCH.reset(token)
+
+
 def replace_dataset(
     sport: str,
     dataset: str,
@@ -219,6 +336,12 @@ def replace_dataset(
 
     headers = list(columns)
     records = _normalize_records(dataframe, headers)
+
+    active_batch = _DATASET_WRITE_BATCH.get()
+    if active_batch is not None:
+        active_batch[(sport, dataset)] = {"headers": headers, "records": records}
+        return len(records)
+
     saved_at = pd.Timestamp.utcnow().isoformat()
 
     requests: list[dict] = [
@@ -298,6 +421,21 @@ def read_dataset(sport: str, dataset: str, columns: Iterable[str]) -> pd.DataFra
         sport = "NCAAF"
     if sport == "CBB":
         sport = "NCAAM"
+    dataset = str(dataset or "").strip()
+
+    active_batch = _DATASET_WRITE_BATCH.get()
+    if active_batch is not None:
+        pending = active_batch.get((sport, dataset))
+        if pending is not None:
+            pending_records = list(pending.get("records") or [])
+            return pd.DataFrame(
+                [
+                    {column: str(record.get(column, "") or "") for column in columns}
+                    for record in pending_records
+                ],
+                columns=columns,
+            )
+
     result = _execute(
         "SELECT payload_json FROM dataset_rows "
         f"WHERE sport={_sql_text(sport)} AND dataset={_sql_text(dataset)} ORDER BY row_index ASC"
