@@ -13179,9 +13179,21 @@ def _legacy_render_auto_matchup_builder_v1(pitcher_this_year, pitcher_last_year,
 
 
 def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitting, team_batting_rhp, team_batting_lhp, nrfi_pitchers, nrfi_rhp, nrfi_lhp, pitcher_arsenal_df=None, team_pitch_type_df=None, bullpen_stats=None, bullpen_fatigue_df=None):
+    # A successful save stores its confirmation for the next render instead of
+    # drawing it on the old matchup and immediately rerunning underneath it.
+    post_save_notice = st.session_state.pop("_mlb_post_save_notice", "")
+    next_game_after_save = st.session_state.pop("_mlb_next_game_after_save", "")
+    if post_save_notice:
+        if next_game_after_save:
+            st.toast(f"Saved. Loading next matchup: {next_game_after_save}")
+        else:
+            st.toast("Saved. All MLB matchups for this slate are complete.")
+
     maybe_auto_update_pitcher_recent_form()
     st.header("Auto Matchup Builder")
     st.caption("Teams and probable pitchers come from the MLB schedule. Fast-build mode reuses shared pitcher calculations and downloads lineup/NRFI history concurrently while preserving the prior formulas and cache freshness windows.")
+    if post_save_notice:
+        st.success(post_save_notice)
 
     if pitcher_arsenal_df is None or pitcher_arsenal_df.empty:
         pitcher_arsenal_df = load_pitch_arsenal_stats_live(2026, "pitcher")
@@ -14881,16 +14893,46 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
 
         if correlation_block:
             cleanup_note = f" Removed {removed_blocked_rows} previously pending tracker row(s)." if removed_blocked_rows else ""
-            st.success(
+            save_notice = (
                 "Matchup summary saved as CORRELATION BLOCKED. No plays from this game were added to Bet Tracker or Best Plays. "
                 "All original grades remain on the Daily Slate for shadow review." + cleanup_note + save_time_note
             )
         else:
-            st.success(
+            save_notice = (
                 "Matchup summary saved. Qualifying bets were added to Bet Tracker. "
                 "DraftKings values will be filled automatically with the latest available pregame snapshot before first pitch."
                 + save_time_note
             )
+
+        # Choose the next unsaved matchup now, before rerunning. This prevents the
+        # mobile recovery state from restoring the game that was just completed
+        # and avoids an extra selection/query-parameter refresh cycle.
+        next_game_label = ""
+        try:
+            current_position = game_options.index(selected_game)
+            ordered_candidates = game_options[current_position + 1:] + game_options[:current_position]
+            next_game_label = next((label for label in ordered_candidates if label != selected_game), "")
+        except Exception:
+            next_game_label = next((label for label in game_options if label != selected_game), "")
+
+        st.session_state["_mlb_post_save_notice"] = save_notice
+        st.session_state["_mlb_next_game_after_save"] = next_game_label
+
+        # Drop only the completed matchup's game-scoped recovery values. Keep the
+        # admin section/date/auth query state intact, and point recovery directly
+        # at the next game so the following run has one stable destination.
+        try:
+            for query_name in list(st.query_params.keys()):
+                query_name = str(query_name)
+                if query_name.startswith("ezpz_bw_"):
+                    del st.query_params[query_name]
+            if next_game_label:
+                st.query_params["ezpz_build_game"] = next_game_label
+            elif "ezpz_build_game" in st.query_params:
+                del st.query_params["ezpz_build_game"]
+        except Exception:
+            pass
+
         st.rerun()
 
 
