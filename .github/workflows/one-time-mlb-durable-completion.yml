@@ -1,0 +1,37 @@
+name: One-time MLB durable completion
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-time-mlb-durable-completion.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply durable MLB completion flow
+        run: python scripts/one_time_mlb_durable_completion.py
+      - name: Validate MLB builder
+        run: |
+          python -m py_compile builders/mlb_builder.py shared/turso_storage.py
+          git diff --check
+      - name: Commit permanent completion fix
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/mlb_builder.py
+          git commit -m "Make MLB builder completion durable"
+          git push origin main
