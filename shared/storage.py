@@ -35,6 +35,33 @@ _BOOTSTRAP_PUBLIC_TABS = {
     ODDS_SNAPSHOT_TAB: ODDS_SNAPSHOT_COLUMNS,
 }
 
+# Builders historically emulated spreadsheets by constructing an entire DataFrame
+# and calling write_sheet. Some of those helpers remove an existing keyed row and
+# append its replacement to the bottom. A positional database diff interprets that
+# harmless reorder as hundreds/thousands of changed rows. These identities let the
+# compatibility layer preserve each existing record's storage position while still
+# appending genuinely new records.
+_IDENTITY_CANDIDATES: tuple[tuple[str, ...], ...] = (
+    ("Candidate ID",),
+    ("Season", "Projection Week", "Team"),
+    ("Observed Date", "Season", "Week", "Team", "Unit", "Position", "Player"),
+    ("Observed Date", "Team", "Player", "Status"),
+    ("Season", "Week", "Game ID", "Team"),
+    ("Season", "Game ID", "Team"),
+    ("Date", "Game ID", "Bet Type", "Selection"),
+    ("Date", "Game ID", "Market", "Selection"),
+    ("Date", "Game Key", "Market", "Selection"),
+    ("Snapshot Time ET", "Date", "Game", "Market", "Selection"),
+    ("Date", "Game", "Bet Type", "Selection"),
+    ("Date", "Game", "Market", "Selection"),
+    ("Season", "Game ID"),
+    ("Date", "Game ID"),
+    ("Team", "Season", "Week"),
+    ("Team", "Season"),
+    ("Date", "Pitcher", "Bet Type", "Selection"),
+    ("Date", "Player", "Bet Type", "Selection"),
+)
+
 
 def _canonical_sport(sport: str | None) -> str:
     value = str(sport or "").strip().upper()
@@ -96,6 +123,64 @@ def _normalize_frame(dataframe: pd.DataFrame | None, columns: list[str]) -> pd.D
     if columns:
         out = out[columns]
     return out.fillna("").astype(str)
+
+
+def _identity_key(row: pd.Series, identity_columns: tuple[str, ...]) -> tuple[str, ...] | None:
+    values = tuple(str(row.get(column, "") or "").strip() for column in identity_columns)
+    if not values or any(not value for value in values):
+        return None
+    return values
+
+
+def _identity_columns(existing: pd.DataFrame, incoming: pd.DataFrame) -> tuple[str, ...] | None:
+    if existing is None or incoming is None or existing.empty or incoming.empty:
+        return None
+    existing_columns = set(existing.columns)
+    incoming_columns = set(incoming.columns)
+    for candidate in _IDENTITY_CANDIDATES:
+        if not set(candidate).issubset(existing_columns) or not set(candidate).issubset(incoming_columns):
+            continue
+        existing_keys = [key for _, row in existing.iterrows() if (key := _identity_key(row, candidate)) is not None]
+        incoming_keys = [key for _, row in incoming.iterrows() if (key := _identity_key(row, candidate)) is not None]
+        if not incoming_keys:
+            continue
+        # Only use a key when it is genuinely unique. Ambiguous keys fall back to
+        # the original incoming order rather than risking the wrong record match.
+        if len(existing_keys) != len(set(existing_keys)) or len(incoming_keys) != len(set(incoming_keys)):
+            continue
+        return candidate
+    return None
+
+
+def _preserve_existing_order(existing: pd.DataFrame, incoming: pd.DataFrame) -> pd.DataFrame:
+    identity_columns = _identity_columns(existing, incoming)
+    if identity_columns is None:
+        return incoming
+
+    incoming_by_key: dict[tuple[str, ...], int] = {}
+    for index, row in incoming.iterrows():
+        key = _identity_key(row, identity_columns)
+        if key is not None:
+            incoming_by_key[key] = int(index)
+
+    ordered_indices: list[int] = []
+    used: set[int] = set()
+    for _, row in existing.iterrows():
+        key = _identity_key(row, identity_columns)
+        index = incoming_by_key.get(key) if key is not None else None
+        if index is None or index in used:
+            continue
+        ordered_indices.append(index)
+        used.add(index)
+
+    for index in incoming.index:
+        numeric_index = int(index)
+        if numeric_index not in used:
+            ordered_indices.append(numeric_index)
+
+    if len(ordered_indices) != len(incoming):
+        return incoming
+    return incoming.loc[ordered_indices].reset_index(drop=True)
 
 
 def _ensure_dataset(tab_name: str, columns: list[str], sport: str | None = None) -> None:
@@ -189,6 +274,15 @@ def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) 
     try:
         _require_turso()
         out = _normalize_frame(dataframe, columns)
+
+        # Preserve stable keyed rows at their existing indexes. This turns legacy
+        # builder patterns such as `existing_without_game + refreshed_game_rows`
+        # into only the real row updates instead of a positional cascade rewrite.
+        if len(out) > 1 and any(set(candidate).issubset(columns) for candidate in _IDENTITY_CANDIDATES):
+            existing = _normalize_frame(read_dataset(dataset_sport, tab_name, columns), columns)
+            if not existing.empty:
+                out = _preserve_existing_order(existing, out)
+
         replace_dataset(dataset_sport, tab_name, out, columns)
         return True
     except Exception as exc:
