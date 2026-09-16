@@ -15,7 +15,7 @@ from shared.public_contract import (
     PUBLIC_SPLIT_TAB,
     PUBLIC_TRACKER_TAB,
 )
-from shared.turso_storage import is_turso_ready, read_dataset, replace_dataset
+from shared.turso_storage import append_dataset_rows, is_turso_ready, read_dataset, replace_dataset
 
 
 _ACTIVE_SPORT = ""
@@ -198,10 +198,18 @@ def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) 
 
 def append_row(tab_name: str, row: dict, columns: Iterable[str]) -> bool:
     columns = list(columns)
-    dataframe = read_sheet(tab_name, columns)
-    payload = {column: row.get(column, "") for column in columns}
-    dataframe = pd.concat([dataframe, pd.DataFrame([payload])], ignore_index=True)
-    return write_sheet(tab_name, dataframe, columns)
+    dataset_sport = _dataset_sport()
+    if not dataset_sport:
+        st.error("No active sport is selected for Turso storage.")
+        return False
+    try:
+        _require_turso()
+        payload = {column: row.get(column, "") for column in columns}
+        append_dataset_rows(dataset_sport, tab_name, [payload], columns)
+        return True
+    except Exception as exc:
+        st.error(f"Could not append Turso dataset '{dataset_sport}/{tab_name}': {exc}")
+        return False
 
 
 class sport_storage:
