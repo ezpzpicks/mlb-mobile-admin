@@ -15,7 +15,13 @@ from shared.public_contract import (
     PUBLIC_SPLIT_TAB,
     PUBLIC_TRACKER_TAB,
 )
-from shared.turso_storage import append_dataset_rows, is_turso_ready, read_dataset, replace_dataset
+from shared.turso_storage import (
+    append_dataset_rows,
+    dataset_exists,
+    is_turso_ready,
+    read_dataset,
+    replace_dataset,
+)
 
 
 _ACTIVE_SPORT = ""
@@ -34,6 +40,10 @@ _BOOTSTRAP_PUBLIC_TABS = {
     PUBLIC_SPLIT_TAB: PUBLIC_SPLIT_COLUMNS,
     ODDS_SNAPSHOT_TAB: ODDS_SNAPSHOT_COLUMNS,
 }
+
+# Once a Render process has verified a sport's permanent datasets, Streamlit
+# reruns should not repeat those existence checks on every widget change.
+_INITIALIZED_DATASET_SPORTS: set[str] = set()
 
 # Builders historically emulated spreadsheets by constructing an entire DataFrame
 # and calling write_sheet. Some of those helpers remove an existing keyed row and
@@ -188,16 +198,16 @@ def _ensure_dataset(tab_name: str, columns: list[str], sport: str | None = None)
     dataset_sport = _dataset_sport(sport)
     if not dataset_sport:
         raise RuntimeError("No active sport is selected for Turso storage.")
-    current = read_dataset(dataset_sport, tab_name, columns)
-    if current is None:
+    if not dataset_exists(dataset_sport, tab_name):
         replace_dataset(dataset_sport, tab_name, pd.DataFrame(columns=columns), columns)
 
 
 def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[str, str]:
     """Initialize the permanent Turso datasets used by each sport.
 
-    The legacy function name is kept so existing builder imports remain stable.
-    It no longer creates or touches Google workbooks.
+    Existence is checked through the one-row manifest instead of loading each
+    complete dataset. A verified sport is remembered for the lifetime of the
+    Render process so Streamlit widget reruns do not repeat bootstrap I/O.
     """
     if not is_turso_ready():
         return {}
@@ -207,15 +217,18 @@ def initialize_sport_workbooks(sports: Iterable[str] = ("NFL", "CFB")) -> dict[s
         dataset_sport = _dataset_sport(canonical)
         if dataset_sport not in {"NFL", "NCAAF", "NCAAM"}:
             continue
-        for tab_name, columns in _BOOTSTRAP_PUBLIC_TABS.items():
-            current = read_dataset(dataset_sport, tab_name, list(columns))
-            if current is None:
-                replace_dataset(
-                    dataset_sport,
-                    tab_name,
-                    pd.DataFrame(columns=list(columns)),
-                    list(columns),
-                )
+
+        if dataset_sport not in _INITIALIZED_DATASET_SPORTS:
+            for tab_name, columns in _BOOTSTRAP_PUBLIC_TABS.items():
+                if not dataset_exists(dataset_sport, tab_name):
+                    replace_dataset(
+                        dataset_sport,
+                        tab_name,
+                        pd.DataFrame(columns=list(columns)),
+                        list(columns),
+                    )
+            _INITIALIZED_DATASET_SPORTS.add(dataset_sport)
+
         initialized[canonical] = f"turso:{dataset_sport}"
     return initialized
 
@@ -256,9 +269,6 @@ def read_sheet(tab_name: str, columns: Iterable[str]) -> pd.DataFrame:
     try:
         _require_turso()
         dataframe = read_dataset(dataset_sport, tab_name, columns)
-        if dataframe is None:
-            replace_dataset(dataset_sport, tab_name, pd.DataFrame(columns=columns), columns)
-            return pd.DataFrame(columns=columns)
         return _normalize_frame(dataframe, columns)
     except Exception as exc:
         st.error(f"Could not read Turso dataset '{dataset_sport}/{tab_name}': {exc}")
@@ -275,9 +285,9 @@ def write_sheet(tab_name: str, dataframe: pd.DataFrame, columns: Iterable[str]) 
         _require_turso()
         out = _normalize_frame(dataframe, columns)
 
-        # Preserve stable keyed rows at their existing indexes. This turns legacy
-        # builder patterns such as `existing_without_game + refreshed_game_rows`
-        # into only the real row updates instead of a positional cascade rewrite.
+        # Preserve stable keyed rows at their existing indexes. read_dataset uses
+        # the short builder cache, so on normal Streamlit reruns this no longer
+        # causes another network read before the differential write.
         if len(out) > 1 and any(set(candidate).issubset(columns) for candidate in _IDENTITY_CANDIDATES):
             existing = _normalize_frame(read_dataset(dataset_sport, tab_name, columns), columns)
             if not existing.empty:
