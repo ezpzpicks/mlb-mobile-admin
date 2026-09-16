@@ -4,6 +4,10 @@ The public API intentionally stays compatible with the builders, but dataset
 replacement is differential: unchanged rows are never rewritten. This matters
 because Turso bills/limits row writes and the previous implementation deleted
 and reinserted every row for even a one-row change.
+
+Builder reads also use a short in-process cache. Streamlit reruns the active
+builder whenever a widget changes, so without this cache entering several odds
+could reread the same large Turso datasets over and over within seconds.
 """
 
 from __future__ import annotations
@@ -12,6 +16,7 @@ import contextvars
 import hashlib
 import json
 import os
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -48,6 +53,18 @@ _TRANSIENT_TURSO_MARKERS = (
     "rate limit",
 )
 
+try:
+    _READ_CACHE_TTL_SECONDS = max(
+        0.0,
+        float(os.environ.get("TURSO_ADMIN_READ_CACHE_TTL_SECONDS", "20") or "20"),
+    )
+except Exception:
+    _READ_CACHE_TTL_SECONDS = 20.0
+
+_READ_CACHE: dict[tuple[str, str, tuple[str, ...]], tuple[float, pd.DataFrame]] = {}
+_KNOWN_DATASETS: set[tuple[str, str]] = set()
+_CACHE_LOCK = threading.RLock()
+
 
 def _first_env(names: Iterable[str]) -> str:
     for name in names:
@@ -73,6 +90,58 @@ def _canonical_sport(sport: str) -> str:
     if value == "CBB":
         return "NCAAM"
     return value
+
+
+def _dataset_key(sport: str, dataset: str) -> tuple[str, str]:
+    return (_canonical_sport(sport), str(dataset or "").strip())
+
+
+def _read_cache_key(sport: str, dataset: str, columns: Iterable[str]) -> tuple[str, str, tuple[str, ...]]:
+    canonical_sport, clean_dataset = _dataset_key(sport, dataset)
+    return (canonical_sport, clean_dataset, tuple(str(column) for column in columns))
+
+
+def _cached_frame(sport: str, dataset: str, columns: Iterable[str]) -> pd.DataFrame | None:
+    if _READ_CACHE_TTL_SECONDS <= 0:
+        return None
+    key = _read_cache_key(sport, dataset, columns)
+    now = time.monotonic()
+    with _CACHE_LOCK:
+        cached = _READ_CACHE.get(key)
+        if cached is None:
+            return None
+        cached_at, dataframe = cached
+        if now - cached_at > _READ_CACHE_TTL_SECONDS:
+            _READ_CACHE.pop(key, None)
+            return None
+        return dataframe.copy(deep=True)
+
+
+def _store_cached_frame(sport: str, dataset: str, columns: Iterable[str], dataframe: pd.DataFrame) -> None:
+    if _READ_CACHE_TTL_SECONDS <= 0:
+        return
+    key = _read_cache_key(sport, dataset, columns)
+    with _CACHE_LOCK:
+        _READ_CACHE[key] = (time.monotonic(), dataframe.copy(deep=True))
+
+
+def _invalidate_dataset_cache(sport: str, dataset: str) -> None:
+    canonical_sport, clean_dataset = _dataset_key(sport, dataset)
+    with _CACHE_LOCK:
+        stale = [
+            key for key in _READ_CACHE
+            if key[0] == canonical_sport and key[1] == clean_dataset
+        ]
+        for key in stale:
+            _READ_CACHE.pop(key, None)
+
+
+def _mark_dataset_known(sport: str, dataset: str) -> None:
+    key = _dataset_key(sport, dataset)
+    if not key[0] or not key[1]:
+        return
+    with _CACHE_LOCK:
+        _KNOWN_DATASETS.add(key)
 
 
 def is_turso_ready() -> bool:
@@ -174,6 +243,27 @@ def _result_rows(result: dict) -> list[dict[str, str]]:
     return rows
 
 
+def dataset_exists(sport: str, dataset: str) -> bool:
+    """Check dataset existence with a one-row manifest lookup, never a full data read."""
+    if not is_turso_ready():
+        return False
+    sport, dataset = _dataset_key(sport, dataset)
+    if not sport or not dataset:
+        return False
+    with _CACHE_LOCK:
+        if (sport, dataset) in _KNOWN_DATASETS:
+            return True
+    result = _execute(
+        "SELECT 1 AS present FROM dataset_manifest "
+        f"WHERE sport={_sql_text(sport)} AND dataset={_sql_text(dataset)} LIMIT 1"
+    )
+    exists = bool(_result_rows(result))
+    if exists:
+        _mark_dataset_known(sport, dataset)
+    print(f"[turso-admin-io] exists {sport}/{dataset}: rows_read=1 present={1 if exists else 0}")
+    return exists
+
+
 def _metadata(row: Mapping[str, object]) -> dict[str, str]:
     def first(*names: str) -> str:
         for name in names:
@@ -206,6 +296,17 @@ def _normalize_records(dataframe: pd.DataFrame | None, columns: Iterable[str]) -
         {column: str(value or "") for column, value in record.items()}
         for record in out.to_dict(orient="records")
     ]
+
+
+def _records_frame(records: list[dict[str, str]], columns: Iterable[str]) -> pd.DataFrame:
+    headers = [str(column) for column in columns]
+    return pd.DataFrame(
+        [
+            {column: str(record.get(column, "") or "") for column in headers}
+            for record in records
+        ],
+        columns=headers,
+    )
 
 
 def _normalized_payload(value: str) -> dict[str, str]:
@@ -410,14 +511,23 @@ def batch_dataset_writes():
                     saved_at,
                 )
             )
-        if not write_requests:
-            return
-        requests = [
-            {"type": "execute", "stmt": {"sql": "BEGIN IMMEDIATE", "args": []}},
-            *write_requests,
-            {"type": "execute", "stmt": {"sql": "COMMIT", "args": []}},
-        ]
-        _pipeline(requests, timeout=90.0)
+        if write_requests:
+            requests = [
+                {"type": "execute", "stmt": {"sql": "BEGIN IMMEDIATE", "args": []}},
+                *write_requests,
+                {"type": "execute", "stmt": {"sql": "COMMIT", "args": []}},
+            ]
+            _pipeline(requests, timeout=90.0)
+
+        # The target state is known exactly after a successful diff/transaction,
+        # including when there was nothing to write. Seed the short read cache so
+        # the Streamlit rerun caused by the save does not immediately reread Turso.
+        for (sport, dataset), entry in pending.items():
+            headers = list(entry.get("headers") or [])
+            records = list(entry.get("records") or [])
+            _invalidate_dataset_cache(sport, dataset)
+            _store_cached_frame(sport, dataset, headers, _records_frame(records, headers))
+            _mark_dataset_known(sport, dataset)
     finally:
         _DATASET_WRITE_BATCH.reset(token)
 
@@ -447,14 +557,21 @@ def replace_dataset(
 
     saved_at = pd.Timestamp.utcnow().isoformat()
     write_requests = _dataset_sync_requests(sport, dataset, records, headers, saved_at)
-    if not write_requests:
-        return len(records)
-    requests = [
-        {"type": "execute", "stmt": {"sql": "BEGIN IMMEDIATE", "args": []}},
-        *write_requests,
-        {"type": "execute", "stmt": {"sql": "COMMIT", "args": []}},
-    ]
-    _pipeline(requests, timeout=60.0)
+    if write_requests:
+        requests = [
+            {"type": "execute", "stmt": {"sql": "BEGIN IMMEDIATE", "args": []}},
+            *write_requests,
+            {"type": "execute", "stmt": {"sql": "COMMIT", "args": []}},
+        ]
+        _pipeline(requests, timeout=60.0)
+
+    _invalidate_dataset_cache(sport, dataset)
+    _store_cached_frame(sport, dataset, headers, _records_frame(records, headers))
+    _mark_dataset_known(sport, dataset)
+    print(
+        f"[turso-admin-io] sync {sport}/{dataset}: "
+        f"rows_target={len(records)} statements={len(write_requests)}"
+    )
     return len(records)
 
 
@@ -520,6 +637,12 @@ def append_dataset_rows(
         {"type": "execute", "stmt": {"sql": "COMMIT", "args": []}},
     ]
     _pipeline(requests, timeout=60.0)
+    _invalidate_dataset_cache(sport, dataset)
+    _mark_dataset_known(sport, dataset)
+    print(
+        f"[turso-admin-io] append {sport}/{dataset}: "
+        f"rows_written={len(normalized)} rows_before={start_index}"
+    )
     return len(normalized)
 
 
@@ -536,13 +659,15 @@ def read_dataset(sport: str, dataset: str, columns: Iterable[str]) -> pd.DataFra
         pending = active_batch.get((sport, dataset))
         if pending is not None:
             pending_records = list(pending.get("records") or [])
-            return pd.DataFrame(
-                [
-                    {column: str(record.get(column, "") or "") for column in columns}
-                    for record in pending_records
-                ],
-                columns=columns,
-            )
+            return _records_frame(pending_records, columns)
+
+    cached = _cached_frame(sport, dataset, columns)
+    if cached is not None:
+        print(
+            f"[turso-admin-io] read {sport}/{dataset}: "
+            f"rows_read=0 rows_returned={len(cached)} cache_hit=1"
+        )
+        return cached
 
     result = _execute(
         "SELECT payload_json FROM dataset_rows "
@@ -552,4 +677,12 @@ def read_dataset(sport: str, dataset: str, columns: Iterable[str]) -> pd.DataFra
     for row in _result_rows(result):
         payload = _normalized_payload(row.get("payload_json") or "{}")
         records.append({column: str(payload.get(column, "") or "") for column in columns})
-    return pd.DataFrame(records, columns=columns)
+    dataframe = pd.DataFrame(records, columns=columns)
+    _store_cached_frame(sport, dataset, columns, dataframe)
+    if records:
+        _mark_dataset_known(sport, dataset)
+    print(
+        f"[turso-admin-io] read {sport}/{dataset}: "
+        f"rows_read={len(records)} rows_returned={len(records)} cache_hit=0"
+    )
+    return dataframe
