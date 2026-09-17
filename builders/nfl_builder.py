@@ -5183,41 +5183,53 @@ def _render_build() -> None:
     market_key = re.sub(r"[^A-Za-z0-9]+", "_", game_id)
     hfa_info = _automatic_home_field_advantage(season, week, home_team, selected_schedule_row)
     automatic_home_field = _num(hfa_info.get("value"), HOME_FIELD_PRIOR_POINTS)
-    st.markdown("### Manual sportsbook lines and prices")
-    st.caption("Manual entry only — no sportsbook/API lines or prices are loaded into the NFL builder.")
-    st.caption("For spreads, each team is one side of the market, so each team has one spread price. Over/Under prices apply to the game total and player props.")
+    st.caption(
+        "Enter all game lines and prices below, then tap Apply Game Lines & Odds once. "
+        "The builder will not rerun while you edit each sportsbook field."
+    )
+    with st.form(key=f"nfl_game_market_inputs_{market_key}", clear_on_submit=False):
+        st.markdown("### Manual sportsbook lines and prices")
+        st.caption("Manual entry only — no sportsbook/API lines or prices are loaded into the NFL builder.")
+        st.caption("For spreads, each team is one side of the market, so each team has one spread price. Over/Under prices apply to the game total and player props.")
 
-    st.markdown(f"**{away_team}**")
-    away_spread_input = st.number_input(
-        f"{away_team} spread line", value=None, step=0.5,
-        key=f"nfl_away_spread_line_{market_key}",
-    )
-    away_spread_odds_input = st.number_input(
-        f"{away_team} spread odds", value=None, step=5,
-        key=f"nfl_away_spread_odds_{market_key}",
-    )
-    st.markdown(f"**{home_team}**")
-    home_spread_input = st.number_input(
-        f"{home_team} spread line", value=None, step=0.5,
-        key=f"nfl_home_spread_line_{market_key}",
-    )
-    home_spread_odds_input = st.number_input(
-        f"{home_team} spread odds", value=None, step=5,
-        key=f"nfl_home_spread_odds_{market_key}",
-    )
-    st.markdown("**Game total**")
-    market_total_input = st.number_input(
-        "Point total line", value=None, step=0.5,
-        key=f"nfl_total_{market_key}",
-    )
-    total_over_odds_input = st.number_input(
-        "Over odds", value=None, step=5,
-        key=f"nfl_total_over_odds_{market_key}",
-    )
-    total_under_odds_input = st.number_input(
-        "Under odds", value=None, step=5,
-        key=f"nfl_total_under_odds_{market_key}",
-    )
+        st.markdown(f"**{away_team}**")
+        away_spread_input = st.number_input(
+            f"{away_team} spread line", value=None, step=0.5,
+            key=f"nfl_away_spread_line_{market_key}",
+        )
+        away_spread_odds_input = st.number_input(
+            f"{away_team} spread odds", value=None, step=5,
+            key=f"nfl_away_spread_odds_{market_key}",
+        )
+        st.markdown(f"**{home_team}**")
+        home_spread_input = st.number_input(
+            f"{home_team} spread line", value=None, step=0.5,
+            key=f"nfl_home_spread_line_{market_key}",
+        )
+        home_spread_odds_input = st.number_input(
+            f"{home_team} spread odds", value=None, step=5,
+            key=f"nfl_home_spread_odds_{market_key}",
+        )
+        st.markdown("**Game total**")
+        market_total_input = st.number_input(
+            "Point total line", value=None, step=0.5,
+            key=f"nfl_total_{market_key}",
+        )
+        total_over_odds_input = st.number_input(
+            "Over odds", value=None, step=5,
+            key=f"nfl_total_over_odds_{market_key}",
+        )
+        total_under_odds_input = st.number_input(
+            "Under odds", value=None, step=5,
+            key=f"nfl_total_under_odds_{market_key}",
+        )
+        nfl_game_market_inputs_submitted = st.form_submit_button(
+            "Apply Game Lines & Odds",
+            type="primary",
+            use_container_width=True,
+        )
+    if nfl_game_market_inputs_submitted:
+        st.success("Game lines and odds applied. The matchup grades below are updated.")
 
     spread_market_ready = all(value is not None for value in [
         away_spread_input, away_spread_odds_input, home_spread_input, home_spread_odds_input,
@@ -5436,95 +5448,106 @@ def _render_build() -> None:
             | ((prop_base["Position"].astype(str) == "WR") & (prop_base["Market"].astype(str) == "Receiving Yards"))
             | ((prop_base["Position"].astype(str) == "TE") & (prop_base["Slot"].astype(str) == "TE1") & (prop_base["Market"].astype(str) == "Receiving Yards"))
         )
-        prop_inputs = prop_base.copy()
-        prop_inputs["Market Line"] = np.nan
-        prop_inputs["Over Odds"] = np.nan
-        prop_inputs["Under Odds"] = np.nan
-        prop_inputs["Line Source"] = ""
+        st.caption(
+            "Enter every player prop line and price below, then tap Apply Player Prop Lines & Odds once. "
+            "Editing individual prop fields will not rerun the builder."
+        )
+        with st.form(key=f"nfl_prop_market_inputs_{market_key}", clear_on_submit=False):
+            prop_inputs = prop_base.copy()
+            prop_inputs["Market Line"] = np.nan
+            prop_inputs["Over Odds"] = np.nan
+            prop_inputs["Under Odds"] = np.nan
+            prop_inputs["Line Source"] = ""
 
-        yard_inputs = prop_inputs.loc[wager_mask].copy()
-        slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE1": 6}
-        market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2, "Anytime TD": 3}
-        team_order = {away_team: 0, home_team: 1}
-        yard_inputs["_team_order"] = yard_inputs["Team"].map(team_order).fillna(99)
-        yard_inputs["_slot_order"] = yard_inputs["Slot"].map(slot_order).fillna(99)
-        yard_inputs["_market_order"] = yard_inputs["Market"].map(market_order).fillna(99)
-        yard_inputs = yard_inputs.sort_values(["_team_order", "_slot_order", "_market_order", "Player"])
+            yard_inputs = prop_inputs.loc[wager_mask].copy()
+            slot_order = {"QB": 0, "RB1": 1, "RB2": 2, "WR1": 3, "WR2": 4, "WR3": 5, "TE1": 6}
+            market_order = {"Passing Yards": 0, "Rushing Yards": 1, "Receiving Yards": 2, "Anytime TD": 3}
+            team_order = {away_team: 0, home_team: 1}
+            yard_inputs["_team_order"] = yard_inputs["Team"].map(team_order).fillna(99)
+            yard_inputs["_slot_order"] = yard_inputs["Slot"].map(slot_order).fillna(99)
+            yard_inputs["_market_order"] = yard_inputs["Market"].map(market_order).fillna(99)
+            yard_inputs = yard_inputs.sort_values(["_team_order", "_slot_order", "_market_order", "Player"])
 
-        yard_player_keys = {
-            (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", "")))
-            for _, row in yard_inputs.iterrows()
-        }
+            yard_player_keys = {
+                (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", "")))
+                for _, row in yard_inputs.iterrows()
+            }
 
-        for team in [away_team, home_team]:
-            team_rows = yard_inputs[yard_inputs["Team"].astype(str) == str(team)]
-            if team_rows.empty:
-                continue
-            st.markdown(f"#### {team} player props")
-            for idx, row in team_rows.iterrows():
-                player = _safe_text(row.get("Player", ""))
-                slot = _safe_text(row.get("Slot", ""))
-                market = _safe_text(row.get("Market", ""))
-                projection_value = _num(row.get("Projection", 0), 0)
-                st.markdown(f"**{slot} — {player} · {market}**")
-                st.caption(f"EZPZ projection: {projection_value:.1f}")
-                line_col, over_col, under_col = st.columns(3)
-                line_value = line_col.number_input(
-                    "Line", value=None, step=0.5,
-                    key=f"nfl_prop_line_{market_key}_{idx}",
-                )
-                over_value = over_col.number_input(
-                    "Over odds", value=None, step=5,
-                    key=f"nfl_prop_over_{market_key}_{idx}",
-                )
-                under_value = under_col.number_input(
-                    "Under odds", value=None, step=5,
-                    key=f"nfl_prop_under_{market_key}_{idx}",
-                )
-                if line_value is not None:
-                    prop_inputs.at[idx, "Market Line"] = float(line_value)
-                if over_value is not None:
-                    prop_inputs.at[idx, "Over Odds"] = int(over_value)
-                if under_value is not None:
-                    prop_inputs.at[idx, "Under Odds"] = int(under_value)
-                if line_value is not None and over_value is not None and under_value is not None:
-                    prop_inputs.at[idx, "Line Source"] = "Manual market line"
-
-        td_inputs = prop_inputs[
-            (prop_inputs["Market"].astype(str) == "Anytime TD")
-            & prop_inputs.apply(
-                lambda row: (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", ""))) in yard_player_keys,
-                axis=1,
-            )
-        ].copy()
-        td_inputs["_team_order"] = td_inputs["Team"].map(team_order).fillna(99)
-        td_inputs["_slot_order"] = td_inputs["Slot"].map(slot_order).fillna(99)
-        td_inputs = td_inputs.sort_values(["_team_order", "_slot_order", "Player"])
-
-        if not td_inputs.empty:
-            st.markdown("#### Anytime TD odds")
-            st.caption("Same players as the yardage section above. Enter one American-odds price per player; no second price is required.")
             for team in [away_team, home_team]:
-                team_td_rows = td_inputs[td_inputs["Team"].astype(str) == str(team)]
-                if team_td_rows.empty:
+                team_rows = yard_inputs[yard_inputs["Team"].astype(str) == str(team)]
+                if team_rows.empty:
                     continue
-                st.markdown(f"**{team}**")
-                for idx, row in team_td_rows.iterrows():
+                st.markdown(f"#### {team} player props")
+                for idx, row in team_rows.iterrows():
                     player = _safe_text(row.get("Player", ""))
                     slot = _safe_text(row.get("Slot", ""))
-                    td_lambda = max(0.0, _num(row.get("Projection", 0), 0))
-                    td_probability = 1.0 - math.exp(-td_lambda)
-                    st.markdown(f"**{slot} — {player}**")
-                    st.caption(f"EZPZ anytime TD probability: {td_probability:.1%} • expected TDs λ={td_lambda:.2f}")
-                    odds_value = st.number_input(
-                        "Anytime TD odds", value=None, step=5,
-                        key=f"nfl_anytime_td_odds_{market_key}_{idx}",
+                    market = _safe_text(row.get("Market", ""))
+                    projection_value = _num(row.get("Projection", 0), 0)
+                    st.markdown(f"**{slot} — {player} · {market}**")
+                    st.caption(f"EZPZ projection: {projection_value:.1f}")
+                    line_col, over_col, under_col = st.columns(3)
+                    line_value = line_col.number_input(
+                        "Line", value=None, step=0.5,
+                        key=f"nfl_prop_line_{market_key}_{idx}",
                     )
-                    if odds_value is not None:
-                        prop_inputs.at[idx, "Market Line"] = 0.5
-                        prop_inputs.at[idx, "Over Odds"] = int(odds_value)
-                        prop_inputs.at[idx, "Line Source"] = "Manual anytime TD price"
+                    over_value = over_col.number_input(
+                        "Over odds", value=None, step=5,
+                        key=f"nfl_prop_over_{market_key}_{idx}",
+                    )
+                    under_value = under_col.number_input(
+                        "Under odds", value=None, step=5,
+                        key=f"nfl_prop_under_{market_key}_{idx}",
+                    )
+                    if line_value is not None:
+                        prop_inputs.at[idx, "Market Line"] = float(line_value)
+                    if over_value is not None:
+                        prop_inputs.at[idx, "Over Odds"] = int(over_value)
+                    if under_value is not None:
+                        prop_inputs.at[idx, "Under Odds"] = int(under_value)
+                    if line_value is not None and over_value is not None and under_value is not None:
+                        prop_inputs.at[idx, "Line Source"] = "Manual market line"
 
+            td_inputs = prop_inputs[
+                (prop_inputs["Market"].astype(str) == "Anytime TD")
+                & prop_inputs.apply(
+                    lambda row: (_normalize_team(row.get("Team", "")), _normalize_name(row.get("Player", ""))) in yard_player_keys,
+                    axis=1,
+                )
+            ].copy()
+            td_inputs["_team_order"] = td_inputs["Team"].map(team_order).fillna(99)
+            td_inputs["_slot_order"] = td_inputs["Slot"].map(slot_order).fillna(99)
+            td_inputs = td_inputs.sort_values(["_team_order", "_slot_order", "Player"])
+
+            if not td_inputs.empty:
+                st.markdown("#### Anytime TD odds")
+                st.caption("Same players as the yardage section above. Enter one American-odds price per player; no second price is required.")
+                for team in [away_team, home_team]:
+                    team_td_rows = td_inputs[td_inputs["Team"].astype(str) == str(team)]
+                    if team_td_rows.empty:
+                        continue
+                    st.markdown(f"**{team}**")
+                    for idx, row in team_td_rows.iterrows():
+                        player = _safe_text(row.get("Player", ""))
+                        slot = _safe_text(row.get("Slot", ""))
+                        td_lambda = max(0.0, _num(row.get("Projection", 0), 0))
+                        td_probability = 1.0 - math.exp(-td_lambda)
+                        st.markdown(f"**{slot} — {player}**")
+                        st.caption(f"EZPZ anytime TD probability: {td_probability:.1%} • expected TDs λ={td_lambda:.2f}")
+                        odds_value = st.number_input(
+                            "Anytime TD odds", value=None, step=5,
+                            key=f"nfl_anytime_td_odds_{market_key}_{idx}",
+                        )
+                        if odds_value is not None:
+                            prop_inputs.at[idx, "Market Line"] = 0.5
+                            prop_inputs.at[idx, "Over Odds"] = int(odds_value)
+                            prop_inputs.at[idx, "Line Source"] = "Manual anytime TD price"
+            nfl_prop_market_inputs_submitted = st.form_submit_button(
+                "Apply Player Prop Lines & Odds",
+                type="primary",
+                use_container_width=True,
+            )
+        if nfl_prop_market_inputs_submitted:
+            st.success("Player prop lines and odds applied. Prop grades are updated.")
         evaluated_props = _evaluate_prop_rows(prop_inputs)
         if not evaluated_props.empty:
             st.markdown("#### Prop grades")

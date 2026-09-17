@@ -3094,24 +3094,36 @@ def _render_build() -> None:
     if not math.isfinite(total_default): total_default = 56.0
     market_key = _text(game.get("Game ID"), f"{season}_{week}_{game['Away Team']}_{game['Home Team']}")
 
-    st.markdown("### Sportsbook lines and prices")
-    spread_col, total_col = st.columns(2)
-    with spread_col:
-        market_spread = st.number_input("Home spread line", -60.0, 60.0, float(spread_default), 0.5, key=f"spread_{market_key}")
-        home_spread_odds = int(st.number_input(f"{game['Home Team']} spread odds", -5000, 5000, -110, 5, key=f"home_spread_odds_{market_key}"))
-        away_spread_odds = int(st.number_input(f"{game['Away Team']} spread odds", -5000, 5000, -110, 5, key=f"away_spread_odds_{market_key}"))
-    with total_col:
-        market_total = st.number_input("Game total line", 20.0, 120.0, float(total_default), 0.5, key=f"total_{market_key}")
-        total_over_odds = int(st.number_input("Over odds", -5000, 5000, -110, 5, key=f"total_over_odds_{market_key}"))
-        total_under_odds = int(st.number_input("Under odds", -5000, 5000, -110, 5, key=f"total_under_odds_{market_key}"))
-    st.caption("Spread and total grades use the entered side prices, no-vig implied probability, model probability, and EV. The sportsbook line itself is never a regression predictor.")
+    st.caption(
+        "Enter all sportsbook lines and prices below, then tap Apply Lines & Odds once. "
+        "The builder will not rerun the matchup model while you edit each field."
+    )
+    with st.form(key=f"cfb_market_inputs_{market_key}", clear_on_submit=False):
+        st.markdown("### Sportsbook lines and prices")
+        spread_col, total_col = st.columns(2)
+        with spread_col:
+            market_spread = st.number_input("Home spread line", -60.0, 60.0, float(spread_default), 0.5, key=f"spread_{market_key}")
+            home_spread_odds = int(st.number_input(f"{game['Home Team']} spread odds", -5000, 5000, -110, 5, key=f"home_spread_odds_{market_key}"))
+            away_spread_odds = int(st.number_input(f"{game['Away Team']} spread odds", -5000, 5000, -110, 5, key=f"away_spread_odds_{market_key}"))
+        with total_col:
+            market_total = st.number_input("Game total line", 20.0, 120.0, float(total_default), 0.5, key=f"total_{market_key}")
+            total_over_odds = int(st.number_input("Over odds", -5000, 5000, -110, 5, key=f"total_over_odds_{market_key}"))
+            total_under_odds = int(st.number_input("Under odds", -5000, 5000, -110, 5, key=f"total_under_odds_{market_key}"))
+        st.caption("Spread and total grades use the entered side prices, no-vig implied probability, model probability, and EV. The sportsbook line itself is never a regression predictor.")
 
-    with st.expander("Moneyline (optional / shadow testing)", expanded=False):
-        c3, c4 = st.columns(2)
-        with c3:
-            away_ml = st.number_input("Away moneyline", -5000.0, 5000.0, float(_num(game.get("Away ML"), 0.0)), 5.0, key=f"aml_{market_key}")
-        with c4:
-            home_ml = st.number_input("Home moneyline", -5000.0, 5000.0, float(_num(game.get("Home ML"), 0.0)), 5.0, key=f"hml_{market_key}")
+        with st.expander("Moneyline (optional / shadow testing)", expanded=False):
+            c3, c4 = st.columns(2)
+            with c3:
+                away_ml = st.number_input("Away moneyline", -5000.0, 5000.0, float(_num(game.get("Away ML"), 0.0)), 5.0, key=f"aml_{market_key}")
+            with c4:
+                home_ml = st.number_input("Home moneyline", -5000.0, 5000.0, float(_num(game.get("Home ML"), 0.0)), 5.0, key=f"hml_{market_key}")
+        cfb_market_inputs_submitted = st.form_submit_button(
+            "Apply Lines & Odds",
+            type="primary",
+            use_container_width=True,
+        )
+    if cfb_market_inputs_submitted:
+        st.success("Lines and odds applied. The matchup grades below are updated.")
 
     roof_options = ["Outdoor/Unknown", "Retractable roof open", "Retractable roof closed", "Indoor/Dome"]
     auto_roof = _text(game.get("Roof"), "Outdoor/Unknown")

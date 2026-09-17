@@ -161,16 +161,28 @@ def _render_build():
         with ch:
             home = _team_inputs("Home", home_name, home)
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        home_spread = st.number_input("Home spread", value=-3.0, step=0.5, key="cbb_home_spread")
-        home_ml = st.number_input("Home moneyline", value=-150, step=5, key="cbb_home_ml")
-    with c2:
-        market_total = st.number_input("Game total", value=142.0, step=0.5, key="cbb_total")
-        away_ml = st.number_input("Away moneyline", value=130, step=5, key="cbb_away_ml")
-    with c3:
-        home_court = st.number_input("Home-court points", value=3.2, step=0.1, key="cbb_hca")
-        rotation_confidence = st.slider("Rotation confidence", 0, 100, 65, key="cbb_rotation_confidence")
+    st.caption(
+        "Enter the market lines and prices, then tap Apply Lines & Odds once. "
+        "The builder will not rerun while you edit those fields."
+    )
+    with st.form(key="cbb_market_inputs", clear_on_submit=False):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            home_spread = st.number_input("Home spread", value=-3.0, step=0.5, key="cbb_home_spread")
+            home_ml = st.number_input("Home moneyline", value=-150, step=5, key="cbb_home_ml")
+        with c2:
+            market_total = st.number_input("Game total", value=142.0, step=0.5, key="cbb_total")
+            away_ml = st.number_input("Away moneyline", value=130, step=5, key="cbb_away_ml")
+        with c3:
+            home_court = st.number_input("Home-court points", value=3.2, step=0.1, key="cbb_hca")
+            rotation_confidence = st.slider("Rotation confidence", 0, 100, 65, key="cbb_rotation_confidence")
+        cbb_market_inputs_submitted = st.form_submit_button(
+            "Apply Lines & Odds",
+            type="primary",
+            use_container_width=True,
+        )
+    if cbb_market_inputs_submitted:
+        st.success("Lines and odds applied. The matchup grades below are updated.")
 
     with st.expander("Advanced matchup adjustments"):
         pace_adjustment = st.number_input("Possession adjustment", value=0.0, step=0.25, key="cbb_pace_adjust")
