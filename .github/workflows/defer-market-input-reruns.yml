@@ -1,0 +1,151 @@
+name: One-time deferred market input patch
+
+on:
+  push:
+    paths:
+      - ".github/workflows/defer-market-input-reruns.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Defer sportsbook input reruns across builders
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def indent_block(block: str, spaces: int = 4) -> str:
+              prefix = " " * spaces
+              return "\n".join(prefix + line if line else line for line in block.splitlines())
+
+          def wrap_segment(path: Path, start_marker: str, end_marker: str, before: str, after: str, guard: str) -> None:
+              text = path.read_text(encoding="utf-8")
+              if guard in text:
+                  print(f"{path}: {guard} already present; skipping")
+                  return
+              start = text.find(start_marker)
+              if start < 0:
+                  raise SystemExit(f"{path}: start marker not found: {start_marker!r}")
+              end = text.find(end_marker, start)
+              if end < 0:
+                  raise SystemExit(f"{path}: end marker not found: {end_marker!r}")
+              block = text[start:end].rstrip("\n")
+              replacement = before + indent_block(block, 4) + "\n" + after
+              text = text[:start] + replacement + text[end:]
+              path.write_text(text, encoding="utf-8")
+
+          # CFB: keep all spread/total/moneyline editing client-side until one submit.
+          wrap_segment(
+              Path("builders/cfb_builder.py"),
+              '    st.markdown("### Sportsbook lines and prices")\n',
+              '    roof_options = ["Outdoor/Unknown", "Retractable roof open", "Retractable roof closed", "Indoor/Dome"]\n',
+              '    st.caption(\n'
+              '        "Enter all sportsbook lines and prices below, then tap Apply Lines & Odds once. "\n'
+              '        "The builder will not rerun the matchup model while you edit each field."\n'
+              '    )\n'
+              '    with st.form(key=f"cfb_market_inputs_{market_key}", clear_on_submit=False):\n',
+              '        cfb_market_inputs_submitted = st.form_submit_button(\n'
+              '            "Apply Lines & Odds",\n'
+              '            type="primary",\n'
+              '            use_container_width=True,\n'
+              '        )\n'
+              '    if cfb_market_inputs_submitted:\n'
+              '        st.success("Lines and odds applied. The matchup grades below are updated.")\n\n',
+              'cfb_market_inputs_',
+          )
+
+          # NFL game markets: spread/total line and side prices submit together.
+          wrap_segment(
+              Path("builders/nfl_builder.py"),
+              '    st.markdown("### Manual sportsbook lines and prices")\n',
+              '    spread_market_ready = all(value is not None for value in [\n',
+              '    st.caption(\n'
+              '        "Enter all game lines and prices below, then tap Apply Game Lines & Odds once. "\n'
+              '        "The builder will not rerun while you edit each sportsbook field."\n'
+              '    )\n'
+              '    with st.form(key=f"nfl_game_market_inputs_{market_key}", clear_on_submit=False):\n',
+              '        nfl_game_market_inputs_submitted = st.form_submit_button(\n'
+              '            "Apply Game Lines & Odds",\n'
+              '            type="primary",\n'
+              '            use_container_width=True,\n'
+              '        )\n'
+              '    if nfl_game_market_inputs_submitted:\n'
+              '        st.success("Game lines and odds applied. The matchup grades below are updated.")\n\n',
+              'nfl_game_market_inputs_',
+          )
+
+          # NFL player markets: all yardage/TD lines and prices submit as one batch.
+          wrap_segment(
+              Path("builders/nfl_builder.py"),
+              '        prop_inputs = prop_base.copy()\n',
+              '        evaluated_props = _evaluate_prop_rows(prop_inputs)\n',
+              '        st.caption(\n'
+              '            "Enter every player prop line and price below, then tap Apply Player Prop Lines & Odds once. "\n'
+              '            "Editing individual prop fields will not rerun the builder."\n'
+              '        )\n'
+              '        with st.form(key=f"nfl_prop_market_inputs_{market_key}", clear_on_submit=False):\n',
+              '            nfl_prop_market_inputs_submitted = st.form_submit_button(\n'
+              '                "Apply Player Prop Lines & Odds",\n'
+              '                type="primary",\n'
+              '                use_container_width=True,\n'
+              '            )\n'
+              '        if nfl_prop_market_inputs_submitted:\n'
+              '            st.success("Player prop lines and odds applied. Prop grades are updated.")\n',
+              'nfl_prop_market_inputs_',
+          )
+
+          # CBB/NCAAM foundation builder: defer the market/control row until submit.
+          wrap_segment(
+              Path("builders/cbb_builder.py"),
+              '    c1, c2, c3 = st.columns(3)\n    with c1:\n        home_spread = st.number_input("Home spread", value=-3.0, step=0.5, key="cbb_home_spread")\n',
+              '    with st.expander("Advanced matchup adjustments"):\n',
+              '    st.caption(\n'
+              '        "Enter the market lines and prices, then tap Apply Lines & Odds once. "\n'
+              '        "The builder will not rerun while you edit those fields."\n'
+              '    )\n'
+              '    with st.form(key="cbb_market_inputs", clear_on_submit=False):\n',
+              '        cbb_market_inputs_submitted = st.form_submit_button(\n'
+              '            "Apply Lines & Odds",\n'
+              '            type="primary",\n'
+              '            use_container_width=True,\n'
+              '        )\n'
+              '    if cbb_market_inputs_submitted:\n'
+              '        st.success("Lines and odds applied. The matchup grades below are updated.")\n\n',
+              'cbb_market_inputs',
+          )
+          PY
+
+      - name: Validate builder changes
+        shell: bash
+        run: |
+          python -m py_compile builders/nfl_builder.py builders/cfb_builder.py builders/cbb_builder.py
+          grep -q 'nfl_game_market_inputs_' builders/nfl_builder.py
+          grep -q 'nfl_prop_market_inputs_' builders/nfl_builder.py
+          grep -q 'cfb_market_inputs_' builders/cfb_builder.py
+          grep -q 'cbb_market_inputs' builders/cbb_builder.py
+          grep -q 'form_submit_button' builders/nfl_builder.py
+          grep -q 'form_submit_button' builders/cfb_builder.py
+          grep -q 'form_submit_button' builders/cbb_builder.py
+          git diff --check
+
+      - name: Commit builder update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add builders/nfl_builder.py builders/cfb_builder.py builders/cbb_builder.py
+          if git diff --cached --quiet; then
+            echo "No builder changes to commit"
+            exit 0
+          fi
+          git commit -m "Defer sportsbook input reruns across builders"
+          git pull --rebase origin main
+          git push origin HEAD:main
