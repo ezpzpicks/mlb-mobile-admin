@@ -1,10 +1,9 @@
-"""Non-blocking Covers enrichment for the interactive CFB builder.
+"""Non-blocking external-data enrichment for the interactive CFB builder.
 
-The CFB build page should never wait on third-party HTML requests after the user
-submits sportsbook lines.  The automatic slate path still warms current Covers
-personnel and weather data before it evaluates games; interactive reruns consume
-only those warmed in-memory values (or the existing persisted CFB personnel/base
-weather fallbacks) so projections render immediately even after a cold deploy.
+The CFB build page should never wait on third-party network requests after the user
+submits sportsbook lines. Automatic/background paths can still warm Covers and
+open-data caches, while interactive reruns consume whatever is already available
+and fall back cleanly until the warmup completes.
 """
 from __future__ import annotations
 
@@ -15,9 +14,46 @@ from typing import Any
 import pandas as pd
 
 
+def _install_nonblocking_totals(builder: Any) -> None:
+    """Keep the independent totals model from synchronously downloading PBP files.
+
+    ``cfb_total_regression`` added a blocking fallback that calls
+    ``_download_open_asset_now`` whenever the PBP cache is empty. On a fresh Render
+    instance that can require full prior/current-season downloads before the first
+    projection is displayed. The normal builder loader already queues those same
+    files on its background executor, so interactive projections should use that
+    non-blocking path instead.
+    """
+    if getattr(builder, "_CFB_NONBLOCKING_TOTALS_INSTALLED", False):
+        return
+
+    try:
+        from builders import cfb_total_regression as totals
+    except Exception:
+        return
+
+    def nonblocking_pbp_metrics(cfb_builder: Any, season: int, week: int | None) -> pd.DataFrame:
+        try:
+            frame = cfb_builder._pbp_team_metrics(int(season), week)
+        except Exception:
+            frame = pd.DataFrame()
+        return frame if isinstance(frame, pd.DataFrame) else pd.DataFrame()
+
+    # _metric_context resolves _load_pbp_metrics at call time, so replacing this
+    # helper is enough to remove the blocking download without changing the model,
+    # coefficients, market calibration, or the background open-data warmer.
+    totals._load_pbp_metrics = nonblocking_pbp_metrics
+    builder._CFB_NONBLOCKING_TOTALS_INSTALLED = True
+
+
 def install_nonblocking_covers(builder: Any, covers: Any) -> None:
     if getattr(builder, "_CFB_NONBLOCKING_COVERS_INSTALLED", False):
         return
+
+    # The totals regression is installed before this hook in app_mobile_admin.py.
+    # Patch its cache-miss behavior here so the first interactive projection cannot
+    # be held up by a large SportsDataverse play-by-play download.
+    _install_nonblocking_totals(builder)
 
     # Preserve the real network-backed functions for the automatic slate warmer.
     network_team_report = covers._team_report
@@ -64,7 +100,7 @@ def install_nonblocking_covers(builder: Any, covers: Any) -> None:
             ))
             if teams:
                 # Warm both teams concurrently before the existing Covers/run_week
-                # wrapper runs.  It will then read these same values from cache.
+                # wrapper runs. It will then read these same values from cache.
                 with ThreadPoolExecutor(
                     max_workers=min(6, len(teams)),
                     thread_name_prefix="ezpz-covers-cfb-warm",
