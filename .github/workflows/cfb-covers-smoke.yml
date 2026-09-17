@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - "builders/cfb_covers.py"
+      - "builders/cfb_interactive_recovery.py"
       - "research/test_cfb_covers_layer.py"
+      - "research/test_cfb_covers_directory_recovery.py"
       - "app_mobile_admin.py"
       - ".github/workflows/cfb-covers-smoke.yml"
   workflow_dispatch:
@@ -21,6 +23,8 @@ jobs:
       - name: Install parser dependencies
         run: python -m pip install --disable-pip-version-check pandas requests beautifulsoup4
       - name: Compile integration files
-        run: python -m py_compile builders/cfb_covers.py app_mobile_admin.py
+        run: python -m py_compile builders/cfb_covers.py builders/cfb_interactive_recovery.py app_mobile_admin.py
       - name: Run Covers parser and matching smoke test
         run: PYTHONPATH=. python research/test_cfb_covers_layer.py
+      - name: Run Covers team directory recovery test
+        run: PYTHONPATH=. python research/test_cfb_covers_directory_recovery.py
