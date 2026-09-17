@@ -121,11 +121,13 @@ if selected_sport == "MLB":
 elif selected_sport == "CFB":
     set_storage_sport("CFB")
     from builders import cfb_builder
+    from builders.cfb_save_type_guard import install_save_type_guard
     from builders.cfb_game_regression import install_regression_layer
     from builders.cfb_total_regression import install_total_regression
     from builders.cfb_market_calibration import install_market_calibration
     from builders.cfb_covers import install_covers_layer
     from builders.cfb_interactive_recovery import install_interactive_recovery
+    install_save_type_guard(cfb_builder)
     install_regression_layer(cfb_builder)
     install_total_regression(cfb_builder)
     install_market_calibration(cfb_builder)
