@@ -121,17 +121,14 @@ if selected_sport == "MLB":
 elif selected_sport == "CFB":
     set_storage_sport("CFB")
     from builders import cfb_builder
-    from builders import cfb_covers
     from builders.cfb_game_regression import install_regression_layer
     from builders.cfb_total_regression import install_total_regression
     from builders.cfb_market_calibration import install_market_calibration
     from builders.cfb_covers import install_covers_layer
-    from builders.cfb_nonblocking_covers import install_nonblocking_covers
     install_regression_layer(cfb_builder)
     install_total_regression(cfb_builder)
     install_market_calibration(cfb_builder)
     install_covers_layer(cfb_builder)
-    install_nonblocking_covers(cfb_builder, cfb_covers)
     cfb_builder.MODEL_VERSION = "cfb-v2.4-covers-personnel-weather-2026-09-11"
     cfb_builder.render()
 elif selected_sport == "NFL":
