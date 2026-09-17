@@ -55,6 +55,99 @@ def _set_sport(sport: str) -> None:
         pass
 
 
+def _install_cfb_evaluation_cache(builder) -> None:
+    """Reuse the already-rendered CFB result on unchanged Streamlit reruns.
+
+    A Streamlit button click reruns the script from the top. The CFB save buttons
+    sit below ``evaluate_game()``, so pressing Save used to run the full 30,000-
+    simulation projection a second time before the button branch could persist the
+    result. On the small Render admin instance that can saturate the CPU for roughly
+    a minute even though the actual Turso save is only one bounded round trip.
+
+    Cache only the most recent interactive evaluation and include every user/model
+    input that can change the displayed grade. This makes a Save rerun reuse exactly
+    what is already on screen while still invalidating immediately when a line,
+    price, personnel input, environment input, or selected-team rating changes.
+    """
+    if getattr(builder, "_EZPZ_CFB_EVALUATION_CACHE", False):
+        return
+
+    original_evaluate_game = builder.evaluate_game
+
+    def object_signature(value):
+        try:
+            return tuple(sorted((str(key), repr(item)) for key, item in vars(value).items()))
+        except Exception:
+            return repr(value)
+
+    def selected_rating_signature(game, ratings):
+        output = []
+        try:
+            teams = [str(game.get("Away Team", "")), str(game.get("Home Team", ""))]
+            team_values = ratings["Team"].astype(str)
+            for team in teams:
+                matched = ratings.loc[team_values == team]
+                if matched.empty:
+                    output.append((team, "missing"))
+                    continue
+                row = matched.iloc[0]
+                output.append(
+                    (
+                        team,
+                        repr(row.get("Power Rating", "")),
+                        repr(row.get("Offense Rating", "")),
+                        repr(row.get("Defense Rating", "")),
+                        repr(row.get("Data Confidence", "")),
+                        repr(row.get("Updated", "")),
+                    )
+                )
+        except Exception:
+            return ()
+        return tuple(output)
+
+    def cached_evaluate_game(*args, **kwargs):
+        # evaluate_game(game, ratings, away_personnel, home_personnel,
+        # environment, market_spread, market_total, away_ml, home_ml, ...)
+        if len(args) < 5:
+            return original_evaluate_game(*args, **kwargs)
+
+        game = args[0]
+        ratings = args[1]
+        game_id = str(game.get("Game ID", ""))
+        signature = repr(
+            (
+                str(getattr(builder, "MODEL_VERSION", "")),
+                game_id,
+                str(game.get("Season", "")),
+                str(game.get("Week", "")),
+                selected_rating_signature(game, ratings),
+                object_signature(args[2]),
+                object_signature(args[3]),
+                object_signature(args[4]),
+                tuple(repr(value) for value in args[5:]),
+                tuple(sorted((str(key), repr(value)) for key, value in kwargs.items())),
+            )
+        )
+
+        cache_key = "_cfb_interactive_evaluation_key"
+        result_key = "_cfb_interactive_evaluation_result"
+        if st.session_state.get(cache_key) == signature:
+            cached = st.session_state.get(result_key)
+            if isinstance(cached, dict):
+                print(f"[cfb-eval-cache] hit game={game_id}")
+                return cached
+
+        started = time.perf_counter()
+        result = original_evaluate_game(*args, **kwargs)
+        st.session_state[cache_key] = signature
+        st.session_state[result_key] = result
+        print(f"[cfb-eval-cache] miss game={game_id} computed_in={time.perf_counter() - started:.3f}s")
+        return result
+
+    builder.evaluate_game = cached_evaluate_game
+    builder._EZPZ_CFB_EVALUATION_CACHE = True
+
+
 valid_sports = set(SPORT_META)
 selected_sport = str(st.session_state.get("selected_sport", "") or "").upper()
 query_sport = _query_sport()
@@ -133,6 +226,7 @@ elif selected_sport == "CFB":
     install_market_calibration(cfb_builder)
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
+    _install_cfb_evaluation_cache(cfb_builder)
     cfb_builder.MODEL_VERSION = "cfb-v2.4-covers-personnel-weather-2026-09-11"
     cfb_builder.render()
 elif selected_sport == "NFL":
