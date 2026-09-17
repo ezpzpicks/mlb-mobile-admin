@@ -7,6 +7,7 @@ an admin can see which starters/injuries were applied.
 """
 from __future__ import annotations
 
+import re
 import time
 from typing import Any
 
@@ -39,6 +40,73 @@ def _install_nonblocking_interactive_totals(builder: Any) -> None:
 
     totals._load_pbp_metrics = cached_pbp_metrics
     builder._EZPZ_CFB_INTERACTIVE_TOTALS_NONBLOCKING = True
+
+
+def _install_covers_team_directory_fix(covers: Any) -> None:
+    """Recover team injury URLs from Covers' current overview-link directory.
+
+    Covers' NCAAF injuries landing page currently links each team to its overview
+    route (``.../teams/main/<slug>``), while the original CFB parser only accepted
+    links that already ended in ``/injuries``. That left the team directory empty
+    for most schools, even though the separate Covers weather endpoint continued to
+    work. Resolve either route shape, then always request the canonical injury page.
+    """
+    if getattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY", False):
+        return
+
+    original_directory = covers._directory
+
+    def directory(builder: Any) -> list[dict[str, str]]:
+        now = time.time()
+        try:
+            with covers._LOCK:
+                cached = covers._DIRECTORY
+                if cached and now - float(cached[0]) <= float(covers.DIRECTORY_TTL) and cached[1]:
+                    return list(cached[1])
+        except Exception:
+            pass
+
+        try:
+            html = covers._fetch_html(builder, covers.COVERS_INJURIES_URL, ttl=covers.DIRECTORY_TTL)
+            soup = covers.BeautifulSoup(html, "html.parser")
+            pattern = re.compile(
+                r"/sport/football/ncaaf/teams/main/([^/?#]+)(?:/injuries)?(?:[/?#].*)?$",
+                re.I,
+            )
+            rows: dict[str, dict[str, str]] = {}
+            for anchor in soup.find_all("a", href=True):
+                href = str(anchor.get("href") or "")
+                match = pattern.search(href)
+                if not match:
+                    continue
+                slug = match.group(1).strip("/")
+                if not slug:
+                    continue
+                rows[slug] = {
+                    "slug": slug,
+                    "label": covers._clean_text(anchor.get_text(" ", strip=True)) or covers._slug_label(slug),
+                    "slug_label": covers._slug_label(slug),
+                    "url": f"{covers.COVERS_BASE}/sport/football/ncaaf/teams/main/{slug}/injuries",
+                }
+            if rows:
+                result = list(rows.values())
+                with covers._LOCK:
+                    covers._DIRECTORY = (now, result)
+                return result
+        except Exception:
+            pass
+
+        # Preserve the original fail-open behavior if Covers changes again.
+        return original_directory(builder)
+
+    covers._directory = directory
+    try:
+        with covers._LOCK:
+            if covers._DIRECTORY and not covers._DIRECTORY[1]:
+                covers._DIRECTORY = None
+    except Exception:
+        pass
+    covers._EZPZ_CFB_TEAM_DIRECTORY_RECOVERY = True
 
 
 def _cached_covers_report(covers: Any, team: str) -> dict[str, Any]:
@@ -126,12 +194,21 @@ def _install_covers_lineup_display(builder: Any) -> None:
 
 
 def install_interactive_recovery(builder: Any) -> None:
-    """Install the selected-matchup responsiveness and Covers lineup fixes."""
+    """Install selected-matchup responsiveness plus Covers personnel recovery."""
     if getattr(builder, "_EZPZ_CFB_INTERACTIVE_RECOVERY", False):
         return
     _install_nonblocking_interactive_totals(builder)
+    try:
+        from builders import cfb_covers as covers
+        _install_covers_team_directory_fix(covers)
+    except Exception:
+        pass
     _install_covers_lineup_display(builder)
     builder._EZPZ_CFB_INTERACTIVE_RECOVERY = True
 
 
-__all__ = ["install_interactive_recovery", "_covers_lineup_frame"]
+__all__ = [
+    "install_interactive_recovery",
+    "_covers_lineup_frame",
+    "_install_covers_team_directory_fix",
+]
