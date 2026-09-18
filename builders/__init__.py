@@ -579,7 +579,7 @@ def _patch_cfb_builder(module: Any) -> Any:
                 "Data Confidence": round(module.clamp(data_conf, 20.0, 98.0), 1),
                 "Advanced Data Available": bool(prior_avail.get("advanced") and current_avail.get("advanced")),
                 "Roster Data Available": bool(prior_avail.get("roster") and current_avail.get("roster")),
-                "Source": "ESPN/SportsDataverse prior-season performance + progressive current-season blend",
+                "Source": "ESPN/SportsDataverse full-input-verified prior-season performance + progressive current-season blend",
                 "Updated": module._now(),
             }
 
