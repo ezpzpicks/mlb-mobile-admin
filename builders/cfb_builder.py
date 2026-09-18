@@ -3074,7 +3074,17 @@ def _render_build() -> None:
     ratings = _ensure_automatic_ratings(season, week)
     if ratings.empty:
         warning = st.session_state.get("cfb_auto_ratings_warning", "")
-        st.error(f"Automatic team ratings could not be built. {warning}".strip())
+        if "still preparing" in str(warning).lower() or "not ready" in str(warning).lower():
+            st.info(
+                "Preparing the complete CFB model dataset. The builder is intentionally "
+                "locked so no game can be projected from partial data."
+            )
+            if warning:
+                st.caption(str(warning))
+            if st.button("Check full-data readiness", use_container_width=True, key="cfb_check_full_data"):
+                st.rerun()
+        else:
+            st.error(f"Automatic team ratings could not be built. {warning}".strip())
         return
 
     # The selected matchup renders first. The full date is filled automatically
@@ -3122,6 +3132,28 @@ def _render_build() -> None:
     home_rating = _rating_row(ratings, game["Home Team"])
     away_base = default_personnel(game["Away Team"], away_rating, season, week, game["Game ID"])
     home_base = default_personnel(game["Home Team"], home_rating, season, week, game["Game ID"])
+
+    # The production Covers layer marks whether its live starter/injury report
+    # actually loaded. Never continue with the base/fallback personnel object when
+    # that required live source is missing.
+    missing_personnel = [
+        team
+        for team, personnel in (
+            (str(game["Away Team"]), away_base),
+            (str(game["Home Team"]), home_base),
+        )
+        if getattr(personnel, "_covers_personnel_ready", True) is False
+    ]
+    if missing_personnel:
+        st.error(
+            "Full model data gate: live Covers starters/injuries are unavailable for "
+            + ", ".join(missing_personnel)
+            + ". No projection was run."
+        )
+        if st.button("Retry live personnel", use_container_width=True, key=f"cfb_retry_personnel_{market_key}"):
+            st.rerun()
+        return
+
     with st.expander("Quarterbacks, injuries, and continuity", expanded=False):
         left, right = st.columns(2)
         with left:
@@ -3134,6 +3166,35 @@ def _render_build() -> None:
         environment = build_environment(game, season, roof)
     except Exception as exc:
         environment = Environment(roof=roof, stadium=_text(game.get("Stadium")), notes=f"Environment fallback: {exc}")
+
+    # For outdoor games inside the normal forecast horizon, weather is a required
+    # model input. Far-future games are allowed to use the model's documented
+    # neutral-weather treatment because a real forecast does not yet exist.
+    weather_required = False
+    if not any(term in str(roof).lower() for term in ("indoor", "dome", "closed")):
+        try:
+            target = datetime.fromisoformat(_text(game.get("Game Time")).replace("Z", "+00:00"))
+            if target.tzinfo is None:
+                target = target.replace(tzinfo=timezone.utc)
+            horizon_days = (target.astimezone(timezone.utc) - datetime.now(timezone.utc)).total_seconds() / 86400.0
+            weather_required = -1.0 <= horizon_days <= 7.5
+        except Exception:
+            weather_required = False
+    if weather_required:
+        weather_values = [
+            _num(getattr(environment, "temperature", np.nan), np.nan),
+            _num(getattr(environment, "wind", np.nan), np.nan),
+            _num(getattr(environment, "precipitation_probability", np.nan), np.nan),
+        ]
+        if not all(math.isfinite(value) for value in weather_values):
+            st.error(
+                "Full model data gate: current weather is required for this outdoor game "
+                "but a complete forecast could not be loaded. No projection was run."
+            )
+            if st.button("Retry weather", use_container_width=True, key=f"cfb_retry_weather_{market_key}"):
+                st.rerun()
+            return
+
     with st.expander("Home field, travel, rest, and weather", expanded=False):
         h1, h2, h3, h4 = st.columns(4)
         h1.metric("Home-field advantage", f"{environment.home_field:+.2f}")
