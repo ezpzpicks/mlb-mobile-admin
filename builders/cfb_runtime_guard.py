@@ -153,6 +153,11 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             return False
         if "Advanced Data Available" not in view.columns or "Roster Data Available" not in view.columns:
             return False
+        if "Source" not in view.columns:
+            return False
+        verified = view["Source"].astype(str).str.contains("full-input-verified", regex=False)
+        if not bool(verified.all()):
+            return False
         advanced = view["Advanced Data Available"].map(cfb_builder._bool)
         roster = view["Roster Data Available"].map(cfb_builder._bool)
         if not bool(advanced.all()) or not bool(roster.all()):
