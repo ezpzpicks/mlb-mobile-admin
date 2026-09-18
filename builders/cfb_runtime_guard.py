@@ -169,12 +169,27 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         return True
 
     def _required_asset_specs(season: int) -> list[tuple[str, int, tuple[str, ...]]]:
-        return [
-            ("cfbfastR_cfb_pbp", int(season) - 1, ("play_by_play", "pbp")),
-            ("cfbfastR_cfb_pbp", int(season), ("play_by_play", "pbp")),
-            ("espn_cfb_rosters", int(season) - 1, ("roster", "espn")),
-            ("espn_cfb_rosters", int(season), ("roster", "espn")),
+        season = int(season)
+        specs = [
+            ("cfbfastR_cfb_pbp", season, ("play_by_play", "pbp")),
+            ("espn_cfb_rosters", season - 1, ("roster", "espn")),
+            ("espn_cfb_rosters", season, ("roster", "espn")),
         ]
+
+        # A completed prior season may use the exact team-level aggregates that
+        # were already calculated from its full PBP parquet and persisted to
+        # NCAAF Turso. Current-season PBP is never satisfied by this cache because
+        # it must remain week-filtered/as-of-date.
+        prior_cached = False
+        checker = getattr(cfb_builder, "_persistent_pbp_metrics_ready", None)
+        if callable(checker):
+            try:
+                prior_cached = bool(checker(season - 1))
+            except Exception:
+                prior_cached = False
+        if not prior_cached:
+            specs.insert(0, ("cfbfastR_cfb_pbp", season - 1, ("play_by_play", "pbp")))
+        return specs
 
     def _asset_ready(tag: str, season: int) -> bool:
         path = cfb_builder.OPEN_DATA_DIR / f"{tag}_{season}.parquet"
@@ -211,7 +226,8 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         if missing_assets:
             st.session_state["cfb_auto_ratings_warning"] = (
                 "Full CFB model data is still preparing. Build is locked until all "
-                "advanced PBP and roster/returning-production files are ready. "
+                "advanced PBP and roster/returning-production inputs are ready. "
+                "Completed prior-season PBP may be satisfied by its exact Turso aggregate cache. "
                 "Waiting on: " + ", ".join(missing_assets)
             )
             return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
