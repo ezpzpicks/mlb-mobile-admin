@@ -3072,6 +3072,7 @@ def _render_build() -> None:
     week = int(pd.to_numeric(day_schedule["Week"], errors="coerce").dropna().iloc[0])
 
     ratings = _ensure_automatic_ratings(season, week)
+    readiness_wait_key = f"cfb_full_data_wait_started_{season}_{week}"
     if ratings.empty:
         warning = st.session_state.get("cfb_auto_ratings_warning", "")
         if "still preparing" in str(warning).lower() or "not ready" in str(warning).lower():
@@ -3081,11 +3082,22 @@ def _render_build() -> None:
             )
             if warning:
                 st.caption(str(warning))
-            if st.button("Check full-data readiness", use_container_width=True, key="cfb_check_full_data"):
+            started_wait = float(st.session_state.get(readiness_wait_key, time.time()))
+            st.session_state[readiness_wait_key] = started_wait
+            elapsed_wait = max(0.0, time.time() - started_wait)
+            if elapsed_wait < 240.0:
+                st.caption(
+                    f"Full-data readiness is being checked automatically "
+                    f"({int(elapsed_wait)}s elapsed)."
+                )
+                time.sleep(5.0)
+                st.rerun()
+            elif st.button("Check full-data readiness", use_container_width=True, key="cfb_check_full_data"):
                 st.rerun()
         else:
             st.error(f"Automatic team ratings could not be built. {warning}".strip())
         return
+    st.session_state.pop(readiness_wait_key, None)
 
     # The selected matchup renders first. The full date is filled automatically
     # in short batches on the Slate page instead of blocking this page.
