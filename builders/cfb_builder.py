@@ -54,6 +54,8 @@ ALLOW_BLOCKING_OPEN_DATA = os.getenv("EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA", "0").s
 _OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="ezpz-cfb-open-data")
 _OPEN_DATA_JOBS: dict[str, Any] = {}
 _OPEN_DATA_JOB_LOCK = threading.Lock()
+_PBP_METRICS_MEMORY_CACHE: dict[int, pd.DataFrame] = {}
+_PBP_METRICS_CACHE_LOCK = threading.Lock()
 
 # This model now owns a dedicated CFB workbook. Within that database, public
 # tab names mirror MLB so the public site can use one sport-agnostic contract.
@@ -64,6 +66,37 @@ SCHEDULE_TAB = "schedule"
 PERSONNEL_TAB = "personnel_snapshots"
 CALIBRATION_TAB = "calibration"
 MODEL_LOG_TAB = "model_change_log"
+PBP_METRICS_CACHE_TAB = "cfb_pbp_team_metrics_cache"
+
+PBP_TEAM_METRIC_VALUE_COLUMNS = [
+    "Team",
+    "EPA/PPA Offense", "EPA/PPA Defense Raw",
+    "Success Rate Offense", "Success Rate Defense Raw",
+    "Pass EPA/PPA", "Pass Defense Raw",
+    "Rush EPA/PPA", "Rush Defense Raw",
+    "Explosiveness Offense", "Explosiveness Defense Raw",
+    "Advanced Plays", "Advanced Drives",
+    "Line Yards Offense", "Line Yards Defense Raw",
+    "Power Success", "Stuff Rate Offense Raw", "Stuff Rate Defense Raw",
+    "Havoc Allowed", "Havoc Created",
+    "Standard Downs Offense", "Standard Downs Defense Raw",
+    "Passing Downs Offense", "Passing Downs Defense Raw",
+    "Finishing Drives Offense", "Finishing Drives Defense Raw",
+    "Field Position Offense", "Field Position Defense Raw",
+    "Yards Per Play", "Yards Per Play Allowed",
+    "Third Down Rate", "Third Down Defense Raw",
+    "Red Zone TD Rate", "Red Zone Defense Raw",
+    "Turnover Rate", "Takeaway Rate",
+    "Sack Rate Allowed", "Sack Rate Created",
+    "Pace Seconds Per Play", "Plays Per Game", "Possessions Per Game",
+    "Open PBP Available",
+]
+PBP_METRICS_CACHE_COLUMNS = [
+    "Season", "Cache Scope", "Cache Version", "Cache Complete",
+    *PBP_TEAM_METRIC_VALUE_COLUMNS,
+    "Source", "Updated",
+]
+PBP_METRICS_CACHE_VERSION = "full-season-pbp-team-metrics-v1"
 
 RATING_COLUMNS = [
     "Team", "Conference", "Classification", "Season", "Projection Week",
@@ -832,7 +865,133 @@ def _line_yards_value(yards: float) -> float:
     return 7.0
 
 
+def _pbp_metrics_cache_complete(frame: pd.DataFrame | None) -> bool:
+    if frame is None or frame.empty or "Team" not in frame.columns:
+        return False
+    view = frame[frame["Team"].astype(str).str.strip().ne("")].copy()
+    if len(view) < 100:
+        return False
+    required_numeric = [
+        "EPA/PPA Offense", "EPA/PPA Defense Raw",
+        "Success Rate Offense", "Success Rate Defense Raw",
+        "Advanced Plays", "Advanced Drives", "Plays Per Game", "Possessions Per Game",
+    ]
+    for column in required_numeric:
+        if column not in view.columns:
+            return False
+        values = pd.to_numeric(view[column], errors="coerce")
+        if int(values.notna().sum()) < 100:
+            return False
+    if "Advanced Plays" in view.columns:
+        plays = pd.to_numeric(view["Advanced Plays"], errors="coerce").fillna(0)
+        if int((plays > 0).sum()) < 100:
+            return False
+    return True
+
+
+def _load_persistent_full_season_pbp_metrics(season: int) -> pd.DataFrame:
+    """Load exact full-season PBP aggregates from permanent NCAAF Turso storage.
+
+    Only completed prior seasons are eligible. Current-season data must continue
+    to come from the live PBP parquet so week cutoffs remain leak-free.
+    """
+    season = int(season)
+    if season >= int(DEFAULT_SEASON):
+        return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
+
+    with _PBP_METRICS_CACHE_LOCK:
+        cached = _PBP_METRICS_MEMORY_CACHE.get(season)
+        if cached is not None and _pbp_metrics_cache_complete(cached):
+            return cached.copy()
+
+    try:
+        get_or_create_worksheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+        stored = read_sheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+    except Exception as exc:
+        print(f"[cfb-pbp-cache] read failed for {season}: {type(exc).__name__}: {exc}")
+        return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
+
+    if stored is None or stored.empty:
+        return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
+
+    subset = stored[
+        (stored["Season"].astype(str).str.strip() == str(season))
+        & (stored["Cache Scope"].astype(str).str.strip() == "full-season")
+        & (stored["Cache Version"].astype(str).str.strip() == PBP_METRICS_CACHE_VERSION)
+        & (stored["Cache Complete"].map(_bool))
+    ].copy()
+    if not _pbp_metrics_cache_complete(subset):
+        return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
+
+    metrics = subset[PBP_TEAM_METRIC_VALUE_COLUMNS].copy()
+    for column in PBP_TEAM_METRIC_VALUE_COLUMNS:
+        if column in {"Team", "Open PBP Available"}:
+            continue
+        metrics[column] = pd.to_numeric(metrics[column], errors="coerce")
+    metrics["Open PBP Available"] = metrics["Open PBP Available"].map(_bool)
+    metrics = metrics.drop_duplicates("Team", keep="last").reset_index(drop=True)
+    if not _pbp_metrics_cache_complete(metrics):
+        return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
+
+    with _PBP_METRICS_CACHE_LOCK:
+        _PBP_METRICS_MEMORY_CACHE[season] = metrics.copy()
+    print(f"[cfb-pbp-cache] loaded exact {season} full-season metrics from Turso: {len(metrics)} teams")
+    return metrics
+
+
+def _persistent_pbp_metrics_ready(season: int) -> bool:
+    return _pbp_metrics_cache_complete(_load_persistent_full_season_pbp_metrics(int(season)))
+
+
+def _persist_full_season_pbp_metrics(season: int, metrics: pd.DataFrame) -> bool:
+    """Persist exact completed-season aggregates after the full PBP calculation."""
+    season = int(season)
+    if season >= int(DEFAULT_SEASON) or not _pbp_metrics_cache_complete(metrics):
+        return False
+
+    payload = metrics[PBP_TEAM_METRIC_VALUE_COLUMNS].copy()
+    payload.insert(0, "Cache Complete", True)
+    payload.insert(0, "Cache Version", PBP_METRICS_CACHE_VERSION)
+    payload.insert(0, "Cache Scope", "full-season")
+    payload.insert(0, "Season", season)
+    payload["Source"] = "Exact aggregate of SportsDataverse cfbfastR_cfb_pbp full-season parquet"
+    payload["Updated"] = _now()
+    payload = payload[PBP_METRICS_CACHE_COLUMNS]
+
+    try:
+        get_or_create_worksheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+        existing = read_sheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+        if existing is None:
+            existing = pd.DataFrame(columns=PBP_METRICS_CACHE_COLUMNS)
+        if not existing.empty:
+            keep = ~(
+                (existing["Season"].astype(str).str.strip() == str(season))
+                & (existing["Cache Scope"].astype(str).str.strip() == "full-season")
+            )
+            existing = existing[keep].copy()
+        combined = pd.concat([existing, payload], ignore_index=True)
+        combined = combined.drop_duplicates(subset=["Season", "Cache Scope", "Team"], keep="last")
+        if not write_sheet(PBP_METRICS_CACHE_TAB, combined, PBP_METRICS_CACHE_COLUMNS):
+            return False
+    except Exception as exc:
+        print(f"[cfb-pbp-cache] write failed for {season}: {type(exc).__name__}: {exc}")
+        return False
+
+    normalized = metrics[PBP_TEAM_METRIC_VALUE_COLUMNS].copy().drop_duplicates("Team", keep="last").reset_index(drop=True)
+    with _PBP_METRICS_CACHE_LOCK:
+        _PBP_METRICS_MEMORY_CACHE[season] = normalized.copy()
+    print(f"[cfb-pbp-cache] persisted exact {season} full-season metrics to Turso: {len(normalized)} teams")
+    return True
+
+
 def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
+    season = int(season)
+    historical_full_season = through_week is None and season < int(DEFAULT_SEASON)
+    if historical_full_season:
+        persisted = _load_persistent_full_season_pbp_metrics(season)
+        if _pbp_metrics_cache_complete(persisted):
+            return persisted.copy()
+
     frame = _open_pbp_frame(season).copy()
     if frame.empty:
         return pd.DataFrame()
@@ -980,7 +1139,10 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
             "Possessions Per Game": drives / games,
             "Open PBP Available": True,
         })
-    return pd.DataFrame(rows)
+    output = pd.DataFrame(rows)
+    if historical_full_season and _pbp_metrics_cache_complete(output):
+        _persist_full_season_pbp_metrics(season, output)
+    return output
 
 
 def _open_roster_frame(season: int) -> pd.DataFrame:
