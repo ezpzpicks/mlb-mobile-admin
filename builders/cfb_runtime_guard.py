@@ -199,6 +199,7 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             return False
 
     def _queue_required_assets(season: int) -> list[str]:
+        season = int(season)
         missing: list[str] = []
         for tag, asset_season, tokens in _required_asset_specs(season):
             if _asset_ready(tag, asset_season):
@@ -208,20 +209,50 @@ def install_runtime_guard(cfb_builder: Any) -> None:
                 cfb_builder._download_open_asset(tag, asset_season, tokens)
             except Exception:
                 pass
-        return missing
+
+        # Once the completed prior-season parquet is local, aggregate it exactly
+        # once in a background worker and persist those team metrics to NCAAF
+        # Turso. Keep the builder locked until that permanent cache is verified.
+        prior_season = season - 1
+        checker = getattr(cfb_builder, "_persistent_pbp_metrics_ready", None)
+        prior_cached = False
+        if callable(checker):
+            try:
+                prior_cached = bool(checker(prior_season))
+            except Exception:
+                prior_cached = False
+        if not prior_cached and _asset_ready("cfbfastR_cfb_pbp", prior_season):
+            queuer = getattr(cfb_builder, "_queue_persistent_pbp_metrics_seed", None)
+            if callable(queuer):
+                try:
+                    queuer(prior_season)
+                except Exception:
+                    pass
+            missing.append(f"{prior_season} exact PBP metric cache (one-time Turso seed)")
+        return list(dict.fromkeys(missing))
 
     def _ensure_automatic_ratings(season: int, week: int, force: bool = False) -> pd.DataFrame:
+        season = int(season)
+        week = int(week)
         session_key = f"cfb_auto_ratings_{season}_{week}"
+
         cached = st.session_state.get(session_key)
-        if not force and _ratings_complete(cached, week):
-            return cached.copy()
+        cached_ready = (
+            not force
+            and isinstance(cached, pd.DataFrame)
+            and _ratings_complete(cached, week)
+        )
 
-        saved = cfb_builder._get_cached_ratings(season, week)
-        if not force and _ratings_complete(saved, week):
-            st.session_state[session_key] = saved.copy()
-            st.session_state.pop("cfb_auto_ratings_warning", None)
-            return saved.copy()
+        saved = pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
+        saved_ready = False
+        if not cached_ready:
+            saved = cfb_builder._get_cached_ratings(season, week)
+            saved_ready = not force and _ratings_complete(saved, week)
 
+        # Full model-input readiness is checked even when a verified ratings
+        # snapshot already exists. The independent totals layer separately needs
+        # prior/current PBP context, so a saved rating alone cannot unlock Build
+        # after a fresh Render restart.
         missing_assets = _queue_required_assets(season)
         if missing_assets:
             st.session_state["cfb_auto_ratings_warning"] = (
@@ -231,6 +262,15 @@ def install_runtime_guard(cfb_builder: Any) -> None:
                 "Waiting on: " + ", ".join(missing_assets)
             )
             return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
+
+        if cached_ready:
+            st.session_state.pop("cfb_auto_ratings_warning", None)
+            return cached.copy()
+
+        if saved_ready:
+            st.session_state[session_key] = saved.copy()
+            st.session_state.pop("cfb_auto_ratings_warning", None)
+            return saved.copy()
 
         try:
             started = time.perf_counter()
