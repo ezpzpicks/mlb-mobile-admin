@@ -56,6 +56,9 @@ _OPEN_DATA_JOBS: dict[str, Any] = {}
 _OPEN_DATA_JOB_LOCK = threading.Lock()
 _PBP_METRICS_MEMORY_CACHE: dict[int, pd.DataFrame] = {}
 _PBP_METRICS_CACHE_LOCK = threading.Lock()
+_PBP_METRICS_SEED_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ezpz-cfb-pbp-cache")
+_PBP_METRICS_SEED_JOBS: dict[int, Any] = {}
+_PBP_METRICS_SEED_JOB_LOCK = threading.Lock()
 
 # This model now owns a dedicated CFB workbook. Within that database, public
 # tab names mirror MLB so the public site can use one sport-agnostic contract.
@@ -905,8 +908,9 @@ def _load_persistent_full_season_pbp_metrics(season: int) -> pd.DataFrame:
             return cached.copy()
 
     try:
-        get_or_create_worksheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
-        stored = read_sheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+        from shared import turso_storage as _turso
+
+        stored = _turso.read_dataset("NCAAF", PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
     except Exception as exc:
         print(f"[cfb-pbp-cache] read failed for {season}: {type(exc).__name__}: {exc}")
         return pd.DataFrame(columns=PBP_TEAM_METRIC_VALUE_COLUMNS)
@@ -959,8 +963,11 @@ def _persist_full_season_pbp_metrics(season: int, metrics: pd.DataFrame) -> bool
     payload = payload[PBP_METRICS_CACHE_COLUMNS]
 
     try:
-        get_or_create_worksheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
-        existing = read_sheet(PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
+        from shared import turso_storage as _turso
+
+        if not _turso.is_turso_ready():
+            return False
+        existing = _turso.read_dataset("NCAAF", PBP_METRICS_CACHE_TAB, PBP_METRICS_CACHE_COLUMNS)
         if existing is None:
             existing = pd.DataFrame(columns=PBP_METRICS_CACHE_COLUMNS)
         if not existing.empty:
@@ -971,7 +978,8 @@ def _persist_full_season_pbp_metrics(season: int, metrics: pd.DataFrame) -> bool
             existing = existing[keep].copy()
         combined = pd.concat([existing, payload], ignore_index=True)
         combined = combined.drop_duplicates(subset=["Season", "Cache Scope", "Team"], keep="last")
-        if not write_sheet(PBP_METRICS_CACHE_TAB, combined, PBP_METRICS_CACHE_COLUMNS):
+        rows_target = _turso.replace_dataset("NCAAF", PBP_METRICS_CACHE_TAB, combined, PBP_METRICS_CACHE_COLUMNS)
+        if int(rows_target or 0) < len(payload):
             return False
     except Exception as exc:
         print(f"[cfb-pbp-cache] write failed for {season}: {type(exc).__name__}: {exc}")
@@ -982,6 +990,52 @@ def _persist_full_season_pbp_metrics(season: int, metrics: pd.DataFrame) -> bool
         _PBP_METRICS_MEMORY_CACHE[season] = normalized.copy()
     print(f"[cfb-pbp-cache] persisted exact {season} full-season metrics to Turso: {len(normalized)} teams")
     return True
+
+
+def _seed_persistent_pbp_metrics_now(season: int) -> bool:
+    """Build and persist a missing completed-season cache from the local PBP file."""
+    season = int(season)
+    try:
+        metrics = _pbp_team_metrics(season, None)
+        ready = _pbp_metrics_cache_complete(metrics) and _persistent_pbp_metrics_ready(season)
+        if ready:
+            print(f"[cfb-pbp-cache] one-time seed complete for {season}")
+        return bool(ready)
+    except Exception as exc:
+        print(f"[cfb-pbp-cache] one-time seed failed for {season}: {type(exc).__name__}: {exc}")
+        return False
+
+
+def _queue_persistent_pbp_metrics_seed(season: int) -> bool:
+    """Queue a one-time exact aggregate after the large prior PBP file is local."""
+    season = int(season)
+    if season >= int(DEFAULT_SEASON):
+        return False
+    if _persistent_pbp_metrics_ready(season):
+        return True
+
+    path = OPEN_DATA_DIR / f"cfbfastR_cfb_pbp_{season}.parquet"
+    try:
+        if not path.exists() or path.stat().st_size <= 1024:
+            return False
+    except Exception:
+        return False
+
+    with _PBP_METRICS_SEED_JOB_LOCK:
+        existing = _PBP_METRICS_SEED_JOBS.get(season)
+        if existing is not None and not existing.done():
+            return False
+        _PBP_METRICS_SEED_JOBS[season] = _PBP_METRICS_SEED_EXECUTOR.submit(
+            _seed_persistent_pbp_metrics_now, season
+        )
+    print(f"[cfb-pbp-cache] queued one-time exact Turso seed for {season}")
+    return False
+
+
+def _pbp_metrics_seed_running(season: int) -> bool:
+    with _PBP_METRICS_SEED_JOB_LOCK:
+        job = _PBP_METRICS_SEED_JOBS.get(int(season))
+        return bool(job is not None and not job.done())
 
 
 def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
