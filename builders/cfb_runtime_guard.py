@@ -137,35 +137,103 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         pass
 
     # ------------------------------------------------------------------
-    # 3) Ratings: do not rebuild giant advanced data during +/- interactions.
+    # 3) Ratings: strict full-data gate without blocking on missing downloads.
     # ------------------------------------------------------------------
-    # Once a valid week snapshot has been saved, it is the interactive builder's
-    # source for that week. A newly downloaded parquet file no longer makes that
-    # snapshot "stale" in the middle of a user session. A new week still has no
-    # saved snapshot and therefore builds normally once.
+    # A Build projection may only use a complete saved/current week snapshot.
+    # Missing SportsDataverse assets are queued in the builder's background
+    # downloader; the interactive request returns immediately and stays locked
+    # until every required source is present. This prevents both partial ratings
+    # and the old "hang after Slate date" behavior.
+    def _ratings_complete(frame: Any, week: int) -> bool:
+        if frame is None or getattr(frame, "empty", True) or "Team" not in frame.columns:
+            return False
+        names = frame["Team"].astype(str).str.strip()
+        view = frame[names.ne("")].copy()
+        if len(view) < 20:
+            return False
+        if "Advanced Data Available" not in view.columns or "Roster Data Available" not in view.columns:
+            return False
+        advanced = view["Advanced Data Available"].map(cfb_builder._bool)
+        roster = view["Roster Data Available"].map(cfb_builder._bool)
+        if not bool(advanced.all()) or not bool(roster.all()):
+            return False
+        if int(week) > 1 and "FBS Games" in view.columns:
+            games = pd.to_numeric(view["FBS Games"], errors="coerce").fillna(0)
+            if int((games > 0).sum()) < 20:
+                return False
+        return True
+
+    def _required_asset_specs(season: int) -> list[tuple[str, int, tuple[str, ...]]]:
+        return [
+            ("cfbfastR_cfb_pbp", int(season) - 1, ("play_by_play", "pbp")),
+            ("cfbfastR_cfb_pbp", int(season), ("play_by_play", "pbp")),
+            ("espn_cfb_rosters", int(season) - 1, ("roster", "espn")),
+            ("espn_cfb_rosters", int(season), ("roster", "espn")),
+        ]
+
+    def _asset_ready(tag: str, season: int) -> bool:
+        path = cfb_builder.OPEN_DATA_DIR / f"{tag}_{season}.parquet"
+        try:
+            return path.exists() and path.stat().st_size > 1024
+        except Exception:
+            return False
+
+    def _queue_required_assets(season: int) -> list[str]:
+        missing: list[str] = []
+        for tag, asset_season, tokens in _required_asset_specs(season):
+            if _asset_ready(tag, asset_season):
+                continue
+            missing.append(f"{asset_season} {tag}")
+            try:
+                cfb_builder._download_open_asset(tag, asset_season, tokens)
+            except Exception:
+                pass
+        return missing
+
     def _ensure_automatic_ratings(season: int, week: int, force: bool = False) -> pd.DataFrame:
         session_key = f"cfb_auto_ratings_{season}_{week}"
         cached = st.session_state.get(session_key)
-        if isinstance(cached, pd.DataFrame) and not cached.empty and not force:
+        if not force and _ratings_complete(cached, week):
             return cached.copy()
 
         saved = cfb_builder._get_cached_ratings(season, week)
-        if isinstance(saved, pd.DataFrame) and not saved.empty:
+        if not force and _ratings_complete(saved, week):
             st.session_state[session_key] = saved.copy()
+            st.session_state.pop("cfb_auto_ratings_warning", None)
             return saved.copy()
 
+        missing_assets = _queue_required_assets(season)
+        if missing_assets:
+            st.session_state["cfb_auto_ratings_warning"] = (
+                "Full CFB model data is still preparing. Build is locked until all "
+                "advanced PBP and roster/returning-production files are ready. "
+                "Waiting on: " + ", ".join(missing_assets)
+            )
+            return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
+
         try:
+            started = time.perf_counter()
+            print(f"[cfb-ratings] building full {season} Week {week} snapshot")
             ratings = cfb_builder.build_team_ratings(season, week)
-            if isinstance(ratings, pd.DataFrame) and not ratings.empty:
-                st.session_state[session_key] = ratings.copy()
-                st.session_state.pop("cfb_auto_ratings_warning", None)
-                return ratings.copy()
+            if not _ratings_complete(ratings, week):
+                raise RuntimeError(
+                    f"CFB {season} Week {week} ratings finished without every required "
+                    "advanced/roster/current-season input."
+                )
+            st.session_state[session_key] = ratings.copy()
+            st.session_state.pop("cfb_auto_ratings_warning", None)
+            print(
+                f"[cfb-ratings] full {season} Week {week} snapshot ready in "
+                f"{time.perf_counter() - started:.2f}s"
+            )
+            return ratings.copy()
         except Exception as exc:
             st.session_state["cfb_auto_ratings_warning"] = str(exc)
 
         return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
     cfb_builder._ensure_automatic_ratings = _ensure_automatic_ratings
+    cfb_builder._ratings_complete_for_build = _ratings_complete
 
     # ------------------------------------------------------------------
     # 4) Lower-memory parquet conversion for the occasional weekly rebuild.
