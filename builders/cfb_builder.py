@@ -1202,7 +1202,10 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
 def _open_roster_frame(season: int) -> pd.DataFrame:
     path = _download_open_asset("espn_cfb_rosters", season, ("roster", "espn"))
     aliases = {
-        "team": ("team", "team_name", "school", "team_display_name"),
+        # ESPN-native SportsDataverse rosters use team_name for the mascot
+        # (for example "Buckeyes"). team_display_name is the value that matches
+        # the ESPN schedule/team index (for example "Ohio State Buckeyes").
+        "team": ("team_display_name", "team", "school", "team_location", "team_name"),
         "athlete_id": ("athlete_id", "id", "player_id"),
         "name": ("full_name", "athlete_full_name", "display_name", "name"),
         "position": ("position_abbreviation", "position", "position_name"),
@@ -1231,7 +1234,10 @@ def _class_number(value: Any) -> float:
 def _roster_priors(season: int, teams: list[str]) -> pd.DataFrame:
     current = _open_roster_frame(season)
     previous = _open_roster_frame(season - 1)
-    if current.empty:
+    # Returning production is a season-over-season overlap calculation. If the
+    # prior roster is unavailable, treating every current player as a newcomer
+    # would be partial/incorrect model data, so keep the strict gate closed.
+    if current.empty or previous.empty:
         return pd.DataFrame()
     current["key"] = _series(current, "athlete_id", "").astype(str)
     current.loc[current["key"].isin(["", "nan", "None"]), "key"] = current["name"].str.lower()

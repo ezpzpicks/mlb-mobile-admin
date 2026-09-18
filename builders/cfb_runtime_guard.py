@@ -172,6 +172,10 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         season = int(season)
         specs = [
             ("cfbfastR_cfb_pbp", season, ("play_by_play", "pbp")),
+            # Prior-season returning production needs season-2 -> season-1
+            # player overlap; current-season returning production needs
+            # season-1 -> season. Queue the complete three-roster chain.
+            ("espn_cfb_rosters", season - 2, ("roster", "espn")),
             ("espn_cfb_rosters", season - 1, ("roster", "espn")),
             ("espn_cfb_rosters", season, ("roster", "espn")),
         ]
@@ -336,7 +340,12 @@ def install_runtime_guard(cfb_builder: Any) -> None:
                 except Exception:
                     data[column] = series.to_list()
             return pd.DataFrame(data, copy=False)
-        except Exception:
+        except Exception as exc:
+            print(
+                f"[cfb-open-data] parquet parse failed for {path}: "
+                f"{type(exc).__name__}: {exc}",
+                flush=True,
+            )
             return pd.DataFrame()
 
     cfb_builder._read_open_parquet = _read_open_parquet_low_memory
