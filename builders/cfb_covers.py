@@ -681,10 +681,19 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
     def default_personnel(team: str, rating: dict[str, Any], season: int, week: int, game_id: str, live_candidate: bool = True):
         base = original_default_personnel(team, rating, season, week, game_id, live_candidate)
         try:
+            setattr(base, "_covers_personnel_ready", False)
+        except Exception:
+            pass
+        try:
             report = _team_report(builder, team)
             if not report.get("ok"):
                 return base
             result = _personnel_overlay(builder, base, report, team, season, week)
+            try:
+                setattr(result, "_covers_personnel_ready", True)
+                setattr(result, "_covers_personnel_source", str(report.get("url", "") or ""))
+            except Exception:
+                pass
             _buffer(builder, report, team, season, week, game_id)
             _flush_history(builder, force=False)
             return result
@@ -693,6 +702,10 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
 
     def build_environment(game: pd.Series, season: int, manual_roof: str | None = None):
         base = original_build_environment(game, season, manual_roof)
+        try:
+            setattr(base, "_covers_weather_ready", False)
+        except Exception:
+            pass
         try:
             away_team = str(game.get("Away Team", ""))
             home_team = str(game.get("Home Team", ""))
@@ -716,6 +729,10 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
             base.weather_home_adjustment = home_weather
             base.home_field = round(non_weather_hfa + home_weather, 3)
             base.weather_confidence = max(float(getattr(base, "weather_confidence", 0.0)), 92.0)
+            try:
+                setattr(base, "_covers_weather_ready", True)
+            except Exception:
+                pass
             prior = _clean_text(getattr(base, "notes", ""))
             base.notes = f"{prior}; Covers weather: {note} ({temp:.1f}F, wind {wind:.1f} mph, POP {precip:.0%})".strip("; ")
         except Exception:
