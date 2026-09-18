@@ -51,7 +51,7 @@ OPEN_DATA_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_SECONDS = int(os.getenv("EZPZ_CFB_CACHE_SECONDS", "21600"))
 AUTO_RATINGS_MAX_AGE_SECONDS = int(os.getenv("EZPZ_CFB_RATINGS_MAX_AGE_SECONDS", "21600"))
 ALLOW_BLOCKING_OPEN_DATA = os.getenv("EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA", "0").strip().lower() in {"1", "true", "yes"}
-_OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ezpz-cfb-open-data")
+_OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="ezpz-cfb-open-data")
 _OPEN_DATA_JOBS: dict[str, Any] = {}
 _OPEN_DATA_JOB_LOCK = threading.Lock()
 
@@ -614,11 +614,34 @@ def _espn_lines_payload(season: int) -> list[dict[str, Any]]:
     return rows
 
 
+def _direct_asset_urls(tag: str, season: int) -> list[str]:
+    """Return deterministic SportsDataverse release URLs before API discovery.
+
+    Render instances can share an unauthenticated GitHub API egress IP, so release
+    metadata discovery may be rate-limited even while release downloads remain
+    available. Known CFB asset names are therefore tried directly first.
+    """
+    names: list[str] = []
+    if tag == "cfbfastR_cfb_pbp":
+        names = [f"play_by_play_{season}.parquet"]
+    elif tag == "espn_cfb_rosters":
+        # cfb_rosters_* is the current canonical SportsDataverse filename.
+        # Keep older aliases as fallbacks for historical/future release changes.
+        names = [
+            f"cfb_rosters_{season}.parquet",
+            f"roster_{season}.parquet",
+            f"rosters_{season}.parquet",
+            f"espn_cfb_rosters_{season}.parquet",
+        ]
+    return [f"{SPORTSDATAVERSE_DOWNLOAD_BASE}/{tag}/{name}" for name in names]
+
+
 def _release_asset_url(tag: str, season: int, preferred_tokens: tuple[str, ...]) -> str:
+    """Discover the best matching release asset URL when direct names fail."""
     payload = _public_json_get(
         f"{SPORTSDATAVERSE_RELEASE_API}/{tag}",
         optional=True,
-        max_age=86400,
+        max_age=21600,
     )
     assets = payload.get("assets", []) if isinstance(payload, dict) else []
     candidates = []
@@ -627,16 +650,16 @@ def _release_asset_url(tag: str, season: int, preferred_tokens: tuple[str, ...])
         if str(season) not in name or not name.endswith(".parquet"):
             continue
         score = sum(1 for token in preferred_tokens if token.lower() in name)
+        if tag == "espn_cfb_rosters" and name == f"cfb_rosters_{season}.parquet":
+            score += 10
+        if tag == "cfbfastR_cfb_pbp" and name == f"play_by_play_{season}.parquet":
+            score += 10
         candidates.append((score, _text(asset.get("browser_download_url"))))
     if candidates:
         candidates.sort(reverse=True)
         return candidates[0][1]
-    common_names = []
-    if tag == "cfbfastR_cfb_pbp":
-        common_names = [f"play_by_play_{season}.parquet"]
-    elif tag == "espn_cfb_rosters":
-        common_names = [f"rosters_{season}.parquet", f"roster_{season}.parquet", f"espn_cfb_rosters_{season}.parquet"]
-    return f"{SPORTSDATAVERSE_DOWNLOAD_BASE}/{tag}/{common_names[0]}" if common_names else ""
+    direct = _direct_asset_urls(tag, season)
+    return direct[0] if direct else ""
 
 
 def _download_open_asset_now(tag: str, season: int, preferred_tokens: tuple[str, ...]) -> Path | None:
@@ -644,32 +667,50 @@ def _download_open_asset_now(tag: str, season: int, preferred_tokens: tuple[str,
     freshness = 21600 if season >= date.today().year else 86400 * 30
     if path.exists() and path.stat().st_size > 1024 and time.time() - path.stat().st_mtime <= freshness:
         return path
-    url = _release_asset_url(tag, season, preferred_tokens)
-    if not url:
+
+    urls = _direct_asset_urls(tag, season)
+    discovered = _release_asset_url(tag, season, preferred_tokens)
+    if discovered and discovered not in urls:
+        urls.append(discovered)
+    if not urls:
+        print(f"[cfb-open-data] no download URL for {tag} {season}")
         return path if path.exists() else None
+
     temp = path.with_suffix(".tmp")
-    try:
-        with requests.get(
-            url,
-            stream=True,
-            timeout=(8, 180),
-            headers={"User-Agent": "EZPZ-Picks-NCAAF/1.3 public-data cache warmer"},
-        ) as response:
-            response.raise_for_status()
-            with temp.open("wb") as handle:
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    if chunk:
-                        handle.write(chunk)
-        if temp.stat().st_size < 1024:
-            raise RuntimeError("downloaded open-data file was unexpectedly small")
-        temp.replace(path)
-        return path
-    except Exception:
+    last_error = ""
+    for url in urls:
         try:
-            temp.unlink(missing_ok=True)
-        except Exception:
-            pass
-        return path if path.exists() and path.stat().st_size > 1024 else None
+            print(f"[cfb-open-data] downloading {tag} {season} from {url}")
+            with requests.get(
+                url,
+                stream=True,
+                timeout=(8, 90),
+                headers={"User-Agent": "EZPZ-Picks-NCAAF/1.4 public-data cache warmer"},
+            ) as response:
+                response.raise_for_status()
+                with temp.open("wb") as handle:
+                    for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        if chunk:
+                            handle.write(chunk)
+            size = temp.stat().st_size
+            if size < 1024:
+                raise RuntimeError("downloaded open-data file was unexpectedly small")
+            temp.replace(path)
+            print(f"[cfb-open-data] ready {tag} {season}: {size} bytes")
+            return path
+        except Exception as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+            print(f"[cfb-open-data] failed {tag} {season} from {url}: {last_error}")
+            try:
+                temp.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    if path.exists() and path.stat().st_size > 1024:
+        print(f"[cfb-open-data] using existing {tag} {season} after refresh failure: {last_error}")
+        return path
+    print(f"[cfb-open-data] unavailable {tag} {season}: {last_error}")
+    return None
 
 
 def _queue_open_asset(tag: str, season: int, preferred_tokens: tuple[str, ...]) -> None:
