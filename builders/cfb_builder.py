@@ -51,7 +51,7 @@ OPEN_DATA_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_SECONDS = int(os.getenv("EZPZ_CFB_CACHE_SECONDS", "21600"))
 AUTO_RATINGS_MAX_AGE_SECONDS = int(os.getenv("EZPZ_CFB_RATINGS_MAX_AGE_SECONDS", "21600"))
 ALLOW_BLOCKING_OPEN_DATA = os.getenv("EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA", "0").strip().lower() in {"1", "true", "yes"}
-_OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="ezpz-cfb-open-data")
+_OPEN_DATA_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="ezpz-cfb-open-data")
 _OPEN_DATA_JOBS: dict[str, Any] = {}
 _OPEN_DATA_JOB_LOCK = threading.Lock()
 
@@ -668,17 +668,15 @@ def _download_open_asset_now(tag: str, season: int, preferred_tokens: tuple[str,
     if path.exists() and path.stat().st_size > 1024 and time.time() - path.stat().st_mtime <= freshness:
         return path
 
-    urls = _direct_asset_urls(tag, season)
-    discovered = _release_asset_url(tag, season, preferred_tokens)
-    if discovered and discovered not in urls:
-        urls.append(discovered)
-    if not urls:
-        print(f"[cfb-open-data] no download URL for {tag} {season}")
-        return path if path.exists() else None
-
     temp = path.with_suffix(".tmp")
     last_error = ""
-    for url in urls:
+    attempted: set[str] = set()
+
+    def try_url(url: str) -> Path | None:
+        nonlocal last_error
+        if not url or url in attempted:
+            return None
+        attempted.add(url)
         try:
             print(f"[cfb-open-data] downloading {tag} {season} from {url}")
             with requests.get(
@@ -705,6 +703,20 @@ def _download_open_asset_now(tag: str, season: int, preferred_tokens: tuple[str,
                 temp.unlink(missing_ok=True)
             except Exception:
                 pass
+            return None
+
+    # Known SportsDataverse filenames are tried first so a GitHub release-API
+    # timeout/rate-limit cannot delay the normal CFB warm-up path.
+    for url in _direct_asset_urls(tag, season):
+        ready = try_url(url)
+        if ready is not None:
+            return ready
+
+    # Only ask the release API when every deterministic URL failed.
+    discovered = _release_asset_url(tag, season, preferred_tokens)
+    ready = try_url(discovered)
+    if ready is not None:
+        return ready
 
     if path.exists() and path.stat().st_size > 1024:
         print(f"[cfb-open-data] using existing {tag} {season} after refresh failure: {last_error}")
