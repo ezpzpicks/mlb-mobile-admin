@@ -220,6 +220,8 @@ elif selected_sport == "CFB":
     from builders.cfb_market_calibration import install_market_calibration
     from builders.cfb_covers import install_covers_layer
     from builders.cfb_interactive_recovery import install_interactive_recovery
+    from builders.cfb_runtime_guard import install_runtime_guard
+    install_runtime_guard(cfb_builder)
     install_save_type_guard(cfb_builder)
     install_regression_layer(cfb_builder)
     install_total_regression(cfb_builder)
