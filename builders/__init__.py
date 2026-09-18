@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib
 import math
+import threading
 from datetime import date, timedelta
 from typing import Any
 
@@ -481,6 +482,23 @@ def _patch_cfb_builder(module: Any) -> Any:
         prior_frame = prior_frame if prior_frame is not None else module.pd.DataFrame()
         current_frame = current_frame if current_frame is not None else module.pd.DataFrame()
 
+        # Production builds are strict: never create a matchup rating snapshot from
+        # a partial SportsDataverse bundle. Both prior/current advanced PBP and
+        # roster/returning-production inputs must be present before ratings exist.
+        missing_sources: list[str] = []
+        if not prior_avail.get("advanced"):
+            missing_sources.append(f"{season - 1} advanced PBP")
+        if not current_avail.get("advanced"):
+            missing_sources.append(f"{season} advanced PBP")
+        if not prior_avail.get("roster"):
+            missing_sources.append(f"{season - 1} roster/returning production")
+        if not current_avail.get("roster"):
+            missing_sources.append(f"{season} roster/returning production")
+        if missing_sources:
+            message = "Full CFB model data is not ready: " + ", ".join(missing_sources)
+            _set_ratings_warning(message)
+            raise RuntimeError(message)
+
         if "Team" in prior_frame.columns:
             prior_frame = prior_frame[prior_frame["Team"].map(_clean_team_name).ne("")].copy()
         if "Team" in current_frame.columns:
@@ -559,8 +577,8 @@ def _patch_cfb_builder(module: Any) -> Any:
                 "Games": int(games),
                 "FBS Games": int(fbs_games),
                 "Data Confidence": round(module.clamp(data_conf, 20.0, 98.0), 1),
-                "Advanced Data Available": bool(prior_avail.get("advanced") or current_avail.get("advanced")),
-                "Roster Data Available": bool(prior_avail.get("roster") or current_avail.get("roster")),
+                "Advanced Data Available": bool(prior_avail.get("advanced") and current_avail.get("advanced")),
+                "Roster Data Available": bool(prior_avail.get("roster") and current_avail.get("roster")),
                 "Source": "ESPN/SportsDataverse prior-season performance + progressive current-season blend",
                 "Updated": module._now(),
             }
@@ -620,7 +638,34 @@ def _patch_cfb_builder(module: Any) -> Any:
                 )
             ].copy()
             combined = module.pd.concat([keep, output], ignore_index=True)
-        module._write(module.RATINGS_TAB, combined, module.RATING_COLUMNS)
+        # Make the complete snapshot available to the current Streamlit session
+        # immediately. Turso persistence happens off the interactive request so a
+        # slow database write can never hold the Game selector indefinitely.
+        try:
+            module.st.session_state[f"cfb_sheet_cache::{module.RATINGS_TAB}"] = combined.copy()
+        except Exception:
+            pass
+
+        combined_for_write = combined.copy()
+        columns_for_write = list(module.RATING_COLUMNS)
+
+        def _persist_complete_ratings() -> None:
+            try:
+                from shared.turso_storage import replace_dataset
+
+                replace_dataset("NCAAF", module.RATINGS_TAB, combined_for_write, columns_for_write)
+                print(
+                    f"[cfb-ratings] persisted full {season} Week {week} snapshot "
+                    f"({len(output)} teams)"
+                )
+            except Exception as exc:
+                print(f"[cfb-ratings] background persistence failed: {exc}")
+
+        threading.Thread(
+            target=_persist_complete_ratings,
+            name=f"cfb-ratings-persist-{season}-{week}",
+            daemon=True,
+        ).start()
         try:
             module.st.session_state.pop("cfb_auto_ratings_warning", None)
         except Exception:
