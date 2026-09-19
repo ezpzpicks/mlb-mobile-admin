@@ -3574,21 +3574,35 @@ def _render_build() -> None:
     # The production Covers layer marks whether its live starter/injury report
     # actually loaded. Never continue with the base/fallback personnel object when
     # that required live source is missing.
-    missing_personnel = [
-        team
+    missing_pairs = [
+        (team, personnel)
         for team, personnel in (
             (str(game["Away Team"]), away_base),
             (str(game["Home Team"]), home_base),
         )
         if getattr(personnel, "_covers_personnel_ready", True) is False
     ]
-    if missing_personnel:
+    if missing_pairs:
+        missing_personnel = [team for team, _ in missing_pairs]
         st.error(
             "Full model data gate: live Covers starters/injuries are unavailable for "
             + ", ".join(missing_personnel)
             + ". No projection was run."
         )
+        detail_rows = []
+        for team, personnel in missing_pairs:
+            reason = _text(getattr(personnel, "_covers_personnel_error", ""))
+            source = _text(getattr(personnel, "_covers_personnel_source", ""))
+            if reason:
+                detail_rows.append(f"{team}: {reason}" + (f" [{source}]" if source else ""))
+        if detail_rows:
+            st.caption("Covers lookup detail: " + " | ".join(detail_rows))
         if st.button("Retry live personnel", use_container_width=True, key=f"cfb_retry_personnel_{market_key}"):
+            try:
+                from builders import cfb_covers as _covers_live
+                _covers_live.clear_live_personnel_cache()
+            except Exception:
+                pass
             st.rerun()
         return
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from builders import cfb_covers as covers
-from builders import cfb_interactive_recovery as recovery
 
 
 LANDING_HTML = """
@@ -15,32 +14,21 @@ LANDING_HTML = """
 
 def main() -> None:
     original_fetch = covers._fetch_html
-    original_directory = covers._directory
     original_cache = covers._DIRECTORY
-    original_flag = getattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY", False)
 
     try:
         covers._fetch_html = lambda builder, url, ttl: LANDING_HTML
         covers._DIRECTORY = None
-        if hasattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY"):
-            delattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY")
 
-        # Core resolver must now handle Covers overview links by itself. The
-        # recovery wrapper remains compatible, but correctness no longer depends
-        # on installation order.
-        native_directory = covers._directory(object())
-        assert len(native_directory) == 3, native_directory
-        native_slugs = {row["slug"] for row in native_directory}
+        # Team-directory recovery is now native to cfb_covers.py. There is no
+        # runtime monkey-patch layer left to install.
+        directory = covers._directory(object())
+        assert len(directory) == 3, directory
+        native_slugs = {row["slug"] for row in directory}
         assert native_slugs == {
             "syracuse-orange", "pittsburgh-panthers", "miami-hurricanes"
         }, native_slugs
-        assert all(row["url"].endswith("/injuries") for row in native_directory)
-
-        covers._DIRECTORY = None
-        recovery._install_covers_team_directory_fix(covers)
-
-        directory = covers._directory(object())
-        assert len(directory) == 3, directory
+        assert all(row["url"].endswith("/injuries") for row in directory)
 
         syracuse = covers._team_url(object(), "Syracuse")
         assert syracuse == (
@@ -60,12 +48,7 @@ def main() -> None:
         print("CFB Covers overview-link directory recovery test passed")
     finally:
         covers._fetch_html = original_fetch
-        covers._directory = original_directory
         covers._DIRECTORY = original_cache
-        if original_flag:
-            covers._EZPZ_CFB_TEAM_DIRECTORY_RECOVERY = True
-        elif hasattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY"):
-            delattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY")
 
 
 if __name__ == "__main__":

@@ -153,52 +153,110 @@ def _cache_file(builder: Any, key: str):
     return builder.CACHE_DIR / f"covers_{digest}.json"
 
 
+
+def _html_is_usable(html: str) -> bool:
+    if len(html or "") < 500:
+        return False
+    lowered = html.lower()
+    block_markers = (
+        "cf-chl-",
+        "challenge-platform",
+        "just a moment...",
+        "verify you are human",
+        "attention required! | cloudflare",
+        "access denied",
+        "/cdn-cgi/challenge-platform/",
+    )
+    return not any(marker in lowered for marker in block_markers)
+
+
 def _fetch_html(builder: Any, url: str, *, ttl: int) -> str:
     now = time.time()
     with _LOCK:
         hit = _MEMORY_HTML.get(url)
-        if hit and now - hit[0] <= ttl:
+        if hit and now - hit[0] <= ttl and _html_is_usable(hit[1]):
             return hit[1]
+
     path = _cache_file(builder, url)
     if path.exists() and now - path.stat().st_mtime <= ttl:
         try:
             html = str(json.loads(path.read_text()).get("html", ""))
-            if html:
+            if _html_is_usable(html):
                 with _LOCK:
                     _MEMORY_HTML[url] = (now, html)
                 return html
         except Exception:
             pass
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; EZPZ-Picks-CFB/2.4; +https://ezpzpicks.com)",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.8",
-        "Cache-Control": "no-cache",
-    }
-    try:
-        response = requests.get(url, headers=headers, timeout=(4, 12))
-        response.raise_for_status()
-        html = response.text
-        if len(html) < 500:
-            raise RuntimeError("Covers returned an unexpectedly small page")
+
+    # Covers began rejecting/serving interstitials more aggressively to
+    # bot-identifying user agents. Use normal browser request headers and do not
+    # cache challenge pages as successful personnel data.
+    header_profiles = [
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/140.0.0.0 Safari/537.36"
+            ),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Referer": f"{COVERS_BASE}/sport/football/ncaaf/injuries",
+            "Upgrade-Insecure-Requests": "1",
+        },
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (X11; Linux x86_64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/139.0.0.0 Safari/537.36"
+            ),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.8",
+            "Referer": COVERS_BASE,
+        },
+    ]
+
+    last_error: Exception | None = None
+    for headers in header_profiles:
         try:
-            path.write_text(json.dumps({"fetched": now, "html": html}))
-        except Exception:
-            pass
-        with _LOCK:
-            _MEMORY_HTML[url] = (now, html)
-        return html
-    except Exception:
-        if path.exists() and now - path.stat().st_mtime <= STALE_MAX_AGE:
+            response = requests.get(url, headers=headers, timeout=(4, 12))
+            response.raise_for_status()
+            html = response.text
+            if not _html_is_usable(html):
+                raise RuntimeError("Covers returned a blocked/interstitial or incomplete HTML page")
             try:
-                html = str(json.loads(path.read_text()).get("html", ""))
-                if html:
-                    with _LOCK:
-                        _MEMORY_HTML[url] = (now, html)
-                    return html
+                path.write_text(json.dumps({"fetched": now, "html": html}))
             except Exception:
                 pass
-        raise
+            with _LOCK:
+                _MEMORY_HTML[url] = (now, html)
+            return html
+        except Exception as exc:
+            last_error = exc
+
+    if path.exists() and now - path.stat().st_mtime <= STALE_MAX_AGE:
+        try:
+            html = str(json.loads(path.read_text()).get("html", ""))
+            if _html_is_usable(html):
+                with _LOCK:
+                    _MEMORY_HTML[url] = (now, html)
+                return html
+        except Exception:
+            pass
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Covers HTML could not be loaded")
+
+
+def clear_live_personnel_cache() -> None:
+    """Clear only Covers live lookup caches so Retry performs a real refetch."""
+    global _DIRECTORY
+    with _LOCK:
+        _MEMORY_HTML.clear()
+        _TEAM_REPORTS.clear()
+        _DIRECTORY = None
 
 
 def _candidate_score(query: str, candidate: str) -> float:
@@ -248,8 +306,11 @@ def _directory(builder: Any) -> list[dict[str, str]]:
             "url": f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{slug}/injuries",
         }
     directory = list(rows.values())
-    with _LOCK:
-        _DIRECTORY = (now, directory)
+    # Never pin an empty parse for six hours. A transient interstitial or markup
+    # miss should be retried on the next request.
+    if directory:
+        with _LOCK:
+            _DIRECTORY = (now, directory)
     return directory
 
 
@@ -485,26 +546,43 @@ def _team_report(builder: Any, team: str) -> dict[str, Any]:
         if hit and now - hit[0] <= TEAM_TTL:
             return dict(hit[1])
 
-    # Try deterministic identity URLs first, then directory-derived fallbacks.
-    # One bad/missing candidate must not prevent the next verified identity from
-    # being attempted.
+    errors: list[str] = []
     try:
         urls = _team_url_candidates(builder, team)
-    except Exception:
+    except Exception as exc:
         urls = []
+        errors.append(f"team URL resolution failed: {type(exc).__name__}: {exc}")
+
+    if not urls:
+        errors.append("no Covers team URL candidates were resolved")
 
     for url in urls:
         try:
-            report = _parse_team_report(_fetch_html(builder, url, ttl=TEAM_TTL), url)
-        except Exception:
+            html = _fetch_html(builder, url, ttl=TEAM_TTL)
+        except Exception as exc:
+            errors.append(f"{url}: fetch failed ({type(exc).__name__}: {exc})")
+            continue
+        try:
+            report = _parse_team_report(html, url)
+        except Exception as exc:
+            errors.append(f"{url}: parse failed ({type(exc).__name__}: {exc})")
             continue
         if not report.get("ok"):
+            errors.append(f"{url}: page loaded but no starters/injuries were parsed")
             continue
+        report["error"] = ""
         with _LOCK:
             _TEAM_REPORTS[key] = (now, report)
         return dict(report)
 
-    return {"team": team, "injuries": [], "starters": [], "url": "", "ok": False}
+    return {
+        "team": team,
+        "injuries": [],
+        "starters": [],
+        "url": urls[0] if urls else "",
+        "ok": False,
+        "error": " | ".join(errors[-4:]),
+    }
 
 
 def _parse_weather_html(html: str) -> list[dict[str, Any]]:
@@ -917,6 +995,11 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
         try:
             report = _team_report(builder, team)
             if not report.get("ok"):
+                try:
+                    setattr(base, "_covers_personnel_error", str(report.get("error", "") or "Covers personnel page unavailable"))
+                    setattr(base, "_covers_personnel_source", str(report.get("url", "") or ""))
+                except Exception:
+                    pass
                 return base
             result = _personnel_overlay(builder, base, report, team, season, week)
             try:
@@ -1031,6 +1114,6 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
 
 
 __all__ = [
-    "install_covers_layer", "_parse_team_report", "_parse_weather_html",
+    "install_covers_layer", "clear_live_personnel_cache", "_parse_team_report", "_parse_weather_html",
     "_candidate_score", "_player_matches", "_severity",
 ]
