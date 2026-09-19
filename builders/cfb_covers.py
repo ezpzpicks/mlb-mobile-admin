@@ -369,6 +369,158 @@ def _espn_directory_aliases(builder: Any, team: str) -> list[str]:
     return aliases
 
 
+def _builder_known_aliases(builder: Any, team: str) -> list[str]:
+    """Recover mascot-bearing aliases already learned from the live schedule.
+
+    ESPN schedule parsing registers display names such as "Georgia Bulldogs" ->
+    "Georgia" in the builder's process-wide alias map. This survives a separate
+    failure of the ESPN teams-directory endpoint and gives selected matchups a
+    deterministic identity source.
+    """
+    alias_map = getattr(builder, "_TEAM_NAME_ALIASES", {})
+    if not isinstance(alias_map, dict) or not alias_map:
+        return []
+
+    canonicalize = getattr(builder, "_canonical_team_name", None)
+
+    def key(value: Any) -> str:
+        if callable(canonicalize):
+            try:
+                value = canonicalize(value)
+            except Exception:
+                pass
+        return _norm(value)
+
+    target = key(team)
+    aliases: list[str] = []
+    try:
+        lock = getattr(builder, "_TEAM_NAME_ALIASES_LOCK", None)
+        if lock is not None:
+            with lock:
+                items = list(alias_map.items())
+        else:
+            items = list(alias_map.items())
+    except Exception:
+        items = list(alias_map.items())
+
+    for alias, canonical in items:
+        alias_text = _clean_text(alias)
+        if key(canonical) != target or not alias_text:
+            continue
+        if _norm(alias_text) == target:
+            continue
+        if _norm(alias_text) not in {_norm(value) for value in aliases}:
+            aliases.append(alias_text)
+
+    aliases.sort(key=lambda value: (len(_norm(value).split()), len(value)), reverse=True)
+    return aliases
+
+
+def _game_identity_aliases(builder: Any, team: str, game_id: str = "") -> list[str]:
+    """Resolve the exact ESPN team identity from the selected game's event.
+
+    The selected matchup already has a stable ESPN game ID. Querying that one
+    event is more reliable than depending on the separate all-teams directory,
+    and it inherently distinguishes Georgia/Georgia State, Arkansas/Arkansas
+    State, Oregon/Oregon State, and every similar base-name collision.
+    """
+    game_id = _clean_text(game_id)
+    if not game_id:
+        return []
+
+    canonicalize = getattr(builder, "_canonical_team_name", None)
+
+    def key(value: Any) -> str:
+        if callable(canonicalize):
+            try:
+                value = canonicalize(value)
+            except Exception:
+                pass
+        return _norm(value)
+
+    target = key(team)
+    if not target:
+        return []
+
+    try:
+        getter = getattr(builder, "_public_json_get")
+        base = _clean_text(
+            getattr(
+                builder,
+                "ESPN_SITE_BASE",
+                "https://site.api.espn.com/apis/site/v2/sports/football/college-football",
+            )
+        ).rstrip("/")
+        payload = getter(
+            f"{base}/summary",
+            {"event": game_id},
+            optional=True,
+            max_age=21600,
+        )
+    except Exception:
+        return []
+    if not isinstance(payload, dict):
+        return []
+
+    candidates: list[dict[str, Any]] = []
+    header = payload.get("header") if isinstance(payload.get("header"), dict) else {}
+    for competition in header.get("competitions", []) or []:
+        if isinstance(competition, dict):
+            for competitor in competition.get("competitors", []) or []:
+                if isinstance(competitor, dict):
+                    team_obj = competitor.get("team")
+                    if isinstance(team_obj, dict):
+                        candidates.append(team_obj)
+    boxscore = payload.get("boxscore") if isinstance(payload.get("boxscore"), dict) else {}
+    for row in boxscore.get("teams", []) or []:
+        if isinstance(row, dict) and isinstance(row.get("team"), dict):
+            candidates.append(row["team"])
+
+    aliases: list[str] = []
+    for team_obj in candidates:
+        location = _clean_text(team_obj.get("location", ""))
+        display = _clean_text(team_obj.get("displayName", ""))
+        short = _clean_text(team_obj.get("shortDisplayName", ""))
+        name = _clean_text(team_obj.get("name", ""))
+
+        location_key = key(location)
+        display_norm = _norm(display)
+        short_norm = _norm(short)
+        exact_location = bool(location_key and location_key == target)
+        display_matches = bool(
+            display_norm
+            and (display_norm == target or display_norm.startswith(target + " "))
+        )
+        short_matches = bool(
+            short_norm
+            and (short_norm == target or short_norm.startswith(target + " "))
+        )
+        if not (exact_location or display_matches or short_matches):
+            continue
+
+        combined = _clean_text(f"{location} {name}")
+        for value in (combined, display, short, name, location):
+            if value and _norm(value) not in {_norm(alias) for alias in aliases}:
+                aliases.append(value)
+
+    aliases.sort(key=lambda value: (len(_norm(value).split()), len(value)), reverse=True)
+    return aliases
+
+
+def _identity_aliases(builder: Any, team: str, game_id: str = "") -> list[str]:
+    aliases: list[str] = []
+    for group in (
+        _game_identity_aliases(builder, team, game_id),
+        _builder_known_aliases(builder, team),
+        _espn_directory_aliases(builder, team),
+    ):
+        for value in group:
+            if value and _norm(value) not in {_norm(alias) for alias in aliases}:
+                aliases.append(value)
+    aliases.sort(key=lambda value: (len(_norm(value).split()), len(value)), reverse=True)
+    return aliases
+
+
 def _covers_team_url(slug: str) -> str:
     slug = _clean_text(slug).strip().strip("/")
     return (
@@ -382,7 +534,7 @@ def _slugify_team_label(value: Any) -> str:
     return re.sub(r"[^a-z0-9]+", "-", _clean_text(value).lower()).strip("-")
 
 
-def _direct_team_urls(builder: Any, team: str) -> list[str]:
+def _direct_team_urls(builder: Any, team: str, game_id: str = "") -> list[str]:
     """Build deterministic Covers URLs before touching the landing directory.
 
     ESPN supplies mascot-bearing team identities (for example Georgia Bulldogs
@@ -410,7 +562,7 @@ def _direct_team_urls(builder: Any, team: str) -> list[str]:
             canonical_team = team
     target_tokens = set(_norm(canonical_team).split())
 
-    for alias in _espn_directory_aliases(builder, team):
+    for alias in _identity_aliases(builder, team, game_id):
         alias_norm = _norm(alias)
         alias_tokens = set(alias_norm.split())
         # A bare location such as "Georgia" is not a useful direct Covers slug.
@@ -425,9 +577,9 @@ def _direct_team_urls(builder: Any, team: str) -> list[str]:
     return urls
 
 
-def _team_url_candidates(builder: Any, team: str) -> list[str]:
+def _team_url_candidates(builder: Any, team: str, game_id: str = "") -> list[str]:
     """Return ordered, de-duplicated Covers injury URLs for one school."""
-    urls = _direct_team_urls(builder, team)
+    urls = _direct_team_urls(builder, team, game_id)
 
     def add(url: str) -> None:
         if url and url not in urls:
@@ -440,7 +592,7 @@ def _team_url_candidates(builder: Any, team: str) -> list[str]:
     except Exception:
         directory = []
 
-    espn_aliases = _espn_directory_aliases(builder, team)
+    espn_aliases = _identity_aliases(builder, team, game_id)
     if directory and espn_aliases:
         scored = []
         for row in directory:
@@ -467,8 +619,8 @@ def _team_url_candidates(builder: Any, team: str) -> list[str]:
     return urls
 
 
-def _team_url(builder: Any, team: str) -> str:
-    candidates = _team_url_candidates(builder, team)
+def _team_url(builder: Any, team: str, game_id: str = "") -> str:
+    candidates = _team_url_candidates(builder, team, game_id)
     return candidates[0] if candidates else ""
 
 
@@ -539,7 +691,7 @@ def _parse_team_report(html: str, url: str) -> dict[str, Any]:
     return {"team": team, "injuries": injuries, "starters": starters, "url": url, "ok": bool(injuries or starters)}
 
 
-def _team_report(builder: Any, team: str) -> dict[str, Any]:
+def _team_report(builder: Any, team: str, game_id: str = "") -> dict[str, Any]:
     key, now = _norm(team), time.time()
     with _LOCK:
         hit = _TEAM_REPORTS.get(key)
@@ -548,7 +700,7 @@ def _team_report(builder: Any, team: str) -> dict[str, Any]:
 
     errors: list[str] = []
     try:
-        urls = _team_url_candidates(builder, team)
+        urls = _team_url_candidates(builder, team, game_id)
     except Exception as exc:
         urls = []
         errors.append(f"team URL resolution failed: {type(exc).__name__}: {exc}")
@@ -993,7 +1145,7 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
         except Exception:
             pass
         try:
-            report = _team_report(builder, team)
+            report = _team_report(builder, team, game_id)
             if not report.get("ok"):
                 try:
                     setattr(base, "_covers_personnel_error", str(report.get("error", "") or "Covers personnel page unavailable"))

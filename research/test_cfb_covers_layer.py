@@ -104,6 +104,80 @@ class FakeIdentityBuilder:
         }
 
 
+class FakeAliasFallbackBuilder:
+    _TEAM_NAME_ALIASES = {
+        "Georgia": "Georgia",
+        "Georgia Bulldogs": "Georgia",
+        "Arkansas": "Arkansas",
+        "Arkansas Razorbacks": "Arkansas",
+    }
+
+    @staticmethod
+    def _canonical_team_name(value):
+        return str(value)
+
+    @staticmethod
+    def _espn_team_index():
+        return {}
+
+
+class FakeGameFallbackBuilder:
+    ESPN_SITE_BASE = "https://site.api.espn.com/apis/site/v2/sports/football/college-football"
+    _TEAM_NAME_ALIASES = {}
+
+    @staticmethod
+    def _canonical_team_name(value):
+        return str(value)
+
+    @staticmethod
+    def _espn_team_index():
+        return {}
+
+    @staticmethod
+    def _public_json_get(url, params, optional=True, max_age=21600):
+        assert str(params.get("event")) == "401000001"
+        return {
+            "header": {
+                "competitions": [{
+                    "competitors": [
+                        {"team": {
+                            "location": "Georgia",
+                            "displayName": "Georgia Bulldogs",
+                            "shortDisplayName": "Georgia",
+                            "name": "Bulldogs",
+                        }},
+                        {"team": {
+                            "location": "Arkansas",
+                            "displayName": "Arkansas Razorbacks",
+                            "shortDisplayName": "Arkansas",
+                            "name": "Razorbacks",
+                        }},
+                    ]
+                }]
+            }
+        }
+
+
+def identity_fallback_smoke() -> None:
+    original_directory = covers._directory
+    try:
+        covers._directory = lambda _builder: []
+
+        alias_builder = FakeAliasFallbackBuilder()
+        georgia = covers._direct_team_urls(alias_builder, "Georgia")
+        arkansas = covers._direct_team_urls(alias_builder, "Arkansas")
+        assert georgia and georgia[0].endswith("/georgia-bulldogs/injuries"), georgia
+        assert arkansas and arkansas[0].endswith("/arkansas-razorbacks/injuries"), arkansas
+
+        game_builder = FakeGameFallbackBuilder()
+        georgia = covers._direct_team_urls(game_builder, "Georgia", "401000001")
+        arkansas = covers._direct_team_urls(game_builder, "Arkansas", "401000001")
+        assert georgia and georgia[0].endswith("/georgia-bulldogs/injuries"), georgia
+        assert arkansas and arkansas[0].endswith("/arkansas-razorbacks/injuries"), arkansas
+    finally:
+        covers._directory = original_directory
+
+
 def identity_resolution_smoke() -> None:
     """State/base-name schools must resolve without the Covers directory."""
     builder = FakeIdentityBuilder()
@@ -266,6 +340,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    identity_fallback_smoke()
     identity_resolution_smoke()
     parser_smoke()
     overlay_smoke()
