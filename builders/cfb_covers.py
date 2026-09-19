@@ -79,9 +79,6 @@ _ALIAS_TO_SLUG = {
     "lsu": "lsu-tigers",
     "ucla": "ucla-bruins",
     "hawai i": "hawaii-rainbow-warriors",
-    # "Oregon" is ambiguous in fuzzy matching because both Oregon Ducks and
-    # Oregon State Beavers contain the single-token query.
-    "oregon": "oregon-ducks",
     "miami fl": "miami-hurricanes",
     "miami florida": "miami-hurricanes",
     "miami oh": "miami-oh-redhawks",
@@ -249,11 +246,89 @@ def _directory(builder: Any) -> list[dict[str, str]]:
     return directory
 
 
+def _espn_directory_aliases(builder: Any, team: str) -> list[str]:
+    """Return mascot-bearing ESPN names for an exact canonical team match.
+
+    The builder normally identifies schools by location (for example, "Utah"
+    or "Oregon"), while Covers uses mascot-bearing labels/slugs ("Utah Utes",
+    "Oregon Ducks"). Resolving through ESPN first prevents base-name schools
+    from colliding with State/Tech/etc. variants in fuzzy matching.
+    """
+    try:
+        index = builder._espn_team_index()
+    except Exception:
+        return []
+    if not isinstance(index, dict) or not index:
+        return []
+
+    canonicalize = getattr(builder, "_canonical_team_name", None)
+
+    def key(value: Any) -> str:
+        if callable(canonicalize):
+            try:
+                value = canonicalize(value)
+            except Exception:
+                pass
+        return _norm(value)
+
+    target = key(team)
+    if not target:
+        return []
+
+    matched: dict[str, Any] | None = None
+    for location, payload in index.items():
+        if key(location) == target:
+            matched = payload if isinstance(payload, dict) else {}
+            break
+    if matched is None:
+        return []
+
+    aliases: list[str] = []
+    for field in ("displayName", "shortDisplayName", "name", "location"):
+        value = _clean_text(matched.get(field, ""))
+        if value and _norm(value) not in {_norm(alias) for alias in aliases}:
+            aliases.append(value)
+
+    location = _clean_text(matched.get("location", ""))
+    mascot = _clean_text(matched.get("name", ""))
+    combined = _clean_text(f"{location} {mascot}")
+    if combined and _norm(combined) not in {_norm(alias) for alias in aliases}:
+        aliases.insert(0, combined)
+
+    # Prefer aliases that actually add identifying information beyond the
+    # builder's short location name. "Utah Utes" should be tried before "Utah".
+    aliases.sort(key=lambda value: (len(_norm(value).split()), len(value)), reverse=True)
+    return aliases
+
+
 def _team_url(builder: Any, team: str) -> str:
+    directory = _directory(builder)
+
+    # Primary path: use ESPN's mascot-bearing identity to disambiguate every
+    # FBS school globally. This handles Oregon/Oregon State, Utah/Utah State,
+    # Washington/Washington State, Michigan/Michigan State, Texas/Texas State,
+    # and the same naming pattern without maintaining one-off aliases.
+    espn_aliases = _espn_directory_aliases(builder, team)
+    if espn_aliases:
+        scored = []
+        for row in directory:
+            score = max(
+                max(_candidate_score(alias, row["label"]), _candidate_score(alias, row["slug_label"]))
+                for alias in espn_aliases
+            )
+            scored.append((score, row))
+        scored.sort(key=lambda item: item[0], reverse=True)
+        if scored and scored[0][0] >= 0.90:
+            if len(scored) == 1 or scored[0][0] - scored[1][0] >= 0.025:
+                return scored[0][1]["url"]
+
+    # Explicit aliases remain as a fallback for abbreviations and legacy names
+    # whose ESPN spelling does not line up cleanly with Covers.
     alias_slug = _ALIAS_TO_SLUG.get(_norm(team))
     if alias_slug:
         return f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{alias_slug}/injuries"
-    directory = _directory(builder)
+
+    # Final fallback preserves the prior conservative fuzzy matcher.
     scored = []
     for row in directory:
         score = max(_candidate_score(team, row["label"]), _candidate_score(team, row["slug_label"]))
