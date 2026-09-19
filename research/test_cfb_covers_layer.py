@@ -250,6 +250,12 @@ def fcs_schedule_classification_smoke() -> None:
     finally:
         covers._team_report = original_report
 
+
+def unicode_team_name_smoke() -> None:
+    assert covers._norm("San José State") == covers._norm("San Jose State")
+    assert covers._slugify_team_label("San José State Spartans") == "san-jose-state-spartans"
+    assert covers._candidate_score("San José State", "San Jose State") == 1.0
+
 def ampersand_slug_smoke() -> None:
     assert covers._slugify_team_label("Texas A&M Aggies") == "texas-a-m-aggies"
     assert covers._slugify_team_label("Texas AandM Aggies") == "texas-a-m-aggies"
@@ -442,6 +448,7 @@ def overlay_smoke() -> None:
 
 def main() -> None:
     weather_retry_cache_smoke()
+    unicode_team_name_smoke()
     ampersand_slug_smoke()
     fcs_schedule_classification_smoke()
     redirect_recovery_smoke()

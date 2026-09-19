@@ -17,6 +17,7 @@ import math
 import re
 import threading
 import time
+import unicodedata
 from typing import Any
 from urllib.parse import urljoin
 
@@ -100,8 +101,13 @@ def _clean_text(value: Any) -> str:
     return " ".join(str(value or "").replace("\xa0", " ").split())
 
 
+def _ascii_fold(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", _clean_text(value))
+    return "".join(ch for ch in text if not unicodedata.combining(ch))
+
+
 def _norm(value: Any) -> str:
-    text = _clean_text(value).lower().replace("&", " and ")
+    text = _ascii_fold(value).lower().replace("&", " and ")
     text = re.sub(r"\bst[.]?\b", "state", text)
     text = re.sub(r"[^a-z0-9]+", " ", text)
     return " ".join(text.split())
@@ -595,7 +601,7 @@ def _slugify_team_label(value: Any) -> str:
     in those slugs (texas-a-m-aggies / north-carolina-a-t-aggies).
     Recover that pattern here without changing global team normalization.
     """
-    text = _clean_text(value).lower()
+    text = _ascii_fold(value).lower()
     text = text.replace("&", " ")
     text = re.sub(r"\b([a-z])and([a-z])\b", r"\1 \2", text)
     text = re.sub(r"[^a-z0-9]+", "-", text)
@@ -889,11 +895,59 @@ def _weather_error(league: str = "ncaaf") -> str:
         return _clean_text(_WEATHER_ERRORS.get(league_key, ""))
 
 
-def _match_weather(builder: Any, away: str, home: str, league: str = "ncaaf") -> dict[str, Any]:
-    scored = [
-        ((_candidate_score(away, card.get("away", "")) + _candidate_score(home, card.get("home", ""))) / 2.0, card)
-        for card in _weather_cards(builder, league)
-    ]
+def _weather_team_aliases(builder: Any, team: str, game_id: str = "") -> list[str]:
+    aliases: list[str] = []
+
+    def add(value: Any) -> None:
+        value = _clean_text(value)
+        if value and _norm(value) not in {_norm(existing) for existing in aliases}:
+            aliases.append(value)
+
+    add(team)
+    canonicalize = getattr(builder, "_canonical_team_name", None)
+    if callable(canonicalize):
+        try:
+            add(canonicalize(team))
+        except Exception:
+            pass
+    for alias in _identity_aliases(builder, team, game_id):
+        add(alias)
+    alias_slug = _ALIAS_TO_SLUG.get(_norm(team))
+    if alias_slug:
+        add(_slug_label(alias_slug))
+    return aliases
+
+
+def _match_weather(
+    builder: Any,
+    away: str,
+    home: str,
+    league: str = "ncaaf",
+    game_id: str = "",
+) -> dict[str, Any]:
+    cards = _weather_cards(builder, league)
+    if not cards:
+        return {}
+
+    if _clean_text(league).lower() == "ncaaf":
+        away_aliases = _weather_team_aliases(builder, away, game_id)
+        home_aliases = _weather_team_aliases(builder, home, game_id)
+    else:
+        away_aliases = [away]
+        home_aliases = [home]
+
+    scored = []
+    for card in cards:
+        away_score = max(
+            (_candidate_score(alias, card.get("away", "")) for alias in away_aliases),
+            default=0.0,
+        )
+        home_score = max(
+            (_candidate_score(alias, card.get("home", "")) for alias in home_aliases),
+            default=0.0,
+        )
+        scored.append(((away_score + home_score) / 2.0, card))
+
     scored.sort(key=lambda item: item[0], reverse=True)
     if not scored or scored[0][0] < 0.86:
         return {}
@@ -1256,7 +1310,8 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
         try:
             away_team = str(game.get("Away Team", ""))
             home_team = str(game.get("Home Team", ""))
-            card = _match_weather(builder, away_team, home_team) if weather_league == "ncaaf" else _match_weather(builder, away_team, home_team, weather_league)
+            game_id = _clean_text(game.get("Game ID", ""))
+            card = _match_weather(builder, away_team, home_team, weather_league, game_id)
             if not card:
                 try:
                     setattr(base, "_covers_weather_error", _weather_error(weather_league) or "No matching Covers weather card was found for this matchup")

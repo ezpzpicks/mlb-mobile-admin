@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import unicodedata
 from typing import Any
 
 import numpy as np
@@ -57,7 +58,9 @@ def _truthy(value: Any) -> bool:
 
 
 def _normalize_team(value: Any) -> str:
-    return " ".join(str(value or "").replace("&", "and").split())
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return " ".join(text.replace("&", "and").split())
 
 
 def _completed_schedule(cfb_builder: Any, season: int, through_week: int | None = None) -> pd.DataFrame:

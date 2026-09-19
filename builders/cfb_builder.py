@@ -20,6 +20,7 @@ from pathlib import Path
 import time
 import re
 import threading
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import quote_plus
 from typing import Any, Iterable
@@ -301,7 +302,9 @@ def _z(series: pd.Series | Iterable[Any] | Any, neutral: float = 0.0) -> pd.Seri
 
 
 def _normalize_team(name: Any) -> str:
-    return " ".join(_text(name).replace("&", "and").split())
+    text = unicodedata.normalize("NFKD", _text(name))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return " ".join(text.replace("&", "and").split())
 
 
 def _register_team_alias(alias: Any, canonical: Any) -> None:
