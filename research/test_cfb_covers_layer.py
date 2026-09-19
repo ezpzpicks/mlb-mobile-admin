@@ -225,6 +225,18 @@ def identity_resolution_smoke() -> None:
             covers._TEAM_REPORTS.clear()
 
 
+def redirect_recovery_smoke() -> None:
+    old = "https://www.covers.com/sport/football/ncaaf/teams/main/nc-state-wolfpack/injuries"
+    canonical_overview = "https://www.covers.com/sport/football/ncaaf/teams/main/north-carolina-state-wolfpack"
+    recovered = covers._redirected_injury_url(old, canonical_overview)
+    assert recovered == (
+        "https://www.covers.com/sport/football/ncaaf/teams/main/"
+        "north-carolina-state-wolfpack/injuries"
+    ), recovered
+
+    unchanged = covers._redirected_injury_url(recovered, recovered)
+    assert unchanged == "", unchanged
+
 def parser_smoke() -> None:
     team_html = """
     <html><body><h1>Baylor Bears</h1>
@@ -340,6 +352,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    redirect_recovery_smoke()
     identity_fallback_smoke()
     identity_resolution_smoke()
     parser_smoke()

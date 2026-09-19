@@ -60,7 +60,7 @@ POSITION_POINTS = {
 _ALIAS_TO_SLUG = {
     "ole miss": "mississippi-rebels",
     "app state": "appalachian-state-mountaineers",
-    "nc state": "nc-state-wolfpack",
+    "nc state": "north-carolina-state-wolfpack",
     "pitt": "pittsburgh-panthers",
     "southern miss": "southern-miss-golden-eagles",
     "la tech": "louisiana-tech-bulldogs",
@@ -154,6 +154,30 @@ def _cache_file(builder: Any, key: str):
 
 
 
+def _redirected_injury_url(requested_url: str, final_url: str) -> str:
+    """Recover renamed Covers team slugs that redirect an injury URL to Overview.
+
+    Covers sometimes keeps an old team slug as a redirect, but drops the
+    /injuries suffix during that redirect. The browser then lands on the
+    renamed team Overview page, which is exactly what happened with NC State.
+    When both URLs are Covers NCAAF team pages, carry the canonical redirected
+    slug forward and restore the injuries route.
+    """
+    requested = _clean_text(requested_url)
+    final = _clean_text(final_url)
+    prefix = f"{COVERS_BASE}/sport/football/ncaaf/teams/main/"
+    if not requested.startswith(prefix) or not final.startswith(prefix):
+        return ""
+    requested_path = requested.split("?", 1)[0].split("#", 1)[0].rstrip("/")
+    final_path = final.split("?", 1)[0].split("#", 1)[0].rstrip("/")
+    if not requested_path.endswith("/injuries"):
+        return ""
+    if final_path.endswith("/injuries"):
+        return ""
+    if final_path == requested_path[:-len("/injuries")]:
+        return ""
+    return final_path + "/injuries"
+
 def _html_is_usable(html: str) -> bool:
     if len(html or "") < 500:
         return False
@@ -222,6 +246,15 @@ def _fetch_html(builder: Any, url: str, *, ttl: int) -> str:
         try:
             response = requests.get(url, headers=headers, timeout=(4, 12))
             response.raise_for_status()
+
+            # Covers can redirect an old team slug /injuries URL to the
+            # renamed team Overview page and drop /injuries. Follow the
+            # canonical slug and explicitly reopen its injury tab.
+            redirected_injury = _redirected_injury_url(url, str(getattr(response, "url", "") or ""))
+            if redirected_injury:
+                response = requests.get(redirected_injury, headers=headers, timeout=(4, 12))
+                response.raise_for_status()
+
             html = response.text
             if not _html_is_usable(html):
                 raise RuntimeError("Covers returned a blocked/interstitial or incomplete HTML page")
