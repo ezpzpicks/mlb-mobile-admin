@@ -79,6 +79,9 @@ _ALIAS_TO_SLUG = {
     "lsu": "lsu-tigers",
     "ucla": "ucla-bruins",
     "hawai i": "hawaii-rainbow-warriors",
+    # "Oregon" is ambiguous in fuzzy matching because both Oregon Ducks and
+    # Oregon State Beavers contain the single-token query.
+    "oregon": "oregon-ducks",
     "miami fl": "miami-hurricanes",
     "miami florida": "miami-hurricanes",
     "miami oh": "miami-oh-redhawks",
@@ -109,6 +112,39 @@ def _rating_classification(rating: Any) -> str:
         return "unknown"
     value = _clean_text(rating.get("Classification", "")).lower()
     return value if value in {"fbs", "fcs"} else "unknown"
+
+
+def _authoritative_classification(builder: Any, team: str, rating: Any) -> str:
+    """Resolve FBS/FCS from the live ESPN FBS directory before cached ratings.
+
+    Older persisted rating snapshots can contain a stale/default FBS label for
+    an FCS opponent. A complete ESPN FBS directory is authoritative here: a
+    positive match is FBS, while a missing team is FCS. If the directory is
+    unavailable or truncated, fall back to the rating and keep the gate closed
+    for anything still unknown.
+    """
+    try:
+        index = builder._espn_team_index()
+        if isinstance(index, dict):
+            canonicalize = getattr(builder, "_canonical_team_name", None)
+
+            def key(value: Any) -> str:
+                if callable(canonicalize):
+                    try:
+                        value = canonicalize(value)
+                    except Exception:
+                        pass
+                return _norm(value)
+
+            names = {key(name) for name in index if key(name)}
+            target = key(team)
+            if target and target in names:
+                return "fbs"
+            if target and len(names) >= 100:
+                return "fcs"
+    except Exception:
+        pass
+    return _rating_classification(rating)
 
 
 def _slug_label(slug: str) -> str:
@@ -687,7 +723,7 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
 
     def default_personnel(team: str, rating: dict[str, Any], season: int, week: int, game_id: str, live_candidate: bool = True):
         base = original_default_personnel(team, rating, season, week, game_id, live_candidate)
-        classification = _rating_classification(rating)
+        classification = _authoritative_classification(builder, team, rating)
         if classification == "fcs":
             try:
                 # Covers does not reliably carry FCS depth charts/injuries. Keep
