@@ -19,6 +19,7 @@ import streamlit as st
 
 
 _SHEETS_LOCK = threading.Lock()
+_RATINGS_BUILD_LOCK = threading.Lock()
 
 
 def _quota_error(exc: Exception) -> bool:
@@ -168,31 +169,44 @@ def install_runtime_guard(cfb_builder: Any) -> None:
                 return False
         return True
 
-    def _required_asset_specs(season: int) -> list[tuple[str, int, tuple[str, ...]]]:
-        season = int(season)
-        specs = [
-            ("cfbfastR_cfb_pbp", season, ("play_by_play", "pbp")),
-            # Prior-season returning production needs season-2 -> season-1
-            # player overlap; current-season returning production needs
-            # season-1 -> season. Queue the complete three-roster chain.
-            ("espn_cfb_rosters", season - 2, ("roster", "espn")),
-            ("espn_cfb_rosters", season - 1, ("roster", "espn")),
-            ("espn_cfb_rosters", season, ("roster", "espn")),
-        ]
-
-        # A completed prior season may use the exact team-level aggregates that
-        # were already calculated from its full PBP parquet and persisted to
-        # NCAAF Turso. Current-season PBP is never satisfied by this cache because
-        # it must remain week-filtered/as-of-date.
-        prior_cached = False
+    def _prior_pbp_cache_ready(season: int) -> bool:
         checker = getattr(cfb_builder, "_persistent_pbp_metrics_ready", None)
-        if callable(checker):
-            try:
-                prior_cached = bool(checker(season - 1))
-            except Exception:
-                prior_cached = False
-        if not prior_cached:
+        if not callable(checker):
+            return False
+        try:
+            return bool(checker(int(season) - 1))
+        except Exception:
+            return False
+
+    def _required_asset_specs(
+        season: int,
+        *,
+        include_rosters: bool,
+    ) -> list[tuple[str, int, tuple[str, ...]]]:
+        season = int(season)
+
+        # The independent totals model always needs exact current-season PBP
+        # through the selected week. Its completed prior-season context can be
+        # satisfied by the exact Turso aggregate cache.
+        specs: list[tuple[str, int, tuple[str, ...]]] = [
+            ("cfbfastR_cfb_pbp", season, ("play_by_play", "pbp")),
+        ]
+        if not _prior_pbp_cache_ready(season):
             specs.insert(0, ("cfbfastR_cfb_pbp", season - 1, ("play_by_play", "pbp")))
+
+        # Roster files are rebuild inputs, not runtime projection inputs. A saved
+        # ratings snapshot marked full-input-verified already proves that its
+        # advanced PBP + complete returning-production chain was present when the
+        # snapshot was produced. Do not redownload 3 roster seasons after every
+        # ephemeral Render restart just to reuse that verified snapshot.
+        if include_rosters:
+            specs.extend(
+                [
+                    ("espn_cfb_rosters", season - 2, ("roster", "espn")),
+                    ("espn_cfb_rosters", season - 1, ("roster", "espn")),
+                    ("espn_cfb_rosters", season, ("roster", "espn")),
+                ]
+            )
         return specs
 
     def _asset_ready(tag: str, season: int) -> bool:
@@ -202,10 +216,13 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         except Exception:
             return False
 
-    def _queue_required_assets(season: int) -> list[str]:
+    def _queue_required_assets(season: int, *, include_rosters: bool) -> list[str]:
         season = int(season)
         missing: list[str] = []
-        for tag, asset_season, tokens in _required_asset_specs(season):
+        for tag, asset_season, tokens in _required_asset_specs(
+            season,
+            include_rosters=include_rosters,
+        ):
             if _asset_ready(tag, asset_season):
                 continue
             missing.append(f"{asset_season} {tag}")
@@ -218,14 +235,7 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         # once in a background worker and persist those team metrics to NCAAF
         # Turso. Keep the builder locked until that permanent cache is verified.
         prior_season = season - 1
-        checker = getattr(cfb_builder, "_persistent_pbp_metrics_ready", None)
-        prior_cached = False
-        if callable(checker):
-            try:
-                prior_cached = bool(checker(prior_season))
-            except Exception:
-                prior_cached = False
-        if not prior_cached and _asset_ready("cfbfastR_cfb_pbp", prior_season):
+        if not _prior_pbp_cache_ready(season) and _asset_ready("cfbfastR_cfb_pbp", prior_season):
             queuer = getattr(cfb_builder, "_queue_persistent_pbp_metrics_seed", None)
             if callable(queuer):
                 try:
@@ -253,18 +263,32 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             saved = cfb_builder._get_cached_ratings(season, week)
             saved_ready = not force and _ratings_complete(saved, week)
 
-        # Full model-input readiness is checked even when a verified ratings
-        # snapshot already exists. The independent totals layer separately needs
-        # prior/current PBP context, so a saved rating alone cannot unlock Build
-        # after a fresh Render restart.
-        missing_assets = _queue_required_assets(season)
+        verified_snapshot_ready = bool(cached_ready or saved_ready)
+
+        # A verified snapshot already contains the full advanced-PBP and complete
+        # roster/returning-production inputs used to build the ratings. On a fresh
+        # Render instance only the independent totals PBP context still needs to
+        # be present. If no verified snapshot exists, keep the original strict
+        # behavior and require every rebuild input before ratings can be created.
+        missing_assets = _queue_required_assets(
+            season,
+            include_rosters=not verified_snapshot_ready,
+        )
         if missing_assets:
-            st.session_state["cfb_auto_ratings_warning"] = (
-                "Full CFB model data is still preparing. Build is locked until all "
-                "advanced PBP and roster/returning-production inputs are ready. "
-                "Completed prior-season PBP may be satisfied by its exact Turso aggregate cache. "
-                "Waiting on: " + ", ".join(missing_assets)
-            )
+            if verified_snapshot_ready:
+                message = (
+                    "Verified CFB ratings are ready, but exact totals/PBP context is still preparing. "
+                    "Build remains locked so no projection can use partial data. Waiting on: "
+                    + ", ".join(missing_assets)
+                )
+            else:
+                message = (
+                    "Full CFB model data is still preparing. Build is locked until all "
+                    "advanced PBP and roster/returning-production rebuild inputs are ready. "
+                    "Completed prior-season PBP may be satisfied by its exact Turso aggregate cache. "
+                    "Waiting on: " + ", ".join(missing_assets)
+                )
+            st.session_state["cfb_auto_ratings_warning"] = message
             return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
         if cached_ready:
@@ -274,11 +298,25 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         if saved_ready:
             st.session_state[session_key] = saved.copy()
             st.session_state.pop("cfb_auto_ratings_warning", None)
+            print(
+                f"[cfb-ratings] reused verified saved {season} Week {week} snapshot "
+                "without cold-start roster downloads",
+                flush=True,
+            )
             return saved.copy()
+
+        # Streamlit can execute two sessions/reruns against the same Python
+        # process. Never let both start the same expensive full-season rebuild.
+        if not _RATINGS_BUILD_LOCK.acquire(blocking=False):
+            st.session_state["cfb_auto_ratings_warning"] = (
+                f"Full CFB {season} Week {week} ratings are already rebuilding in another "
+                "session. Build remains locked until that verified snapshot is available."
+            )
+            return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
         try:
             started = time.perf_counter()
-            print(f"[cfb-ratings] building full {season} Week {week} snapshot")
+            print(f"[cfb-ratings] building full {season} Week {week} snapshot", flush=True)
             ratings = cfb_builder.build_team_ratings(season, week)
             if not _ratings_complete(ratings, week):
                 raise RuntimeError(
@@ -289,11 +327,14 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             st.session_state.pop("cfb_auto_ratings_warning", None)
             print(
                 f"[cfb-ratings] full {season} Week {week} snapshot ready in "
-                f"{time.perf_counter() - started:.2f}s"
+                f"{time.perf_counter() - started:.2f}s",
+                flush=True,
             )
             return ratings.copy()
         except Exception as exc:
             st.session_state["cfb_auto_ratings_warning"] = str(exc)
+        finally:
+            _RATINGS_BUILD_LOCK.release()
 
         return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
