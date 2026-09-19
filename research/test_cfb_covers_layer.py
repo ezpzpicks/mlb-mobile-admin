@@ -250,6 +250,29 @@ def fcs_schedule_classification_smoke() -> None:
     finally:
         covers._team_report = original_report
 
+def ampersand_slug_smoke() -> None:
+    assert covers._slugify_team_label("Texas A&M Aggies") == "texas-a-m-aggies"
+    assert covers._slugify_team_label("Texas AandM Aggies") == "texas-a-m-aggies"
+    assert covers._slugify_team_label("North Carolina A&T Aggies") == "north-carolina-a-t-aggies"
+    assert covers._slugify_team_label("North Carolina AandT Aggies") == "north-carolina-a-t-aggies"
+
+    class AmpBuilder:
+        _TEAM_NAME_ALIASES = {
+            "Texas AandM": "Texas AandM",
+            "Texas AandM Aggies": "Texas AandM",
+        }
+
+        @staticmethod
+        def _canonical_team_name(value):
+            return str(value)
+
+        @staticmethod
+        def _espn_team_index():
+            return {}
+
+    urls = covers._direct_team_urls(AmpBuilder(), "Texas AandM")
+    assert urls and urls[0].endswith("/texas-a-m-aggies/injuries"), urls
+
 def redirect_recovery_smoke() -> None:
     old = "https://www.covers.com/sport/football/ncaaf/teams/main/nc-state-wolfpack/injuries"
     canonical_overview = "https://www.covers.com/sport/football/ncaaf/teams/main/north-carolina-state-wolfpack"
@@ -377,6 +400,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    ampersand_slug_smoke()
     fcs_schedule_classification_smoke()
     redirect_recovery_smoke()
     identity_fallback_smoke()

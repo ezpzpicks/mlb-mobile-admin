@@ -61,6 +61,8 @@ _ALIAS_TO_SLUG = {
     "ole miss": "mississippi-rebels",
     "app state": "appalachian-state-mountaineers",
     "nc state": "north-carolina-state-wolfpack",
+    "texas aandm": "texas-a-m-aggies",
+    "texas a and m": "texas-a-m-aggies",
     "pitt": "pittsburgh-panthers",
     "southern miss": "southern-miss-golden-eagles",
     "la tech": "louisiana-tech-bulldogs",
@@ -568,7 +570,19 @@ def _covers_team_url(slug: str) -> str:
 
 
 def _slugify_team_label(value: Any) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", _clean_text(value).lower()).strip("-")
+    """Convert ESPN/builder team labels into Covers team slugs.
+
+    The builder normalizes ampersands with replace("&", "and"). For
+    acronym-style school names that can produce glued tokens such as
+    Texas AandM or North Carolina AandT. Covers uses separate letters
+    in those slugs (texas-a-m-aggies / north-carolina-a-t-aggies).
+    Recover that pattern here without changing global team normalization.
+    """
+    text = _clean_text(value).lower()
+    text = text.replace("&", " ")
+    text = re.sub(r"\b([a-z])and([a-z])\b", r"\1 \2", text)
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
 
 
 def _direct_team_urls(builder: Any, team: str, game_id: str = "") -> list[str]:
