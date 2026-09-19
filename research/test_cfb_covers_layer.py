@@ -285,6 +285,47 @@ def redirect_recovery_smoke() -> None:
     unchanged = covers._redirected_injury_url(recovered, recovered)
     assert unchanged == "", unchanged
 
+def weather_retry_cache_smoke() -> None:
+    builder = FakeBuilder()
+    original_fetch = covers._fetch_html
+    original_weather = dict(covers._WEATHER)
+    original_errors = dict(covers._WEATHER_ERRORS)
+    calls = {"count": 0}
+    weather_html = """
+    <html><body><section><h3>Kentucky @ Texas A&amp;M</h3>
+      <div>Kyle Field · 93.6 °F</div><div>6.1 Mph Wind</div>
+      <div>42.58% Humidity</div><div>0% P.O.P</div>
+    </section></body></html>
+    """
+
+    def flaky_fetch(_builder, _url, ttl):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise RuntimeError("transient weather fetch failure")
+        return weather_html
+
+    try:
+        covers._fetch_html = flaky_fetch
+        covers._WEATHER.clear()
+        covers._WEATHER_ERRORS.clear()
+        first = covers._weather_cards(builder)
+        assert first == [], first
+        assert "transient weather fetch failure" in covers._weather_error(), covers._weather_error()
+
+        second = covers._weather_cards(builder)
+        assert len(second) == 1, second
+        assert second[0]["away"] == "Kentucky", second
+        assert second[0]["home"] == "Texas A&M", second
+        assert abs(second[0]["temperature"] - 93.6) < 1e-9
+        assert covers._weather_error() == ""
+        assert calls["count"] == 2, calls
+    finally:
+        covers._fetch_html = original_fetch
+        covers._WEATHER.clear()
+        covers._WEATHER.update(original_weather)
+        covers._WEATHER_ERRORS.clear()
+        covers._WEATHER_ERRORS.update(original_errors)
+
 def parser_smoke() -> None:
     team_html = """
     <html><body><h1>Baylor Bears</h1>
@@ -400,6 +441,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    weather_retry_cache_smoke()
     ampersand_slug_smoke()
     fcs_schedule_classification_smoke()
     redirect_recovery_smoke()

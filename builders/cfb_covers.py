@@ -92,6 +92,7 @@ _MEMORY_HTML: dict[str, tuple[float, str]] = {}
 _TEAM_REPORTS: dict[str, tuple[float, dict[str, Any]]] = {}
 _DIRECTORY: tuple[float, list[dict[str, str]]] | None = None
 _WEATHER: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+_WEATHER_ERRORS: dict[str, str] = {}
 _FALLBACK_PENDING: dict[str, list[dict[str, Any]]] = {"starters": [], "injuries": []}
 
 
@@ -296,6 +297,22 @@ def clear_live_personnel_cache() -> None:
         _MEMORY_HTML.clear()
         _TEAM_REPORTS.clear()
         _DIRECTORY = None
+
+
+def clear_live_weather_cache(builder: Any, league: str = "ncaaf") -> None:
+    """Clear Covers weather caches so Retry performs a real network refetch."""
+    league_key = "nfl" if _clean_text(league).lower() == "nfl" else "ncaaf"
+    url = COVERS_NFL_WEATHER_URL if league_key == "nfl" else COVERS_WEATHER_URL
+    with _LOCK:
+        _WEATHER.pop(league_key, None)
+        _WEATHER_ERRORS.pop(league_key, None)
+        _MEMORY_HTML.pop(url, None)
+    try:
+        path = _cache_file(builder, url)
+        if path.exists():
+            path.unlink()
+    except Exception:
+        pass
 
 
 def _candidate_score(query: str, candidate: str) -> float:
@@ -846,16 +863,30 @@ def _weather_cards(builder: Any, league: str = "ncaaf") -> list[dict[str, Any]]:
     now = time.time()
     with _LOCK:
         cached = _WEATHER.get(league_key)
-        if cached and now - cached[0] <= WEATHER_TTL:
+        if cached and cached[1] and now - cached[0] <= WEATHER_TTL:
             return list(cached[1])
     url = COVERS_NFL_WEATHER_URL if league_key == "nfl" else COVERS_WEATHER_URL
     try:
-        cards = _parse_weather_html(_fetch_html(builder, url, ttl=WEATHER_TTL))
-    except Exception:
-        cards = []
+        html = _fetch_html(builder, url, ttl=WEATHER_TTL)
+        cards = _parse_weather_html(html)
+        if not cards:
+            raise RuntimeError("Covers weather page loaded but no matchup weather cards were parsed")
+    except Exception as exc:
+        with _LOCK:
+            _WEATHER.pop(league_key, None)
+            _WEATHER_ERRORS[league_key] = f"{type(exc).__name__}: {exc}"
+        return []
+
     with _LOCK:
         _WEATHER[league_key] = (now, cards)
+        _WEATHER_ERRORS.pop(league_key, None)
     return list(cards)
+
+
+def _weather_error(league: str = "ncaaf") -> str:
+    league_key = "nfl" if _clean_text(league).lower() == "nfl" else "ncaaf"
+    with _LOCK:
+        return _clean_text(_WEATHER_ERRORS.get(league_key, ""))
 
 
 def _match_weather(builder: Any, away: str, home: str, league: str = "ncaaf") -> dict[str, Any]:
@@ -1227,9 +1258,17 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
             home_team = str(game.get("Home Team", ""))
             card = _match_weather(builder, away_team, home_team) if weather_league == "ncaaf" else _match_weather(builder, away_team, home_team, weather_league)
             if not card:
+                try:
+                    setattr(base, "_covers_weather_error", _weather_error(weather_league) or "No matching Covers weather card was found for this matchup")
+                except Exception:
+                    pass
                 return base
             values = [float(card.get("temperature", math.nan)), float(card.get("wind", math.nan)), float(card.get("precipitation", math.nan))]
             if sum(math.isfinite(value) for value in values) < 2:
+                try:
+                    setattr(base, "_covers_weather_error", "Matched Covers weather card was incomplete")
+                except Exception:
+                    pass
                 return base
             temp = values[0] if math.isfinite(values[0]) else float(getattr(base, "temperature", math.nan))
             wind = values[1] if math.isfinite(values[1]) else float(getattr(base, "wind", math.nan))
@@ -1247,6 +1286,7 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
             base.weather_confidence = max(float(getattr(base, "weather_confidence", 0.0)), 92.0)
             try:
                 setattr(base, "_covers_weather_ready", True)
+                setattr(base, "_covers_weather_error", "")
             except Exception:
                 pass
             prior = _clean_text(getattr(base, "notes", ""))
@@ -1293,6 +1333,7 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
             _TEAM_REPORTS.clear()
             _DIRECTORY = None
             _WEATHER.clear()
+            _WEATHER_ERRORS.clear()
         _pending(builder, "starters").clear()
         _pending(builder, "injuries").clear()
 
@@ -1317,6 +1358,6 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
 
 
 __all__ = [
-    "install_covers_layer", "clear_live_personnel_cache", "_parse_team_report", "_parse_weather_html",
+    "install_covers_layer", "clear_live_personnel_cache", "clear_live_weather_cache", "_parse_team_report", "_parse_weather_html",
     "_candidate_score", "_player_matches", "_severity",
 ]

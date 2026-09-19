@@ -8,6 +8,8 @@ Primary public data integrations: ESPN public feeds, SportsDataverse open releas
 """
 from __future__ import annotations
 
+import sys
+
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 import hashlib
@@ -3669,7 +3671,15 @@ def _render_build() -> None:
                 "Full model data gate: current weather is required for this outdoor game "
                 "but a complete forecast could not be loaded. No projection was run."
             )
+            covers_weather_error = _text(getattr(environment, "_covers_weather_error", ""))
+            if covers_weather_error:
+                st.caption("Weather lookup detail: " + covers_weather_error)
             if st.button("Retry weather", use_container_width=True, key=f"cfb_retry_weather_{market_key}"):
+                try:
+                    from builders import cfb_covers as _covers_live
+                    _covers_live.clear_live_weather_cache(sys.modules[__name__])
+                except Exception:
+                    pass
                 st.rerun()
             return
 
