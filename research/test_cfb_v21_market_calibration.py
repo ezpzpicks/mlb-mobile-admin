@@ -32,10 +32,15 @@ away_value = calibration._priced_spread_market(pricing_builder, sim, 0.0, "Home"
 assert away_value["team"] == "Away"
 assert away_value["odds"] == 180
 
-# The selected conservative spread gates are exactly the research fallbacks.
-assert calibration._grade_spread(0.58, 4.0, 72, 4) == "A Spread"
-assert calibration._grade_spread(0.55, 2.5, 62, 3) == "B Spread"
-assert calibration._grade_spread(0.549, 10.0, 90, 6) == "No Play"
+# The selected spread gates remain point-edge driven below 20 points, while
+# every 20+ market spread is projection-only regardless of model strength.
+assert calibration._grade_spread(0.01, 5.99, 0, 0, 19.5) == "No Play"
+assert calibration._grade_spread(0.01, 6.00, 0, 0, 19.5) == "B Spread"
+assert calibration._grade_spread(0.01, 9.50, 0, 0, 19.5) == "A Spread"
+assert calibration._grade_spread(0.99, 20.0, 100, 6, 20.0) == "No Play"
+assert calibration._grade_spread(0.99, 20.0, 100, 6, -20.0) == "No Play"
+assert calibration._grade_spread(0.99, 20.0, 100, 6, 35.5) == "No Play"
+assert calibration.SPREAD_NO_GRADE_THRESHOLD == 20.0
 assert calibration.ATS_CALIBRATION_PROVEN is False
 assert abs(calibration.MARGIN_RESIDUAL_SD - 17.75939215594032) < 1e-9
 assert calibration.TEAM_RESIDUAL_FEATURES == ()

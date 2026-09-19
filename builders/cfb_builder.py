@@ -3784,7 +3784,11 @@ def _render_tracker() -> None:
     st.subheader("Bet Tracker")
     frame = _sheet(TRACKER_TAB, TRACKER_COLUMNS)
     if frame.empty: st.info("No tracked plays yet."); return
-    settled = frame[frame["Result"].isin(["Win", "Loss", "Push"])].copy()
+    grade_text = frame["Grade"].astype(str).str.strip().str.lower()
+    qualified = grade_text.ne("") & ~grade_text.str.contains(
+        r"no play|non edge|research|projection only|no market line", regex=True
+    )
+    settled = frame[qualified & frame["Result"].isin(["Win", "Loss", "Push"])].copy()
     wins = int((settled["Result"] == "Win").sum()); losses = int((settled["Result"] == "Loss").sum()); pushes = int((settled["Result"] == "Push").sum())
     c1, c2, c3, c4 = st.columns(4); c1.metric("Wins", wins); c2.metric("Losses", losses); c3.metric("Pushes", pushes); c4.metric("Win rate", f"{wins/max(1,wins+losses):.1%}")
     st.dataframe(frame.sort_values(["Date", "Game"], ascending=False), hide_index=True, use_container_width=True)

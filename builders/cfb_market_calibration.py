@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-MODEL_VERSION = "cfb-v2.3-independent-total-2026-09-08-w2-spread-guardrail"
+MODEL_VERSION = "cfb-v2.3-independent-total-2026-09-19-20pt-spread-no-grade"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
 # 2024 out-of-sample residual distribution from the 2021-23-trained CFB v2 model.
@@ -39,6 +39,7 @@ SPREAD_B_PROBABILITY = 0.55
 SPREAD_B_POINT_EDGE = 6.0
 SPREAD_A_PROBABILITY = 0.58
 SPREAD_A_POINT_EDGE = 9.5
+SPREAD_NO_GRADE_THRESHOLD = 20.0
 
 # 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and
 # Unders are intentionally graded differently because the historical edge curve
@@ -158,11 +159,11 @@ def _grade_spread(
     confluence: int,
     market_spread: float = 0.0,
 ) -> str:
-    # The 2025 holdout-supported point edge remains the primary grading signal.
-    # Week 1 exposed extra fragility on very large numbers, so 21+ point spreads
-    # now require at least one independent confluence signal. This is a
-    # qualification safeguard only; it does not change the projection itself.
-    if abs(float(market_spread)) >= 21.0 and int(confluence) < 1:
+    # The underlying projection and spread probability are still calculated for
+    # every matchup, but 20+ point market spreads are projection-only. Recent
+    # production results showed this extreme-spread regime is not calibrated well
+    # enough to contribute an official A/B spread grade or betting record.
+    if abs(float(market_spread)) >= SPREAD_NO_GRADE_THRESHOLD:
         return "No Play"
     if point_edge >= SPREAD_A_POINT_EDGE:
         return "A Spread"
@@ -313,8 +314,10 @@ def install_market_calibration(cfb_builder: Any) -> None:
         spread["grade"] = _grade_spread(
             spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread
         )
-        if abs(market_home_spread) >= 21.0 and spread_conf < 1:
-            spread_support = list(spread_support) + ["21+ point spread requires Confluence >= 1"]
+        if abs(market_home_spread) >= SPREAD_NO_GRADE_THRESHOLD:
+            spread_support = list(spread_support) + [
+                "20+ point market spread is projection-only; spread grade disabled"
+            ]
         total["grade"] = _grade_total(
             total["pick"], total["model_edge_points"], total["probability"], reliability, total_conf
         )
