@@ -112,14 +112,18 @@ def _rating_classification(rating: Any) -> str:
 
 
 def _authoritative_classification(builder: Any, team: str, rating: Any) -> str:
-    """Resolve FBS/FCS from the live ESPN FBS directory before cached ratings.
+    """Resolve FBS/FCS with the selected game's schedule classification first.
 
-    Older persisted rating snapshots can contain a stale/default FBS label for
-    an FCS opponent. A complete ESPN FBS directory is authoritative here: a
-    positive match is FBS, while a missing team is FCS. If the directory is
-    unavailable or truncated, fall back to the rating and keep the gate closed
-    for anything still unknown.
+    The game schedule already carries the opponent division. That value is more
+    specific than a cached team rating or a separately fetched ESPN teams
+    directory and prevents lower-level opponents from being sent through the
+    required Covers personnel gate.
     """
+    if isinstance(rating, dict):
+        game_classification = _clean_text(rating.get("_Game Classification", "")).lower()
+        if game_classification in {"fbs", "fcs"}:
+            return game_classification
+
     try:
         index = builder._espn_team_index()
         if isinstance(index, dict):

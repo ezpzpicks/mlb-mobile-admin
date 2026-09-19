@@ -225,6 +225,31 @@ def identity_resolution_smoke() -> None:
             covers._TEAM_REPORTS.clear()
 
 
+def fcs_schedule_classification_smoke() -> None:
+    builder = FakeBuilder()
+    builder._canonical_team_name = lambda value: str(value)
+    # Simulate a misleading/stale team-directory result that would otherwise
+    # classify the lower-level opponent as FBS.
+    builder._espn_team_index = lambda: {"Southern Illinois": {"location": "Southern Illinois"}}
+
+    rating = {"Classification": "fbs", "_Game Classification": "fcs"}
+    assert covers._authoritative_classification(builder, "Southern Illinois", rating) == "fcs"
+
+    original_report = covers._team_report
+    try:
+        covers._team_report = lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("FCS opponent should bypass Covers personnel lookup")
+        )
+        covers.install_covers_layer(builder)
+        personnel = builder.default_personnel(
+            "Southern Illinois", rating, 2026, 4, "fcs-game-1"
+        )
+        assert getattr(personnel, "_covers_personnel_ready", False) is True
+        assert getattr(personnel, "_covers_personnel_exempt", False) is True
+        assert "FCS opponent" in personnel.source
+    finally:
+        covers._team_report = original_report
+
 def redirect_recovery_smoke() -> None:
     old = "https://www.covers.com/sport/football/ncaaf/teams/main/nc-state-wolfpack/injuries"
     canonical_overview = "https://www.covers.com/sport/football/ncaaf/teams/main/north-carolina-state-wolfpack"
@@ -352,6 +377,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    fcs_schedule_classification_smoke()
     redirect_recovery_smoke()
     identity_fallback_smoke()
     identity_resolution_smoke()

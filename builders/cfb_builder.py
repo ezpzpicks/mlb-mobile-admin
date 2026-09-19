@@ -2569,6 +2569,24 @@ def _rating_row(ratings: pd.DataFrame, team: str) -> dict[str, Any]:
     return matches.iloc[-1].to_dict()
 
 
+def _rating_row_for_game(
+    ratings: pd.DataFrame,
+    team: str,
+    classification: Any,
+) -> dict[str, Any]:
+    """Attach the selected schedule's trusted FBS/FCS classification to a rating.
+
+    Ratings are reused across seasons/weeks and can contain stale/default
+    classification values for lower-level opponents. Personnel source gating
+    should use the classification attached to this exact scheduled matchup.
+    """
+    row = dict(_rating_row(ratings, team))
+    game_classification = _text(classification).lower()
+    if game_classification in {"fbs", "fcs"}:
+        row["_Game Classification"] = game_classification
+    return row
+
+
 def _calibration_adjustments() -> tuple[float, float, int]:
     frame = _sheet(CALIBRATION_TAB, CALIBRATION_COLUMNS)
     if frame.empty: return 0.0, 0.0, 0
@@ -3113,8 +3131,12 @@ def run_week(
 
     for _, game in games.iterrows():
         try:
-            away_rating = _rating_row(ratings, game["Away Team"])
-            home_rating = _rating_row(ratings, game["Home Team"])
+            away_rating = _rating_row_for_game(
+                ratings, game["Away Team"], game.get("Away Classification")
+            )
+            home_rating = _rating_row_for_game(
+                ratings, game["Home Team"], game.get("Home Classification")
+            )
             away_p = default_personnel(game["Away Team"], away_rating, season, week, game["Game ID"], live_candidate=False)
             home_p = default_personnel(game["Home Team"], home_rating, season, week, game["Game ID"], live_candidate=False)
             env = build_environment(game, season)
@@ -3566,8 +3588,12 @@ def _render_build() -> None:
     roof_index = roof_options.index(auto_roof) if auto_roof in roof_options else 0
     roof = st.selectbox("Stadium environment", roof_options, index=roof_index, key=f"roof_{market_key}")
 
-    away_rating = _rating_row(ratings, game["Away Team"])
-    home_rating = _rating_row(ratings, game["Home Team"])
+    away_rating = _rating_row_for_game(
+        ratings, game["Away Team"], game.get("Away Classification")
+    )
+    home_rating = _rating_row_for_game(
+        ratings, game["Home Team"], game.get("Home Classification")
+    )
     away_base = default_personnel(game["Away Team"], away_rating, season, week, game["Game ID"])
     home_base = default_personnel(game["Home Team"], home_rating, season, week, game["Game ID"])
 
