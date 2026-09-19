@@ -104,6 +104,13 @@ def _norm(value: Any) -> str:
     return " ".join(text.split())
 
 
+def _rating_classification(rating: Any) -> str:
+    if not isinstance(rating, dict):
+        return "unknown"
+    value = _clean_text(rating.get("Classification", "")).lower()
+    return value if value in {"fbs", "fcs"} else "unknown"
+
+
 def _slug_label(slug: str) -> str:
     return " ".join(slug.replace("-", " ").split())
 
@@ -680,6 +687,37 @@ def install_covers_layer(builder: Any, league: str = "ncaaf") -> None:
 
     def default_personnel(team: str, rating: dict[str, Any], season: int, week: int, game_id: str, live_candidate: bool = True):
         base = original_default_personnel(team, rating, season, week, game_id, live_candidate)
+        classification = _rating_classification(rating)
+        if classification == "fcs":
+            try:
+                # Covers does not reliably carry FCS depth charts/injuries. Keep
+                # the FCS team's available ratings/roster/QB context, but do not
+                # invent injury penalties. Lower confidence so reliability still
+                # reflects the missing live personnel source.
+                base.qb_adjustment = 0.0
+                base.ol_adjustment = 0.0
+                base.skill_adjustment = 0.0
+                base.dl_adjustment = 0.0
+                base.linebacker_adjustment = 0.0
+                base.secondary_adjustment = 0.0
+                base.kicker_adjustment = 0.0
+                base.availability_confidence = min(
+                    float(getattr(base, "availability_confidence", 45.0) or 45.0),
+                    55.0,
+                )
+                prior_source = _clean_text(getattr(base, "source", ""))
+                prior_notes = _clean_text(getattr(base, "notes", ""))
+                base.source = f"{prior_source}; FCS opponent — Covers depth chart/injuries not required".strip("; ")
+                base.notes = (
+                    f"{prior_notes}; FCS Covers exemption: unknown injury effects set to zero; "
+                    "available ratings/roster inputs retained."
+                ).strip("; ")
+                setattr(base, "_covers_personnel_ready", True)
+                setattr(base, "_covers_personnel_exempt", True)
+                setattr(base, "_covers_personnel_source", "")
+            except Exception:
+                pass
+            return base
         try:
             setattr(base, "_covers_personnel_ready", False)
         except Exception:

@@ -583,6 +583,10 @@ def _espn_events(season: int) -> list[dict[str, Any]]:
 @st.cache_data(ttl=21600, show_spinner=False)
 def _espn_games_payload(season: int) -> list[dict[str, Any]]:
     fbs_names = set(_espn_team_index())
+    # Only waive the strict live-personnel gate for teams that are positively
+    # identified as non-FBS. If ESPN's FBS directory is truncated/unavailable,
+    # classify missing teams as unknown so the gate still fails closed.
+    fbs_directory_complete = len(fbs_names) >= 100
     rows: list[dict[str, Any]] = []
     for event in _espn_events(season):
         competitions = event.get("competitions", []) or []
@@ -622,8 +626,8 @@ def _espn_games_payload(season: int) -> list[dict[str, Any]]:
             "homeTeam": home_name,
             "awayConference": _text(_first(away_conf, ["name", "shortName", "abbreviation"], _first(away_team, ["conferenceName"], ""))),
             "homeConference": _text(_first(home_conf, ["name", "shortName", "abbreviation"], _first(home_team, ["conferenceName"], ""))),
-            "awayClassification": "fbs" if away_name in fbs_names else "fcs",
-            "homeClassification": "fbs" if home_name in fbs_names else "fcs",
+            "awayClassification": "fbs" if away_name in fbs_names else ("fcs" if fbs_directory_complete else "unknown"),
+            "homeClassification": "fbs" if home_name in fbs_names else ("fcs" if fbs_directory_complete else "unknown"),
             "awayPoints": _num(away.get("score"), np.nan) if completed else None,
             "homePoints": _num(home.get("score"), np.nan) if completed else None,
             "neutralSite": _bool(comp.get("neutralSite")),
@@ -2075,10 +2079,33 @@ def _season_features(season: int, through_week: int | None = None) -> tuple[pd.D
         if _canonical_team_name(team)
     })
     base = pd.DataFrame({"Team": names})
+    classification_by_team: dict[str, str] = {}
     if not teams.empty:
         teams = teams.copy()
         teams["Team"] = teams["Team"].map(_canonical_team_name)
-        base = base.merge(teams[[c for c in ["Team", "Conference", "Classification"] if c in teams.columns]].drop_duplicates("Team"), on="Team", how="left")
+        classification_by_team.update({
+            _canonical_team_name(team): "fbs"
+            for team in teams["Team"]
+            if _canonical_team_name(team)
+        })
+        base = base.merge(
+            teams[[c for c in ["Team", "Conference"] if c in teams.columns]].drop_duplicates("Team"),
+            on="Team",
+            how="left",
+        )
+    if not schedule.empty:
+        for side in ("Away", "Home"):
+            team_column = f"{side} Team"
+            class_column = f"{side} Classification"
+            if team_column not in schedule.columns or class_column not in schedule.columns:
+                continue
+            for team, classification in zip(schedule[team_column], schedule[class_column]):
+                canonical = _canonical_team_name(team)
+                value = _text(classification).lower()
+                if not canonical or value not in {"fbs", "fcs"}:
+                    continue
+                classification_by_team.setdefault(canonical, value)
+    base["Classification"] = base["Team"].map(classification_by_team).fillna("unknown")
     frame = _merge_feature(base, metrics)
     games = _numeric_series(frame, "Games", np.nan).replace(0, np.nan)
     drives = _numeric_series(frame, "Advanced Drives", np.nan)
@@ -2239,7 +2266,7 @@ def build_team_ratings(season: int, week: int) -> pd.DataFrame:
         effective_prior = 1.0 - effective_current
         data_conf = 34.0 + 28.0 * sample_factor + (14.0 if current_avail["advanced"] else 0.0) + (10.0 if current_avail["roster"] else 0.0) + min(10.0, fbs_games * 1.5)
         row = {
-            "Team": team, "Conference": _text(merged.get("Conference")), "Classification": _text(merged.get("Classification", "fbs")),
+            "Team": team, "Conference": _text(merged.get("Conference")), "Classification": _text(merged.get("Classification", "unknown"), "unknown").lower(),
             "Season": season, "Projection Week": week, "Previous Season Weight": round(effective_prior, 3), "Current Season Weight": round(effective_current, 3),
             "Preseason Rating": round(preseason, 3), "Power Rating": round(effective_prior * preseason + effective_current * current_power, 3),
             "Offense Rating": round(_num(crow.get("Offense Rating"), preseason), 3), "Defense Rating": round(_num(crow.get("Defense Rating"), preseason), 3),
@@ -2532,12 +2559,12 @@ def save_personnel(personnel: Personnel, team: str, season: int, week: int, game
 def _rating_row(ratings: pd.DataFrame, team: str) -> dict[str, Any]:
     canonical = _canonical_team_name(team)
     if ratings.empty or "Team" not in ratings.columns:
-        row = {"Team": team, "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
+        row = {"Team": team, "Classification": "unknown", "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
         row.update(NEUTRAL); return row
     canonical_ratings = ratings["Team"].map(_canonical_team_name)
     matches = ratings[canonical_ratings == canonical]
     if matches.empty:
-        row = {"Team": team, "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
+        row = {"Team": team, "Classification": "unknown", "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
         row.update(NEUTRAL); return row
     return matches.iloc[-1].to_dict()
 
