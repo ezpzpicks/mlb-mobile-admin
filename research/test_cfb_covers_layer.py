@@ -76,6 +76,81 @@ class FakeBuilder:
         return total, home, "test weather"
 
 
+class FakeIdentityBuilder:
+    @staticmethod
+    def _canonical_team_name(value):
+        return str(value)
+
+    @staticmethod
+    def _espn_team_index():
+        teams = [
+            ("Georgia", "Georgia Bulldogs", "Bulldogs"),
+            ("Georgia State", "Georgia State Panthers", "Panthers"),
+            ("Arkansas", "Arkansas Razorbacks", "Razorbacks"),
+            ("Arkansas State", "Arkansas State Red Wolves", "Red Wolves"),
+            ("Oregon", "Oregon Ducks", "Ducks"),
+            ("Oregon State", "Oregon State Beavers", "Beavers"),
+            ("Utah", "Utah Utes", "Utes"),
+            ("Utah State", "Utah State Aggies", "Aggies"),
+        ]
+        return {
+            location: {
+                "location": location,
+                "displayName": display,
+                "shortDisplayName": display,
+                "name": mascot,
+            }
+            for location, display, mascot in teams
+        }
+
+
+def identity_resolution_smoke() -> None:
+    """State/base-name schools must resolve without the Covers directory."""
+    builder = FakeIdentityBuilder()
+    expected = {
+        "Georgia": "georgia-bulldogs",
+        "Georgia State": "georgia-state-panthers",
+        "Arkansas": "arkansas-razorbacks",
+        "Arkansas State": "arkansas-state-red-wolves",
+        "Oregon": "oregon-ducks",
+        "Oregon State": "oregon-state-beavers",
+        "Utah": "utah-utes",
+        "Utah State": "utah-state-aggies",
+    }
+    original_fetch = covers._fetch_html
+    original_directory = covers._directory
+    try:
+        # Prove these identities do not depend on a healthy/parseable landing
+        # directory. This is the failure mode that blocked the live builder.
+        covers._directory = lambda _builder: (_ for _ in ()).throw(
+            RuntimeError("directory intentionally unavailable")
+        )
+
+        def fake_fetch(_builder, url, ttl):
+            return """
+            <html><body><h1>Resolved Team</h1>
+            <table><tr><th>POS</th><th>#</th><th>Player</th></tr>
+              <tr><td>QB</td><td>1</td><td>Test Quarterback</td></tr>
+            </table></body></html>
+            """
+
+        covers._fetch_html = fake_fetch
+        with covers._LOCK:
+            covers._TEAM_REPORTS.clear()
+
+        for team, slug in expected.items():
+            urls = covers._direct_team_urls(builder, team)
+            assert urls and urls[0].endswith(f"/{slug}/injuries"), (team, urls)
+            report = covers._team_report(builder, team)
+            assert report["ok"], (team, report)
+            assert report["url"].endswith(f"/{slug}/injuries"), (team, report["url"])
+    finally:
+        covers._fetch_html = original_fetch
+        covers._directory = original_directory
+        with covers._LOCK:
+            covers._TEAM_REPORTS.clear()
+
+
 def parser_smoke() -> None:
     team_html = """
     <html><body><h1>Baylor Bears</h1>
@@ -191,6 +266,7 @@ def overlay_smoke() -> None:
 
 
 def main() -> None:
+    identity_resolution_smoke()
     parser_smoke()
     overlay_smoke()
     print("CFB Covers parser/matching + overlay smoke test passed")

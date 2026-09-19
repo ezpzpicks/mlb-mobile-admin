@@ -25,6 +25,18 @@ def main() -> None:
         if hasattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY"):
             delattr(covers, "_EZPZ_CFB_TEAM_DIRECTORY_RECOVERY")
 
+        # Core resolver must now handle Covers overview links by itself. The
+        # recovery wrapper remains compatible, but correctness no longer depends
+        # on installation order.
+        native_directory = covers._directory(object())
+        assert len(native_directory) == 3, native_directory
+        native_slugs = {row["slug"] for row in native_directory}
+        assert native_slugs == {
+            "syracuse-orange", "pittsburgh-panthers", "miami-hurricanes"
+        }, native_slugs
+        assert all(row["url"].endswith("/injuries") for row in native_directory)
+
+        covers._DIRECTORY = None
         recovery._install_covers_team_directory_fix(covers)
 
         directory = covers._directory(object())

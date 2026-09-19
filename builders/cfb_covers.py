@@ -226,7 +226,14 @@ def _directory(builder: Any) -> list[dict[str, str]]:
         if _DIRECTORY and now - _DIRECTORY[0] <= DIRECTORY_TTL:
             return list(_DIRECTORY[1])
     soup = BeautifulSoup(_fetch_html(builder, COVERS_INJURIES_URL, ttl=DIRECTORY_TTL), "html.parser")
-    pattern = re.compile(r"/sport/football/ncaaf/teams/main/([^/?#]+)/injuries", re.I)
+    # Covers now mixes team overview links (.../<slug>) with direct injury
+    # links (.../<slug>/injuries). Extract the team slug from either shape and
+    # always canonicalize to the injury endpoint. Keeping this in the core
+    # resolver avoids relying on a later Streamlit monkey-patch.
+    pattern = re.compile(
+        r"/sport/football/ncaaf/teams/main/([^/?#]+)(?:/injuries)?(?:[/?#].*)?$",
+        re.I,
+    )
     rows: dict[str, dict[str, str]] = {}
     for anchor in soup.find_all("a", href=True):
         href = str(anchor.get("href") or "")
@@ -238,7 +245,7 @@ def _directory(builder: Any) -> list[dict[str, str]]:
             "slug": slug,
             "label": _clean_text(anchor.get_text(" ", strip=True)) or _slug_label(slug),
             "slug_label": _slug_label(slug),
-            "url": urljoin(COVERS_BASE, href),
+            "url": f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{slug}/injuries",
         }
     directory = list(rows.values())
     with _LOCK:
@@ -301,15 +308,79 @@ def _espn_directory_aliases(builder: Any, team: str) -> list[str]:
     return aliases
 
 
-def _team_url(builder: Any, team: str) -> str:
-    directory = _directory(builder)
+def _covers_team_url(slug: str) -> str:
+    slug = _clean_text(slug).strip().strip("/")
+    return (
+        f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{slug}/injuries"
+        if slug
+        else ""
+    )
 
-    # Primary path: use ESPN's mascot-bearing identity to disambiguate every
-    # FBS school globally. This handles Oregon/Oregon State, Utah/Utah State,
-    # Washington/Washington State, Michigan/Michigan State, Texas/Texas State,
-    # and the same naming pattern without maintaining one-off aliases.
+
+def _slugify_team_label(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", _clean_text(value).lower()).strip("-")
+
+
+def _direct_team_urls(builder: Any, team: str) -> list[str]:
+    """Build deterministic Covers URLs before touching the landing directory.
+
+    ESPN supplies mascot-bearing team identities (for example Georgia Bulldogs
+    versus Georgia State Panthers). Covers' normal team slugs follow those full
+    identities for the state/base-name collision cases. Explicit legacy aliases
+    remain first because a handful of schools use non-literal Covers slugs.
+    """
+    urls: list[str] = []
+
+    def add_slug(slug: str) -> None:
+        url = _covers_team_url(slug)
+        if url and url not in urls:
+            urls.append(url)
+
+    alias_slug = _ALIAS_TO_SLUG.get(_norm(team))
+    if alias_slug:
+        add_slug(alias_slug)
+
+    canonical_team: Any = team
+    canonicalize = getattr(builder, "_canonical_team_name", None)
+    if callable(canonicalize):
+        try:
+            canonical_team = canonicalize(team)
+        except Exception:
+            canonical_team = team
+    target_tokens = set(_norm(canonical_team).split())
+
+    for alias in _espn_directory_aliases(builder, team):
+        alias_norm = _norm(alias)
+        alias_tokens = set(alias_norm.split())
+        # A bare location such as "Georgia" is not a useful direct Covers slug.
+        # Only use ESPN identities that add mascot/identity information and still
+        # contain the full canonical school name.
+        if not alias_norm or alias_norm == _norm(canonical_team):
+            continue
+        if target_tokens and not target_tokens.issubset(alias_tokens):
+            continue
+        add_slug(_slugify_team_label(alias))
+
+    return urls
+
+
+def _team_url_candidates(builder: Any, team: str) -> list[str]:
+    """Return ordered, de-duplicated Covers injury URLs for one school."""
+    urls = _direct_team_urls(builder, team)
+
+    def add(url: str) -> None:
+        if url and url not in urls:
+            urls.append(url)
+
+    # Directory matching remains a verification/fallback path, but a temporary
+    # landing-page failure must no longer block deterministic ESPN-derived URLs.
+    try:
+        directory = _directory(builder)
+    except Exception:
+        directory = []
+
     espn_aliases = _espn_directory_aliases(builder, team)
-    if espn_aliases:
+    if directory and espn_aliases:
         scored = []
         for row in directory:
             score = max(
@@ -320,25 +391,24 @@ def _team_url(builder: Any, team: str) -> str:
         scored.sort(key=lambda item: item[0], reverse=True)
         if scored and scored[0][0] >= 0.90:
             if len(scored) == 1 or scored[0][0] - scored[1][0] >= 0.025:
-                return scored[0][1]["url"]
+                add(scored[0][1]["url"])
 
-    # Explicit aliases remain as a fallback for abbreviations and legacy names
-    # whose ESPN spelling does not line up cleanly with Covers.
-    alias_slug = _ALIAS_TO_SLUG.get(_norm(team))
-    if alias_slug:
-        return f"{COVERS_BASE}/sport/football/ncaaf/teams/main/{alias_slug}/injuries"
+    if directory:
+        scored = []
+        for row in directory:
+            score = max(_candidate_score(team, row["label"]), _candidate_score(team, row["slug_label"]))
+            scored.append((score, row))
+        scored.sort(key=lambda item: item[0], reverse=True)
+        if scored and scored[0][0] >= 0.83:
+            if len(scored) == 1 or scored[0][0] - scored[1][0] >= 0.025:
+                add(scored[0][1]["url"])
 
-    # Final fallback preserves the prior conservative fuzzy matcher.
-    scored = []
-    for row in directory:
-        score = max(_candidate_score(team, row["label"]), _candidate_score(team, row["slug_label"]))
-        scored.append((score, row))
-    scored.sort(key=lambda item: item[0], reverse=True)
-    if not scored or scored[0][0] < 0.83:
-        return ""
-    if len(scored) > 1 and scored[0][0] - scored[1][0] < 0.025:
-        return ""
-    return scored[0][1]["url"]
+    return urls
+
+
+def _team_url(builder: Any, team: str) -> str:
+    candidates = _team_url_candidates(builder, team)
+    return candidates[0] if candidates else ""
 
 
 def _headers(table: Any) -> list[str]:
@@ -414,16 +484,27 @@ def _team_report(builder: Any, team: str) -> dict[str, Any]:
         hit = _TEAM_REPORTS.get(key)
         if hit and now - hit[0] <= TEAM_TTL:
             return dict(hit[1])
+
+    # Try deterministic identity URLs first, then directory-derived fallbacks.
+    # One bad/missing candidate must not prevent the next verified identity from
+    # being attempted.
     try:
-        url = _team_url(builder, team)
-        if not url:
-            raise RuntimeError("No unambiguous Covers team match")
-        report = _parse_team_report(_fetch_html(builder, url, ttl=TEAM_TTL), url)
+        urls = _team_url_candidates(builder, team)
+    except Exception:
+        urls = []
+
+    for url in urls:
+        try:
+            report = _parse_team_report(_fetch_html(builder, url, ttl=TEAM_TTL), url)
+        except Exception:
+            continue
+        if not report.get("ok"):
+            continue
         with _LOCK:
             _TEAM_REPORTS[key] = (now, report)
         return dict(report)
-    except Exception:
-        return {"team": team, "injuries": [], "starters": [], "url": "", "ok": False}
+
+    return {"team": team, "injuries": [], "starters": [], "url": "", "ok": False}
 
 
 def _parse_weather_html(html: str) -> list[dict[str, Any]]:
