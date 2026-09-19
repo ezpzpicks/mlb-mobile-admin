@@ -83,6 +83,10 @@ def _completed_schedule(cfb_builder: Any, season: int, through_week: int | None 
     done = done[pd.notna(done["Away Score"]) & pd.notna(done["Home Score"])].copy()
     if through_week is not None:
         done = done[pd.to_numeric(done["Week"], errors="coerce") < int(through_week)].copy()
+    canonicalizer = getattr(cfb_builder, "_canonical_team_name", _normalize_team)
+    for column in ("Away Team", "Home Team"):
+        if column in done.columns:
+            done[column] = done[column].map(canonicalizer)
     return done
 
 
@@ -96,7 +100,8 @@ def _fallback_summary(cfb_builder: Any, season: int, through_week: int | None = 
         return {}
     out: dict[str, TeamStats] = {}
     for _, row in frame.iterrows():
-        team = _normalize_team(row.get("Team"))
+        canonicalizer = getattr(cfb_builder, "_canonical_team_name", _normalize_team)
+        team = canonicalizer(row.get("Team"))
         if not team:
             continue
         out[team] = TeamStats(
@@ -220,8 +225,9 @@ def _team_score(features: dict[str, float]) -> float:
 def _regression_base(cfb_builder: Any, game: pd.Series) -> tuple[float, float, dict[str, float], dict[str, float]]:
     season = int(_num(game.get("Season"), getattr(cfb_builder, "DEFAULT_SEASON", 2026)))
     week = int(_num(game.get("Week"), 1.0))
-    away_team = _normalize_team(game.get("Away Team"))
-    home_team = _normalize_team(game.get("Home Team"))
+    canonicalizer = getattr(cfb_builder, "_canonical_team_name", _normalize_team)
+    away_team = canonicalizer(game.get("Away Team"))
+    home_team = canonicalizer(game.get("Home Team"))
     prior, current = _context(cfb_builder, season, week)
 
     away_prior, home_prior = _stat(prior, away_team), _stat(prior, home_team)

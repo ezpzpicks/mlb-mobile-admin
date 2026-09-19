@@ -7,10 +7,12 @@ and keep large SportsDataverse parquet reads below the Render memory ceiling.
 from __future__ import annotations
 
 import copy
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
 import math
 import threading
 import time
+import traceback
 from typing import Any, Iterable
 from zoneinfo import ZoneInfo
 
@@ -19,7 +21,12 @@ import streamlit as st
 
 
 _SHEETS_LOCK = threading.Lock()
-_RATINGS_BUILD_LOCK = threading.Lock()
+_RATINGS_BUILD_EXECUTOR = ThreadPoolExecutor(
+    max_workers=1,
+    thread_name_prefix="ezpz-cfb-ratings",
+)
+_RATINGS_BUILD_JOBS: dict[tuple[int, int], Future] = {}
+_RATINGS_BUILD_JOB_LOCK = threading.Lock()
 
 
 def _quota_error(exc: Exception) -> bool:
@@ -178,6 +185,48 @@ def install_runtime_guard(cfb_builder: Any) -> None:
         except Exception:
             return False
 
+    def _build_verified_ratings(season: int, week: int) -> pd.DataFrame:
+        """Build and validate one complete snapshot outside the request thread."""
+        started = time.perf_counter()
+        print(f"[cfb-ratings] building full {season} Week {week} snapshot", flush=True)
+        try:
+            ratings = cfb_builder.build_team_ratings(season, week)
+            if not _ratings_complete(ratings, week):
+                raise RuntimeError(
+                    f"CFB {season} Week {week} ratings finished without every required "
+                    "advanced/roster/current-season input."
+                )
+            print(
+                f"[cfb-ratings] full {season} Week {week} snapshot ready in "
+                f"{time.perf_counter() - started:.2f}s",
+                flush=True,
+            )
+            return ratings.copy()
+        except Exception as exc:
+            print(
+                f"[cfb-ratings] full {season} Week {week} snapshot failed: "
+                f"{type(exc).__name__}: {exc}",
+                flush=True,
+            )
+            traceback.print_exc()
+            raise
+
+    def _ratings_build_job(season: int, week: int, *, force: bool = False) -> Future:
+        key = (int(season), int(week))
+        with _RATINGS_BUILD_JOB_LOCK:
+            job = _RATINGS_BUILD_JOBS.get(key)
+            if force and job is not None and job.done():
+                _RATINGS_BUILD_JOBS.pop(key, None)
+                job = None
+            if job is None:
+                job = _RATINGS_BUILD_EXECUTOR.submit(
+                    _build_verified_ratings,
+                    int(season),
+                    int(week),
+                )
+                _RATINGS_BUILD_JOBS[key] = job
+            return job
+
     def _required_asset_specs(
         season: int,
         *,
@@ -305,19 +354,20 @@ def install_runtime_guard(cfb_builder: Any) -> None:
             )
             return saved.copy()
 
-        # Streamlit can execute two sessions/reruns against the same Python
-        # process. Never let both start the same expensive full-season rebuild.
-        if not _RATINGS_BUILD_LOCK.acquire(blocking=False):
+        # The full rebuild is CPU-heavy. Run one shared job outside Streamlit's
+        # request thread so the page can keep polling readiness instead of
+        # freezing at the stale "0s elapsed" render.
+        job = _ratings_build_job(season, week, force=force)
+        if not job.done():
             st.session_state["cfb_auto_ratings_warning"] = (
-                f"Full CFB {season} Week {week} ratings are already rebuilding in another "
-                "session. Build remains locked until that verified snapshot is available."
+                f"Full CFB model data is still preparing. The verified {season} Week {week} "
+                "ratings rebuild is running in the background. Build remains locked until "
+                "all advanced PBP and roster/returning-production inputs pass validation."
             )
             return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
         try:
-            started = time.perf_counter()
-            print(f"[cfb-ratings] building full {season} Week {week} snapshot", flush=True)
-            ratings = cfb_builder.build_team_ratings(season, week)
+            ratings = job.result()
             if not _ratings_complete(ratings, week):
                 raise RuntimeError(
                     f"CFB {season} Week {week} ratings finished without every required "
@@ -325,21 +375,29 @@ def install_runtime_guard(cfb_builder: Any) -> None:
                 )
             st.session_state[session_key] = ratings.copy()
             st.session_state.pop("cfb_auto_ratings_warning", None)
-            print(
-                f"[cfb-ratings] full {season} Week {week} snapshot ready in "
-                f"{time.perf_counter() - started:.2f}s",
-                flush=True,
-            )
             return ratings.copy()
         except Exception as exc:
-            st.session_state["cfb_auto_ratings_warning"] = str(exc)
-        finally:
-            _RATINGS_BUILD_LOCK.release()
+            st.session_state["cfb_auto_ratings_warning"] = (
+                f"Verified CFB ratings rebuild failed: {type(exc).__name__}: {exc}"
+            )
 
         return pd.DataFrame(columns=cfb_builder.RATING_COLUMNS)
 
     cfb_builder._ensure_automatic_ratings = _ensure_automatic_ratings
     cfb_builder._ratings_complete_for_build = _ratings_complete
+
+    # A manual automatic-data refresh should allow a failed completed job to be
+    # retried, while never duplicating a rebuild that is still running.
+    original_clear_automatic_state = cfb_builder._clear_automatic_state
+
+    def _clear_automatic_state_and_failed_jobs() -> None:
+        original_clear_automatic_state()
+        with _RATINGS_BUILD_JOB_LOCK:
+            for key, job in list(_RATINGS_BUILD_JOBS.items()):
+                if job.done():
+                    _RATINGS_BUILD_JOBS.pop(key, None)
+
+    cfb_builder._clear_automatic_state = _clear_automatic_state_and_failed_jobs
 
     # ------------------------------------------------------------------
     # 4) Lower-memory parquet conversion for the occasional weekly rebuild.

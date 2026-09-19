@@ -100,12 +100,15 @@ def _model() -> dict[str, Any]:
     return model
 
 
-def _metric_lookup(frame: pd.DataFrame | None) -> dict[str, dict[str, float]]:
+def _metric_lookup(
+    frame: pd.DataFrame | None,
+    canonicalizer: Any = spread_reg._normalize_team,
+) -> dict[str, dict[str, float]]:
     if frame is None or frame.empty:
         return {}
     output: dict[str, dict[str, float]] = {}
     for _, row in frame.iterrows():
-        team = spread_reg._normalize_team(row.get("Team"))
+        team = canonicalizer(row.get("Team"))
         if not team:
             continue
         values = {
@@ -153,8 +156,9 @@ def _metric_context(cfb_builder: Any, season: int, week: int) -> tuple[dict[str,
     prior_frame = _load_pbp_metrics(cfb_builder, int(season) - 1, None)
     current_frame = _load_pbp_metrics(cfb_builder, int(season), int(week))
 
-    prior_lookup = _metric_lookup(prior_frame)
-    current_lookup = _metric_lookup(current_frame)
+    canonicalizer = getattr(cfb_builder, "_canonical_team_name", spread_reg._normalize_team)
+    prior_lookup = _metric_lookup(prior_frame, canonicalizer)
+    current_lookup = _metric_lookup(current_frame, canonicalizer)
     value = (prior_lookup, current_lookup)
 
     # Never cache an all-empty response. The first Streamlit request can arrive
@@ -190,8 +194,9 @@ def _matchup_mean(away_offense: float, home_defense: float, home_offense: float,
 def _feature_row(cfb_builder: Any, game: pd.Series, game_script_margin: float) -> dict[str, float]:
     season = int(_num(game.get("Season"), getattr(cfb_builder, "DEFAULT_SEASON", 2026)))
     week = int(_num(game.get("Week"), 1.0))
-    away = spread_reg._normalize_team(game.get("Away Team"))
-    home = spread_reg._normalize_team(game.get("Home Team"))
+    canonicalizer = getattr(cfb_builder, "_canonical_team_name", spread_reg._normalize_team)
+    away = canonicalizer(game.get("Away Team"))
+    home = canonicalizer(game.get("Home Team"))
     neutral = _truthy(game.get("Neutral Site", False))
 
     prior_stats, current_stats = spread_reg._context(cfb_builder, season, week)

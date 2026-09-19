@@ -59,6 +59,10 @@ _PBP_METRICS_CACHE_LOCK = threading.Lock()
 _PBP_METRICS_SEED_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ezpz-cfb-pbp-cache")
 _PBP_METRICS_SEED_JOBS: dict[int, Any] = {}
 _PBP_METRICS_SEED_JOB_LOCK = threading.Lock()
+_TEAM_NAME_ALIASES: dict[str, str] = {}
+_TEAM_NAME_ALIASES_LOCK = threading.Lock()
+_ROSTER_FRAME_CACHE: dict[tuple[int, int, int], pd.DataFrame] = {}
+_ROSTER_FRAME_CACHE_LOCK = threading.Lock()
 
 # This model now owns a dedicated CFB workbook. Within that database, public
 # tab names mirror MLB so the public site can use one sport-agnostic contract.
@@ -298,6 +302,31 @@ def _normalize_team(name: Any) -> str:
     return " ".join(_text(name).replace("&", "and").split())
 
 
+def _register_team_alias(alias: Any, canonical: Any) -> None:
+    """Remember equivalent ESPN/SportsDataverse team labels.
+
+    Play-by-play uses school/location names (``Auburn``), while ESPN roster and
+    schedule feeds can use display names (``Auburn Tigers``). Keeping one
+    process-wide alias map lets every model layer join those sources without
+    dropping the advanced metrics or returning-production inputs.
+    """
+    alias_name = _normalize_team(alias)
+    canonical_name = _normalize_team(canonical)
+    if not alias_name or not canonical_name:
+        return
+    with _TEAM_NAME_ALIASES_LOCK:
+        _TEAM_NAME_ALIASES[alias_name] = canonical_name
+        _TEAM_NAME_ALIASES.setdefault(canonical_name, canonical_name)
+
+
+def _canonical_team_name(name: Any) -> str:
+    normalized = _normalize_team(name)
+    if not normalized:
+        return ""
+    with _TEAM_NAME_ALIASES_LOCK:
+        return _TEAM_NAME_ALIASES.get(normalized, normalized)
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
@@ -387,9 +416,17 @@ def _espn_team_index() -> dict[str, dict[str, Any]]:
         team = entry.get("team") if isinstance(entry, dict) and isinstance(entry.get("team"), dict) else entry
         if not isinstance(team, dict):
             continue
-        name = _normalize_team(_first(team, ["displayName", "shortDisplayName", "name", "location"]))
+        # ESPN's location is the same naming surface used by cfbfastR PBP and
+        # SportsDataverse roster ``team_location``. Display names are still
+        # registered as aliases for already-persisted schedules.
+        location = _normalize_team(_first(team, ["location", "name", "shortDisplayName", "displayName"]))
+        display_name = _normalize_team(_first(team, ["displayName", "shortDisplayName", "name", "location"]))
+        name = location or display_name
         if not name:
             continue
+        _register_team_alias(display_name, name)
+        _register_team_alias(_first(team, ["shortDisplayName"], ""), name)
+        _register_team_alias(_first(team, ["abbreviation"], ""), name)
         output[name] = team
     return output
 
@@ -434,7 +471,13 @@ def _espn_competitor(competition: dict[str, Any], side: str) -> dict[str, Any]:
 
 def _team_name_from_competitor(competitor: dict[str, Any]) -> str:
     team = competitor.get("team") if isinstance(competitor.get("team"), dict) else {}
-    return _normalize_team(_first(team, ["displayName", "shortDisplayName", "name", "location"], ""))
+    location = _normalize_team(_first(team, ["location", "name", "shortDisplayName", "displayName"], ""))
+    display_name = _normalize_team(_first(team, ["displayName", "shortDisplayName", "name", "location"], ""))
+    canonical = location or display_name
+    _register_team_alias(display_name, canonical)
+    _register_team_alias(_first(team, ["shortDisplayName"], ""), canonical)
+    _register_team_alias(_first(team, ["abbreviation"], ""), canonical)
+    return canonical
 
 
 def _parse_espn_line(odds: dict[str, Any], home: dict[str, Any], away: dict[str, Any]) -> dict[str, float | str]:
@@ -1051,8 +1094,8 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
         return pd.DataFrame()
     if "week" in frame.columns and through_week is not None:
         frame = frame[pd.to_numeric(frame["week"], errors="coerce") < int(through_week)]
-    frame["offense"] = _series(frame, "offense", "").map(_normalize_team)
-    frame["defense"] = _series(frame, "defense", "").map(_normalize_team)
+    frame["offense"] = _series(frame, "offense", "").map(_canonical_team_name)
+    frame["defense"] = _series(frame, "defense", "").map(_canonical_team_name)
     frame = frame[(frame["offense"] != "") & (frame["defense"] != "")].copy()
     if frame.empty:
         return frame
@@ -1114,7 +1157,11 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
     frame["_third_success"] = (third & (yards >= distance)).astype(float)
     frame["_red_zone"] = red_zone.astype(float)
     frame["_rz_td"] = (red_zone & touchdown).astype(float)
-    frame["_line_yards"] = [_line_yards_value(float(v)) for v in yards]
+    frame["_line_yards"] = np.select(
+        [yards < 0, yards <= 4, yards <= 10],
+        [1.2 * yards, yards, 4.0 + 0.5 * (yards - 4.0)],
+        default=7.0,
+    )
     frame["_explosive"] = ((is_pass & (yards >= 20)) | (is_rush & (yards >= 10))).astype(float)
     frame["_field_start"] = 100.0 - pd.to_numeric(_series(frame, "drive_start_yards_to_goal", np.nan), errors="coerce")
     if "game_id" not in frame.columns:
@@ -1124,21 +1171,26 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
 
     rows: list[dict[str, Any]] = []
     teams = sorted(set(frame["offense"]) | set(frame["defense"]))
+    offense_indices = frame.groupby("offense", sort=False).indices
+    defense_indices = frame.groupby("defense", sort=False).indices
+    empty = frame.iloc[0:0]
     for team in teams:
-        off = frame[frame["offense"] == team]
-        deff = frame[frame["defense"] == team]
+        off_positions = offense_indices.get(team)
+        def_positions = defense_indices.get(team)
+        off = frame.iloc[off_positions] if off_positions is not None else empty
+        deff = frame.iloc[def_positions] if def_positions is not None else empty
         if off.empty and deff.empty:
             continue
         games = max(1, off["game_id"].nunique())
         drives = max(1, off["drive_id"].astype(str).nunique())
         def mean(df: pd.DataFrame, col: str, fallback: float = np.nan, mask: pd.Series | None = None) -> float:
             values = pd.to_numeric(df.loc[mask, col] if mask is not None else df[col], errors="coerce") if col in df.columns else pd.Series(dtype=float)
-            return float(values.mean()) if len(values) and math.isfinite(_num(values.mean(), np.nan)) else fallback
+            average = values.mean() if len(values) else np.nan
+            return float(average) if math.isfinite(_num(average, np.nan)) else fallback
         off_pass = off["_pass"] > 0
         off_rush = off["_rush"] > 0
         def_pass = deff["_pass"] > 0
         def_rush = deff["_rush"] > 0
-        scoring_drives = off.groupby("drive_id")["_scoring_opp"].max() if not off.empty else pd.Series(dtype=float)
         drive_points = pd.to_numeric(_series(off, "drive_points", np.nan), errors="coerce")
         finishing = float(drive_points[off["_scoring_opp"] > 0].mean()) if drive_points.notna().any() and (off["_scoring_opp"] > 0).any() else np.nan
         if not math.isfinite(_num(finishing, np.nan)):
@@ -1201,11 +1253,25 @@ def _pbp_team_metrics(season: int, through_week: int | None) -> pd.DataFrame:
 
 def _open_roster_frame(season: int) -> pd.DataFrame:
     path = _download_open_asset("espn_cfb_rosters", season, ("roster", "espn"))
+    if path is None or not path.exists():
+        return pd.DataFrame()
+    try:
+        stat = path.stat()
+        cache_key = (int(season), int(stat.st_size), int(stat.st_mtime_ns))
+        with _ROSTER_FRAME_CACHE_LOCK:
+            cached = _ROSTER_FRAME_CACHE.get(cache_key)
+        if cached is not None:
+            return cached.copy()
+    except Exception:
+        cache_key = None
     aliases = {
-        # ESPN-native SportsDataverse rosters use team_name for the mascot
-        # (for example "Buckeyes"). team_display_name is the value that matches
-        # the ESPN schedule/team index (for example "Ohio State Buckeyes").
-        "team": ("team_display_name", "team", "school", "team_location", "team_name"),
+        # team_location matches cfbfastR PBP ("Ohio State"). Keep ESPN display,
+        # short-display, and abbreviation columns solely as join aliases for
+        # existing schedules that use "Ohio State Buckeyes" or "OSU".
+        "team": ("team_location", "team", "school", "team_display_name", "team_name"),
+        "team_display": ("team_display_name", "team_short_display_name"),
+        "team_short": ("team_short_display_name",),
+        "team_abbreviation": ("team_abbreviation",),
         "athlete_id": ("athlete_id", "id", "player_id"),
         "name": ("full_name", "athlete_full_name", "display_name", "name"),
         "position": ("position_abbreviation", "position", "position_name"),
@@ -1218,6 +1284,15 @@ def _open_roster_frame(season: int) -> pd.DataFrame:
     frame["team"] = frame["team"].map(_normalize_team)
     frame["name"] = _series(frame, "name", "").astype(str).str.strip()
     frame["position"] = _series(frame, "position", "").astype(str).str.upper().str.strip()
+    alias_columns = [column for column in ("team", "team_display", "team_short", "team_abbreviation") if column in frame.columns]
+    if alias_columns:
+        for values in frame[alias_columns].drop_duplicates().itertuples(index=False, name=None):
+            canonical = values[alias_columns.index("team")]
+            for alias in values:
+                _register_team_alias(alias, canonical)
+    if cache_key is not None:
+        with _ROSTER_FRAME_CACHE_LOCK:
+            _ROSTER_FRAME_CACHE[cache_key] = frame.copy()
     return frame
 
 
@@ -1231,9 +1306,15 @@ def _class_number(value: Any) -> float:
     return float(mapping.get(text, 2.0))
 
 
-def _roster_priors(season: int, teams: list[str]) -> pd.DataFrame:
-    current = _open_roster_frame(season)
-    previous = _open_roster_frame(season - 1)
+def _roster_priors(
+    season: int,
+    teams: list[str],
+    *,
+    current: pd.DataFrame | None = None,
+    previous: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    current = _open_roster_frame(season) if current is None else current.copy()
+    previous = _open_roster_frame(season - 1) if previous is None else previous.copy()
     # Returning production is a season-over-season overlap calculation. If the
     # prior roster is unavailable, treating every current player as a newcomer
     # would be partial/incorrect model data, so keep the strict gate closed.
@@ -1249,9 +1330,16 @@ def _roster_priors(season: int, teams: list[str]) -> pd.DataFrame:
     position_weight = {"QB": 3.0, "RB": 1.5, "WR": 1.5, "TE": 1.3, "OL": 1.5, "OT": 1.5, "OG": 1.5, "C": 1.5,
                        "DL": 1.4, "DE": 1.4, "DT": 1.4, "EDGE": 1.5, "LB": 1.3, "CB": 1.3, "S": 1.3, "DB": 1.3,
                        "K": 0.7, "P": 0.6}
-    for team in teams:
-        cur = current[current["team"] == team].copy()
-        prev = previous[previous["team"] == team].copy() if not previous.empty else pd.DataFrame()
+    current_indices = current.groupby("team", sort=False).indices
+    previous_indices = previous.groupby("team", sort=False).indices
+    empty_current = current.iloc[0:0]
+    empty_previous = previous.iloc[0:0]
+    for raw_team in teams:
+        team = _canonical_team_name(raw_team)
+        current_positions = current_indices.get(team)
+        previous_positions = previous_indices.get(team)
+        cur = current.iloc[current_positions].copy() if current_positions is not None else empty_current.copy()
+        prev = previous.iloc[previous_positions].copy() if previous_positions is not None else empty_previous.copy()
         if cur.empty:
             continue
         cur["class_num"] = [_class_number(v) for v in _series(cur, "class", _series(cur, "experience_years", 2.0))]
@@ -1303,11 +1391,30 @@ def _open_power_ratings(games: pd.DataFrame, through_week: int | None) -> pd.Dat
 
 
 def _open_feature_bundle(season: int, through_week: int | None) -> dict[str, Any]:
+    # Loading the two roster seasons first registers ESPN display-name aliases
+    # before schedules and PBP are merged. This guarantees that every available
+    # source lands on the same school/location key.
+    current_roster = _open_roster_frame(season)
+    previous_roster = _open_roster_frame(season - 1)
     games = _parse_games(_espn_games_payload(season), season)
+    for column in ("Away Team", "Home Team"):
+        if column in games.columns:
+            games[column] = games[column].map(_canonical_team_name)
     results = _result_strength(games, through_week)
     pbp = _pbp_team_metrics(season, through_week)
-    fbs_teams = sorted(set(_espn_team_index()) | set(results.get("Team", [])) | set(pbp.get("Team", [])))
-    roster = _roster_priors(season, fbs_teams)
+    if "Team" in pbp.columns:
+        pbp["Team"] = pbp["Team"].map(_canonical_team_name)
+    fbs_teams = sorted({
+        _canonical_team_name(team)
+        for team in (set(_espn_team_index()) | set(results.get("Team", [])) | set(pbp.get("Team", [])))
+        if _canonical_team_name(team)
+    })
+    roster = _roster_priors(
+        season,
+        fbs_teams,
+        current=current_roster,
+        previous=previous_roster,
+    )
     ratings = _open_power_ratings(games, through_week)
     merged = pd.DataFrame({"Team": fbs_teams})
     for feature in [results, pbp, roster, ratings]:
@@ -1955,12 +2062,23 @@ def _result_strength(games: pd.DataFrame, through_week: int | None = None) -> pd
 def _season_features(season: int, through_week: int | None = None) -> tuple[pd.DataFrame, dict[str, bool]]:
     teams = _parse_teams(_espn_teams_payload(season))
     schedule = _parse_games(_espn_games_payload(season), season)
-    names = sorted(set(teams.get("Team", [])) | set(schedule.get("Away Team", [])) | set(schedule.get("Home Team", [])))
-    base = pd.DataFrame({"Team": names})
-    if not teams.empty:
-        base = base.merge(teams[[c for c in ["Team", "Conference", "Classification"] if c in teams.columns]].drop_duplicates("Team"), on="Team", how="left")
     bundle = _open_feature_bundle(season, through_week)
     metrics = bundle["metrics"]
+    names = sorted({
+        _canonical_team_name(team)
+        for team in (
+            set(teams.get("Team", []))
+            | set(schedule.get("Away Team", []))
+            | set(schedule.get("Home Team", []))
+            | set(metrics.get("Team", []))
+        )
+        if _canonical_team_name(team)
+    })
+    base = pd.DataFrame({"Team": names})
+    if not teams.empty:
+        teams = teams.copy()
+        teams["Team"] = teams["Team"].map(_canonical_team_name)
+        base = base.merge(teams[[c for c in ["Team", "Conference", "Classification"] if c in teams.columns]].drop_duplicates("Team"), on="Team", how="left")
     frame = _merge_feature(base, metrics)
     games = _numeric_series(frame, "Games", np.nan).replace(0, np.nan)
     drives = _numeric_series(frame, "Advanced Drives", np.nan)
@@ -2412,10 +2530,16 @@ def save_personnel(personnel: Personnel, team: str, season: int, week: int, game
 # ---------------------------------------------------------------------------
 
 def _rating_row(ratings: pd.DataFrame, team: str) -> dict[str, Any]:
-    if ratings.empty or team not in set(ratings["Team"]):
+    canonical = _canonical_team_name(team)
+    if ratings.empty or "Team" not in ratings.columns:
         row = {"Team": team, "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
         row.update(NEUTRAL); return row
-    return ratings[ratings["Team"] == team].iloc[-1].to_dict()
+    canonical_ratings = ratings["Team"].map(_canonical_team_name)
+    matches = ratings[canonical_ratings == canonical]
+    if matches.empty:
+        row = {"Team": team, "Power Rating": 0.0, "Offense Rating": 0.0, "Defense Rating": 0.0, "Special Teams Rating": 0.0, "Data Confidence": 20.0, "Games": 0, "FBS Games": 0, "Previous Season Weight": 1.0, "Current Season Weight": 0.0}
+        row.update(NEUTRAL); return row
+    return matches.iloc[-1].to_dict()
 
 
 def _calibration_adjustments() -> tuple[float, float, int]:
@@ -3360,7 +3484,7 @@ def _render_build() -> None:
             started_wait = float(st.session_state.get(readiness_wait_key, time.time()))
             st.session_state[readiness_wait_key] = started_wait
             elapsed_wait = max(0.0, time.time() - started_wait)
-            if elapsed_wait < 240.0:
+            if elapsed_wait < 900.0:
                 st.caption(
                     f"Full-data readiness is being checked automatically "
                     f"({int(elapsed_wait)}s elapsed)."
