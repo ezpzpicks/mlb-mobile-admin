@@ -3783,15 +3783,36 @@ def _render_slate() -> None:
 def _render_tracker() -> None:
     st.subheader("Bet Tracker")
     frame = _sheet(TRACKER_TAB, TRACKER_COLUMNS)
-    if frame.empty: st.info("No tracked plays yet."); return
-    grade_text = frame["Grade"].astype(str).str.strip().str.lower()
+    if frame.empty:
+        st.info("No tracked plays yet.")
+        return
+
+    # Historical rows can predate the 20-point spread ceiling and may still carry
+    # an A/B grade in older storage. Keep their result data for research, but
+    # normalize the effective grade by the saved selection line before records
+    # or the tracker UI use it.
+    display = frame.copy()
+    selection_line = pd.to_numeric(
+        display["Selection"]
+        .astype(str)
+        .str.replace(r"[−–—]", "-", regex=True)
+        .str.extract(r"([+-]?\d+(?:\.\d+)?)\s*$", expand=False),
+        errors="coerce",
+    )
+    projection_only_spread = (
+        display["Bet Type"].astype(str).str.strip().str.lower().eq("spread")
+        & selection_line.abs().ge(20.0)
+    )
+    display.loc[projection_only_spread, "Grade"] = "No Play"
+
+    grade_text = display["Grade"].astype(str).str.strip().str.lower()
     qualified = grade_text.ne("") & ~grade_text.str.contains(
         r"no play|non edge|research|projection only|no market line", regex=True
     )
-    settled = frame[qualified & frame["Result"].isin(["Win", "Loss", "Push"])].copy()
+    settled = display[qualified & display["Result"].isin(["Win", "Loss", "Push"])].copy()
     wins = int((settled["Result"] == "Win").sum()); losses = int((settled["Result"] == "Loss").sum()); pushes = int((settled["Result"] == "Push").sum())
     c1, c2, c3, c4 = st.columns(4); c1.metric("Wins", wins); c2.metric("Losses", losses); c3.metric("Pushes", pushes); c4.metric("Win rate", f"{wins/max(1,wins+losses):.1%}")
-    st.dataframe(frame.sort_values(["Date", "Game"], ascending=False), hide_index=True, use_container_width=True)
+    st.dataframe(display.sort_values(["Date", "Game"], ascending=False), hide_index=True, use_container_width=True)
 
 
 def _render_ratings() -> None:
