@@ -378,6 +378,27 @@ def _season_weight(projection_week: int, current_games: float | None = None) -> 
     return round(clamp(weight, 0.0, 0.93), 4)
 
 
+def _matchup_season_weight(projection_week: int, current_games: float | None = None) -> float:
+    """Faster current-season weighting for opponent/position matchup profiles.
+
+    Matchups are intentionally allowed to move faster than global team ratings so
+    real position-specific strengths/weaknesses can create actionable projection
+    separation. A small prior remains to guard against one-game noise.
+    """
+    games = max(0, int(math.floor(_num(current_games, 0)))) if current_games is not None else max(0, int(projection_week) - 1)
+    if games <= 0:
+        return 0.0
+    if games == 1:
+        return 0.35
+    if games == 2:
+        return 0.60
+    if games == 3:
+        return 0.75
+    if games == 4:
+        return 0.85
+    return 0.90
+
+
 def _neutral_rating(team: str, season: int, week: int) -> dict[str, Any]:
     current_weight = _season_weight(week, 0)
     row = {column: 0.0 for column in RATING_COLUMNS}
@@ -3379,7 +3400,7 @@ def _defense_position_profiles(season: int, projection_week: int) -> pd.DataFram
     current = season_frame(int(season), max(0, int(projection_week) - 1)) if int(projection_week) > 1 else pd.DataFrame()
     prior_map = {(row["defense"], row["position"]): row.to_dict() for _, row in prior.iterrows()} if not prior.empty else {}
     current_map = {(row["defense"], row["position"]): row.to_dict() for _, row in current.iterrows()} if not current.empty else {}
-    current_weight = _season_weight(projection_week, max(0, projection_week - 1))
+    current_weight = _matchup_season_weight(projection_week, max(0, projection_week - 1))
     rows = []
     metrics = ["attempts", "passing_yards", "carries", "rushing_yards", "targets", "receptions", "receiving_yards", "receiving_air_yards", "receiving_yac"]
     for key in sorted(set(prior_map) | set(current_map)):
