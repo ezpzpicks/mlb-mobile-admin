@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.14-atd-engine-calibration-2026-09-20"
+MODEL_VERSION = "nfl-v4.15-slot-matchup-amplification-2026-09-20"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -59,26 +59,70 @@ MARKET_SLOTS = {
 # The broad position model is already doing most of the matchup work. These
 # strengths govern only the incremental slot-specific outlier signal.
 MARKET_STRENGTH = {
-    "Passing Attempts": 0.18,
-    "Passing Completions": 0.18,
-    "Passing Yards": 0.24,
-    "Rushing Attempts": 0.34,
-    "Rushing Yards": 0.52,
-    "Targets": 0.38,
-    "Receptions": 0.38,
-    "Receiving Yards": 0.52,
+    # Exact-slot residual signal. Broad position-vs-defense performance is
+    # amplified separately below so we do not require every defense weakness
+    # to be unique to RB1/WR1/etc. before it can materially move a projection.
+    "Passing Attempts": 0.40,
+    "Passing Completions": 0.45,
+    "Passing Yards": 0.70,
+    "Rushing Attempts": 0.55,
+    "Rushing Yards": 0.80,
+    "Targets": 0.60,
+    "Receptions": 0.60,
+    "Receiving Yards": 0.80,
     "Anytime TD": 0.72,
 }
 
 MARKET_CAP = {
-    "Passing Attempts": 0.04,
-    "Passing Completions": 0.04,
-    "Passing Yards": 0.05,
-    "Rushing Attempts": 0.075,
-    "Rushing Yards": 0.12,
-    "Targets": 0.08,
-    "Receptions": 0.08,
-    "Receiving Yards": 0.12,
+    "Passing Attempts": 0.12,
+    "Passing Completions": 0.14,
+    "Passing Yards": 0.22,
+    "Rushing Attempts": 0.18,
+    "Rushing Yards": 0.25,
+    "Targets": 0.20,
+    "Receptions": 0.20,
+    "Receiving Yards": 0.25,
+    "Anytime TD": 0.18,
+}
+
+# The base projection already contains a broad matchup component, but the
+# regression/shrinkage layers can mute extreme opponent-position weaknesses.
+# This explicitly restores a meaningful share of that signal after regression.
+BROAD_MATCHUP_STRENGTH = {
+    "Passing Attempts": 0.45,
+    "Passing Completions": 0.45,
+    "Passing Yards": 0.75,
+    "Rushing Attempts": 0.50,
+    "Rushing Yards": 0.80,
+    "Targets": 0.55,
+    "Receptions": 0.55,
+    "Receiving Yards": 0.80,
+    "Anytime TD": 0.00,
+}
+
+BROAD_MATCHUP_CAP = {
+    "Passing Attempts": 0.12,
+    "Passing Completions": 0.12,
+    "Passing Yards": 0.22,
+    "Rushing Attempts": 0.15,
+    "Rushing Yards": 0.25,
+    "Targets": 0.18,
+    "Receptions": 0.18,
+    "Receiving Yards": 0.25,
+    "Anytime TD": 0.00,
+}
+
+# Broad + exact-slot matchup can reinforce one another when a defense is truly
+# extreme. Keep a sanity ceiling, but do not pull a clear edge back to average.
+TOTAL_MATCHUP_CAP = {
+    "Passing Attempts": 0.20,
+    "Passing Completions": 0.22,
+    "Passing Yards": 0.35,
+    "Rushing Attempts": 0.24,
+    "Rushing Yards": 0.38,
+    "Targets": 0.28,
+    "Receptions": 0.30,
+    "Receiving Yards": 0.38,
     "Anytime TD": 0.18,
 }
 
@@ -360,8 +404,9 @@ def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, marke
             # Without an all-TE baseline, broad TE defense already owns this signal.
             outlier_index = 1.0
     elif len(family_slots) == 1:
-        # QB has no separate same-position depth slot to normalize against.
-        outlier_index = 1.0
+        # QB has no same-position depth peer. Use the exact-slot absolute index
+        # so an extreme QB matchup can still move passing/rushing projections.
+        outlier_index = absolute_index
     else:
         outlier_index = absolute_index / max(family_index, 0.25)
 
@@ -460,6 +505,46 @@ def _factor(profile: dict[str, float] | None) -> float:
     return 1.0 + _num((profile or {}).get("adjustment_pct"), 0.0)
 
 
+def _broad_matchup_factor(row: dict[str, Any] | None, market: str) -> tuple[float, float, float]:
+    """Amplify the broad opponent-position matchup already carried by the row."""
+    if not row:
+        return 1.0, 0.0, 1.0
+    index = _num(row.get("Matchup Index"), 1.0)
+    if not math.isfinite(index) or index <= 0:
+        index = 1.0
+    raw_edge = float(np.clip(index - 1.0, -0.45, 0.45))
+    strength = BROAD_MATCHUP_STRENGTH.get(market, 0.0)
+    cap = BROAD_MATCHUP_CAP.get(market, 0.0)
+    adjustment = float(np.clip(raw_edge * strength, -cap, cap))
+    return 1.0 + adjustment, adjustment, index
+
+
+def _combined_matchup_factor(
+    row: dict[str, Any] | None,
+    market: str,
+    slot_factor: float,
+) -> tuple[float, float, float, float]:
+    broad_factor, broad_adjustment, broad_index = _broad_matchup_factor(row, market)
+    raw_factor = broad_factor * max(0.01, float(slot_factor))
+    cap = TOTAL_MATCHUP_CAP.get(market, 0.20)
+    combined = float(np.clip(raw_factor, 1.0 - cap, 1.0 + cap))
+    return combined, broad_adjustment, broad_index, combined - 1.0
+
+
+def _append_broad_reason(
+    row: dict[str, Any], market: str, broad_index: float,
+    broad_adjustment: float, total_adjustment: float,
+) -> None:
+    if abs(broad_adjustment) < 0.0005 and abs(total_adjustment) < 0.0005:
+        return
+    current = str(row.get("Confluence", "") or "").strip()
+    note = (
+        f"position matchup {market}: opponent index {broad_index:.2f}; "
+        f"broad amp {broad_adjustment:+.1%}; total matchup {total_adjustment:+.1%}"
+    )
+    row["Confluence"] = f"{current} • {note}".strip(" •")
+
+
 def _append_reason(row: dict[str, Any], opponent: str, slot: str, market: str, profile: dict[str, float]) -> None:
     adjustment = _num(profile.get("adjustment_pct"), 0.0)
     if abs(adjustment) < 0.0005:
@@ -499,14 +584,15 @@ def _apply_slot_overlay(
     player_profile: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     slot = _slot(slot)
-    if slot not in TRACKED_SLOTS or not rows or projection_week <= 1:
+    if slot not in TRACKED_SLOTS or not rows:
         return rows
 
     profiles = {
         market: slot_matchup_profile(nfl_builder, season, projection_week, opponent, slot, market)
         for market in MARKET_STATS
         if _market_allowed_for_slot(market, slot)
-    }
+    } if projection_week > 1 else {}
+
     td_profile = profiles.get("Anytime TD")
     if td_profile is not None:
         # Red-zone role is already part of the base TD lambda. Do not amplify the
@@ -520,63 +606,122 @@ def _apply_slot_overlay(
         td_profile["usage_multiplier"] = 1.0
         profiles["Anytime TD"] = td_profile
 
-    factors = {market: _factor(profile) for market, profile in profiles.items()}
+    slot_factors = {market: _factor(profile) for market, profile in profiles.items()}
+    row_map = {str(row.get("Market", "") or ""): row for row in rows}
 
-    pass_attempt_factor = factors.get("Passing Attempts", 1.0)
-    rush_attempt_factor = factors.get("Rushing Attempts", 1.0)
-    target_factor = factors.get("Targets", 1.0)
-    reception_factor = factors.get("Receptions", target_factor)
+    matchup: dict[str, dict[str, float]] = {}
+    for market, row in row_map.items():
+        factor, broad_adjustment, broad_index, total_adjustment = _combined_matchup_factor(
+            row, market, slot_factors.get(market, 1.0)
+        )
+        matchup[market] = {
+            "factor": factor,
+            "broad_adjustment": broad_adjustment,
+            "broad_index": broad_index,
+            "total_adjustment": total_adjustment,
+        }
+
+    pass_attempt_factor = matchup.get("Passing Attempts", {}).get("factor", 1.0)
+    rush_attempt_factor = matchup.get("Rushing Attempts", {}).get("factor", 1.0)
+    target_factor = matchup.get("Targets", {}).get("factor", 1.0)
+    reception_factor = matchup.get("Receptions", {}).get("factor", target_factor)
 
     for row in rows:
         market = str(row.get("Market", "") or "")
         profile = profiles.get(market)
-        market_factor = factors.get(market, 1.0)
+        details = matchup.get(market, {
+            "factor": 1.0, "broad_adjustment": 0.0,
+            "broad_index": 1.0, "total_adjustment": 0.0,
+        })
+        market_factor = float(details["factor"])
 
-        # Keep compound simulations internally consistent with the slot signal.
+        # Keep compound simulations internally consistent with the stronger
+        # matchup signal: opportunity markets move opportunity, while yardage
+        # markets retain the remainder in efficiency.
         if market in {"Passing Completions", "Passing Yards"}:
-            row["Projected Player Attempts"] = round(max(0.0, _num(row.get("Projected Player Attempts")) * pass_attempt_factor), 2)
+            row["Projected Player Attempts"] = round(
+                max(0.0, _num(row.get("Projected Player Attempts")) * pass_attempt_factor), 2
+            )
         if market == "Passing Completions":
-            row["Projected Completions"] = round(max(0.0, _num(row.get("Projected Completions")) * market_factor), 2)
+            row["Projected Completions"] = round(
+                max(0.0, _num(row.get("Projected Completions")) * market_factor), 2
+            )
             if pass_attempt_factor > 0:
-                row["Efficiency"] = round(max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3)
+                row["Efficiency"] = round(
+                    max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3
+                )
         elif market == "Passing Yards" and pass_attempt_factor > 0:
-            row["Efficiency"] = round(max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3)
+            row["Efficiency"] = round(
+                max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3
+            )
 
         if market == "Rushing Attempts":
-            row["Projected Player Attempts"] = round(max(0.0, _num(row.get("Projected Player Attempts")) * market_factor), 2)
+            row["Projected Player Attempts"] = round(
+                max(0.0, _num(row.get("Projected Player Attempts")) * market_factor), 2
+            )
         elif market == "Rushing Yards":
-            row["Projected Player Attempts"] = round(max(0.0, _num(row.get("Projected Player Attempts")) * rush_attempt_factor), 2)
+            row["Projected Player Attempts"] = round(
+                max(0.0, _num(row.get("Projected Player Attempts")) * rush_attempt_factor), 2
+            )
             if rush_attempt_factor > 0:
-                row["Efficiency"] = round(max(0.0, _num(row.get("Efficiency")) * market_factor / rush_attempt_factor), 3)
+                row["Efficiency"] = round(
+                    max(0.0, _num(row.get("Efficiency")) * market_factor / rush_attempt_factor), 3
+                )
 
         if market == "Targets":
-            row["Projected Targets"] = round(max(0.0, _num(row.get("Projected Targets")) * market_factor), 2)
-            row["Targets Per Route"] = round(max(0.0, _num(row.get("Targets Per Route")) * market_factor), 3)
+            row["Projected Targets"] = round(
+                max(0.0, _num(row.get("Projected Targets")) * market_factor), 2
+            )
+            row["Targets Per Route"] = round(
+                max(0.0, _num(row.get("Targets Per Route")) * market_factor), 3
+            )
         elif market == "Receptions":
-            row["Projected Targets"] = round(max(0.0, _num(row.get("Projected Targets")) * target_factor), 2)
-            row["Projected Receptions"] = round(max(0.0, _num(row.get("Projected Receptions")) * market_factor), 2)
+            row["Projected Targets"] = round(
+                max(0.0, _num(row.get("Projected Targets")) * target_factor), 2
+            )
+            row["Projected Receptions"] = round(
+                max(0.0, _num(row.get("Projected Receptions")) * market_factor), 2
+            )
             if target_factor > 0:
-                row["Efficiency"] = round(max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3)
+                row["Efficiency"] = round(
+                    max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3
+                )
         elif market == "Receiving Yards":
-            row["Projected Targets"] = round(max(0.0, _num(row.get("Projected Targets")) * target_factor), 2)
-            row["Projected Receptions"] = round(max(0.0, _num(row.get("Projected Receptions")) * reception_factor), 2)
-            row["Targets Per Route"] = round(max(0.0, _num(row.get("Targets Per Route")) * target_factor), 3)
+            row["Projected Targets"] = round(
+                max(0.0, _num(row.get("Projected Targets")) * target_factor), 2
+            )
+            row["Projected Receptions"] = round(
+                max(0.0, _num(row.get("Projected Receptions")) * reception_factor), 2
+            )
+            row["Targets Per Route"] = round(
+                max(0.0, _num(row.get("Targets Per Route")) * target_factor), 3
+            )
             if target_factor > 0:
-                row["Efficiency"] = round(max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3)
+                row["Efficiency"] = round(
+                    max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3
+                )
 
-        if profile is None or abs(market_factor - 1.0) < 0.0005:
+        if abs(market_factor - 1.0) < 0.0005:
             continue
 
         old_projection = max(0.0, _num(row.get("Projection"), 0.0))
         projection = max(0.0, old_projection * market_factor)
-        # This is a first-class model matchup input, not a residual calibration.
         row["Raw Projection"] = round(projection, 2)
         row["Calibration Adjustment"] = 0.0
         row["Projection"] = round(projection, 2)
         row["Fair Line"] = nfl_builder._fair_line(projection, market)
-        row["_sd"] = nfl_builder._prop_sd(market, projection, _num(row.get("Reliability"), 70.0))
-        row["Matchup Index"] = round(max(0.01, _num(row.get("Matchup Index"), 1.0) * market_factor), 3)
-        _append_reason(row, nfl_builder._normalize_team(opponent), slot, market, profile)
+        row["_sd"] = nfl_builder._prop_sd(
+            market, projection, _num(row.get("Reliability"), 70.0)
+        )
+        # Display the actual final matchup multiplier instead of a diluted raw
+        # position index so large favorable/unfavorable matchups are visible.
+        row["Matchup Index"] = round(market_factor, 3)
+        _append_broad_reason(
+            row, market, float(details["broad_index"]),
+            float(details["broad_adjustment"]), float(details["total_adjustment"]),
+        )
+        if profile is not None:
+            _append_reason(row, nfl_builder._normalize_team(opponent), slot, market, profile)
 
     return rows
 
