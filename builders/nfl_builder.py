@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.13-relative-prop-projection-edge-2026-09-20"
+MODEL_VERSION = "nfl-v4.14-atd-engine-calibration-2026-09-20"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -3663,7 +3663,10 @@ def _expected_lineup_roles(lineup: pd.DataFrame, profiles: pd.DataFrame, team: s
     return roles
 
 def _regressed_rate(raw: float, volume: float, prior: float, prior_volume: float) -> float:
-    raw = raw if math.isfinite(raw) and raw > 0 else prior
+    # A true zero rate is evidence, not missing data. Only non-finite or negative
+    # values fall back to the positional prior. With zero volume this still
+    # collapses naturally to the prior.
+    raw = raw if math.isfinite(raw) and raw >= 0 else prior
     volume = max(0.0, volume)
     return (raw * volume + prior * prior_volume) / max(volume + prior_volume, 1.0)
 
@@ -4419,6 +4422,39 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(output)
 
 
+def _normalize_team_anytime_td_rows(
+    rows: list[dict[str, Any]], expected_team_tds: float,
+) -> list[dict[str, Any]]:
+    """Keep modeled player TD allocation within the team's scoring expectation.
+
+    The seven tracked skill/QB slots are only a subset of possible scorers, so
+    they may not collectively project for more touchdowns than the team itself.
+    This is intentionally an upper-bound correction: rows are only scaled down,
+    never up.
+    """
+    if not rows:
+        return rows
+    target = max(0.0, _num(expected_team_tds, 0.0))
+    td_rows = [row for row in rows if _safe_text(row.get("Market", "")) == "Anytime TD"]
+    raw_total = sum(max(0.0, _num(row.get("Projection", 0.0), 0.0)) for row in td_rows)
+    if target <= 0.0 or raw_total <= target + 1e-9:
+        return rows
+
+    scale = target / raw_total
+    for row in td_rows:
+        old_projection = max(0.0, _num(row.get("Projection", 0.0), 0.0))
+        old_raw = max(0.0, _num(row.get("Raw Projection", old_projection), old_projection))
+        row["Projection"] = round(old_projection * scale, 4)
+        row["Raw Projection"] = round(old_raw * scale, 4)
+        row["Fair Line"] = 0.5
+        if "_sd" in row:
+            row["_sd"] = _prop_sd("Anytime TD", row["Projection"], _num(row.get("Reliability", 70.0), 70.0))
+        current = _safe_text(row.get("Confluence", ""))
+        note = f"team TD normalization {raw_total:.2f}->{target:.2f} ({scale:.3f}x)"
+        row["Confluence"] = f"{current} • {note}".strip(" •")
+    return rows
+
+
 def _build_game_prop_rows(
     away_team: str, home_team: str, away_lineup: pd.DataFrame, home_lineup: pd.DataFrame,
     profiles: pd.DataFrame, defense_profiles: pd.DataFrame, away_rating: dict[str, Any],
@@ -4441,8 +4477,9 @@ def _build_game_prop_rows(
         pregame_team_total, pregame_team_total_source = _pregame_implied_team_total(
             home_away, market_total, home_spread, fallback_team_score
         )
+        team_rows: list[dict[str, Any]] = []
         for _, player_row in skill.iterrows():
-            rows.extend(_project_player_markets(
+            team_rows.extend(_project_player_markets(
                 _safe_text(player_row.get("Player", "")), _safe_text(player_row.get("Position", "")),
                 _safe_text(player_row.get("Slot", "")), team, opponent, home_away, lineup, profiles,
                 defense_profiles, rating, opponent_rating, projection, weather_adjustment,
@@ -4450,6 +4487,10 @@ def _build_game_prop_rows(
                 pregame_team_total=pregame_team_total,
                 pregame_team_total_source=pregame_team_total_source,
             ))
+        expected_team_tds = _team_touchdown_context(
+            profiles, team, rating, opponent_rating, pregame_team_total
+        )["expected_team_tds"]
+        rows.extend(_normalize_team_anytime_td_rows(team_rows, expected_team_tds))
     return pd.DataFrame(rows)
 
 
