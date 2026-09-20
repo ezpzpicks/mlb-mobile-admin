@@ -53,7 +53,7 @@ except Exception:
     nfl = None
 
 
-MODEL_VERSION = "nfl-v4.11-progressive-prop-season-weight-2026-09-14"
+MODEL_VERSION = "nfl-v4.12-prop-projection-edge-gates-2026-09-20"
 DEFAULT_SEASON = 2026
 DEFAULT_PRIOR_SEASON = DEFAULT_SEASON - 1
 MIN_GRADED_PROP_PLAY_PROBABILITY = 0.90
@@ -4211,6 +4211,23 @@ def _project_player_markets(
     return rows
 
 
+PROP_PROJECTION_EDGE_FLOORS = {
+    # Minimum absolute model projection distance from the sportsbook line.
+    # A/B grades must clear both the probability/price edge gate above and
+    # these market-specific projection-edge floors.
+    "Passing Attempts": {"A Prop": 2.5, "B Prop": 1.5, "Lean": 1.0},
+    "Passing Completions": {"A Prop": 2.0, "B Prop": 1.25, "Lean": 0.75},
+    "Passing Yards": {"A Prop": 15.0, "B Prop": 10.0, "Lean": 5.0},
+    "Passing TDs": {"A Prop": 0.45, "B Prop": 0.30, "Lean": 0.20},
+    "Interceptions": {"A Prop": 0.35, "B Prop": 0.25, "Lean": 0.15},
+    "Rushing Attempts": {"A Prop": 2.5, "B Prop": 1.5, "Lean": 1.0},
+    "Rushing Yards": {"A Prop": 12.0, "B Prop": 8.0, "Lean": 4.0},
+    "Targets": {"A Prop": 1.5, "B Prop": 1.0, "Lean": 0.5},
+    "Receptions": {"A Prop": 1.25, "B Prop": 0.75, "Lean": 0.5},
+    "Receiving Yards": {"A Prop": 7.0, "B Prop": 4.0, "Lean": 2.0},
+}
+
+
 def _grade_prop(probability: float, probability_edge_value: float, reliability: float, direction: str, role_confidence: float, market: str) -> str:
     # Reliability/role confidence can strengthen a real betting edge, but they
     # must never rescue a marginal price edge into an official A/B prop.
@@ -4223,6 +4240,31 @@ def _grade_prop(probability: float, probability_edge_value: float, reliability: 
     if probability >= 0.54 and probability_edge_value >= 0.025 and reliability >= 60:
         return "Lean"
     return "Non-Edge Prop"
+
+
+def _apply_prop_projection_edge_gate(grade: str, projection_edge: float, market: str) -> str:
+    floors = PROP_PROJECTION_EDGE_FLOORS.get(market)
+    if not floors or grade not in ["A Prop", "B Prop", "Lean"]:
+        return grade
+
+    gap = abs(_num(projection_edge, 0.0))
+    if grade == "A Prop":
+        if gap >= floors["A Prop"]:
+            return "A Prop"
+        if gap >= floors["B Prop"]:
+            return "B Prop"
+        if gap >= floors["Lean"]:
+            return "Lean"
+        return "Non-Edge Prop"
+
+    if grade == "B Prop":
+        if gap >= floors["B Prop"]:
+            return "B Prop"
+        if gap >= floors["Lean"]:
+            return "Lean"
+        return "Non-Edge Prop"
+
+    return "Lean" if gap >= floors["Lean"] else "Non-Edge Prop"
 
 
 def _grade_anytime_td(
@@ -4325,12 +4367,14 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         conditional_probability = probability / max(1.0 - p_push, 1e-9)
         probability_edge_value = conditional_probability - implied
         settled_ev = _expected_value_with_push(probability, lose_probability, odds)
+        projection_edge_value = abs(projection - line)
         grade = _grade_prop(
             conditional_probability, probability_edge_value,
             _num(item.get("Reliability", 50), 50), direction,
             _num(item.get("Role Confidence", 50), 50),
             _safe_text(item.get("Market", "")),
         )
+        grade = _apply_prop_projection_edge_gate(grade, projection_edge_value, market)
         if settled_ev <= 0:
             grade = "Non-Edge Prop"
         if _num(item.get("_play_probability", 1.0), 1.0) < MIN_GRADED_PROP_PLAY_PROBABILITY:
@@ -4338,7 +4382,7 @@ def _evaluate_prop_rows(rows: pd.DataFrame) -> pd.DataFrame:
         item.update({
             "Line Source": "Manual market line", "Pick": f"{direction} {line:.1f}", "Pick Odds": odds,
             "Model Probability": round(conditional_probability, 4), "Push Probability": round(p_push, 4), "Implied Probability": round(implied, 4),
-            "Probability Edge": round(probability_edge_value, 4), "Projection Edge": round(abs(projection - line), 2),
+            "Probability Edge": round(probability_edge_value, 4), "Projection Edge": round(projection_edge_value, 2),
             "Expected Value": round(settled_ev, 4), "Grade": grade, "Track": grade in ["A Prop", "B Prop"],
         })
         output.append(item)
@@ -5432,7 +5476,7 @@ def _render_build() -> None:
     }
 
     st.markdown("### Manual player prop lines")
-    st.caption("Manual entry only. Player projections are conditional on being active; availability below 90% is held out of A/B grades. No Odds API values are loaded.")
+    st.caption("Manual entry only. A/B player props must clear both price/probability edge and a market-specific projection-vs-line minimum; availability below 90% is held out. No Odds API values are loaded.")
 
     prop_base = _build_game_prop_rows(
         away_team, home_team, away_lineup, home_lineup, profiles, defense_profiles,
