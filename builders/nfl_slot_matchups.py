@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.11-progressive-prop-season-weight-2026-09-14"
+MODEL_VERSION = "nfl-v4.14-atd-engine-calibration-2026-09-20"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -291,8 +291,12 @@ def _touchdown_profile_from_history(history: pd.DataFrame, opponent: str, slot: 
     raw_outlier = float(np.clip(outlier_index - 1.0, -1.0, 1.0))
     sample_weight = float(sample / (sample + 3.5)) if sample > 0 else 0.0
     league_coverage = float(np.clip(league_slot_n / 24.0, 0.40, 1.0))
+    # Touchdowns are too sparse for a one-game defensive split to move the next
+    # week's player probabilities. Phase the slot signal in over games 2-4.
+    early_sample_maturity = float(np.clip((sample - 1.0) / 3.0, 0.0, 1.0))
     adjustment_pct = float(np.clip(
-        raw_outlier * sample_weight * league_coverage * MARKET_STRENGTH["Anytime TD"],
+        raw_outlier * sample_weight * league_coverage * MARKET_STRENGTH["Anytime TD"]
+        * early_sample_maturity,
         -MARKET_CAP["Anytime TD"], MARKET_CAP["Anytime TD"],
     ))
 
@@ -310,6 +314,7 @@ def _touchdown_profile_from_history(history: pd.DataFrame, opponent: str, slot: 
         "family_edge_pct": general_index_raw - 1.0,
         "slot_outlier_pct": outlier_index - 1.0,
         "sample_weight": sample_weight,
+        "early_sample_maturity": early_sample_maturity,
     }
 
 
@@ -504,17 +509,15 @@ def _apply_slot_overlay(
     }
     td_profile = profiles.get("Anytime TD")
     if td_profile is not None:
+        # Red-zone role is already part of the base TD lambda. Do not amplify the
+        # defensive slot overlay with the same signal a second time.
         usage = _touchdown_usage_multiplier(player_profile or {}, slot)
         base_adjustment = _num(td_profile.get("adjustment_pct"), 0.0)
-        final_adjustment = float(np.clip(
-            base_adjustment * usage["multiplier"],
-            -MARKET_CAP["Anytime TD"], MARKET_CAP["Anytime TD"],
-        ))
         td_profile = dict(td_profile)
         td_profile["base_adjustment_pct"] = base_adjustment
-        td_profile["adjustment_pct"] = final_adjustment
+        td_profile["adjustment_pct"] = base_adjustment
         td_profile["usage_ratio"] = usage["usage_ratio"]
-        td_profile["usage_multiplier"] = usage["multiplier"]
+        td_profile["usage_multiplier"] = 1.0
         profiles["Anytime TD"] = td_profile
 
     factors = {market: _factor(profile) for market, profile in profiles.items()}
