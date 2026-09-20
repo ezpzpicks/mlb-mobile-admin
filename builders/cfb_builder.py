@@ -337,9 +337,13 @@ def _now() -> str:
 
 
 def _season_weights(week: int) -> tuple[float, float]:
-    current = {0: 0.0, 1: 0.0, 2: 0.25, 3: 0.40, 4: 0.55, 5: 0.65, 6: 0.75}.get(int(week))
-    if current is None:
-        current = min(0.88, 0.75 + 0.01 * max(0, int(week) - 6))
+    projection_week = int(week)
+    # Weeks 1-4 keep the original progressive ramp. Starting in Week 5,
+    # trust the current season at a fixed 85/15 current/prior blend.
+    if projection_week >= 5:
+        current = 0.85
+    else:
+        current = {0: 0.0, 1: 0.0, 2: 0.25, 3: 0.40, 4: 0.55}.get(projection_week, 0.0)
     return round(1.0 - current, 3), round(current, 3)
 
 
@@ -2267,7 +2271,7 @@ def build_team_ratings(season: int, week: int) -> pd.DataFrame:
         current_power = _num(crow.get("Current Power"), preseason)
         games = _num(crow.get("Games"), 0.0); fbs_games = _num(crow.get("FBS Games"), 0.0)
         sample_factor = clamp(fbs_games / 6.0, 0.0, 1.0)
-        effective_current = current_weight * sample_factor
+        effective_current = current_weight if int(week) >= 5 else current_weight * sample_factor
         effective_prior = 1.0 - effective_current
         data_conf = 34.0 + 28.0 * sample_factor + (14.0 if current_avail["advanced"] else 0.0) + (10.0 if current_avail["roster"] else 0.0) + min(10.0, fbs_games * 1.5)
         row = {
