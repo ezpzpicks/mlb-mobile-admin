@@ -4225,7 +4225,7 @@ PROP_PROJECTION_EDGE_FLOORS = {
 
 YARDAGE_PROJECTION_EDGE_PCT_FLOORS = {
     "A Prop": 0.15,
-    "B Prop": 0.10,
+    "B Prop": 0.125,
     "Lean": 0.05,
 }
 
@@ -5506,7 +5506,7 @@ def _render_build() -> None:
     }
 
     st.markdown("### Manual player prop lines")
-    st.caption("Manual entry only. Yardage A/B props must clear both price/probability edge and a relative projection-vs-line minimum (15% A / 10% B); availability below 90% is held out. No Odds API values are loaded.")
+    st.caption("Manual entry only. Yardage A/B props must clear both price/probability edge and a relative projection-vs-line minimum (15% A / 12.5% B); availability below 90% is held out. No Odds API values are loaded.")
 
     prop_base = _build_game_prop_rows(
         away_team, home_team, away_lineup, home_lineup, profiles, defense_profiles,
