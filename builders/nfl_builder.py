@@ -4212,13 +4212,15 @@ def _project_player_markets(
 
 
 def _grade_prop(probability: float, probability_edge_value: float, reliability: float, direction: str, role_confidence: float, market: str) -> str:
+    # Reliability/role confidence can strengthen a real betting edge, but they
+    # must never rescue a marginal price edge into an official A/B prop.
     under_penalty = 0.012 if direction == "Under" else 0.0
     count_penalty = 0.006 if market in ["Passing TDs", "Interceptions"] else 0.0
-    if probability >= 0.60 + under_penalty + count_penalty and probability_edge_value >= 0.055 and reliability >= 75 and role_confidence >= 76:
+    if probability >= 0.60 + under_penalty + count_penalty and probability_edge_value >= 0.075 and reliability >= 75 and role_confidence >= 76:
         return "A Prop"
-    if probability >= 0.57 + under_penalty + count_penalty and probability_edge_value >= 0.035 and reliability >= 68 and role_confidence >= 68:
+    if probability >= 0.57 + under_penalty + count_penalty and probability_edge_value >= 0.050 and reliability >= 68 and role_confidence >= 68:
         return "B Prop"
-    if probability >= 0.54 and probability_edge_value >= 0.015 and reliability >= 60:
+    if probability >= 0.54 and probability_edge_value >= 0.025 and reliability >= 60:
         return "Lean"
     return "Non-Edge Prop"
 
