@@ -174,7 +174,7 @@ NFL_TEAMS = [
 
 TEAM_ALIASES = {
     "ARZ": "ARI", "BLT": "BAL", "CLV": "CLE", "HST": "HOU", "OAK": "LV",
-    "SD": "LAC", "STL": "LAR", "WSH": "WAS",
+    "SD": "LAC", "STL": "LAR", "LA": "LAR", "WSH": "WAS",
 }
 
 # Stable ESPN Core team IDs. Using these directly avoids the site.api team
