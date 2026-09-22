@@ -13011,7 +13011,7 @@ def build_auto_pitcher_k_board(today_games, k_market, pitcher_this_year, pitcher
                 "Projection": round(exp_k, 2), "True Projection": round(exp_k, 2),
                 "Most Likely K": probabilities.get("mode", ""), "Distribution Median": probabilities.get("median", ""),
                 "6-IP Pace": round(six_k, 2), "Line": line, "Mean vs Line": round(edge, 2), "Edge": round(edge, 2),
-                "Bet Side": bet_side, "Recommendation": grade, "Best Odds": best_odds, "Best Book": best_book,
+                "Bet Side": bet_side, "Recommendation": _pitcher_k_display_grade(grade, bet_side, grade), "Best Odds": best_odds, "Best Book": best_book,
                 "Volatility": volatility, "K Score": k_score,
                 "Probability": round(selected_probability * 100, 1),
                 "Probability Edge": round(price_edge * 100, 1),
@@ -13889,44 +13889,64 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
     home_under_loss_cushion = strikeout_under_first_loss_cushion(home_k, home_k_line)
     away_under_loss_cushion = strikeout_under_first_loss_cushion(away_k, away_k_line)
 
-    def _builder_k_pass_reason(final_grade, publication_note, selected_side, selected_probability, price_edge, odds):
-        """Explain a builder Pass without changing its probability or grade."""
+    home_k_projection_gap = _pitcher_k_projection_gap(home_k, home_k_line, home_selected_side)
+    away_k_projection_gap = _pitcher_k_projection_gap(away_k, away_k_line, away_selected_side)
+    home_k_grade_display = _pitcher_k_display_grade(home_k_grade, home_selected_side, home_k_grade_raw)
+    away_k_grade_display = _pitcher_k_display_grade(away_k_grade, away_selected_side, away_k_grade_raw)
+
+    def _builder_k_pass_reason(final_grade, publication_note, selected_side, price_edge, projection_gap, odds):
+        """Explain a Non-Edge/PASS using the current edge + gap tiers."""
         if str(final_grade or "").upper().strip() != "PASS":
             return ""
         restriction = str(publication_note or "").strip()
         if restriction:
             return restriction
-        reasons = []
-        try:
-            probability = float(selected_probability)
-            if probability < 0.60:
-                reasons.append(
-                    f"{str(selected_side or 'selected side').title()} probability "
-                    f"{probability * 100:.1f}% is below 60.0%"
-                )
-        except Exception:
-            reasons.append("selected-side probability is unavailable")
+
+        side_label = str(selected_side or "selected side").upper().strip()
         try:
             advantage = float(price_edge)
-            if advantage < 0.025:
-                reasons.append(
-                    f"price edge {advantage * 100:+.1f}% is below +2.5% at odds {odds}"
-                )
         except Exception:
-            reasons.append("price edge is unavailable")
-        return "; ".join(reasons) if reasons else "The selected side did not qualify under the active K-grade thresholds."
+            return "Probability edge is unavailable, so the current K tier cannot be evaluated."
+        try:
+            gap = float(projection_gap)
+        except Exception:
+            return "Projection gap is unavailable, so the current K tier cannot be evaluated."
+
+        reasons = []
+        if advantage < 0.10:
+            reasons.append(
+                f"{side_label} probability edge {advantage * 100:+.1f}% is below the 10.0% minimum for any graded tier"
+            )
+        elif advantage < 0.15:
+            if not (0.15 <= gap < 0.25):
+                reasons.append(
+                    f"Lean requires a 15.0%–<25.0% projection gap; current {side_label} gap is {gap * 100:+.1f}%"
+                )
+        elif gap < 0.10:
+            reasons.append(
+                f"Regular requires at least a 10.0% projection gap; current {side_label} gap is {gap * 100:+.1f}%"
+            )
+
+        if reasons:
+            return "; ".join(reasons)
+        return (
+            f"Current {side_label} edge is {advantage * 100:+.1f}% and projection gap is {gap * 100:+.1f}%. "
+            "Strong requires ≥15% edge + ≥22.5% gap; Regular ≥15% edge + ≥10% gap; "
+            "Lean 10%–<15% edge + 15%–<25% gap."
+        )
 
     home_k_pass_reason = _builder_k_pass_reason(
         home_k_grade, home_v15_5_note, home_selected_side,
-        home_selected_prob, home_k_price_edge, home_k_odds,
+        home_k_price_edge, home_k_projection_gap, home_k_odds,
     )
     away_k_pass_reason = _builder_k_pass_reason(
         away_k_grade, away_v15_5_note, away_selected_side,
-        away_selected_prob, away_k_price_edge, away_k_odds,
+        away_k_price_edge, away_k_projection_gap, away_k_odds,
     )
 
     st.divider()
     st.subheader("Strikeout Projections")
+    st.caption("K tiers: Strong = edge ≥15% + projection gap ≥22.5% • Regular = edge ≥15% + gap ≥10% • Lean = edge 10%–<15% + gap 15%–<25% • otherwise Non-Edge")
     col3, col4 = st.columns(2)
     with col3:
         st.markdown(f"### {home_pitcher}")
@@ -13941,6 +13961,7 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "P(Over)", "value": f"{home_k_probs.get('over',0)*100:.1f}%"},
             {"label": "P(Under)", "value": f"{home_k_probs.get('under',0)*100:.1f}%"},
             {"label": "Probability Edge", "value": f"{home_k_price_edge*100:+.1f}%"},
+            {"label": "Projection Gap", "value": f"{home_k_projection_gap*100:+.1f}%"},
             {"label": "6-IP Pace", "value": round(home_k_6ip, 2)},
             {"label": "Line", "value": home_k_line},
             {"label": "Mean vs Line", "value": round(home_k_edge, 2)},
@@ -13955,13 +13976,13 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "Arsenal Rate", "value": f"{float((home_arsenal_details.get('rate_multipliers', {}) or {}).get('arsenal', 1.0))*100:.1f}%"},
             {"label": "Env K Adj", "value": f"{home_k_context.get('k_projection_adjustment', 0):+.2f}"},
             {"label": "Early Hook Risk", "value": home_k_context.get("early_hook_risk", "Low")},
-            {"label": "Bet Grade", "value": home_k_grade, "wide": True, "big": True},
+            {"label": "Bet Grade", "value": home_k_grade_display, "wide": True, "big": True},
             {"label": "Raw K Score", "value": home_k_score, "big": True},
         ])
         if home_k_pass_reason:
             with st.container():
                 st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
-                st.error(f"Why this is a Pass: {home_k_pass_reason}")
+                st.error(f"Why this is Non-Edge / Pass: {home_k_pass_reason}")
                 st.markdown('</div>', unsafe_allow_html=True)
         if home_recent_form_note:
             with st.container():
@@ -14001,6 +14022,7 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "P(Over)", "value": f"{away_k_probs.get('over',0)*100:.1f}%"},
             {"label": "P(Under)", "value": f"{away_k_probs.get('under',0)*100:.1f}%"},
             {"label": "Probability Edge", "value": f"{away_k_price_edge*100:+.1f}%"},
+            {"label": "Projection Gap", "value": f"{away_k_projection_gap*100:+.1f}%"},
             {"label": "6-IP Pace", "value": round(away_k_6ip, 2)},
             {"label": "Line", "value": away_k_line},
             {"label": "Mean vs Line", "value": round(away_k_edge, 2)},
@@ -14015,13 +14037,13 @@ def render_auto_matchup_builder(pitcher_this_year, pitcher_last_year, team_hitti
             {"label": "Arsenal Rate", "value": f"{float((away_arsenal_details.get('rate_multipliers', {}) or {}).get('arsenal', 1.0))*100:.1f}%"},
             {"label": "Env K Adj", "value": f"{away_k_context.get('k_projection_adjustment', 0):+.2f}"},
             {"label": "Early Hook Risk", "value": away_k_context.get("early_hook_risk", "Low")},
-            {"label": "Bet Grade", "value": away_k_grade, "wide": True, "big": True},
+            {"label": "Bet Grade", "value": away_k_grade_display, "wide": True, "big": True},
             {"label": "Raw K Score", "value": away_k_score, "big": True},
         ])
         if away_k_pass_reason:
             with st.container():
                 st.markdown('<div class="builder-note-compact">', unsafe_allow_html=True)
-                st.error(f"Why this is a Pass: {away_k_pass_reason}")
+                st.error(f"Why this is Non-Edge / Pass: {away_k_pass_reason}")
                 st.markdown('</div>', unsafe_allow_html=True)
         if away_recent_form_note:
             with st.container():
@@ -21521,36 +21543,78 @@ def select_k_market_side(probabilities, over_odds=-110, under_odds=None, require
     }
 
 
+def _pitcher_k_projection_gap(exp_k, line, side):
+    """Direction-adjusted projection-vs-line gap used by the current K tiers."""
+    try:
+        projection = float(exp_k)
+        market_line = float(line)
+    except Exception:
+        return 0.0
+    if market_line <= 0:
+        return 0.0
+    side_upper = str(side or "").upper().strip()
+    if side_upper == "OVER":
+        return (projection - market_line) / market_line
+    if side_upper == "UNDER":
+        return (market_line - projection) / market_line
+    return 0.0
+
+
+def _pitcher_k_display_grade(grade, side="", raw_grade=None):
+    """Translate internal compatibility labels into the builder's tier names."""
+    def _display(value):
+        value = str(value or "").upper().strip()
+        if value == "OVER":
+            return "REGULAR OVER"
+        if value == "UNDER":
+            return "REGULAR UNDER"
+        return value
+
+    final_grade = str(grade or "PASS").upper().strip()
+    raw = str(raw_grade or "").upper().strip()
+    if final_grade == "PASS":
+        if raw and raw != "PASS":
+            return f"PASS • {_display(raw)} TIER"
+        side_upper = str(side or "").upper().strip()
+        return f"NON-EDGE {side_upper}".strip()
+    return _display(final_grade)
+
+
 def strikeout_bet_grade(exp_k, six_k, ipg_this, ipg_last, line, volatility, odds=-110, reliability=None, expected_std=None, distribution_details=None, under_odds=None):
+    """Grade pitcher K props with the validated edge + projection-gap tiers.
+
+    Strong:  >=15% probability edge and >=22.5% directional projection gap.
+    Regular: >=15% probability edge and >=10% directional projection gap.
+    Lean:    10% to <15% probability edge and 15% to <25% directional gap.
+    Anything else is Non-Edge/PASS. Probability, reliability, recent form and
+    arsenal diagnostics remain visible but do not rewrite these market tiers.
+    """
     try:
         exp_k = float(exp_k)
         line = float(line)
         expected_std = float(expected_std if expected_std is not None else 2.10)
     except Exception:
         return "PASS", 0.0
+
     signed_edge = exp_k - line
     probabilities = k_market_probabilities(
         exp_k, line, expected_std, distribution_details=distribution_details
     )
     selection = select_k_market_side(probabilities, odds, under_odds)
     side = selection["side"]
-    probability = selection["probability"]
-    price_edge = selection["price_edge"]
+    price_edge = float(selection["price_edge"])
+    projection_gap = _pitcher_k_projection_gap(exp_k, line, side)
+
     grade = "PASS"
-    if side == "OVER":
-        if probability >= 0.68 and price_edge >= 0.06:
-            grade = "STRONG OVER"
-        elif probability >= 0.63 and price_edge >= 0.04:
-            grade = "OVER"
-        elif probability >= 0.60 and price_edge >= 0.025:
-            grade = "LEAN OVER"
-    else:
-        if probability >= 0.69 and price_edge >= 0.06:
-            grade = "STRONG UNDER"
-        elif probability >= 0.64 and price_edge >= 0.04:
-            grade = "UNDER"
-        elif probability >= 0.60 and price_edge >= 0.025:
-            grade = "LEAN UNDER"
+    if price_edge >= 0.15 and projection_gap >= 0.225:
+        grade = f"STRONG {side}"
+    elif price_edge >= 0.15 and projection_gap >= 0.10:
+        # Keep OVER/UNDER internally for downstream compatibility; the builder
+        # renders this as REGULAR OVER / REGULAR UNDER.
+        grade = side
+    elif 0.10 <= price_edge < 0.15 and 0.15 <= projection_gap < 0.25:
+        grade = f"LEAN {side}"
+
     return grade, round(signed_edge, 3)
 
 
