@@ -287,6 +287,44 @@ def _run_temporary_mlb_k_gate_audit() -> None:
                 "restriction": str(row.get("Grade Restriction Reason", "")),
             }
             print("[mlb-k-gate-audit] candidate=" + json.dumps(candidate, sort_keys=True), flush=True)
+
+        # Targeted lookup for the three 18-3 tracker plays that may not appear in
+        # the threshold reconstruction because historical saved fields evolved.
+        for _, row in out.iterrows():
+            date_text = str(row.get("Date", ""))
+            pitcher_text = str(row.get("Pitcher", ""))
+            normalized_pitcher = pitcher_text.lower().replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n")
+            wanted = (
+                ("sanchez" in normalized_pitcher and date_text in {"2026-08-17","2026-08-23"})
+                or ("burns" in normalized_pitcher and date_text == "2026-08-24")
+            )
+            if not wanted:
+                continue
+            targeted = {
+                "date": date_text,
+                "pitcher": pitcher_text,
+                "role": str(row.get("Role","")),
+                "model_version": str(row.get("Model Version","")),
+                "projection": None if pd.isna(row.get("_proj")) else float(row.get("_proj")),
+                "line": None if pd.isna(row.get("_Line")) else float(row.get("_Line")),
+                "side": str(row.get("_side","")),
+                "edge_pct": None if pd.isna(row.get("_edge")) else round(float(row.get("_edge"))*100,1),
+                "gap_pct": None if pd.isna(row.get("_gap")) else round(float(row.get("_gap"))*100,1),
+                "actual_k": None if pd.isna(row.get("_Actual Ks")) else float(row.get("_Actual Ks")),
+                "result": str(row.get("_result","")),
+                "projected_pitches": None if pd.isna(row.get("_Projected Pitches")) else float(row.get("_Projected Pitches")),
+                "projected_bf": None if pd.isna(row.get("_Projected Batters Faced")) else float(row.get("_Projected Batters Faced")),
+                "normal_pitches": None if pd.isna(row.get("_Normal Workload Pitches")) else float(row.get("_Normal Workload Pitches")),
+                "normal_bf": None if pd.isna(row.get("_Normal Workload BF")) else float(row.get("_Normal Workload BF")),
+                "lineup_confirmed": str(row.get("Lineup Confirmed","")),
+                "hitters": None if pd.isna(row.get("_Lineup Hitters Found")) else float(row.get("_Lineup Hitters Found")),
+                "lineup_gate": str(row.get("Nine-Hitter Requirement Passed","")),
+                "workload_support": str(row.get("Workload Support","")),
+                "published_grade": str(row.get("Published Grade","")),
+                "shadow_grade": str(row.get("Shadow Grade","")),
+                "restriction": str(row.get("Grade Restriction Reason","")),
+            }
+            print("[mlb-k-gate-audit] targeted=" + json.dumps(targeted, sort_keys=True), flush=True)
     except Exception as exc:
         print(f"[mlb-k-gate-audit] ERROR: {type(exc).__name__}: {exc}", flush=True)
 
