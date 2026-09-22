@@ -34,6 +34,200 @@ try:
 except Exception as exc:
     print(f"Sport workbook bootstrap failed: {exc}")
 
+
+# TEMP 2026-09-22 MLB pitcher-K eligibility audit.
+# Reads production history once per process, prints only non-secret aggregate/candidate data,
+# and does not write or alter any dataset.
+@st.cache_resource(show_spinner=False)
+def _temporary_mlb_k_eligibility_audit_20260922():
+    import json
+    import math
+    import pandas as pd
+    from shared.turso_storage import read_dataset
+
+    cols = [
+        "Date", "Game Key", "Pitcher", "Team", "Opponent", "Role", "Model Version",
+        "Projection", "True Projection", "Line", "Grade", "Published Grade", "Shadow Grade",
+        "Tail Selected Side", "Tail Probability Edge", "Price Edge", "Actual Ks",
+        "Projected Pitches", "Projected Batters Faced", "Normal Workload Pitches", "Normal Workload BF",
+        "Lineup Confirmed", "Lineup Hitters Found", "Nine-Hitter Requirement Passed",
+        "Workload Support", "Grade Restriction Reason", "Opener", "Bulk Pitcher",
+    ]
+    df = read_dataset("MLB", "pitcher_recent_form", cols)
+    if df is None or df.empty:
+        print("[mlb-k-gate-audit] no pitcher_recent_form rows")
+        return True
+
+    def num(v):
+        try:
+            s = str(v or "").replace("%","").replace("−","-").strip()
+            if not s or s.lower() in {"nan","none","<na>"}:
+                return math.nan
+            return float(s)
+        except Exception:
+            return math.nan
+
+    def truth(v):
+        return str(v or "").strip().upper() in {"TRUE","YES","1","Y"}
+
+    out = df.copy()
+    out["_date"] = pd.to_datetime(out["Date"], errors="coerce")
+    out = out[(out["_date"] >= pd.Timestamp("2026-08-10")) & (out["_date"] <= pd.Timestamp("2026-09-11"))].copy()
+
+    for c in ["Projection","True Projection","Line","Tail Probability Edge","Price Edge","Actual Ks",
+              "Projected Pitches","Projected Batters Faced","Normal Workload Pitches","Normal Workload BF",
+              "Lineup Hitters Found"]:
+        out["_"+c] = out[c].map(num)
+
+    def edge_value(row):
+        v = row["_Tail Probability Edge"]
+        return v if pd.notna(v) else row["_Price Edge"]
+
+    def projection_value(row):
+        v = row["_True Projection"]
+        return v if pd.notna(v) else row["_Projection"]
+
+    def side_value(row):
+        s = str(row.get("Tail Selected Side","") or "").strip().upper()
+        if s in {"OVER","UNDER"}:
+            return s
+        g = " ".join([
+            str(row.get("Grade","") or ""),
+            str(row.get("Published Grade","") or ""),
+            str(row.get("Shadow Grade","") or ""),
+        ]).upper()
+        if "UNDER" in g:
+            return "UNDER"
+        if "OVER" in g:
+            return "OVER"
+        p = projection_value(row)
+        line = row["_Line"]
+        if pd.notna(p) and pd.notna(line):
+            return "OVER" if p > line else "UNDER" if p < line else ""
+        return ""
+
+    out["_edge"] = out.apply(edge_value, axis=1)
+    out["_proj"] = out.apply(projection_value, axis=1)
+    out["_side"] = out.apply(side_value, axis=1)
+
+    def gap_value(row):
+        p, line, side = row["_proj"], row["_Line"], row["_side"]
+        if pd.isna(p) or pd.isna(line) or line <= 0 or side not in {"OVER","UNDER"}:
+            return math.nan
+        return ((p-line)/line) if side == "OVER" else ((line-p)/line)
+
+    def result_value(row):
+        actual, line, side = row["_Actual Ks"], row["_Line"], row["_side"]
+        if pd.isna(actual) or pd.isna(line) or side not in {"OVER","UNDER"}:
+            return ""
+        if abs(actual-line) < 1e-9:
+            return "P"
+        win = actual > line if side == "OVER" else actual < line
+        return "W" if win else "L"
+
+    out["_gap"] = out.apply(gap_value, axis=1)
+    out["_result"] = out.apply(result_value, axis=1)
+    usable = out[out["_result"].isin(["W","L"]) & out["_edge"].notna() & out["_gap"].notna()].copy()
+
+    def wl(frame):
+        w = int((frame["_result"]=="W").sum())
+        l = int((frame["_result"]=="L").sum())
+        return {"n": int(len(frame)), "w": w, "l": l}
+
+    baseline = usable[(usable["_edge"] >= 0.15) & (usable["_gap"] >= 0.10)].copy()
+    strong = baseline[baseline["_gap"] >= 0.225].copy()
+    regular = baseline[(baseline["_gap"] >= 0.10) & (baseline["_gap"] < 0.225)].copy()
+    lean = usable[(usable["_edge"] >= 0.10) & (usable["_edge"] < 0.15) & (usable["_gap"] >= 0.15) & (usable["_gap"] < 0.25)].copy()
+
+    def gate_status(row):
+        role_ok = str(row.get("Role","") or "").strip().upper() == "STARTER"
+        lineup_ok = truth(row.get("Nine-Hitter Requirement Passed",""))
+        if not lineup_ok:
+            lineup_ok = truth(row.get("Lineup Confirmed","")) and (row["_Lineup Hitters Found"] >= 8)
+
+        support = str(row.get("Workload Support","") or "").strip().upper()
+        restriction = str(row.get("Grade Restriction Reason","") or "").strip().lower()
+        published = str(row.get("Published Grade","") or "").strip().upper()
+        shadow = str(row.get("Shadow Grade","") or "").strip().upper()
+
+        # Exact current hybrid gate is automatically satisfied when full starter workload exists.
+        # If support is not FULL, a recorded structural pass/fail resolves most historical rows.
+        if support == "FULL":
+            hybrid_ok = True
+            hybrid_status = "FULL"
+        elif "hybrid/reliever workload without full support" in restriction:
+            hybrid_ok = False
+            hybrid_status = "FAIL_RECORDED"
+        elif shadow not in {"","PASS"} and published not in {"","PASS"}:
+            hybrid_ok = True
+            hybrid_status = "PASSED_AT_BUILD"
+        else:
+            hybrid_ok = None
+            hybrid_status = "UNKNOWN_IF_HYBRID"
+
+        definite_pass = role_ok and lineup_ok and (hybrid_ok is True)
+        definite_fail = (not role_ok) or (not lineup_ok) or (hybrid_ok is False)
+        return pd.Series({
+            "_role_ok": role_ok, "_lineup_ok": lineup_ok, "_hybrid_ok": hybrid_ok,
+            "_hybrid_status": hybrid_status, "_definite_pass": definite_pass,
+            "_definite_fail": definite_fail,
+        })
+
+    if not baseline.empty:
+        baseline = pd.concat([baseline, baseline.apply(gate_status, axis=1)], axis=1)
+    else:
+        for c in ["_role_ok","_lineup_ok","_hybrid_ok","_hybrid_status","_definite_pass","_definite_fail"]:
+            baseline[c] = []
+
+    passed = baseline[baseline["_definite_pass"] == True].copy()
+    failed = baseline[baseline["_definite_fail"] == True].copy()
+    unknown = baseline[(baseline["_definite_pass"] != True) & (baseline["_definite_fail"] != True)].copy()
+
+    summary = {
+        "window_rows": int(len(out)),
+        "usable_completed": wl(usable),
+        "baseline_edge15_gap10": wl(baseline),
+        "strong_edge15_gap22_5": wl(strong),
+        "regular_edge15_gap10_to22_5": wl(regular),
+        "lean_edge10_to15_gap15_to25": wl(lean),
+        "gate_definite_pass": wl(passed),
+        "gate_definite_fail": wl(failed),
+        "gate_unknown_hybrid_only": wl(unknown),
+        "role_fail_count": int((baseline["_role_ok"] == False).sum()) if not baseline.empty else 0,
+        "lineup_fail_count": int((baseline["_lineup_ok"] == False).sum()) if not baseline.empty else 0,
+        "workload_support_counts": baseline["Workload Support"].astype(str).value_counts(dropna=False).to_dict() if not baseline.empty else {},
+        "nine_hitter_counts": baseline["Nine-Hitter Requirement Passed"].astype(str).value_counts(dropna=False).to_dict() if not baseline.empty else {},
+    }
+    print("[mlb-k-gate-audit] summary=" + json.dumps(summary, sort_keys=True))
+
+    for _, r in baseline.sort_values(["_date","Pitcher"]).iterrows():
+        row = {
+            "date": str(r.get("Date","")), "pitcher": str(r.get("Pitcher","")),
+            "side": str(r.get("_side","")), "line": r.get("_Line"), "projection": r.get("_proj"),
+            "edge_pct": round(float(r.get("_edge",0))*100,1), "gap_pct": round(float(r.get("_gap",0))*100,1),
+            "result": str(r.get("_result","")), "role": str(r.get("Role","")),
+            "workload_support": str(r.get("Workload Support","")),
+            "normal_pitches": None if pd.isna(r.get("_Normal Workload Pitches")) else float(r.get("_Normal Workload Pitches")),
+            "normal_bf": None if pd.isna(r.get("_Normal Workload BF")) else float(r.get("_Normal Workload BF")),
+            "lineup_confirmed": str(r.get("Lineup Confirmed","")),
+            "hitters": None if pd.isna(r.get("_Lineup Hitters Found")) else float(r.get("_Lineup Hitters Found")),
+            "lineup_gate": str(r.get("Nine-Hitter Requirement Passed","")),
+            "published_grade": str(r.get("Published Grade","")),
+            "shadow_grade": str(r.get("Shadow Grade","")),
+            "hybrid_gate_status": str(r.get("_hybrid_status","")),
+            "definite_pass": bool(r.get("_definite_pass",False)),
+            "definite_fail": bool(r.get("_definite_fail",False)),
+            "restriction": str(r.get("Grade Restriction Reason","")),
+        }
+        print("[mlb-k-gate-audit] candidate=" + json.dumps(row, sort_keys=True))
+    return True
+
+try:
+    _temporary_mlb_k_eligibility_audit_20260922()
+except Exception as exc:
+    print(f"[mlb-k-gate-audit] ERROR: {type(exc).__name__}: {exc}")
+
+
 require_admin_password(LOGO_FILE)
 
 
