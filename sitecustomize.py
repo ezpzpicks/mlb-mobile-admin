@@ -325,6 +325,84 @@ def _run_temporary_mlb_k_gate_audit() -> None:
                 "restriction": str(row.get("Grade Restriction Reason","")),
             }
             print("[mlb-k-gate-audit] targeted=" + json.dumps(targeted, sort_keys=True), flush=True)
+
+        # Reproduce the original 18-3 sweep from the canonical bet tracker.
+        tracker_cols = [
+            "Date", "Bet Type", "Selection", "Market", "Odds/Line", "Model %",
+            "Implied %", "Edge %", "Result", "Raw Projection", "Calibrated Projection",
+            "Model Version", "Game Key", "Team", "Opponent", "Pitcher Role",
+        ]
+        tracker = read_dataset("MLB", "bet_tracker", tracker_cols)
+        if tracker is not None and not tracker.empty:
+            t = tracker.copy()
+            t["_date"] = pd.to_datetime(t["Date"], errors="coerce")
+            t = t[
+                (t["_date"] >= pd.Timestamp("2026-08-10"))
+                & (t["_date"] <= pd.Timestamp("2026-09-11"))
+                & t["Market"].astype(str).str.contains("Pitcher Strikeouts", case=False, na=False)
+            ].copy()
+
+            def parse_pct(v):
+                try:
+                    s=str(v or "").replace("Edge","").replace("%","").replace("+","").replace("−","-").strip()
+                    if not s:
+                        return math.nan
+                    return float(s)/100.0
+                except Exception:
+                    return math.nan
+
+            def parse_line(v):
+                try:
+                    s=str(v or "").split("/")[0].strip()
+                    return float(s)
+                except Exception:
+                    return math.nan
+
+            def tracker_side(row):
+                txt=(str(row.get("Bet Type",""))+" "+str(row.get("Selection",""))).upper()
+                if "UNDER" in txt: return "UNDER"
+                if "OVER" in txt: return "OVER"
+                return ""
+
+            t["_edge"]=t["Edge %"].map(parse_pct)
+            t["_line"]=t["Odds/Line"].map(parse_line)
+            t["_proj"]=t["Calibrated Projection"].map(num)
+            t["_side"]=t.apply(tracker_side,axis=1)
+            t["_gap"]=t.apply(
+                lambda r: ((r["_proj"]-r["_line"])/r["_line"]) if r["_side"]=="OVER" and pd.notna(r["_proj"]) and pd.notna(r["_line"]) and r["_line"]>0
+                else ((r["_line"]-r["_proj"])/r["_line"]) if r["_side"]=="UNDER" and pd.notna(r["_proj"]) and pd.notna(r["_line"]) and r["_line"]>0
+                else math.nan,
+                axis=1
+            )
+            t["_result"]=t["Result"].astype(str).str.strip().str.upper()
+            tbase=t[
+                t["_result"].isin(["W","L","WIN","LOSS"])
+                & (t["_edge"]>=0.15)
+                & (t["_gap"]>=0.10)
+            ].copy()
+            tbase["_wl"]=tbase["_result"].map({"WIN":"W","LOSS":"L","W":"W","L":"L"})
+            tsummary={
+                "n":int(len(tbase)),
+                "w":int((tbase["_wl"]=="W").sum()),
+                "l":int((tbase["_wl"]=="L").sum()),
+                "first_date":str(tbase["_date"].min().date()) if not tbase.empty else "",
+                "last_date":str(tbase["_date"].max().date()) if not tbase.empty else "",
+            }
+            print("[mlb-k-gate-audit] tracker_summary="+json.dumps(tsummary,sort_keys=True),flush=True)
+            for _,r in tbase.sort_values(["_date","Selection"]).iterrows():
+                tr={
+                    "date":str(r.get("Date","")),
+                    "selection":str(r.get("Selection","")),
+                    "bet_type":str(r.get("Bet Type","")),
+                    "line":None if pd.isna(r.get("_line")) else float(r.get("_line")),
+                    "projection":None if pd.isna(r.get("_proj")) else float(r.get("_proj")),
+                    "edge_pct":round(float(r.get("_edge",0))*100,1),
+                    "gap_pct":round(float(r.get("_gap",0))*100,1),
+                    "result":str(r.get("_wl","")),
+                    "role":str(r.get("Pitcher Role","")),
+                    "version":str(r.get("Model Version","")),
+                }
+                print("[mlb-k-gate-audit] tracker_candidate="+json.dumps(tr,sort_keys=True),flush=True)
     except Exception as exc:
         print(f"[mlb-k-gate-audit] ERROR: {type(exc).__name__}: {exc}", flush=True)
 
