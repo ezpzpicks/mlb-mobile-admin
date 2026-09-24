@@ -1,0 +1,287 @@
+{
+  "design": {
+    "baseline": "scoring-only structural baseline; not claimed to be exact production v1.5",
+    "confirmation": "2024 coefficient-sign confirmation",
+    "current_season_features": "prior weeks only; blended with previous season via games/(games+4)",
+    "data": "SportsDataverse/cfbfastR PBP reconstructed games",
+    "discovery": "2021-2023",
+    "holdout": "2025 untouched",
+    "market_used_as_predictor": false,
+    "power": "iterative opponent-adjusted neutral margin, winsorized at 45 points"
+  },
+  "favorite_side_bias_baseline": {
+    "mean_actual_favorite_margin": 13.239283429302624,
+    "mean_actual_minus_market": 0.6343570057581573,
+    "mean_market_favorite_margin": 12.604926423544466,
+    "mean_model_favorite_margin": 4.518633361280029,
+    "mean_model_minus_market": -8.086293062264437,
+    "n": 1563
+  },
+  "favorite_side_bias_regression": {
+    "mean_actual_favorite_margin": 13.239283429302624,
+    "mean_actual_minus_market": 0.6343570057581573,
+    "mean_market_favorite_margin": 12.604926423544466,
+    "mean_model_favorite_margin": 9.988384977872014,
+    "mean_model_minus_market": -2.616541445672451,
+    "n": 1563
+  },
+  "favorite_size_buckets_baseline": {
+    "0-6.5": {
+      "actual_mean_abs_margin": 11.974402730375427,
+      "ats_direction_accuracy": 0.5232358003442341,
+      "margin_mae": 12.011837601201435,
+      "margin_rmse": 15.584507652802039,
+      "market_margin_mae": 11.468430034129693,
+      "market_mean_abs_spread": 3.6715017064846416,
+      "model_mean_abs_margin": 3.225495230328627,
+      "n": 586,
+      "total_mae": 13.315580924472416
+    },
+    "14-20.5": {
+      "actual_mean_abs_margin": 18.4625,
+      "ats_direction_accuracy": 0.4895397489539749,
+      "margin_mae": 14.822105876248846,
+      "margin_rmse": 17.84397005078783,
+      "market_margin_mae": 11.697916666666666,
+      "market_mean_abs_spread": 16.64375,
+      "model_mean_abs_margin": 7.259325132732912,
+      "n": 240,
+      "total_mae": 13.255063636040937
+    },
+    "21-27.5": {
+      "actual_mean_abs_margin": 26.736842105263158,
+      "ats_direction_accuracy": 0.46308724832214765,
+      "margin_mae": 21.00671519412914,
+      "margin_rmse": 25.232615200425744,
+      "market_margin_mae": 12.944078947368421,
+      "market_mean_abs_spread": 23.8125,
+      "model_mean_abs_margin": 8.878261938112068,
+      "n": 152,
+      "total_mae": 12.490576896299153
+    },
+    "28+": {
+      "actual_mean_abs_margin": 37.64150943396226,
+      "ats_direction_accuracy": 0.5220125786163522,
+      "margin_mae": 27.937430692502087,
+      "margin_rmse": 32.39458429493033,
+      "market_margin_mae": 12.09433962264151,
+      "market_mean_abs_spread": 36.100628930817614,
+      "model_mean_abs_margin": 10.550060862214535,
+      "n": 159,
+      "total_mae": 11.707520042271453
+    },
+    "7-13.5": {
+      "actual_mean_abs_margin": 14.624413145539906,
+      "ats_direction_accuracy": 0.5036144578313253,
+      "margin_mae": 13.101875828800932,
+      "margin_rmse": 16.773525750088716,
+      "market_margin_mae": 11.960093896713616,
+      "market_mean_abs_spread": 9.849765258215962,
+      "model_mean_abs_margin": 4.997510711052301,
+      "n": 426,
+      "total_mae": 12.312594819108433
+    }
+  },
+  "favorite_size_buckets_regression": {
+    "0-6.5": {
+      "actual_mean_abs_margin": 11.974402730375427,
+      "ats_direction_accuracy": 0.5008605851979346,
+      "margin_mae": 12.357949987340556,
+      "margin_rmse": 15.952914210519538,
+      "market_margin_mae": 11.468430034129693,
+      "market_mean_abs_spread": 3.6715017064846416,
+      "model_mean_abs_margin": 5.159123279610433,
+      "n": 586,
+      "total_mae": 13.318199304732712
+    },
+    "14-20.5": {
+      "actual_mean_abs_margin": 18.4625,
+      "ats_direction_accuracy": 0.497907949790795,
+      "margin_mae": 12.552109574117951,
+      "margin_rmse": 15.24260824384923,
+      "market_margin_mae": 11.697916666666666,
+      "market_mean_abs_spread": 16.64375,
+      "model_mean_abs_margin": 13.897403646461461,
+      "n": 240,
+      "total_mae": 13.137798636255095
+    },
+    "21-27.5": {
+      "actual_mean_abs_margin": 26.736842105263158,
+      "ats_direction_accuracy": 0.42953020134228187,
+      "margin_mae": 15.635218071456686,
+      "margin_rmse": 18.83727596156434,
+      "market_margin_mae": 12.944078947368421,
+      "market_mean_abs_spread": 23.8125,
+      "model_mean_abs_margin": 18.32342789999448,
+      "n": 152,
+      "total_mae": 12.815237179674707
+    },
+    "28+": {
+      "actual_mean_abs_margin": 37.64150943396226,
+      "ats_direction_accuracy": 0.5094339622641509,
+      "margin_mae": 15.566991842837913,
+      "margin_rmse": 19.937849925828207,
+      "market_margin_mae": 12.09433962264151,
+      "market_mean_abs_spread": 36.100628930817614,
+      "model_mean_abs_margin": 26.85563954256007,
+      "n": 159,
+      "total_mae": 11.723312515270505
+    },
+    "7-13.5": {
+      "actual_mean_abs_margin": 14.624413145539906,
+      "ats_direction_accuracy": 0.4987951807228916,
+      "margin_mae": 12.588384343813106,
+      "margin_rmse": 15.787318528600691,
+      "market_margin_mae": 11.960093896713616,
+      "market_mean_abs_spread": 9.849765258215962,
+      "model_mean_abs_margin": 9.064836639866654,
+      "n": 426,
+      "total_mae": 12.165415384848782
+    }
+  },
+  "final_coefficients": {
+    "const": 11.240443677221451,
+    "current_opp_allowed_delta": 0.2716376410485099,
+    "current_own_scoring_delta": 0.38741952777838656,
+    "current_power_delta": 0.3569282298069327,
+    "home_indicator": 4.804668259201711,
+    "prior_opp_papg": 0.22597582571150315,
+    "prior_own_ppg": 0.26670808584236927,
+    "prior_power_gap": 0.3024181814544948
+  },
+  "final_p_values": {
+    "const": 4.147544068390134e-30,
+    "current_opp_allowed_delta": 2.873144005433152e-15,
+    "current_own_scoring_delta": 1.4991850360152464e-30,
+    "current_power_delta": 1.0906675515531097e-72,
+    "home_indicator": 1.227423465867645e-82,
+    "prior_opp_papg": 5.060175656025919e-28,
+    "prior_own_ppg": 1.5030657631215181e-36,
+    "prior_power_gap": 1.7264801157337874e-167
+  },
+  "holdout_regression": {
+    "margin_bias": -0.819513998544633,
+    "margin_mae": 13.60198063639121,
+    "margin_rmse": 17.60781730016111,
+    "n": 1657,
+    "total_bias": 0.15389833879510967,
+    "total_mae": 12.895795263130914,
+    "total_rmse": 16.075168685943602
+  },
+  "holdout_scoring_baseline": {
+    "margin_bias": -5.490421118457581,
+    "margin_mae": 15.731345477791365,
+    "margin_rmse": 20.43623069827393,
+    "n": 1657,
+    "total_bias": 1.491784585164719,
+    "total_mae": 12.90213638326774,
+    "total_rmse": 16.009684245453638
+  },
+  "improvement_vs_scoring_baseline": {
+    "margin_mae_pct": 13.535808773675932,
+    "margin_rmse_pct": 13.840191177484177,
+    "total_mae_pct": 0.049147830626323975,
+    "total_rmse_pct": -0.4090301812701906
+  },
+  "research_version": "cfb-team-score-regression-v2-2026-08-21",
+  "sample_sizes": {
+    "confirmation_team_rows": 3218,
+    "discovery_team_rows": 7680,
+    "holdout_games": 1657,
+    "holdout_games_with_spread": 1563,
+    "holdout_team_rows": 3314
+  },
+  "selected_features": [
+    "prior_own_ppg",
+    "prior_opp_papg",
+    "prior_power_gap",
+    "current_own_scoring_delta",
+    "current_opp_allowed_delta",
+    "current_power_delta",
+    "home_indicator"
+  ],
+  "selection_history": [
+    {
+      "features": [
+        "prior_own_ppg",
+        "prior_opp_papg",
+        "prior_power_gap",
+        "current_own_scoring_delta",
+        "current_opp_allowed_delta",
+        "current_power_delta",
+        "home_indicator"
+      ],
+      "worst": "current_opp_allowed_delta",
+      "worst_p": 3.842398290312781e-12
+    }
+  ],
+  "sign_confirmation": [
+    {
+      "confirmation_coefficient": 0.2684932917026139,
+      "confirmation_p": 3.5578011001450266e-10,
+      "discovery_coefficient": 0.27507767473894534,
+      "discovery_p": 6.895980297141183e-29,
+      "feature": "prior_own_ppg",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 0.33037261293152637,
+      "confirmation_p": 1.2628035468560506e-13,
+      "discovery_coefficient": 0.2074890891371236,
+      "discovery_p": 6.4086592197849054e-18,
+      "feature": "prior_opp_papg",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 0.3098889249557923,
+      "confirmation_p": 2.066982941186433e-55,
+      "discovery_coefficient": 0.29589279235365584,
+      "discovery_p": 7.17421703142585e-110,
+      "feature": "prior_power_gap",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 0.19656752125647986,
+      "confirmation_p": 0.002864363858157513,
+      "discovery_coefficient": 0.45415426385663427,
+      "discovery_p": 1.1338418304398956e-30,
+      "feature": "current_own_scoring_delta",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 0.2272756896218871,
+      "confirmation_p": 0.000641181608505912,
+      "discovery_coefficient": 0.2802094711122216,
+      "discovery_p": 3.842398290312781e-12,
+      "feature": "current_opp_allowed_delta",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 0.4099424575597394,
+      "confirmation_p": 3.726791475110436e-25,
+      "discovery_coefficient": 0.34218928656643954,
+      "discovery_p": 2.939681711716486e-50,
+      "feature": "current_power_delta",
+      "same_sign": true
+    },
+    {
+      "confirmation_coefficient": 5.3412332963203735,
+      "confirmation_p": 3.150399226245279e-32,
+      "discovery_coefficient": 4.576319112397409,
+      "discovery_p": 6.161206461319527e-53,
+      "feature": "home_indicator",
+      "same_sign": true
+    }
+  ],
+  "usc_san_jose_state_prior_only_sanity_case": [
+    {
+      "away_team": "San Jos\u00e9 State",
+      "home_team": "USC",
+      "note": "Prior-only sanity case using 2025 performance; no 2026 roster/portal/injury overlay.",
+      "projected_away": 12.522991252260406,
+      "projected_home": 42.68951797360008,
+      "projected_home_margin": 30.16652672133968,
+      "projected_total": 55.21250922586049
+    }
+  ]
+}
