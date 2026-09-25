@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.17-component-tier-yardage-weighting-2026-09-25"
+MODEL_VERSION = "nfl-v4.18-variable-tier-yardage-weighting-2026-09-25"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -129,9 +129,10 @@ TOTAL_MATCHUP_CAP = {
 _HISTORY_CACHE: dict[tuple[int, int], pd.DataFrame] = {}
 _PROFILE_CACHE: dict[tuple[int, int, str, str, str], dict[str, float]] = {}
 
-# Production yardage tier system. Opportunity and efficiency are graded
-# independently against the league average for the player's exact lineup slot.
-# The corresponding matchup adjustment is then scaled by this multiplier.
+# Production yardage tier system. Every player-owned input that materially
+# enters a yardage projection gets its own exact-slot tier. Each variable owns a
+# defined slice of the matchup adjustment; shared team/game inputs remain common
+# context and are not player-tiered.
 YARDAGE_TIER_WEIGHTS = {
     "Tier 1": 0.00,
     "Tier 2": 0.50,
@@ -139,12 +140,88 @@ YARDAGE_TIER_WEIGHTS = {
     "Tier 4": 1.50,
     "Tier 5": 2.00,
 }
-YARDAGE_COMPONENT_METRICS = {
-    "Passing Yards": ("attempts_pg", "pass_ypa"),
-    "Rushing Yards": ("carries_pg", "rush_ypc"),
-    "Receiving Yards": ("targets_pg", "yards_per_target"),
+YARDAGE_MARKETS = {"Passing Yards", "Rushing Yards", "Receiving Yards"}
+
+# Shares sum to 1.0 within each opportunity/efficiency side. When every
+# variable is Tier 3 the existing matchup factor is reproduced exactly.
+# "percentile" is used for signed metrics whose league average can sit near 0.
+YARDAGE_VARIABLE_SPECS = {
+    ("Passing Yards", "QB"): {
+        "opportunity": [
+            {"label": "attempt volume", "metrics": ("attempts_pg",), "share": 0.55, "mode": "ratio"},
+            {"label": "attempt share", "metrics": ("attempt_share",), "share": 0.45, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPA", "metrics": ("pass_ypa",), "share": 0.65, "mode": "ratio"},
+            {"label": "deep attempt rate", "metrics": ("deep_attempt_rate",), "share": 0.35, "mode": "ratio"},
+        ],
+    },
+    ("Rushing Yards", "QB"): {
+        "opportunity": [
+            {"label": "carry volume", "metrics": ("carries_pg",), "share": 0.55, "mode": "ratio"},
+            {"label": "carry share", "metrics": ("carry_share",), "share": 0.45, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPC", "metrics": ("rush_ypc",), "share": 1.00, "mode": "ratio"},
+        ],
+    },
+    ("Rushing Yards", "RB"): {
+        "opportunity": [
+            {"label": "carry volume", "metrics": ("carries_pg",), "share": 0.35, "mode": "ratio"},
+            {"label": "recent carry volume", "metrics": ("current_carries_pg", "carries_pg"), "share": 0.25, "mode": "ratio"},
+            {"label": "carry share", "metrics": ("carry_share",), "share": 0.40, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPC", "metrics": ("rush_ypc",), "share": 0.55, "mode": "ratio"},
+            {"label": "RYOE/att", "metrics": ("ngs_rushing_rush_yards_over_expected_per_att",), "share": 0.30, "mode": "percentile"},
+            {"label": "stacked-box rate", "metrics": ("ngs_rushing_percent_attempts_gte_eight_defenders",), "share": 0.15, "mode": "ratio"},
+        ],
+    },
+    ("Receiving Yards", "RB"): {
+        "opportunity": [
+            {"label": "target volume", "metrics": ("targets_pg",), "share": 0.25, "mode": "ratio"},
+            {"label": "recent target volume", "metrics": ("current_targets_pg", "targets_pg"), "share": 0.15, "mode": "ratio"},
+            {"label": "target share", "metrics": ("target_share",), "share": 0.25, "mode": "ratio"},
+            {"label": "route participation", "metrics": ("route_participation",), "share": 0.20, "mode": "ratio"},
+            {"label": "TPRR", "metrics": ("targets_per_route",), "share": 0.15, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPT", "metrics": ("yards_per_target",), "share": 1.00, "mode": "ratio"},
+        ],
+    },
+    ("Receiving Yards", "WR"): {
+        "opportunity": [
+            {"label": "target volume", "metrics": ("targets_pg",), "share": 0.20, "mode": "ratio"},
+            {"label": "recent target volume", "metrics": ("current_targets_pg", "targets_pg"), "share": 0.15, "mode": "ratio"},
+            {"label": "target share", "metrics": ("target_share",), "share": 0.25, "mode": "ratio"},
+            {"label": "route participation", "metrics": ("route_participation",), "share": 0.20, "mode": "ratio"},
+            {"label": "TPRR", "metrics": ("targets_per_route",), "share": 0.20, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPT", "metrics": ("yards_per_target",), "share": 0.35, "mode": "ratio"},
+            {"label": "depth of target", "metrics": ("ngs_receiving_avg_intended_air_yards", "adot"), "share": 0.25, "mode": "ratio"},
+            {"label": "YAC over expected", "metrics": ("ngs_receiving_avg_yac_above_expectation",), "share": 0.15, "mode": "percentile"},
+            {"label": "man YPT", "metrics": ("man_ypt",), "share": 0.125, "mode": "ratio"},
+            {"label": "zone YPT", "metrics": ("zone_ypt",), "share": 0.125, "mode": "ratio"},
+        ],
+    },
+    ("Receiving Yards", "TE"): {
+        "opportunity": [
+            {"label": "target volume", "metrics": ("targets_pg",), "share": 0.20, "mode": "ratio"},
+            {"label": "recent target volume", "metrics": ("current_targets_pg", "targets_pg"), "share": 0.15, "mode": "ratio"},
+            {"label": "target share", "metrics": ("target_share",), "share": 0.25, "mode": "ratio"},
+            {"label": "route participation", "metrics": ("route_participation",), "share": 0.20, "mode": "ratio"},
+            {"label": "TPRR", "metrics": ("targets_per_route",), "share": 0.20, "mode": "ratio"},
+        ],
+        "efficiency": [
+            {"label": "YPT", "metrics": ("yards_per_target",), "share": 0.35, "mode": "ratio"},
+            {"label": "depth of target", "metrics": ("ngs_receiving_avg_intended_air_yards", "adot"), "share": 0.25, "mode": "ratio"},
+            {"label": "YAC over expected", "metrics": ("ngs_receiving_avg_yac_above_expectation",), "share": 0.15, "mode": "percentile"},
+            {"label": "man YPT", "metrics": ("man_ypt",), "share": 0.125, "mode": "ratio"},
+            {"label": "zone YPT", "metrics": ("zone_ypt",), "share": 0.125, "mode": "ratio"},
+        ],
+    },
 }
-YARDAGE_MARKETS = set(YARDAGE_COMPONENT_METRICS)
 
 
 def _num(value: Any, default: float = 0.0) -> float:
@@ -575,7 +652,7 @@ def _tier_from_ratio(ratio: float) -> str:
 
 
 def _scaled_matchup_factor(base_factor: float, tier_weight: float) -> float:
-    """Scale only the matchup deviation, matching the research component test."""
+    """Scale only the matchup deviation by one variable's tier weight."""
     base_factor = max(0.01, float(base_factor))
     scaled = 1.0 + (base_factor - 1.0) * float(tier_weight)
     return float(np.clip(scaled, 0.65, 1.35))
@@ -618,54 +695,133 @@ def _benchmark_slots(nfl_builder: Any, profiles: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def _yardage_component_tiers(
+def _percentile_tier(percentile: float) -> str:
+    if percentile >= 0.80:
+        return "Tier 1"
+    if percentile >= 0.60:
+        return "Tier 2"
+    if percentile >= 0.40:
+        return "Tier 3"
+    if percentile >= 0.20:
+        return "Tier 4"
+    return "Tier 5"
+
+
+def _yardage_variable_tiers(
     nfl_builder: Any,
     profiles: pd.DataFrame,
     player_profile: dict[str, Any],
     slot: str,
     market: str,
-) -> dict[str, Any]:
-    """Return independent opportunity/efficiency tiers for one yardage market."""
-    metrics = YARDAGE_COMPONENT_METRICS.get(market)
-    if metrics is None:
-        return {
-            "opportunity_tier": "Tier 3", "efficiency_tier": "Tier 3",
-            "opportunity_weight": 1.0, "efficiency_weight": 1.0,
-        }
-    opportunity_metric, efficiency_metric = metrics
-    benchmarks = _benchmark_slots(nfl_builder, profiles)
+) -> dict[str, list[dict[str, Any]]]:
+    """Grade every player-owned yardage input against its exact-slot peers."""
     exact_slot = _slot(slot)
-    if benchmarks.empty:
-        exact = pd.DataFrame()
-    else:
-        exact = benchmarks[benchmarks["_bench_slot"].eq(exact_slot)].copy()
+    position = nfl_builder._position_group(player_profile.get("position", ""))
+    if not position:
+        position = "QB" if exact_slot == "QB" else (
+            "RB" if exact_slot.startswith("RB") else (
+                "WR" if exact_slot.startswith("WR") else "TE"
+            )
+        )
+    spec = YARDAGE_VARIABLE_SPECS.get((market, position), {})
+    benchmarks = _benchmark_slots(nfl_builder, profiles)
+    exact = (
+        benchmarks[benchmarks["_bench_slot"].eq(exact_slot)].copy()
+        if not benchmarks.empty else pd.DataFrame()
+    )
 
-    def grade(metric: str) -> tuple[str, float, float, float]:
-        player_value = _num(player_profile.get(metric), np.nan)
-        if exact.empty or metric not in exact.columns:
-            league_avg = np.nan
+    def grade(item: dict[str, Any]) -> dict[str, Any]:
+        metric_used = ""
+        player_value = np.nan
+        peer_values = pd.Series(dtype=float)
+        for metric in item.get("metrics", ()):
+            candidate = _num(player_profile.get(metric), np.nan)
+            if not math.isfinite(candidate):
+                continue
+            if exact.empty or metric not in exact.columns:
+                continue
+            peers = pd.to_numeric(exact[metric], errors="coerce")
+            peers = peers[np.isfinite(peers)]
+            mode = str(item.get("mode", "ratio"))
+            if mode == "ratio":
+                peers = peers[peers.gt(0.0)]
+                if candidate <= 0:
+                    continue
+            if len(peers) < 4:
+                continue
+            metric_used = metric
+            player_value = float(candidate)
+            peer_values = peers.astype(float)
+            break
+
+        if not metric_used:
+            tier = "Tier 3"
+            return {
+                "label": str(item.get("label", "variable")),
+                "metric": str((item.get("metrics") or ("",))[0]),
+                "share": float(item.get("share", 0.0)),
+                "tier": tier,
+                "weight": YARDAGE_TIER_WEIGHTS[tier],
+                "relative": 1.0,
+                "league_avg": np.nan,
+                "sample": 0,
+                "mode": str(item.get("mode", "ratio")),
+            }
+
+        league_avg = float(peer_values.mean())
+        mode = str(item.get("mode", "ratio"))
+        if mode == "percentile":
+            lower = float((peer_values < player_value).mean())
+            equal = float((peer_values == player_value).mean())
+            percentile = float(np.clip(lower + 0.5 * equal, 0.0, 1.0))
+            tier = _percentile_tier(percentile)
+            relative = percentile
         else:
-            values = pd.to_numeric(exact[metric], errors="coerce")
-            values = values[values.gt(0.0) & np.isfinite(values)]
-            league_avg = float(values.mean()) if not values.empty else np.nan
-        ratio = player_value / league_avg if math.isfinite(player_value) and math.isfinite(league_avg) and league_avg > 0 else 1.0
-        tier = _tier_from_ratio(ratio)
-        return tier, YARDAGE_TIER_WEIGHTS[tier], float(ratio), float(league_avg) if math.isfinite(league_avg) else np.nan
+            ratio = player_value / league_avg if league_avg > 0 else 1.0
+            relative = float(ratio)
+            tier = _tier_from_ratio(relative)
 
-    opp_tier, opp_weight, opp_ratio, opp_avg = grade(opportunity_metric)
-    eff_tier, eff_weight, eff_ratio, eff_avg = grade(efficiency_metric)
+        return {
+            "label": str(item.get("label", metric_used)),
+            "metric": metric_used,
+            "share": float(item.get("share", 0.0)),
+            "tier": tier,
+            "weight": YARDAGE_TIER_WEIGHTS[tier],
+            "relative": float(relative),
+            "league_avg": league_avg,
+            "sample": int(len(peer_values)),
+            "mode": mode,
+        }
+
     return {
-        "opportunity_metric": opportunity_metric,
-        "efficiency_metric": efficiency_metric,
-        "opportunity_tier": opp_tier,
-        "efficiency_tier": eff_tier,
-        "opportunity_weight": opp_weight,
-        "efficiency_weight": eff_weight,
-        "opportunity_ratio": opp_ratio,
-        "efficiency_ratio": eff_ratio,
-        "opportunity_league_avg": opp_avg,
-        "efficiency_league_avg": eff_avg,
+        side: [grade(item) for item in spec.get(side, [])]
+        for side in ("opportunity", "efficiency")
     }
+
+
+def _variable_scaled_matchup_factor(
+    base_factor: float,
+    variables: list[dict[str, Any]] | None,
+) -> float:
+    """Let each variable independently own and tier-scale its matchup slice.
+
+    Shares are normalized across the variables in that side. If every variable
+    is Tier 3, this returns the pre-tier matchup factor exactly.
+    """
+    base_factor = max(0.01, float(base_factor))
+    variables = list(variables or [])
+    if not variables:
+        return base_factor
+    total_share = sum(max(0.0, _num(item.get("share"), 0.0)) for item in variables)
+    if total_share <= 0:
+        return base_factor
+    deviation = base_factor - 1.0
+    scaled_deviation = 0.0
+    for item in variables:
+        share = max(0.0, _num(item.get("share"), 0.0)) / total_share
+        weight = _num(item.get("weight"), 1.0)
+        scaled_deviation += deviation * share * weight
+    return float(np.clip(1.0 + scaled_deviation, 0.65, 1.35))
 
 
 def _broad_matchup_factor(row: dict[str, Any] | None, market: str) -> tuple[float, float, float]:
@@ -793,10 +949,10 @@ def _apply_slot_overlay(
     target_factor = matchup.get("Targets", {}).get("factor", 1.0)
     reception_factor = matchup.get("Receptions", {}).get("factor", target_factor)
 
-    # Independent exact-slot tier grades for every yardage formula component.
-    # Standalone count props keep their existing matchup behavior.
-    yardage_tiers = {
-        market: _yardage_component_tiers(
+    # Every player-owned input receives its own exact-slot tier. Standalone
+    # count props keep their existing matchup behavior.
+    yardage_variable_tiers = {
+        market: _yardage_variable_tiers(
             nfl_builder, profiles_frame if profiles_frame is not None else pd.DataFrame(),
             player_profile or {}, slot, market,
         )
@@ -813,10 +969,10 @@ def _apply_slot_overlay(
         })
         market_factor = float(details["factor"])
 
-        # Count props retain the existing matchup behavior. Yardage props split
-        # matchup into opportunity and efficiency, then scale each side by the
-        # player's independent exact-slot tier (0/50/100/150/200%).
-        tier_info = yardage_tiers.get(market)
+        # Count props retain the existing matchup behavior. For yardage props,
+        # every player variable independently scales its assigned slice of the
+        # opportunity or efficiency matchup adjustment.
+        variable_tiers = yardage_variable_tiers.get(market, {})
         final_market_factor = market_factor
 
         if market == "Passing Completions":
@@ -833,8 +989,8 @@ def _apply_slot_overlay(
         elif market == "Passing Yards":
             base_opp_factor = max(0.01, pass_attempt_factor)
             base_eff_factor = max(0.01, market_factor / base_opp_factor)
-            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
-            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            opp_factor = _variable_scaled_matchup_factor(base_opp_factor, variable_tiers.get("opportunity"))
+            eff_factor = _variable_scaled_matchup_factor(base_eff_factor, variable_tiers.get("efficiency"))
             final_market_factor = opp_factor * eff_factor
             row["Projected Player Attempts"] = round(
                 max(0.0, _num(row.get("Projected Player Attempts")) * opp_factor), 2
@@ -850,8 +1006,8 @@ def _apply_slot_overlay(
         elif market == "Rushing Yards":
             base_opp_factor = max(0.01, rush_attempt_factor)
             base_eff_factor = max(0.01, market_factor / base_opp_factor)
-            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
-            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            opp_factor = _variable_scaled_matchup_factor(base_opp_factor, variable_tiers.get("opportunity"))
+            eff_factor = _variable_scaled_matchup_factor(base_eff_factor, variable_tiers.get("efficiency"))
             final_market_factor = opp_factor * eff_factor
             row["Projected Player Attempts"] = round(
                 max(0.0, _num(row.get("Projected Player Attempts")) * opp_factor), 2
@@ -881,8 +1037,8 @@ def _apply_slot_overlay(
         elif market == "Receiving Yards":
             base_opp_factor = max(0.01, target_factor)
             base_eff_factor = max(0.01, market_factor / base_opp_factor)
-            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
-            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            opp_factor = _variable_scaled_matchup_factor(base_opp_factor, variable_tiers.get("opportunity"))
+            eff_factor = _variable_scaled_matchup_factor(base_eff_factor, variable_tiers.get("efficiency"))
             final_market_factor = opp_factor * eff_factor
             row["Projected Targets"] = round(
                 max(0.0, _num(row.get("Projected Targets")) * opp_factor), 2
@@ -919,15 +1075,20 @@ def _apply_slot_overlay(
         )
         if profile is not None:
             _append_reason(row, nfl_builder._normalize_team(opponent), slot, market, profile)
-        if market in YARDAGE_MARKETS and tier_info is not None:
+        if market in YARDAGE_MARKETS and variable_tiers:
             current = str(row.get("Confluence", "") or "").strip()
-            tier_note = (
-                f"component tiers: opportunity {tier_info['opportunity_tier']} "
-                f"({tier_info['opportunity_weight']:.0%} matchup, {tier_info['opportunity_ratio']:.2f}x slot avg); "
-                f"efficiency {tier_info['efficiency_tier']} "
-                f"({tier_info['efficiency_weight']:.0%} matchup, {tier_info['efficiency_ratio']:.2f}x slot avg)"
-            )
-            row["Confluence"] = f"{current} • {tier_note}".strip(" •")
+            parts = []
+            for side in ("opportunity", "efficiency"):
+                items = variable_tiers.get(side, [])
+                if not items:
+                    continue
+                detail = ", ".join(
+                    f"{item['label']} {item['tier']}@{item['weight']:.0%}"
+                    for item in items
+                )
+                parts.append(f"{side}: {detail}")
+            if parts:
+                row["Confluence"] = f"{current} • variable tiers: {' | '.join(parts)}".strip(" •")
 
     return rows
 
