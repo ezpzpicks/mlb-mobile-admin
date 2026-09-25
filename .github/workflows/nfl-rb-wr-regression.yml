@@ -7,6 +7,7 @@ on:
       - nfl-rb-wr-regression-v1
     paths:
       - research/nfl_rb_wr_prop_regression.py
+      - research/nfl_player_strength_interaction.py
       - .github/workflows/nfl-rb-wr-regression.yml
   pull_request:
     branches:
@@ -35,10 +36,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install scipy statsmodels pyarrow
-      - name: Compile research script
-        run: python -m py_compile research/nfl_rb_wr_prop_regression.py
+      - name: Compile research scripts
+        run: python -m py_compile research/nfl_rb_wr_prop_regression.py research/nfl_player_strength_interaction.py
       - name: Run historical regression
         run: python -m research.nfl_rb_wr_prop_regression --output-dir artifacts/nfl_rb_wr_prop_regression
+      - name: Run player-strength interaction test
+        run: python -m research.nfl_player_strength_interaction
       - name: Save auditable results
         if: github.event_name != 'pull_request'
         run: |
@@ -55,6 +58,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nfl-rb-wr-prop-regression
-          path: artifacts/nfl_rb_wr_prop_regression/
+          path: |
+            artifacts/nfl_rb_wr_prop_regression/
+            artifacts/nfl_player_strength_interaction/
           if-no-files-found: error
           retention-days: 14
