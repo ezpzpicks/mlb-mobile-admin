@@ -289,6 +289,52 @@ def _run_market(
     m_fixed = _metrics(actual, fixed_pred)
     m_aware = _metrics(actual, aware_pred)
 
+    # Explicit tier-weight curves. These scale ONLY the learned slot-matchup
+    # overlay; all player opportunity/efficiency and other model components stay
+    # unchanged. The aggressive curve is the requested 20/60/100/140/180 test.
+    tier_weight_curves = {
+        "mild_70_85_100_115_130": {
+            "Tier 1": 0.70, "Tier 2": 0.85, "Tier 3": 1.00,
+            "Tier 4": 1.15, "Tier 5": 1.30,
+        },
+        "aggressive_20_60_100_140_180": {
+            "Tier 1": 0.20, "Tier 2": 0.60, "Tier 3": 1.00,
+            "Tier 4": 1.40, "Tier 5": 1.80,
+        },
+    }
+    curve_results: dict[str, Any] = {}
+    for curve_name, weights in tier_weight_curves.items():
+        scale = hold["tier"].map(weights).astype(float).to_numpy()
+        curve_pred = base_pred + (
+            hold["fixed_term"].to_numpy(float) * float(fixed_beta[0]) * scale
+        )
+        curve_pred = np.clip(curve_pred, base_pred * 0.65, base_pred * 1.35)
+        cm = _metrics(actual, curve_pred)
+        per_tier: dict[str, Any] = {}
+        for tier in ["Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"]:
+            mask = hold["tier"].eq(tier).to_numpy()
+            if not mask.any():
+                continue
+            bm = _metrics(actual[mask], base_pred[mask])
+            fm = _metrics(actual[mask], fixed_pred[mask])
+            tm = _metrics(actual[mask], curve_pred[mask])
+            per_tier[tier] = {
+                "n": int(mask.sum()),
+                "weight": float(weights[tier]),
+                "base_mae": bm["mae"],
+                "fixed_100pct_mae": fm["mae"],
+                "curve_mae": tm["mae"],
+                "curve_vs_base_improvement_pct": _improvement(bm["mae"], tm["mae"]),
+                "curve_vs_fixed_improvement_pct": _improvement(fm["mae"], tm["mae"]),
+            }
+        curve_results[curve_name] = {
+            "weights": weights,
+            "metrics": cm,
+            "vs_base_mae_improvement_pct": _improvement(m_base["mae"], cm["mae"]),
+            "vs_fixed_100pct_mae_improvement_pct": _improvement(m_fixed["mae"], cm["mae"]),
+            "tiers": per_tier,
+        }
+
     tier_metrics: dict[str, Any] = {}
     for tier in ["Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"]:
         t = hold[hold["tier"].eq(tier)].copy()
@@ -321,6 +367,7 @@ def _run_market(
         "fixed_vs_base_mae_improvement_pct": _improvement(m_base["mae"], m_fixed["mae"]),
         "strength_aware_vs_base_mae_improvement_pct": _improvement(m_base["mae"], m_aware["mae"]),
         "strength_aware_vs_fixed_mae_improvement_pct": _improvement(m_fixed["mae"], m_aware["mae"]),
+        "explicit_tier_weight_curves": curve_results,
         "fixed_beta_train_2021_24": float(fixed_beta[0]),
         "fixed_beta_pvalue_train_2021_24": float(fixed_p[0]),
         "aware_beta_train_2021_24": {
@@ -412,7 +459,7 @@ def main() -> None:
 
     common = ["team_total", "team_spread", "home"]
     results: dict[str, Any] = {
-        "research_version": "nfl-player-strength-yardage-ratio-2026-09-24",
+        "research_version": "nfl-player-strength-yardage-ratio-tier-weights-2026-09-24",
         "method": (
             "Slots reconstructed from lagged pregame workload; strength is player trailing-8 average yards "
             "divided by the contemporaneous league average of lagged average yards for that exact slot; "
