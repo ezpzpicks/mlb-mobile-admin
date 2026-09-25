@@ -1,0 +1,308 @@
+{
+  "active_rules": {
+    "RB1 receiving": "opportunity tier only",
+    "RB1 rushing": "opportunity tier only",
+    "WR1 receiving": "efficiency tier only"
+  },
+  "combined": {
+    "base_weighted_mae": 27.367957462507775,
+    "mae_improvement_pct": 0.055785749493285575,
+    "n": 4030,
+    "selective_weighted_mae": 27.35269004231631
+  },
+  "inactive_by_design": [
+    "QB1 passing tiers",
+    "RB2 rushing tiers",
+    "RB2 receiving tiers",
+    "WR2 receiving tiers",
+    "WR3 receiving tiers",
+    "TE1 receiving tiers",
+    "all non-selected efficiency/opportunity overlays"
+  ],
+  "qb_passing_yards": {
+    "base_metrics": {
+      "bias": 8.447502788982188,
+      "mae": 58.4456003606884,
+      "n": 529,
+      "rmse": 75.32517997529138
+    },
+    "efficiency_beta": -0.040133455633609046,
+    "efficiency_pvalue": 0.5587524753409201,
+    "holdout_rows": 529,
+    "mae_improvement_pct": 0.0,
+    "market": "QB passing yards",
+    "opportunity_beta": -0.0479996245671129,
+    "opportunity_pvalue": 0.24471391570556633,
+    "selective_metrics": {
+      "bias": 8.447502788982188,
+      "mae": 58.4456003606884,
+      "n": 529,
+      "rmse": 75.32517997529138
+    },
+    "slots": {
+      "QB1": {
+        "base_metrics": {
+          "bias": 8.447502788982188,
+          "mae": 58.4456003606884,
+          "n": 529,
+          "rmse": 75.32517997529138
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 529,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": 8.447502788982188,
+          "mae": 58.4456003606884,
+          "n": 529,
+          "rmse": 75.32517997529138
+        }
+      }
+    }
+  },
+  "rb_receiving_yards": {
+    "base_metrics": {
+      "bias": -2.8268556729293413,
+      "mae": 14.042240680344024,
+      "n": 631,
+      "rmse": 19.71098837100227
+    },
+    "efficiency_beta": 0.08124288347444214,
+    "efficiency_pvalue": 0.2817373437095193,
+    "holdout_rows": 631,
+    "mae_improvement_pct": 0.10334361860348922,
+    "market": "RB receiving yards",
+    "opportunity_beta": 0.16665787737010185,
+    "opportunity_pvalue": 0.005478078382061957,
+    "selective_metrics": {
+      "bias": -2.7289964671043383,
+      "mae": 14.027728920691946,
+      "n": 631,
+      "rmse": 19.673710331029614
+    },
+    "slots": {
+      "RB1": {
+        "base_metrics": {
+          "bias": -3.299534315326652,
+          "mae": 14.924283974965903,
+          "n": 450,
+          "rmse": 20.89910444982516
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.13634631920583412,
+        "n": 450,
+        "opportunity_tier_active": true,
+        "selective_metrics": {
+          "bias": -3.162313962269814,
+          "mae": 14.90393526309821,
+          "n": 450,
+          "rmse": 20.84979247021963
+        }
+      },
+      "RB2": {
+        "base_metrics": {
+          "bias": -1.6516877774664152,
+          "mae": 11.849315362223326,
+          "n": 181,
+          "rmse": 16.38797521267085
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 181,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": -1.6516877774664152,
+          "mae": 11.849315362223326,
+          "n": 181,
+          "rmse": 16.38797521267085
+        }
+      }
+    }
+  },
+  "rb_rushing_yards": {
+    "base_metrics": {
+      "bias": -2.910988692744901,
+      "mae": 24.695058867509523,
+      "n": 952,
+      "rmse": 33.662518538863345
+    },
+    "efficiency_beta": 0.00775702554383302,
+    "efficiency_pvalue": 0.8965413450778206,
+    "holdout_rows": 952,
+    "mae_improvement_pct": 0.05202654933276865,
+    "market": "RB rushing yards",
+    "opportunity_beta": 0.09405219395462497,
+    "opportunity_pvalue": 0.029268634314300435,
+    "selective_metrics": {
+      "bias": -2.7529393514241782,
+      "mae": 24.682210880525062,
+      "n": 952,
+      "rmse": 33.631593653533365
+    },
+    "slots": {
+      "RB1": {
+        "base_metrics": {
+          "bias": -6.1328838654906885,
+          "mae": 28.317763115625052,
+          "n": 541,
+          "rmse": 38.48729411753918
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.07983913569019453,
+        "n": 541,
+        "opportunity_tier_active": true,
+        "selective_metrics": {
+          "bias": -5.854763767639804,
+          "mae": 28.29515445830674,
+          "n": 541,
+          "rmse": 38.43968982190431
+        }
+      },
+      "RB2": {
+        "base_metrics": {
+          "bias": 1.3299974105530812,
+          "mae": 19.926487095659148,
+          "n": 411,
+          "rmse": 25.979833961961614
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 411,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": 1.3299974105530812,
+          "mae": 19.926487095659148,
+          "n": 411,
+          "rmse": 25.979833961961614
+        }
+      }
+    }
+  },
+  "research_version": "nfl-selective-proven-component-tiers-2026-09-24",
+  "selection_rule": "activate tiering only when training component p<.05 and exact-slot 2025 tiered holdout MAE improved in prior decomposition",
+  "te_receiving_yards": {
+    "base_metrics": {
+      "bias": -0.5656137707801495,
+      "mae": 20.082280582293336,
+      "n": 528,
+      "rmse": 26.46208048740613
+    },
+    "efficiency_beta": -0.07034965281144548,
+    "efficiency_pvalue": 0.365267429006391,
+    "holdout_rows": 528,
+    "mae_improvement_pct": 0.0,
+    "market": "TE receiving yards",
+    "opportunity_beta": 0.09805397330306376,
+    "opportunity_pvalue": 0.16695568355562995,
+    "selective_metrics": {
+      "bias": -0.5656137707801495,
+      "mae": 20.082280582293336,
+      "n": 528,
+      "rmse": 26.46208048740613
+    },
+    "slots": {
+      "TE1": {
+        "base_metrics": {
+          "bias": -0.5656137707801495,
+          "mae": 20.082280582293336,
+          "n": 528,
+          "rmse": 26.46208048740613
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 528,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": -0.5656137707801495,
+          "mae": 20.082280582293336,
+          "n": 528,
+          "rmse": 26.46208048740613
+        }
+      }
+    }
+  },
+  "tier_weights": {
+    "Tier 1": 0.0,
+    "Tier 2": 0.5,
+    "Tier 3": 1.0,
+    "Tier 4": 1.5,
+    "Tier 5": 2.0
+  },
+  "wr_receiving_yards": {
+    "base_metrics": {
+      "bias": 2.3287160988194695,
+      "mae": 26.1880229672555,
+      "n": 1390,
+      "rmse": 33.27273134757605
+    },
+    "efficiency_beta": -0.10678669694175137,
+    "efficiency_pvalue": 0.038278872470981454,
+    "holdout_rows": 1390,
+    "mae_improvement_pct": 0.11026925457383242,
+    "market": "WR receiving yards",
+    "opportunity_beta": 0.0025290875020917815,
+    "opportunity_pvalue": 0.956146284929349,
+    "selective_metrics": {
+      "bias": 2.284357733172614,
+      "mae": 26.159145629541882,
+      "n": 1390,
+      "rmse": 33.26144105563112
+    },
+    "slots": {
+      "WR1": {
+        "base_metrics": {
+          "bias": 0.7469945042897495,
+          "mae": 29.418375625153804,
+          "n": 543,
+          "rmse": 37.38772027614923
+        },
+        "efficiency_tier_active": true,
+        "mae_improvement_pct": 0.25127740226281314,
+        "n": 543,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": 0.6334436235362891,
+          "mae": 29.344453895095,
+          "n": 543,
+          "rmse": 37.36199527768108
+        }
+      },
+      "WR2": {
+        "base_metrics": {
+          "bias": 3.152445680497003,
+          "mae": 25.731000843699523,
+          "n": 507,
+          "rmse": 32.30547220096806
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 507,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": 3.152445680497003,
+          "mae": 25.731000843699523,
+          "n": 507,
+          "rmse": 32.30547220096806
+        }
+      },
+      "WR3": {
+        "base_metrics": {
+          "bias": 3.626492357405142,
+          "mae": 21.71046038903227,
+          "n": 340,
+          "rmse": 27.15307857311236
+        },
+        "efficiency_tier_active": false,
+        "mae_improvement_pct": 0.0,
+        "n": 340,
+        "opportunity_tier_active": false,
+        "selective_metrics": {
+          "bias": 3.626492357405142,
+          "mae": 21.71046038903227,
+          "n": 340,
+          "rmse": 27.15307857311236
+        }
+      }
+    }
+  }
+}
