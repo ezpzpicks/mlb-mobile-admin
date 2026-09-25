@@ -1,0 +1,2251 @@
+{
+  "method": "Opportunity and efficiency are graded independently against the exact-slot league average using lagged pregame inputs. Exact-slot opponent effects are also decomposed into opportunity and efficiency histories. 2021-24 learns component matchup coefficients; 2025 is untouched holdout.",
+  "qb_passing_yards": {
+    "efficiency_matchup_beta_train_2021_24": -0.04013345563360865,
+    "efficiency_matchup_pvalue_train_2021_24": 0.5587524753409239,
+    "holdout_rows": 529,
+    "improvement_vs_base_pct": {
+      "both_components_100pct": 0.15955957561545903,
+      "both_components_independent_tiers": 0.004551477265281583,
+      "efficiency_tier_only": 0.043097685652269985,
+      "opportunity_tier_only": -0.04335383337650239
+    },
+    "market": "QB passing yards",
+    "opportunity_matchup_beta_train_2021_24": -0.047999624567105936,
+    "opportunity_matchup_pvalue_train_2021_24": 0.24471391570563594,
+    "position": "QB",
+    "slots": {
+      "QB1": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 59.48709183127565,
+            "efficiency_tier_mae": 59.48709183127565,
+            "improvement_pct": 0.0,
+            "n": 16,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 53.87405370601366,
+            "efficiency_tier_mae": 53.85161933562297,
+            "improvement_pct": 0.041642254197379706,
+            "n": 106,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 58.179939216279976,
+            "efficiency_tier_mae": 58.16786117464212,
+            "improvement_pct": 0.020759804497143302,
+            "n": 309,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 63.84704262243039,
+            "efficiency_tier_mae": 63.78043401668045,
+            "improvement_pct": 0.10432527962781592,
+            "n": 85,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 65.43689137916826,
+            "efficiency_tier_mae": 65.31743497326327,
+            "improvement_pct": 0.18255207939632143,
+            "n": 13,
+            "weight": 2.0
+          }
+        },
+        "n": 529,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 78.46557040042727,
+            "improvement_pct": 0.0,
+            "n": 40,
+            "opportunity_tier_mae": 78.46557040042727,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 51.4498224965996,
+            "improvement_pct": 0.16080611875006995,
+            "n": 147,
+            "opportunity_tier_mae": 51.36708803393902,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 56.96795791321596,
+            "improvement_pct": -0.11683811546852156,
+            "n": 223,
+            "opportunity_tier_mae": 57.034518201662664,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 62.14418294137178,
+            "improvement_pct": -0.04653354712326185,
+            "n": 68,
+            "opportunity_tier_mae": 62.17310083402517,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 64.43758457110725,
+            "improvement_pct": -0.26645705270738484,
+            "n": 51,
+            "opportunity_tier_mae": 64.60928305979125,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 66.15873093494727,
+            "improvement_pct": 0.032475386861038506,
+            "independent_tier_mae": 66.1372456311338,
+            "n": 22
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 97.93649212861901,
+            "improvement_pct": -0.44591859601047573,
+            "independent_tier_mae": 98.37320915930086,
+            "n": 12
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 50.423498690731186,
+            "improvement_pct": 0.29919121516773567,
+            "independent_tier_mae": 50.2726360122683,
+            "n": 24
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 52.635567848790586,
+            "improvement_pct": -0.009399490016678303,
+            "independent_tier_mae": 52.640515323735755,
+            "n": 92
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 46.87150020807046,
+            "improvement_pct": 0.7115220016609721,
+            "independent_tier_mae": 46.53799917158147,
+            "n": 29
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 56.41650977963671,
+            "improvement_pct": -0.30684359028218267,
+            "independent_tier_mae": 56.58962022375645,
+            "n": 10
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 56.706595858269814,
+            "improvement_pct": -0.23160815323484546,
+            "independent_tier_mae": 56.8379329576995,
+            "n": 55
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 54.70664415510767,
+            "improvement_pct": 0.055914400741253034,
+            "independent_tier_mae": 54.67605526286269,
+            "n": 128
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 68.32685307133946,
+            "improvement_pct": 0.3306488750532663,
+            "independent_tier_mae": 68.10093110029977,
+            "n": 28
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 45.72650723528345,
+            "improvement_pct": -0.4969736804477525,
+            "independent_tier_mae": 45.953755941230845,
+            "n": 16
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 72.62315725588698,
+            "improvement_pct": 0.27662035358940423,
+            "independent_tier_mae": 72.42226682149796,
+            "n": 40
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 65.6392649290252,
+            "improvement_pct": -0.2368151018272007,
+            "independent_tier_mae": 65.7947086211055,
+            "n": 27
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 68.75860372120256,
+            "improvement_pct": -1.9152333792821152,
+            "independent_tier_mae": 70.07549145079935,
+            "n": 11
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": 8.447502788981783,
+            "mae": 58.44560036068836,
+            "n": 529,
+            "rmse": 75.32517997529132
+          },
+          "both_components_100pct": {
+            "bias": 7.464701639357403,
+            "mae": 58.35234480878694,
+            "n": 529,
+            "rmse": 75.24341863164274
+          },
+          "both_components_independent_tiers": {
+            "bias": 7.56973361707261,
+            "mae": 58.442940222475386,
+            "n": 529,
+            "rmse": 75.30154406454557
+          },
+          "efficiency_tier_only": {
+            "bias": 8.330277524980147,
+            "mae": 58.42041165956733,
+            "n": 529,
+            "rmse": 75.28620052026604
+          },
+          "opportunity_tier_only": {
+            "bias": 7.6866150088330265,
+            "mae": 58.47093876888463,
+            "n": 529,
+            "rmse": 75.33932966119151
+          }
+        }
+      }
+    },
+    "variant_metrics": {
+      "base": {
+        "bias": 8.447502788981783,
+        "mae": 58.44560036068836,
+        "n": 529,
+        "rmse": 75.32517997529132
+      },
+      "both_components_100pct": {
+        "bias": 7.464701639357403,
+        "mae": 58.35234480878694,
+        "n": 529,
+        "rmse": 75.24341863164274
+      },
+      "both_components_independent_tiers": {
+        "bias": 7.56973361707261,
+        "mae": 58.442940222475386,
+        "n": 529,
+        "rmse": 75.30154406454557
+      },
+      "efficiency_tier_only": {
+        "bias": 8.330277524980147,
+        "mae": 58.42041165956733,
+        "n": 529,
+        "rmse": 75.28620052026604
+      },
+      "opportunity_tier_only": {
+        "bias": 7.6866150088330265,
+        "mae": 58.47093876888463,
+        "n": 529,
+        "rmse": 75.33932966119151
+      }
+    }
+  },
+  "rb_receiving_yards": {
+    "efficiency_matchup_beta_train_2021_24": 0.08124288347444214,
+    "efficiency_matchup_pvalue_train_2021_24": 0.2817373437095193,
+    "holdout_rows": 631,
+    "improvement_vs_base_pct": {
+      "both_components_100pct": -0.14074573766015594,
+      "both_components_independent_tiers": 0.20402160619098905,
+      "efficiency_tier_only": 0.08009122708568217,
+      "opportunity_tier_only": 0.11097099095504052
+    },
+    "market": "RB receiving yards",
+    "opportunity_matchup_beta_train_2021_24": 0.16665787737010293,
+    "opportunity_matchup_pvalue_train_2021_24": 0.005478078382061684,
+    "position": "RB",
+    "slots": {
+      "RB1": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 15.661994981736925,
+            "efficiency_tier_mae": 15.661994981736925,
+            "improvement_pct": 0.0,
+            "n": 101,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 15.23277842896406,
+            "efficiency_tier_mae": 15.211810883318545,
+            "improvement_pct": 0.1376475456745754,
+            "n": 82,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 15.104467629159155,
+            "efficiency_tier_mae": 15.10133439951183,
+            "improvement_pct": 0.020743727778107936,
+            "n": 94,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 15.038162576832104,
+            "efficiency_tier_mae": 14.963111449408368,
+            "improvement_pct": 0.4990711268101333,
+            "n": 80,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 13.571026893727367,
+            "efficiency_tier_mae": 13.548464742303487,
+            "improvement_pct": 0.16625235216583864,
+            "n": 93,
+            "weight": 2.0
+          }
+        },
+        "n": 450,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 17.5542470197938,
+            "improvement_pct": 0.0,
+            "n": 121,
+            "opportunity_tier_mae": 17.5542470197938,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 16.726786696004734,
+            "improvement_pct": -0.46288902634629314,
+            "n": 65,
+            "opportunity_tier_mae": 16.80421315608089,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 14.104550966069725,
+            "improvement_pct": 0.38870680752096937,
+            "n": 99,
+            "opportunity_tier_mae": 14.049725616294348,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 13.481735718519749,
+            "improvement_pct": -0.22154945161275277,
+            "n": 56,
+            "opportunity_tier_mae": 13.51160443007201,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 12.415550625883398,
+            "improvement_pct": 0.7710497950617884,
+            "n": 109,
+            "opportunity_tier_mae": 12.319820548226732,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 19.05754493917546,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 19.05754493917546,
+            "n": 30
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 18.118459875424634,
+            "improvement_pct": 0.08613409187795897,
+            "independent_tier_mae": 18.102853704548664,
+            "n": 34
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.050510137861377,
+            "improvement_pct": 0.3185448127570823,
+            "independent_tier_mae": 18.989825726013457,
+            "n": 22
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 14.818107012224672,
+            "improvement_pct": 1.4879994906003098,
+            "independent_tier_mae": 14.59761365536616,
+            "n": 20
+          },
+          "Tier 1 opportunity / Tier 5 efficiency": {
+            "base_mae": 14.722436145193633,
+            "improvement_pct": -1.6027424854835288,
+            "independent_tier_mae": 14.958398884190835,
+            "n": 15
+          },
+          "Tier 2 opportunity / Tier 1 efficiency": {
+            "base_mae": 21.954618935351967,
+            "improvement_pct": -0.8377512199053314,
+            "independent_tier_mae": 22.138544023308445,
+            "n": 10
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 11.750152468006815,
+            "improvement_pct": 0.22713147377762774,
+            "independent_tier_mae": 11.723464173535113,
+            "n": 12
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 14.381155457534055,
+            "improvement_pct": -0.10353390015950531,
+            "independent_tier_mae": 14.396044828667241,
+            "n": 17
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 16.02381448653678,
+            "improvement_pct": -0.5619674719112304,
+            "independent_tier_mae": 16.113863111710515,
+            "n": 16
+          },
+          "Tier 2 opportunity / Tier 5 efficiency": {
+            "base_mae": 22.58324417080387,
+            "improvement_pct": 1.610507597771475,
+            "independent_tier_mae": 22.21953930760979,
+            "n": 10
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 17.44037694190836,
+            "improvement_pct": -0.460213216113719,
+            "independent_tier_mae": 17.520639861535074,
+            "n": 19
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 15.218504930012477,
+            "improvement_pct": 0.27394932225622254,
+            "independent_tier_mae": 15.176813938899178,
+            "n": 20
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 13.304924454702762,
+            "improvement_pct": -0.1330081605824175,
+            "independent_tier_mae": 13.322621089986843,
+            "n": 29
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 12.45380095345605,
+            "improvement_pct": 0.03455248204309169,
+            "independent_tier_mae": 12.449497856117924,
+            "n": 15
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 11.747716353510857,
+            "improvement_pct": 2.972976155112635,
+            "independent_tier_mae": 11.398459547550711,
+            "n": 16
+          },
+          "Tier 4 opportunity / Tier 1 efficiency": {
+            "base_mae": 15.989187395349685,
+            "improvement_pct": -1.2820799323700371,
+            "independent_tier_mae": 16.194181558294503,
+            "n": 14
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 12.321639590930609,
+            "improvement_pct": 1.8408492321454075,
+            "independent_tier_mae": 12.094816783133238,
+            "n": 8
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 11.968824263482459,
+            "improvement_pct": -3.74520300929751,
+            "independent_tier_mae": 12.417081029975934,
+            "n": 9
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 11.353912673488667,
+            "improvement_pct": 1.9798268527334053,
+            "independent_tier_mae": 11.129124861543037,
+            "n": 16
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 15.908159869733867,
+            "improvement_pct": 3.212076983087277,
+            "independent_tier_mae": 15.397177528125418,
+            "n": 9
+          },
+          "Tier 5 opportunity / Tier 1 efficiency": {
+            "base_mae": 8.406184649838982,
+            "improvement_pct": -1.0308131231166724,
+            "independent_tier_mae": 8.492836704362942,
+            "n": 28
+          },
+          "Tier 5 opportunity / Tier 2 efficiency": {
+            "base_mae": 11.139393808354896,
+            "improvement_pct": 1.931545870650307,
+            "independent_tier_mae": 10.924231307234141,
+            "n": 8
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 15.450991986600528,
+            "improvement_pct": 0.31709100675405905,
+            "independent_tier_mae": 15.401998280556727,
+            "n": 17
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 21.68001669537132,
+            "improvement_pct": 1.8145846453692362,
+            "independent_tier_mae": 21.286614441303627,
+            "n": 13
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 11.262781784812175,
+            "improvement_pct": 0.9199008662125148,
+            "independent_tier_mae": 11.159175357614062,
+            "n": 43
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": -3.299534315326659,
+            "mae": 14.924283974965903,
+            "n": 450,
+            "rmse": 20.89910444982516
+          },
+          "both_components_100pct": {
+            "bias": -3.0631241555594593,
+            "mae": 14.90745353075597,
+            "n": 450,
+            "rmse": 20.821567391274467
+          },
+          "both_components_independent_tiers": {
+            "bias": -3.1001697864514153,
+            "mae": 14.878924929001569,
+            "n": 450,
+            "rmse": 20.80222057617536
+          },
+          "efficiency_tier_only": {
+            "bias": -3.239223388737734,
+            "mae": 14.901803458063457,
+            "n": 450,
+            "rmse": 20.852458176961658
+          },
+          "opportunity_tier_only": {
+            "bias": -3.1623139622698213,
+            "mae": 14.90393526309821,
+            "n": 450,
+            "rmse": 20.849792470219633
+          }
+        }
+      },
+      "RB2": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 12.564612956780715,
+            "efficiency_tier_mae": 12.564612956780715,
+            "improvement_pct": 0.0,
+            "n": 47,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 11.395565549832126,
+            "efficiency_tier_mae": 11.402943152615522,
+            "improvement_pct": -0.06474099728648554,
+            "n": 35,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 9.144430572035805,
+            "efficiency_tier_mae": 9.225368795251482,
+            "improvement_pct": -0.8851094945506014,
+            "n": 41,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 13.053577163649118,
+            "efficiency_tier_mae": 13.033611763704906,
+            "improvement_pct": 0.1529496450965987,
+            "n": 37,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 14.163831849577072,
+            "efficiency_tier_mae": 14.172482456388572,
+            "improvement_pct": -0.06107532836714867,
+            "n": 21,
+            "weight": 2.0
+          }
+        },
+        "n": 181,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 11.953486419789881,
+            "improvement_pct": 0.0,
+            "n": 143,
+            "opportunity_tier_mae": 11.953486419789881,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 11.691574570405713,
+            "improvement_pct": -0.13036973728290407,
+            "n": 21,
+            "opportunity_tier_mae": 11.706816845457386,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 11.624751541459727,
+            "improvement_pct": 0.39600672948650273,
+            "n": 16,
+            "opportunity_tier_mae": 11.57871674306946,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 3.858431890593387,
+            "improvement_pct": 6.722058924097469,
+            "n": 1,
+            "opportunity_tier_mae": 3.5990658253615315,
+            "weight": 1.5
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 13.222023774724457,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 13.222023774724457,
+            "n": 42
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 11.597606070823769,
+            "improvement_pct": -0.02589777589087259,
+            "independent_tier_mae": 11.600609592852697,
+            "n": 28
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 8.774248757977569,
+            "improvement_pct": -1.0052096854509955,
+            "independent_tier_mae": 8.862448356318323,
+            "n": 30
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 14.038066364154645,
+            "improvement_pct": 0.048286513860804105,
+            "independent_tier_mae": 14.031287871293928,
+            "n": 29
+          },
+          "Tier 1 opportunity / Tier 5 efficiency": {
+            "base_mae": 11.35422872918917,
+            "improvement_pct": 0.007571368720762871,
+            "independent_tier_mae": 11.353369058666685,
+            "n": 14
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 11.333718615609072,
+            "improvement_pct": -0.3036997534197068,
+            "independent_tier_mae": 11.36813909109796,
+            "n": 8
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": -1.651687777466422,
+            "mae": 11.849315362223326,
+            "n": 181,
+            "rmse": 16.38797521267085
+          },
+          "both_components_100pct": {
+            "bias": -1.5188946129634684,
+            "mae": 11.960059519926787,
+            "n": 181,
+            "rmse": 16.509484587335233
+          },
+          "both_components_independent_tiers": {
+            "bias": -1.6752583424817638,
+            "mae": 11.862209960791217,
+            "n": 181,
+            "rmse": 16.43442183169749
+          },
+          "efficiency_tier_only": {
+            "bias": -1.7057168227283304,
+            "mae": 11.865998379871764,
+            "n": 181,
+            "rmse": 16.417559960977563
+          },
+          "opportunity_tier_only": {
+            "bias": -1.6215065995652223,
+            "mae": 11.845581466845475,
+            "n": 181,
+            "rmse": 16.405399895029188
+          }
+        }
+      }
+    },
+    "variant_metrics": {
+      "base": {
+        "bias": -2.826855672929349,
+        "mae": 14.042240680344024,
+        "n": 631,
+        "rmse": 19.71098837100227
+      },
+      "both_components_100pct": {
+        "bias": -2.6201676623583907,
+        "mae": 14.062004535573589,
+        "n": 631,
+        "rmse": 19.68153215007484
+      },
+      "both_components_independent_tiers": {
+        "bias": -2.691439245471214,
+        "mae": 14.013591475362782,
+        "n": 631,
+        "rmse": 19.648895211578857
+      },
+      "efficiency_tier_only": {
+        "bias": -2.799342741435512,
+        "mae": 14.030994077472812,
+        "n": 631,
+        "rmse": 19.68279841394639
+      },
+      "opportunity_tier_only": {
+        "bias": -2.720339108625554,
+        "mae": 14.026657866708755,
+        "n": 631,
+        "rmse": 19.677875551201755
+      }
+    }
+  },
+  "rb_rushing_yards": {
+    "efficiency_matchup_beta_train_2021_24": 0.007757025543832952,
+    "efficiency_matchup_pvalue_train_2021_24": 0.8965413450778215,
+    "holdout_rows": 952,
+    "improvement_vs_base_pct": {
+      "both_components_100pct": -0.1999463104244122,
+      "both_components_independent_tiers": -0.08208908598719275,
+      "efficiency_tier_only": -0.004212567328515936,
+      "opportunity_tier_only": -0.07672640132303668
+    },
+    "market": "RB rushing yards",
+    "opportunity_matchup_beta_train_2021_24": 0.09405219395462237,
+    "opportunity_matchup_pvalue_train_2021_24": 0.02926863431430471,
+    "position": "RB",
+    "slots": {
+      "RB1": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 30.91211146655751,
+            "efficiency_tier_mae": 30.91211146655751,
+            "improvement_pct": 0.0,
+            "n": 51,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 30.025590550306347,
+            "efficiency_tier_mae": 30.03071325745109,
+            "improvement_pct": -0.017061137019636626,
+            "n": 101,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 27.19705577383667,
+            "efficiency_tier_mae": 27.19766989751529,
+            "improvement_pct": -0.002258052061689288,
+            "n": 207,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 27.315853995407718,
+            "efficiency_tier_mae": 27.31857433945113,
+            "improvement_pct": -0.009958846770333608,
+            "n": 151,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 30.84912957054922,
+            "efficiency_tier_mae": 30.824707635938633,
+            "improvement_pct": 0.07916571699287563,
+            "n": 31,
+            "weight": 2.0
+          }
+        },
+        "n": 541,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 35.04637044186398,
+            "improvement_pct": 0.0,
+            "n": 96,
+            "opportunity_tier_mae": 35.04637044186398,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 24.451204263571253,
+            "improvement_pct": -0.08185739537433473,
+            "n": 113,
+            "opportunity_tier_mae": 24.47121938251907,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 26.86397987797329,
+            "improvement_pct": -0.01271122303561886,
+            "n": 144,
+            "opportunity_tier_mae": 26.867394618371822,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 27.92334784320205,
+            "improvement_pct": -0.26505540555475904,
+            "n": 90,
+            "opportunity_tier_mae": 27.997360186072314,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 28.68324278606451,
+            "improvement_pct": 0.7700516023278563,
+            "n": 98,
+            "opportunity_tier_mae": 28.462367015390832,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 38.40864868029314,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 38.40864868029314,
+            "n": 17
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 41.08919457604948,
+            "improvement_pct": -0.008029672378558842,
+            "independent_tier_mae": 41.092493903756925,
+            "n": 28
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 30.341648800031592,
+            "improvement_pct": -0.0022083777551504266,
+            "independent_tier_mae": 30.342318858254238,
+            "n": 29
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 31.346317681854174,
+            "improvement_pct": 0.020640694358559614,
+            "independent_tier_mae": 31.3398475842288,
+            "n": 21
+          },
+          "Tier 2 opportunity / Tier 1 efficiency": {
+            "base_mae": 20.51145172117907,
+            "improvement_pct": -0.43562999694554944,
+            "independent_tier_mae": 20.60080575768553,
+            "n": 8
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 23.91384180817489,
+            "improvement_pct": -0.2426439934836445,
+            "independent_tier_mae": 23.971867308933607,
+            "n": 25
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 23.118138761041745,
+            "improvement_pct": 0.18264078328067918,
+            "independent_tier_mae": 23.075915611328664,
+            "n": 43
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 25.567595913170027,
+            "improvement_pct": -0.26521545200107766,
+            "independent_tier_mae": 25.63540512823695,
+            "n": 33
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 29.464954201136624,
+            "improvement_pct": -0.5639183570056024,
+            "independent_tier_mae": 29.631112486760127,
+            "n": 14
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 21.811025733639603,
+            "improvement_pct": -0.07300499373050322,
+            "independent_tier_mae": 21.826948871609005,
+            "n": 27
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 28.212056185657968,
+            "improvement_pct": -0.25959429417152996,
+            "independent_tier_mae": 28.285293073784402,
+            "n": 59
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 26.005583108605496,
+            "improvement_pct": 0.40382850683244426,
+            "independent_tier_mae": 25.900565150644944,
+            "n": 37
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 41.48816909582546,
+            "improvement_pct": -0.7973500365390211,
+            "independent_tier_mae": 41.8189750272704,
+            "n": 12
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 24.883305496635696,
+            "improvement_pct": 0.03786387201658414,
+            "independent_tier_mae": 24.873883713688954,
+            "n": 38
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 25.328879464288782,
+            "improvement_pct": -0.9125323448653023,
+            "independent_tier_mae": 25.560013681992363,
+            "n": 30
+          },
+          "Tier 5 opportunity / Tier 1 efficiency": {
+            "base_mae": 29.50333451505762,
+            "improvement_pct": 1.5033056024289733,
+            "independent_tier_mae": 29.059809234389398,
+            "n": 8
+          },
+          "Tier 5 opportunity / Tier 2 efficiency": {
+            "base_mae": 21.94282536544535,
+            "improvement_pct": 4.772151678268938,
+            "independent_tier_mae": 20.89568045650863,
+            "n": 9
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 30.150679985065853,
+            "improvement_pct": 0.700033425973532,
+            "independent_tier_mae": 29.93961514701208,
+            "n": 38
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 30.020588596864993,
+            "improvement_pct": 0.4757163589168767,
+            "independent_tier_mae": 29.877775745866572,
+            "n": 30
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 25.46939932972316,
+            "improvement_pct": -0.8351835394298197,
+            "independent_tier_mae": 25.682115560516657,
+            "n": 13
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": -6.13288386549065,
+            "mae": 28.317763115625056,
+            "n": 541,
+            "rmse": 38.48729411753918
+          },
+          "both_components_100pct": {
+            "bias": -5.783719694864734,
+            "mae": 28.332686462598154,
+            "n": 541,
+            "rmse": 38.44711615985914
+          },
+          "both_components_independent_tiers": {
+            "bias": -5.854844865755256,
+            "mae": 28.29608974662123,
+            "n": 541,
+            "rmse": 38.43933179158366
+          },
+          "efficiency_tier_only": {
+            "bias": -6.133033164259238,
+            "mae": 28.318314333740993,
+            "n": 541,
+            "rmse": 38.48675149337193
+          },
+          "opportunity_tier_only": {
+            "bias": -5.854763767639774,
+            "mae": 28.295154458306747,
+            "n": 541,
+            "rmse": 38.43968982190431
+          }
+        }
+      },
+      "RB2": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 20.87289610072937,
+            "efficiency_tier_mae": 20.87289610072937,
+            "improvement_pct": 0.0,
+            "n": 45,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 20.25917618864975,
+            "efficiency_tier_mae": 20.257235928266518,
+            "improvement_pct": 0.009577192898493174,
+            "n": 82,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 20.854500799324445,
+            "efficiency_tier_mae": 20.855844876648842,
+            "improvement_pct": -0.006445022766695327,
+            "n": 142,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 19.048818994633244,
+            "efficiency_tier_mae": 19.051439789873932,
+            "improvement_pct": -0.013758308278461709,
+            "n": 103,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 17.073998829808158,
+            "efficiency_tier_mae": 17.08401045122719,
+            "improvement_pct": -0.058636652835853065,
+            "n": 39,
+            "weight": 2.0
+          }
+        },
+        "n": 411,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 21.770320522441644,
+            "improvement_pct": 0.0,
+            "n": 156,
+            "opportunity_tier_mae": 21.770320522441644,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 19.26250853289135,
+            "improvement_pct": -0.5690945455698435,
+            "n": 45,
+            "opportunity_tier_mae": 19.37213041829196,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 18.905002137662358,
+            "improvement_pct": -0.8171419564229075,
+            "n": 80,
+            "opportunity_tier_mae": 19.059482841991844,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 15.162998699551343,
+            "improvement_pct": -0.34290793438682315,
+            "n": 57,
+            "opportunity_tier_mae": 15.214993825183075,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 21.23441388969167,
+            "improvement_pct": -0.6460347775869796,
+            "n": 73,
+            "opportunity_tier_mae": 21.371595588235838,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 22.237961241087973,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 22.237961241087973,
+            "n": 11
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 27.3732858950478,
+            "improvement_pct": 0.013177221206171862,
+            "independent_tier_mae": 27.369678856614012,
+            "n": 30
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 20.454624029650823,
+            "improvement_pct": 0.005294405537252759,
+            "independent_tier_mae": 20.453541078903573,
+            "n": 69
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 20.376257215736047,
+            "improvement_pct": -0.006782072049270635,
+            "independent_tier_mae": 20.377639148181363,
+            "n": 42
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 15.552654396654635,
+            "improvement_pct": -1.123516991777534,
+            "independent_tier_mae": 15.727391111473485,
+            "n": 10
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.45351113536637,
+            "improvement_pct": -0.5782192367542698,
+            "independent_tier_mae": 19.56599507897519,
+            "n": 25
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 17.15480925765604,
+            "improvement_pct": 0.4193775106580834,
+            "independent_tier_mae": 17.08286584563314,
+            "n": 24
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 20.47678340005089,
+            "improvement_pct": -1.7481749255310908,
+            "independent_tier_mae": 20.834753393005894,
+            "n": 20
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 20.610015816978063,
+            "improvement_pct": -0.5236877478383077,
+            "independent_tier_mae": 20.717947944639114,
+            "n": 23
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 18.743593924348815,
+            "improvement_pct": -1.262928454036575,
+            "independent_tier_mae": 18.980312105328487,
+            "n": 8
+          },
+          "Tier 4 opportunity / Tier 1 efficiency": {
+            "base_mae": 14.426822136355756,
+            "improvement_pct": 0.1433550475491121,
+            "independent_tier_mae": 14.406140558622358,
+            "n": 8
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 16.786238184192207,
+            "improvement_pct": -0.6921065443617743,
+            "independent_tier_mae": 16.902416837217157,
+            "n": 14
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 17.2619328475386,
+            "improvement_pct": -1.3225980269451272,
+            "independent_tier_mae": 17.490238830792737,
+            "n": 12
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 11.423062049377569,
+            "improvement_pct": 1.6486451695998419,
+            "independent_tier_mae": 11.234736288680113,
+            "n": 15
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 16.92248616172036,
+            "improvement_pct": -1.3777574333418692,
+            "independent_tier_mae": 17.155636972719712,
+            "n": 8
+          },
+          "Tier 5 opportunity / Tier 1 efficiency": {
+            "base_mae": 23.735288098684133,
+            "improvement_pct": -2.525895323347144,
+            "independent_tier_mae": 24.334816630751767,
+            "n": 18
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 27.93458843140776,
+            "improvement_pct": -0.25650360680143053,
+            "independent_tier_mae": 28.006241658279457,
+            "n": 16
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 19.047035284104904,
+            "improvement_pct": 0.29966246429495724,
+            "independent_tier_mae": 18.989958468797425,
+            "n": 17
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 17.462191308333722,
+            "improvement_pct": 0.1987043399164216,
+            "independent_tier_mae": 17.427493176359555,
+            "n": 18
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": 1.3299974105531205,
+            "mae": 19.92648709565916,
+            "n": 411,
+            "rmse": 25.979833961961617
+          },
+          "both_components_100pct": {
+            "bias": 1.6293000698571436,
+            "mae": 20.02121517136541,
+            "n": 411,
+            "rmse": 26.03877451410441
+          },
+          "both_components_independent_tiers": {
+            "bias": 1.5307502018233974,
+            "mae": 20.001971736121945,
+            "n": 411,
+            "rmse": 26.011594178041634
+          },
+          "efficiency_tier_only": {
+            "bias": 1.3363671683454783,
+            "mae": 19.92817116566834,
+            "n": 411,
+            "rmse": 25.981473771242708
+          },
+          "opportunity_tier_only": {
+            "bias": 1.524312850853856,
+            "mae": 20.00013533737235,
+            "n": 411,
+            "rmse": 26.009943817099007
+          }
+        }
+      }
+    },
+    "variant_metrics": {
+      "base": {
+        "bias": -2.910988692744863,
+        "mae": 24.69505886750953,
+        "n": 952,
+        "rmse": 33.662518538863345
+      },
+      "both_components_100pct": {
+        "bias": -2.5833508678682096,
+        "mae": 24.744435726572252,
+        "n": 952,
+        "rmse": 33.656087636640244
+      },
+      "both_components_independent_tiers": {
+        "bias": -2.6663159027564887,
+        "mae": 24.715330815617868,
+        "n": 952,
+        "rmse": 33.641957966265984
+      },
+      "efficiency_tier_only": {
+        "bias": -2.9083235668847234,
+        "mae": 24.69609916349114,
+        "n": 952,
+        "rmse": 33.66271237174583
+      },
+      "opportunity_tier_only": {
+        "bias": -2.669048967008596,
+        "mae": 24.714006497483176,
+        "n": 952,
+        "rmse": 33.641639561609814
+      }
+    }
+  },
+  "research_version": "nfl-independent-opportunity-efficiency-tiers-2026-09-24",
+  "te_receiving_yards": {
+    "efficiency_matchup_beta_train_2021_24": -0.07034965281144544,
+    "efficiency_matchup_pvalue_train_2021_24": 0.3652674290063911,
+    "holdout_rows": 528,
+    "improvement_vs_base_pct": {
+      "both_components_100pct": 0.10765778560768897,
+      "both_components_independent_tiers": 0.08446612546837419,
+      "efficiency_tier_only": 0.15622359875084546,
+      "opportunity_tier_only": -0.09084045184032107
+    },
+    "market": "TE receiving yards",
+    "opportunity_matchup_beta_train_2021_24": 0.09805397330306373,
+    "opportunity_matchup_pvalue_train_2021_24": 0.16695568355563029,
+    "position": "TE",
+    "slots": {
+      "TE1": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 22.877331351001214,
+            "efficiency_tier_mae": 22.877331351001214,
+            "improvement_pct": 0.0,
+            "n": 74,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 20.01253306691062,
+            "efficiency_tier_mae": 20.022449886953833,
+            "improvement_pct": -0.04955304763298194,
+            "n": 88,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 20.073217622565387,
+            "efficiency_tier_mae": 20.011747483591844,
+            "improvement_pct": 0.3062296246140519,
+            "n": 177,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 20.194477277898965,
+            "efficiency_tier_mae": 20.19300065082156,
+            "improvement_pct": 0.007312034162039952,
+            "n": 127,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 16.641299743571235,
+            "efficiency_tier_mae": 16.53855755058189,
+            "improvement_pct": 0.6173928393365856,
+            "n": 62,
+            "weight": 2.0
+          }
+        },
+        "n": 528,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 21.92928603883568,
+            "improvement_pct": 0.0,
+            "n": 112,
+            "opportunity_tier_mae": 21.92928603883568,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 22.83480346779133,
+            "improvement_pct": -0.1079792713023242,
+            "n": 85,
+            "opportunity_tier_mae": 22.859460322179167,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 20.57561144714059,
+            "improvement_pct": -0.16693414859041544,
+            "n": 139,
+            "opportunity_tier_mae": 20.609959168927148,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 20.294913351221524,
+            "improvement_pct": -0.09667483742425524,
+            "n": 85,
+            "opportunity_tier_mae": 20.31453342570921,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 15.15259990965095,
+            "improvement_pct": -0.06749677813252182,
+            "n": 107,
+            "opportunity_tier_mae": 15.162827426393276,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 23.399481171713933,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 23.399481171713933,
+            "n": 10
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 20.37070714664458,
+            "improvement_pct": -0.016759779126116918,
+            "independent_tier_mae": 20.374121232168786,
+            "n": 17
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 21.99220934955306,
+            "improvement_pct": 0.09647414237284238,
+            "independent_tier_mae": 21.97099255419424,
+            "n": 52
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 24.498648853005015,
+            "improvement_pct": 0.5331123489269507,
+            "independent_tier_mae": 24.368043530649395,
+            "n": 21
+          },
+          "Tier 1 opportunity / Tier 5 efficiency": {
+            "base_mae": 18.143057587469524,
+            "improvement_pct": 1.0703818781601009,
+            "independent_tier_mae": 17.9488575869091,
+            "n": 12
+          },
+          "Tier 2 opportunity / Tier 1 efficiency": {
+            "base_mae": 19.937291548714615,
+            "improvement_pct": -0.12627070190799966,
+            "independent_tier_mae": 19.96246650669462,
+            "n": 13
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 39.1337648988026,
+            "improvement_pct": -0.18657637549467332,
+            "independent_tier_mae": 39.206779258945396,
+            "n": 9
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 21.967724804125847,
+            "improvement_pct": 0.24004204419880854,
+            "independent_tier_mae": 21.914993028442055,
+            "n": 34
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 22.27177946250795,
+            "improvement_pct": -0.24570187668509966,
+            "independent_tier_mae": 22.3265016426185,
+            "n": 22
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 26.2001036493078,
+            "improvement_pct": -0.08596431785254123,
+            "independent_tier_mae": 26.222626389686585,
+            "n": 22
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 20.207376396322413,
+            "improvement_pct": -0.8611800265807404,
+            "independent_tier_mae": 20.381398285743533,
+            "n": 18
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.47694297718646,
+            "improvement_pct": 0.474585178193056,
+            "independent_tier_mae": 19.38450829265162,
+            "n": 47
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 19.646591541951352,
+            "improvement_pct": 0.025514632117218806,
+            "independent_tier_mae": 19.64157878639585,
+            "n": 38
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 18.420581229432337,
+            "improvement_pct": 1.1537221828067843,
+            "independent_tier_mae": 18.208058897586433,
+            "n": 14
+          },
+          "Tier 4 opportunity / Tier 1 efficiency": {
+            "base_mae": 22.08576984154547,
+            "improvement_pct": -0.10289946550236677,
+            "independent_tier_mae": 22.108495980664504,
+            "n": 19
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 19.260510223310554,
+            "improvement_pct": -0.15655373690377317,
+            "independent_tier_mae": 19.29066327181188,
+            "n": 27
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.181178469575382,
+            "improvement_pct": -0.19741656850201955,
+            "independent_tier_mae": 19.219045293908266,
+            "n": 15
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 18.614587350323838,
+            "improvement_pct": 0.827420241517155,
+            "independent_tier_mae": 18.460566486712366,
+            "n": 16
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 24.981644648283584,
+            "improvement_pct": -0.8744214399391065,
+            "independent_tier_mae": 25.200089505137576,
+            "n": 8
+          },
+          "Tier 5 opportunity / Tier 1 efficiency": {
+            "base_mae": 20.371101084952546,
+            "improvement_pct": -0.2489342196600918,
+            "independent_tier_mae": 20.42181172647454,
+            "n": 10
+          },
+          "Tier 5 opportunity / Tier 2 efficiency": {
+            "base_mae": 10.51943842016265,
+            "improvement_pct": -2.4761433346309354,
+            "independent_tier_mae": 10.779914793444114,
+            "n": 17
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 15.838896300194522,
+            "improvement_pct": 0.9223906428530183,
+            "independent_tier_mae": 15.692799802790335,
+            "n": 29
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 17.19479880018518,
+            "improvement_pct": -0.17741455003965179,
+            "independent_tier_mae": 17.22530487510675,
+            "n": 30
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 12.553084268055484,
+            "improvement_pct": 0.7085958422658507,
+            "independent_tier_mae": 12.464133634855914,
+            "n": 21
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": -0.5656137707801512,
+            "mae": 20.082280582293336,
+            "n": 528,
+            "rmse": 26.46208048740613
+          },
+          "both_components_100pct": {
+            "bias": -0.4397744240639765,
+            "mae": 20.060660443718916,
+            "n": 528,
+            "rmse": 26.450109797865935
+          },
+          "both_components_independent_tiers": {
+            "bias": -0.4861596999661344,
+            "mae": 20.065317857979785,
+            "n": 528,
+            "rmse": 26.45296307072328
+          },
+          "efficiency_tier_only": {
+            "bias": -0.65755313847011,
+            "mae": 20.050907320856435,
+            "n": 528,
+            "rmse": 26.46475792478011
+          },
+          "opportunity_tier_only": {
+            "bias": -0.39324359039128415,
+            "mae": 20.100523416714132,
+            "n": 528,
+            "rmse": 26.451488249291415
+          }
+        }
+      }
+    },
+    "variant_metrics": {
+      "base": {
+        "bias": -0.5656137707801512,
+        "mae": 20.082280582293336,
+        "n": 528,
+        "rmse": 26.46208048740613
+      },
+      "both_components_100pct": {
+        "bias": -0.4397744240639765,
+        "mae": 20.060660443718916,
+        "n": 528,
+        "rmse": 26.450109797865935
+      },
+      "both_components_independent_tiers": {
+        "bias": -0.4861596999661344,
+        "mae": 20.065317857979785,
+        "n": 528,
+        "rmse": 26.45296307072328
+      },
+      "efficiency_tier_only": {
+        "bias": -0.65755313847011,
+        "mae": 20.050907320856435,
+        "n": 528,
+        "rmse": 26.46475792478011
+      },
+      "opportunity_tier_only": {
+        "bias": -0.39324359039128415,
+        "mae": 20.100523416714132,
+        "n": 528,
+        "rmse": 26.451488249291415
+      }
+    }
+  },
+  "tier_definition": {
+    "Tier 1": ">=125% of exact-slot component average",
+    "Tier 2": "110%-125%",
+    "Tier 3": "90%-110%",
+    "Tier 4": "75%-90%",
+    "Tier 5": "<75%"
+  },
+  "tier_matchup_weights": {
+    "Tier 1": 0.0,
+    "Tier 2": 0.5,
+    "Tier 3": 1.0,
+    "Tier 4": 1.5,
+    "Tier 5": 2.0
+  },
+  "wr_receiving_yards": {
+    "efficiency_matchup_beta_train_2021_24": -0.10678669694175028,
+    "efficiency_matchup_pvalue_train_2021_24": 0.03827887247098377,
+    "holdout_rows": 1390,
+    "improvement_vs_base_pct": {
+      "both_components_100pct": -0.017785760699915894,
+      "both_components_independent_tiers": -0.014845388972764863,
+      "efficiency_tier_only": -0.015533866849519563,
+      "opportunity_tier_only": 0.0008777188635427745
+    },
+    "market": "WR receiving yards",
+    "opportunity_matchup_beta_train_2021_24": 0.002529087502092148,
+    "opportunity_matchup_pvalue_train_2021_24": 0.9561462849293427,
+    "position": "WR",
+    "slots": {
+      "WR1": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 34.931510645899095,
+            "efficiency_tier_mae": 34.931510645899095,
+            "improvement_pct": 0.0,
+            "n": 42,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 29.07120292396535,
+            "efficiency_tier_mae": 29.02429997325476,
+            "improvement_pct": 0.1613381834706502,
+            "n": 110,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 30.421376038812504,
+            "efficiency_tier_mae": 30.399207349309833,
+            "improvement_pct": 0.07287208006103085,
+            "n": 242,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 29.196153367664078,
+            "efficiency_tier_mae": 29.079963108715287,
+            "improvement_pct": 0.3979642711340059,
+            "n": 93,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 22.000123769806528,
+            "efficiency_tier_mae": 21.66423702155865,
+            "improvement_pct": 1.5267493572415947,
+            "n": 56,
+            "weight": 2.0
+          }
+        },
+        "n": 543,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 33.997002570120195,
+            "improvement_pct": 0.0,
+            "n": 89,
+            "opportunity_tier_mae": 33.997002570120195,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 31.639334628215902,
+            "improvement_pct": -0.0041723236162496844,
+            "n": 83,
+            "opportunity_tier_mae": 31.64065472364662,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 29.27261834656526,
+            "improvement_pct": 0.006839867441911534,
+            "n": 181,
+            "opportunity_tier_mae": 29.270616138273578,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 25.988761336079715,
+            "improvement_pct": 0.006046458773735815,
+            "n": 121,
+            "opportunity_tier_mae": 25.987189936339725,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 27.237622017129365,
+            "improvement_pct": -0.012632536394468258,
+            "n": 69,
+            "opportunity_tier_mae": 27.241062819643666,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 28.85904531408949,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 28.85904531408949,
+            "n": 11
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 29.843331262375766,
+            "improvement_pct": 0.4796246791140915,
+            "independent_tier_mae": 29.70019528057164,
+            "n": 23
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 38.90170004786122,
+            "improvement_pct": -0.06324592776992885,
+            "independent_tier_mae": 38.926303788974764,
+            "n": 44
+          },
+          "Tier 2 opportunity / Tier 1 efficiency": {
+            "base_mae": 47.40170644685268,
+            "improvement_pct": -0.002110808036869413,
+            "independent_tier_mae": 47.40270700588197,
+            "n": 8
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 27.72096089597193,
+            "improvement_pct": -0.02220691580523567,
+            "independent_tier_mae": 27.727116866418502,
+            "n": 21
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 28.177338212488994,
+            "improvement_pct": -0.08145139807541611,
+            "independent_tier_mae": 28.200289048403505,
+            "n": 34
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 38.891950138608685,
+            "improvement_pct": 1.4714956255344902,
+            "independent_tier_mae": 38.319656793634,
+            "n": 13
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 35.4481567576843,
+            "improvement_pct": 0.016669508404698573,
+            "independent_tier_mae": 35.44224772421427,
+            "n": 12
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 31.170284465334582,
+            "improvement_pct": 0.3397296215780932,
+            "independent_tier_mae": 31.064389775875686,
+            "n": 29
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 28.949929201641826,
+            "improvement_pct": 0.439232019101585,
+            "independent_tier_mae": 28.822771843080975,
+            "n": 88
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 28.784941326778682,
+            "improvement_pct": 0.48615947472093307,
+            "independent_tier_mae": 28.645000607225686,
+            "n": 37
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 23.759412753740357,
+            "improvement_pct": 3.191900460748249,
+            "independent_tier_mae": 23.00103594858264,
+            "n": 15
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 27.787846708022396,
+            "improvement_pct": -2.4731218029807063e-05,
+            "independent_tier_mae": 27.78785358029535,
+            "n": 30
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 28.147291457170823,
+            "improvement_pct": -0.0280265459838467,
+            "independent_tier_mae": 28.155180170754274,
+            "n": 50
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 24.003253802756827,
+            "improvement_pct": 0.14650555167039325,
+            "independent_tier_mae": 23.968087703354254,
+            "n": 22
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 19.544703197749328,
+            "improvement_pct": -1.0326686416911492,
+            "independent_tier_mae": 19.746535218784093,
+            "n": 14
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 28.358090671503263,
+            "improvement_pct": -0.49364127085849313,
+            "independent_tier_mae": 28.498077910685275,
+            "n": 26
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 30.282987366755915,
+            "improvement_pct": -0.5921172762378524,
+            "independent_tier_mae": 30.462298166715403,
+            "n": 14
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 17.70388554181529,
+            "improvement_pct": -1.5307514922329903,
+            "independent_tier_mae": 17.974888033929847,
+            "n": 16
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": 0.7469945042896009,
+            "mae": 29.418375625153775,
+            "n": 543,
+            "rmse": 37.38772027614923
+          },
+          "both_components_100pct": {
+            "bias": 0.6170577288510668,
+            "mae": 29.36544454296999,
+            "n": 543,
+            "rmse": 37.376092504925
+          },
+          "both_components_independent_tiers": {
+            "bias": 0.6357365819248818,
+            "mae": 29.34418648811455,
+            "n": 543,
+            "rmse": 37.36078699874436
+          },
+          "efficiency_tier_only": {
+            "bias": 0.6334436235361428,
+            "mae": 29.344453895094972,
+            "n": 543,
+            "rmse": 37.361995277681075
+          },
+          "opportunity_tier_only": {
+            "bias": 0.7492852963630636,
+            "mae": 29.41799706939853,
+            "n": 543,
+            "rmse": 37.386487658629726
+          }
+        }
+      },
+      "WR2": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 27.698135553343448,
+            "efficiency_tier_mae": 27.698135553343448,
+            "improvement_pct": 0.0,
+            "n": 84,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 30.28135721421244,
+            "efficiency_tier_mae": 30.32040727897288,
+            "improvement_pct": -0.12895744561313907,
+            "n": 72,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 25.513023794554012,
+            "efficiency_tier_mae": 25.499499998313997,
+            "improvement_pct": 0.053007422204898375,
+            "n": 162,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 23.100279210288434,
+            "efficiency_tier_mae": 23.096002310432546,
+            "improvement_pct": 0.018514494205695856,
+            "n": 121,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 23.68342180424781,
+            "efficiency_tier_mae": 23.908153775384513,
+            "improvement_pct": -0.9488999224613501,
+            "n": 68,
+            "weight": 2.0
+          }
+        },
+        "n": 507,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 31.39866116731011,
+            "improvement_pct": 0.0,
+            "n": 129,
+            "opportunity_tier_mae": 31.39866116731011,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 24.516039389246103,
+            "improvement_pct": 0.0020212831371758653,
+            "n": 75,
+            "opportunity_tier_mae": 24.515543850676025,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 25.62178251263442,
+            "improvement_pct": -0.005193673080769662,
+            "n": 109,
+            "opportunity_tier_mae": 25.623113224255594,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 24.966359335857454,
+            "improvement_pct": 0.0038953086475527385,
+            "n": 95,
+            "opportunity_tier_mae": 24.965386819103266,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 20.120290426217938,
+            "improvement_pct": 0.010805178571535854,
+            "n": 99,
+            "opportunity_tier_mae": 20.118116392908274,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 29.42305623381755,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 29.42305623381755,
+            "n": 28
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 35.13666376418402,
+            "improvement_pct": 0.05173272120705258,
+            "independent_tier_mae": 35.11848661187744,
+            "n": 25
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 31.50349482872602,
+            "improvement_pct": 0.5793651972558548,
+            "independent_tier_mae": 31.320974543769083,
+            "n": 49
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 27.653604697858647,
+            "improvement_pct": 0.2242658707678949,
+            "independent_tier_mae": 27.591587100484283,
+            "n": 21
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 30.445171358459408,
+            "improvement_pct": -0.201500035181053,
+            "independent_tier_mae": 30.506518389457636,
+            "n": 12
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 20.39449820915853,
+            "improvement_pct": -1.868084037883147,
+            "independent_tier_mae": 20.775484574810186,
+            "n": 22
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 21.198762166207526,
+            "improvement_pct": -1.0711000522819902,
+            "independent_tier_mae": 21.42582211885291,
+            "n": 24
+          },
+          "Tier 2 opportunity / Tier 5 efficiency": {
+            "base_mae": 26.444194098039567,
+            "improvement_pct": 1.1513009551025442,
+            "independent_tier_mae": 26.139741838819667,
+            "n": 10
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 26.777574316313967,
+            "improvement_pct": 0.0031372045962528247,
+            "independent_tier_mae": 26.77673424902175,
+            "n": 17
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 28.82160895087676,
+            "improvement_pct": -0.32346941028650367,
+            "independent_tier_mae": 28.914838039385245,
+            "n": 22
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 24.635464035794694,
+            "improvement_pct": -0.5638287712389628,
+            "independent_tier_mae": 24.774365869956732,
+            "n": 30
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 21.978430045408743,
+            "improvement_pct": 0.313867833475426,
+            "independent_tier_mae": 21.909446823193306,
+            "n": 26
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 28.069787951861233,
+            "improvement_pct": -1.2565526689348723,
+            "independent_tier_mae": 28.422499621534705,
+            "n": 14
+          },
+          "Tier 4 opportunity / Tier 1 efficiency": {
+            "base_mae": 27.84412930107448,
+            "improvement_pct": 0.0018147324912439417,
+            "independent_tier_mae": 27.84362400461315,
+            "n": 20
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 23.217704508460386,
+            "improvement_pct": 0.8499946035239917,
+            "independent_tier_mae": 23.020355273076326,
+            "n": 33
+          },
+          "Tier 4 opportunity / Tier 4 efficiency": {
+            "base_mae": 25.21309285481115,
+            "improvement_pct": -0.3518257539331792,
+            "independent_tier_mae": 25.301799008837463,
+            "n": 19
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 20.783612297682804,
+            "improvement_pct": -1.6784639154384404,
+            "independent_tier_mae": 21.132457730424036,
+            "n": 19
+          },
+          "Tier 5 opportunity / Tier 1 efficiency": {
+            "base_mae": 19.935563184504183,
+            "improvement_pct": -0.0031844065290608458,
+            "independent_tier_mae": 19.936198013879835,
+            "n": 12
+          },
+          "Tier 5 opportunity / Tier 2 efficiency": {
+            "base_mae": 14.180418654389225,
+            "improvement_pct": -0.28279525265611044,
+            "independent_tier_mae": 14.2205202051506,
+            "n": 9
+          },
+          "Tier 5 opportunity / Tier 3 efficiency": {
+            "base_mae": 22.696838487701935,
+            "improvement_pct": -0.08149682652870271,
+            "independent_tier_mae": 22.715335690791758,
+            "n": 28
+          },
+          "Tier 5 opportunity / Tier 4 efficiency": {
+            "base_mae": 21.133866076737075,
+            "improvement_pct": 0.7066714243225859,
+            "independent_tier_mae": 20.98451908431817,
+            "n": 31
+          },
+          "Tier 5 opportunity / Tier 5 efficiency": {
+            "base_mae": 17.599836845132582,
+            "improvement_pct": -1.253020855072167,
+            "independent_tier_mae": 17.82036647126077,
+            "n": 19
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": 3.1524456804968914,
+            "mae": 25.7310008436995,
+            "n": 507,
+            "rmse": 32.305472200968055
+          },
+          "both_components_100pct": {
+            "bias": 2.9239413826954816,
+            "mae": 25.770293387451268,
+            "n": 507,
+            "rmse": 32.34484651633838
+          },
+          "both_components_independent_tiers": {
+            "bias": 2.9392195183990477,
+            "mae": 25.76088361634772,
+            "n": 507,
+            "rmse": 32.33106774072361
+          },
+          "efficiency_tier_only": {
+            "bias": 2.937553231421402,
+            "mae": 25.761346048485695,
+            "n": 507,
+            "rmse": 32.332274146105966
+          },
+          "opportunity_tier_only": {
+            "bias": 3.1541578448444576,
+            "mae": 25.73060688666725,
+            "n": 507,
+            "rmse": 32.30432580508313
+          }
+        }
+      },
+      "WR3": {
+        "efficiency_tiers": {
+          "Tier 1": {
+            "base_mae": 19.273037941597547,
+            "efficiency_tier_mae": 19.273037941597547,
+            "improvement_pct": 0.0,
+            "n": 57,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 24.726201493654617,
+            "efficiency_tier_mae": 24.778191247821507,
+            "improvement_pct": -0.21026179124291122,
+            "n": 63,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 20.159108496174333,
+            "efficiency_tier_mae": 20.203175283191005,
+            "improvement_pct": -0.21859491963662003,
+            "n": 108,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 23.398653542003228,
+            "efficiency_tier_mae": 23.608141436281493,
+            "improvement_pct": -0.8952989277874922,
+            "n": 66,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 21.820604872622187,
+            "efficiency_tier_mae": 22.006436385709797,
+            "improvement_pct": -0.851633188779146,
+            "n": 46,
+            "weight": 2.0
+          }
+        },
+        "n": 340,
+        "opportunity_tiers": {
+          "Tier 1": {
+            "base_mae": 23.1282407094931,
+            "improvement_pct": 0.0,
+            "n": 147,
+            "opportunity_tier_mae": 23.1282407094931,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 21.511544308319067,
+            "improvement_pct": 0.0037243673419077505,
+            "n": 51,
+            "opportunity_tier_mae": 21.510743139388108,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 19.98365571896013,
+            "improvement_pct": -0.0007398050753302955,
+            "n": 77,
+            "opportunity_tier_mae": 19.983803559059375,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 21.557466395410305,
+            "improvement_pct": -0.016450265223951915,
+            "n": 49,
+            "opportunity_tier_mae": 21.561012655807914,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 18.097440282260624,
+            "improvement_pct": 0.020203262419134102,
+            "n": 16,
+            "opportunity_tier_mae": 18.093784008909253,
+            "weight": 2.0
+          }
+        },
+        "tier_cross": {
+          "Tier 1 opportunity / Tier 1 efficiency": {
+            "base_mae": 25.698800893683334,
+            "improvement_pct": 0.0,
+            "independent_tier_mae": 25.698800893683334,
+            "n": 23
+          },
+          "Tier 1 opportunity / Tier 2 efficiency": {
+            "base_mae": 24.469075621016287,
+            "improvement_pct": -0.2016091409863149,
+            "independent_tier_mae": 24.51840751418311,
+            "n": 28
+          },
+          "Tier 1 opportunity / Tier 3 efficiency": {
+            "base_mae": 22.728240736634767,
+            "improvement_pct": -0.571243339425196,
+            "independent_tier_mae": 22.858074298011317,
+            "n": 47
+          },
+          "Tier 1 opportunity / Tier 4 efficiency": {
+            "base_mae": 22.068391071564456,
+            "improvement_pct": -2.2256121900676,
+            "independent_tier_mae": 22.559547873404984,
+            "n": 30
+          },
+          "Tier 1 opportunity / Tier 5 efficiency": {
+            "base_mae": 20.70346313597606,
+            "improvement_pct": -1.076532788262071,
+            "independent_tier_mae": 20.926342704940595,
+            "n": 19
+          },
+          "Tier 2 opportunity / Tier 1 efficiency": {
+            "base_mae": 15.347682766496888,
+            "improvement_pct": 0.029343325772522133,
+            "independent_tier_mae": 15.343179245944182,
+            "n": 9
+          },
+          "Tier 2 opportunity / Tier 2 efficiency": {
+            "base_mae": 19.8675218594467,
+            "improvement_pct": 0.03944162529102899,
+            "independent_tier_mae": 19.859685785920284,
+            "n": 12
+          },
+          "Tier 2 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.296001767634777,
+            "improvement_pct": 1.0347055871400759,
+            "independent_tier_mae": 19.096344959250413,
+            "n": 15
+          },
+          "Tier 2 opportunity / Tier 4 efficiency": {
+            "base_mae": 32.9445072014699,
+            "improvement_pct": -0.7486657679283575,
+            "independent_tier_mae": 33.191151449299994,
+            "n": 11
+          },
+          "Tier 3 opportunity / Tier 1 efficiency": {
+            "base_mae": 14.1979289399091,
+            "improvement_pct": -0.018848917600330178,
+            "independent_tier_mae": 14.200605095835938,
+            "n": 13
+          },
+          "Tier 3 opportunity / Tier 2 efficiency": {
+            "base_mae": 28.162055416552768,
+            "improvement_pct": -0.2426397280061775,
+            "independent_tier_mae": 28.23038775121644,
+            "n": 9
+          },
+          "Tier 3 opportunity / Tier 3 efficiency": {
+            "base_mae": 19.102541063015753,
+            "improvement_pct": -0.4641160952038387,
+            "independent_tier_mae": 19.19119903068213,
+            "n": 27
+          },
+          "Tier 3 opportunity / Tier 4 efficiency": {
+            "base_mae": 21.39352082750612,
+            "improvement_pct": 0.9780983204860064,
+            "independent_tier_mae": 21.184271159599458,
+            "n": 18
+          },
+          "Tier 3 opportunity / Tier 5 efficiency": {
+            "base_mae": 19.985793179560115,
+            "improvement_pct": -1.0484560953922037,
+            "independent_tier_mae": 20.195335446363693,
+            "n": 10
+          },
+          "Tier 4 opportunity / Tier 1 efficiency": {
+            "base_mae": 18.429238941147254,
+            "improvement_pct": -0.00884237667986598,
+            "independent_tier_mae": 18.430868523873663,
+            "n": 8
+          },
+          "Tier 4 opportunity / Tier 2 efficiency": {
+            "base_mae": 29.235106775906253,
+            "improvement_pct": -0.3714912255836277,
+            "independent_tier_mae": 29.34371263236875,
+            "n": 11
+          },
+          "Tier 4 opportunity / Tier 3 efficiency": {
+            "base_mae": 16.477696983435546,
+            "improvement_pct": 0.1895728990153728,
+            "independent_tier_mae": 16.44645973557308,
+            "n": 16
+          },
+          "Tier 4 opportunity / Tier 5 efficiency": {
+            "base_mae": 22.975433120504086,
+            "improvement_pct": -1.8808347924955722,
+            "independent_tier_mae": 23.407563060361078,
+            "n": 10
+          }
+        },
+        "variants": {
+          "base": {
+            "bias": 3.6264923574050525,
+            "mae": 21.710460389032242,
+            "n": 340,
+            "rmse": 27.15307857311235
+          },
+          "both_components_100pct": {
+            "bias": 3.557468716991001,
+            "mae": 21.75544425752777,
+            "n": 340,
+            "rmse": 27.22185420323606
+          },
+          "both_components_independent_tiers": {
+            "bias": 3.5606288768791368,
+            "mae": 21.800278206574,
+            "n": 340,
+            "rmse": 27.25634646968643
+          },
+          "efficiency_tier_only": {
+            "bias": 3.559036861250135,
+            "mae": 21.799898677663744,
+            "n": 340,
+            "rmse": 27.25694780415949
+          },
+          "opportunity_tier_only": {
+            "bias": 3.6281119014452012,
+            "mae": 21.710712713908784,
+            "n": 340,
+            "rmse": 27.152485895887832
+          }
+        }
+      }
+    },
+    "variant_metrics": {
+      "base": {
+        "bias": 2.328716098819349,
+        "mae": 26.188022967255478,
+        "n": 1390,
+        "rmse": 33.272731347576034
+      },
+      "both_components_100pct": {
+        "bias": 2.1777266126400567,
+        "mae": 26.192680706352473,
+        "n": 1390,
+        "rmse": 33.29531912856766
+      },
+      "both_components_independent_tiers": {
+        "bias": 2.1913691208290893,
+        "mae": 26.191910681129244,
+        "n": 1390,
+        "rmse": 33.29062935537542
+      },
+      "efficiency_tier_only": {
+        "bias": 2.189476193335124,
+        "mae": 26.192090979873733,
+        "n": 1390,
+        "rmse": 33.29170685394948
+      },
+      "opportunity_tier_only": {
+        "bias": 2.3306316473040662,
+        "mae": 26.187793110037905,
+        "n": 1390,
+        "rmse": 33.271665979616394
+      }
+    }
+  }
+}
