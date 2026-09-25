@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.16-progressive-slot-weighting-2026-09-24"
+MODEL_VERSION = "nfl-v4.17-component-tier-yardage-weighting-2026-09-25"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -128,6 +128,23 @@ TOTAL_MATCHUP_CAP = {
 
 _HISTORY_CACHE: dict[tuple[int, int], pd.DataFrame] = {}
 _PROFILE_CACHE: dict[tuple[int, int, str, str, str], dict[str, float]] = {}
+
+# Production yardage tier system. Opportunity and efficiency are graded
+# independently against the league average for the player's exact lineup slot.
+# The corresponding matchup adjustment is then scaled by this multiplier.
+YARDAGE_TIER_WEIGHTS = {
+    "Tier 1": 0.00,
+    "Tier 2": 0.50,
+    "Tier 3": 1.00,
+    "Tier 4": 1.50,
+    "Tier 5": 2.00,
+}
+YARDAGE_COMPONENT_METRICS = {
+    "Passing Yards": ("attempts_pg", "pass_ypa"),
+    "Rushing Yards": ("carries_pg", "rush_ypc"),
+    "Receiving Yards": ("targets_pg", "yards_per_target"),
+}
+YARDAGE_MARKETS = set(YARDAGE_COMPONENT_METRICS)
 
 
 def _num(value: Any, default: float = 0.0) -> float:
@@ -543,6 +560,114 @@ def _factor(profile: dict[str, float] | None) -> float:
     return 1.0 + _num((profile or {}).get("adjustment_pct"), 0.0)
 
 
+def _tier_from_ratio(ratio: float) -> str:
+    if not math.isfinite(ratio) or ratio <= 0:
+        return "Tier 3"
+    if ratio >= 1.25:
+        return "Tier 1"
+    if ratio >= 1.10:
+        return "Tier 2"
+    if ratio >= 0.90:
+        return "Tier 3"
+    if ratio >= 0.75:
+        return "Tier 4"
+    return "Tier 5"
+
+
+def _scaled_matchup_factor(base_factor: float, tier_weight: float) -> float:
+    """Scale only the matchup deviation, matching the research component test."""
+    base_factor = max(0.01, float(base_factor))
+    scaled = 1.0 + (base_factor - 1.0) * float(tier_weight)
+    return float(np.clip(scaled, 0.65, 1.35))
+
+
+def _benchmark_slots(nfl_builder: Any, profiles: pd.DataFrame) -> pd.DataFrame:
+    """Reconstruct exact offensive slots from pregame blended player usage."""
+    if profiles is None or profiles.empty:
+        return pd.DataFrame()
+    frame = profiles.copy()
+    if "team" not in frame.columns or "position" not in frame.columns:
+        return pd.DataFrame()
+    frame["_team"] = frame["team"].map(nfl_builder._normalize_team)
+    frame["_position"] = frame["position"].map(nfl_builder._position_group)
+    frame["_bench_slot"] = ""
+
+    specs = [
+        ("QB", "attempts_pg", ["QB"]),
+        ("RB", "carries_pg", ["RB1", "RB2"]),
+        ("WR", "targets_pg", ["WR1", "WR2", "WR3"]),
+        ("TE", "targets_pg", ["TE1"]),
+    ]
+    for position, metric, slots in specs:
+        if metric not in frame.columns:
+            continue
+        mask = frame["_position"].eq(position)
+        values = pd.to_numeric(frame.loc[mask, metric], errors="coerce")
+        eligible = mask.copy()
+        eligible.loc[mask] = values.fillna(0.0).gt(0.0).to_numpy()
+        if not eligible.any():
+            continue
+        ranks = (
+            pd.to_numeric(frame.loc[eligible, metric], errors="coerce")
+            .groupby(frame.loc[eligible, "_team"])
+            .rank(method="first", ascending=False)
+        )
+        for rank, slot_name in enumerate(slots, start=1):
+            idx = ranks.index[ranks.eq(rank)]
+            frame.loc[idx, "_bench_slot"] = slot_name
+    return frame
+
+
+def _yardage_component_tiers(
+    nfl_builder: Any,
+    profiles: pd.DataFrame,
+    player_profile: dict[str, Any],
+    slot: str,
+    market: str,
+) -> dict[str, Any]:
+    """Return independent opportunity/efficiency tiers for one yardage market."""
+    metrics = YARDAGE_COMPONENT_METRICS.get(market)
+    if metrics is None:
+        return {
+            "opportunity_tier": "Tier 3", "efficiency_tier": "Tier 3",
+            "opportunity_weight": 1.0, "efficiency_weight": 1.0,
+        }
+    opportunity_metric, efficiency_metric = metrics
+    benchmarks = _benchmark_slots(nfl_builder, profiles)
+    exact_slot = _slot(slot)
+    if benchmarks.empty:
+        exact = pd.DataFrame()
+    else:
+        exact = benchmarks[benchmarks["_bench_slot"].eq(exact_slot)].copy()
+
+    def grade(metric: str) -> tuple[str, float, float, float]:
+        player_value = _num(player_profile.get(metric), np.nan)
+        if exact.empty or metric not in exact.columns:
+            league_avg = np.nan
+        else:
+            values = pd.to_numeric(exact[metric], errors="coerce")
+            values = values[values.gt(0.0) & np.isfinite(values)]
+            league_avg = float(values.mean()) if not values.empty else np.nan
+        ratio = player_value / league_avg if math.isfinite(player_value) and math.isfinite(league_avg) and league_avg > 0 else 1.0
+        tier = _tier_from_ratio(ratio)
+        return tier, YARDAGE_TIER_WEIGHTS[tier], float(ratio), float(league_avg) if math.isfinite(league_avg) else np.nan
+
+    opp_tier, opp_weight, opp_ratio, opp_avg = grade(opportunity_metric)
+    eff_tier, eff_weight, eff_ratio, eff_avg = grade(efficiency_metric)
+    return {
+        "opportunity_metric": opportunity_metric,
+        "efficiency_metric": efficiency_metric,
+        "opportunity_tier": opp_tier,
+        "efficiency_tier": eff_tier,
+        "opportunity_weight": opp_weight,
+        "efficiency_weight": eff_weight,
+        "opportunity_ratio": opp_ratio,
+        "efficiency_ratio": eff_ratio,
+        "opportunity_league_avg": opp_avg,
+        "efficiency_league_avg": eff_avg,
+    }
+
+
 def _broad_matchup_factor(row: dict[str, Any] | None, market: str) -> tuple[float, float, float]:
     """Amplify the broad opponent-position matchup already carried by the row."""
     if not row:
@@ -623,6 +748,7 @@ def _apply_slot_overlay(
     opponent: str,
     slot: str,
     player_profile: dict[str, Any] | None = None,
+    profiles_frame: pd.DataFrame | None = None,
 ) -> list[dict[str, Any]]:
     slot = _slot(slot)
     if slot not in TRACKED_SLOTS or not rows:
@@ -667,6 +793,17 @@ def _apply_slot_overlay(
     target_factor = matchup.get("Targets", {}).get("factor", 1.0)
     reception_factor = matchup.get("Receptions", {}).get("factor", target_factor)
 
+    # Independent exact-slot tier grades for every yardage formula component.
+    # Standalone count props keep their existing matchup behavior.
+    yardage_tiers = {
+        market: _yardage_component_tiers(
+            nfl_builder, profiles_frame if profiles_frame is not None else pd.DataFrame(),
+            player_profile or {}, slot, market,
+        )
+        for market in YARDAGE_MARKETS
+        if _market_allowed_for_slot(market, slot)
+    }
+
     for row in rows:
         market = str(row.get("Market", "") or "")
         profile = profiles.get(market)
@@ -676,14 +813,16 @@ def _apply_slot_overlay(
         })
         market_factor = float(details["factor"])
 
-        # Keep compound simulations internally consistent with the stronger
-        # matchup signal: opportunity markets move opportunity, while yardage
-        # markets retain the remainder in efficiency.
-        if market in {"Passing Completions", "Passing Yards"}:
+        # Count props retain the existing matchup behavior. Yardage props split
+        # matchup into opportunity and efficiency, then scale each side by the
+        # player's independent exact-slot tier (0/50/100/150/200%).
+        tier_info = yardage_tiers.get(market)
+        final_market_factor = market_factor
+
+        if market == "Passing Completions":
             row["Projected Player Attempts"] = round(
                 max(0.0, _num(row.get("Projected Player Attempts")) * pass_attempt_factor), 2
             )
-        if market == "Passing Completions":
             row["Projected Completions"] = round(
                 max(0.0, _num(row.get("Projected Completions")) * market_factor), 2
             )
@@ -691,9 +830,17 @@ def _apply_slot_overlay(
                 row["Efficiency"] = round(
                     max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3
                 )
-        elif market == "Passing Yards" and pass_attempt_factor > 0:
+        elif market == "Passing Yards":
+            base_opp_factor = max(0.01, pass_attempt_factor)
+            base_eff_factor = max(0.01, market_factor / base_opp_factor)
+            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
+            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            final_market_factor = opp_factor * eff_factor
+            row["Projected Player Attempts"] = round(
+                max(0.0, _num(row.get("Projected Player Attempts")) * opp_factor), 2
+            )
             row["Efficiency"] = round(
-                max(0.0, _num(row.get("Efficiency")) * market_factor / pass_attempt_factor), 3
+                max(0.0, _num(row.get("Efficiency")) * eff_factor), 3
             )
 
         if market == "Rushing Attempts":
@@ -701,13 +848,17 @@ def _apply_slot_overlay(
                 max(0.0, _num(row.get("Projected Player Attempts")) * market_factor), 2
             )
         elif market == "Rushing Yards":
+            base_opp_factor = max(0.01, rush_attempt_factor)
+            base_eff_factor = max(0.01, market_factor / base_opp_factor)
+            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
+            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            final_market_factor = opp_factor * eff_factor
             row["Projected Player Attempts"] = round(
-                max(0.0, _num(row.get("Projected Player Attempts")) * rush_attempt_factor), 2
+                max(0.0, _num(row.get("Projected Player Attempts")) * opp_factor), 2
             )
-            if rush_attempt_factor > 0:
-                row["Efficiency"] = round(
-                    max(0.0, _num(row.get("Efficiency")) * market_factor / rush_attempt_factor), 3
-                )
+            row["Efficiency"] = round(
+                max(0.0, _num(row.get("Efficiency")) * eff_factor), 3
+            )
 
         if market == "Targets":
             row["Projected Targets"] = round(
@@ -728,25 +879,30 @@ def _apply_slot_overlay(
                     max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3
                 )
         elif market == "Receiving Yards":
+            base_opp_factor = max(0.01, target_factor)
+            base_eff_factor = max(0.01, market_factor / base_opp_factor)
+            opp_factor = _scaled_matchup_factor(base_opp_factor, _num((tier_info or {}).get("opportunity_weight"), 1.0))
+            eff_factor = _scaled_matchup_factor(base_eff_factor, _num((tier_info or {}).get("efficiency_weight"), 1.0))
+            final_market_factor = opp_factor * eff_factor
             row["Projected Targets"] = round(
-                max(0.0, _num(row.get("Projected Targets")) * target_factor), 2
+                max(0.0, _num(row.get("Projected Targets")) * opp_factor), 2
             )
+            # Preserve the projected catch rate inside the yardage distribution.
             row["Projected Receptions"] = round(
-                max(0.0, _num(row.get("Projected Receptions")) * reception_factor), 2
+                max(0.0, _num(row.get("Projected Receptions")) * opp_factor), 2
             )
             row["Targets Per Route"] = round(
-                max(0.0, _num(row.get("Targets Per Route")) * target_factor), 3
+                max(0.0, _num(row.get("Targets Per Route")) * opp_factor), 3
             )
-            if target_factor > 0:
-                row["Efficiency"] = round(
-                    max(0.0, _num(row.get("Efficiency")) * market_factor / target_factor), 3
-                )
+            row["Efficiency"] = round(
+                max(0.0, _num(row.get("Efficiency")) * eff_factor), 3
+            )
 
-        if abs(market_factor - 1.0) < 0.0005:
+        if abs(final_market_factor - 1.0) < 0.0005:
             continue
 
         old_projection = max(0.0, _num(row.get("Projection"), 0.0))
-        projection = max(0.0, old_projection * market_factor)
+        projection = max(0.0, old_projection * final_market_factor)
         row["Raw Projection"] = round(projection, 2)
         row["Calibration Adjustment"] = 0.0
         row["Projection"] = round(projection, 2)
@@ -756,13 +912,22 @@ def _apply_slot_overlay(
         )
         # Display the actual final matchup multiplier instead of a diluted raw
         # position index so large favorable/unfavorable matchups are visible.
-        row["Matchup Index"] = round(market_factor, 3)
+        row["Matchup Index"] = round(final_market_factor, 3)
         _append_broad_reason(
             row, market, float(details["broad_index"]),
             float(details["broad_adjustment"]), float(details["total_adjustment"]),
         )
         if profile is not None:
             _append_reason(row, nfl_builder._normalize_team(opponent), slot, market, profile)
+        if market in YARDAGE_MARKETS and tier_info is not None:
+            current = str(row.get("Confluence", "") or "").strip()
+            tier_note = (
+                f"component tiers: opportunity {tier_info['opportunity_tier']} "
+                f"({tier_info['opportunity_weight']:.0%} matchup, {tier_info['opportunity_ratio']:.2f}x slot avg); "
+                f"efficiency {tier_info['efficiency_tier']} "
+                f"({tier_info['efficiency_weight']:.0%} matchup, {tier_info['efficiency_ratio']:.2f}x slot avg)"
+            )
+            row["Confluence"] = f"{current} • {tier_note}".strip(" •")
 
     return rows
 
@@ -798,7 +963,8 @@ def install_slot_matchup_layer(nfl_builder: Any) -> None:
         except Exception:
             player_profile = {}
         return _apply_slot_overlay(
-            nfl_builder, rows, season, projection_week, opponent, slot, player_profile
+            nfl_builder, rows, season, projection_week, opponent, slot,
+            player_profile, profiles_frame
         )
 
     nfl_builder._project_player_markets = wrapped
