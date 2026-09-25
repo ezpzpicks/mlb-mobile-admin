@@ -2,52 +2,182 @@
   "method": "Slots reconstructed from lagged pregame workload; strength is player trailing-8 average yards divided by the contemporaneous league average of lagged average yards for that exact slot; tiers use absolute ratio bands (<75%, 75-90%, 90-110%, 110-125%, >=125%); defense-slot matchup learned from prior normalized performances only with four-game neutral shrinkage; current regression is baseline; same-weight slot matchup compared with strength-aware interaction; 2021-23 discovery, 2024 sign confirmation, 2021-24 refit, untouched 2025 holdout.",
   "rb_receiving_yards": {
     "aware_beta_train_2021_24": {
-      "same_weight_matchup": 0.09825267211212307,
-      "strength_x_matchup": 0.23094819601516106
+      "same_weight_matchup": 0.09825267211212305,
+      "strength_x_matchup": 0.23094819601516123
     },
     "aware_pvalue_train_2021_24": {
       "same_weight_matchup": 0.21383974369629288,
-      "strength_x_matchup": 0.14899626110090414
+      "strength_x_matchup": 0.14899626110090386
     },
     "base_metrics": {
-      "bias": -1.123751495371565,
+      "bias": -1.123751495371567,
       "mae": 14.025078112640015,
       "n": 701,
       "rmse": 19.230284320811815
     },
-    "fixed_beta_pvalue_train_2021_24": 0.0166471018619289,
-    "fixed_beta_train_2021_24": 0.1795992412379995,
+    "explicit_tier_weight_curves": {
+      "aggressive_20_60_100_140_180": {
+        "metrics": {
+          "bias": -1.02718925490336,
+          "mae": 14.026269689386247,
+          "n": 701,
+          "rmse": 19.18696431053606
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 15.125829192751524,
+            "curve_mae": 15.131308367503461,
+            "curve_vs_base_improvement_pct": -0.03622396287908894,
+            "curve_vs_fixed_improvement_pct": 0.21740852759702892,
+            "fixed_100pct_mae": 15.164276798411626,
+            "n": 282,
+            "weight": 0.2
+          },
+          "Tier 2": {
+            "base_mae": 13.013030247671969,
+            "curve_mae": 12.991449885449722,
+            "curve_vs_base_improvement_pct": 0.16583656390184556,
+            "curve_vs_fixed_improvement_pct": -0.0027334001316429405,
+            "fixed_100pct_mae": 12.991094786847716,
+            "n": 68,
+            "weight": 0.6
+          },
+          "Tier 3": {
+            "base_mae": 13.356273159892954,
+            "curve_mae": 13.368030878819393,
+            "curve_vs_base_improvement_pct": -0.08803143500947792,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 13.368030878819393,
+            "n": 94,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 13.551744125733098,
+            "curve_mae": 13.63073054235676,
+            "curve_vs_base_improvement_pct": -0.5828505607162161,
+            "curve_vs_fixed_improvement_pct": -0.2103302392460964,
+            "fixed_100pct_mae": 13.602121168360803,
+            "n": 94,
+            "weight": 1.4
+          },
+          "Tier 5": {
+            "base_mae": 13.201572042418276,
+            "curve_mae": 13.153889121611305,
+            "curve_vs_base_improvement_pct": 0.36119123278469517,
+            "curve_vs_fixed_improvement_pct": 0.15396343130045317,
+            "fixed_100pct_mae": 13.174172529683448,
+            "n": 163,
+            "weight": 1.8
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.008496043563263314,
+        "vs_fixed_100pct_mae_improvement_pct": 0.10048322272346424,
+        "weights": {
+          "Tier 1": 0.2,
+          "Tier 2": 0.6,
+          "Tier 3": 1.0,
+          "Tier 4": 1.4,
+          "Tier 5": 1.8
+        }
+      },
+      "mild_70_85_100_115_130": {
+        "metrics": {
+          "bias": -1.0340261227465442,
+          "mae": 14.033667623845634,
+          "n": 701,
+          "rmse": 19.195278950430353
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 15.125829192751524,
+            "curve_mae": 15.148384510310306,
+            "curve_vs_base_improvement_pct": -0.14911789146468987,
+            "curve_vs_fixed_improvement_pct": 0.10480083100952323,
+            "fixed_100pct_mae": 15.164276798411626,
+            "n": 282,
+            "weight": 0.7
+          },
+          "Tier 2": {
+            "base_mae": 13.013030247671969,
+            "curve_mae": 12.991227948823468,
+            "curve_vs_base_improvement_pct": 0.1675420592555769,
+            "curve_vs_fixed_improvement_pct": -0.0010250250493643934,
+            "fixed_100pct_mae": 12.991094786847716,
+            "n": 68,
+            "weight": 0.85
+          },
+          "Tier 3": {
+            "base_mae": 13.356273159892954,
+            "curve_mae": 13.368030878819393,
+            "curve_vs_base_improvement_pct": -0.08803143500947792,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 13.368030878819393,
+            "n": 94,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 13.551744125733098,
+            "curve_mae": 13.612849683609284,
+            "curve_vs_base_improvement_pct": -0.4509054872144,
+            "curve_vs_fixed_improvement_pct": -0.07887383971726167,
+            "fixed_100pct_mae": 13.602121168360803,
+            "n": 94,
+            "weight": 1.15
+          },
+          "Tier 5": {
+            "base_mae": 13.201572042418276,
+            "curve_mae": 13.166566251656395,
+            "curve_vs_base_improvement_pct": 0.2651638051089893,
+            "curve_vs_fixed_improvement_pct": 0.05773628673766657,
+            "fixed_100pct_mae": 13.174172529683448,
+            "n": 163,
+            "weight": 1.3
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.06124394557116698,
+        "vs_fixed_100pct_mae_improvement_pct": 0.04779280010867615,
+        "weights": {
+          "Tier 1": 0.7,
+          "Tier 2": 0.85,
+          "Tier 3": 1.0,
+          "Tier 4": 1.15,
+          "Tier 5": 1.3
+        }
+      }
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.016647101861928845,
+    "fixed_beta_train_2021_24": 0.17959924123799964,
     "fixed_same_weight_matchup_metrics": {
-      "bias": -1.0381282434524526,
-      "mae": 14.040377913596378,
+      "bias": -1.0381282434524546,
+      "mae": 14.040377913596382,
       "n": 701,
-      "rmse": 19.203636503400332
+      "rmse": 19.203636503400336
     },
     "fixed_sign_check": {
-      "confirmation_beta": 0.09607879648906717,
-      "confirmation_pvalue": 0.5536517236749535,
-      "discovery_beta": 0.19948137899006557,
-      "discovery_pvalue": 0.018242066723865302
+      "confirmation_beta": 0.09607879648906727,
+      "confirmation_pvalue": 0.5536517236749532,
+      "discovery_beta": 0.19948137899006574,
+      "discovery_pvalue": 0.018242066723865243
     },
-    "fixed_vs_base_mae_improvement_pct": -0.10908888231128164,
+    "fixed_vs_base_mae_improvement_pct": -0.10908888231130696,
     "holdout_rows": 701,
     "interaction_sign_check": {
-      "confirmation_2024_beta": 0.017356979662631715,
-      "confirmation_2024_pvalue": 0.9622343054896279,
-      "discovery_2021_23_beta": 0.27731120819439675,
-      "discovery_2021_23_pvalue": 0.11974819234837844,
+      "confirmation_2024_beta": 0.017356979662631486,
+      "confirmation_2024_pvalue": 0.9622343054896284,
+      "discovery_2021_23_beta": 0.2773112081943968,
+      "discovery_2021_23_pvalue": 0.11974819234837837,
       "same_sign": true,
       "supports_elite_less_matchup_sensitive": false
     },
     "market": "RB receiving yards",
     "strength_aware_matchup_metrics": {
-      "bias": -1.096947367951471,
+      "bias": -1.0969473679514727,
       "mae": 14.053210480052833,
       "n": 701,
       "rmse": 19.23979976038664
     },
     "strength_aware_vs_base_mae_improvement_pct": -0.20058617276051852,
-    "strength_aware_vs_fixed_mae_improvement_pct": -0.09139758584437976,
+    "strength_aware_vs_fixed_mae_improvement_pct": -0.09139758584435444,
     "tiers": {
       "Tier 1": {
         "base_mae": 15.125829192751524,
@@ -82,71 +212,201 @@
         "strength_aware_vs_fixed_improvement_pct": 0.21771644876123727
       },
       "Tier 5": {
-        "base_mae": 13.201572042418272,
+        "base_mae": 13.201572042418276,
         "fixed_matchup_mae": 13.174172529683448,
         "n": 163,
         "strength_aware_mae": 13.207471022663118,
-        "strength_aware_vs_base_improvement_pct": -0.04468392268656587,
+        "strength_aware_vs_base_improvement_pct": -0.044683922686538945,
         "strength_aware_vs_fixed_improvement_pct": -0.25275585927422123
       }
     }
   },
   "rb_rushing_yards": {
     "aware_beta_train_2021_24": {
-      "same_weight_matchup": 0.1852189441008223,
-      "strength_x_matchup": -0.21349904779241788
+      "same_weight_matchup": 0.18521894410082124,
+      "strength_x_matchup": -0.213499047792417
     },
     "aware_pvalue_train_2021_24": {
-      "same_weight_matchup": 0.0013553397364882917,
-      "strength_x_matchup": 0.15389389581080004
+      "same_weight_matchup": 0.0013553397364883596,
+      "strength_x_matchup": 0.1538938958108012
     },
     "base_metrics": {
-      "bias": -2.2125999087318937,
-      "mae": 24.597047944730992,
+      "bias": -2.2125999087318555,
+      "mae": 24.597047944730996,
       "n": 967,
-      "rmse": 33.37891587423264
+      "rmse": 33.37891587423263
     },
-    "fixed_beta_pvalue_train_2021_24": 0.009451671769027477,
-    "fixed_beta_train_2021_24": 0.1405051516430006,
+    "explicit_tier_weight_curves": {
+      "aggressive_20_60_100_140_180": {
+        "metrics": {
+          "bias": -1.8124866941442301,
+          "mae": 24.64588881670284,
+          "n": 967,
+          "rmse": 33.3455056808825
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 25.802629081655056,
+            "curve_mae": 25.856938591747692,
+            "curve_vs_base_improvement_pct": -0.21048052863438266,
+            "curve_vs_fixed_improvement_pct": 0.8840473299757874,
+            "fixed_100pct_mae": 26.087565013707067,
+            "n": 263,
+            "weight": 0.2
+          },
+          "Tier 2": {
+            "base_mae": 21.646290147153998,
+            "curve_mae": 21.665557982324188,
+            "curve_vs_base_improvement_pct": -0.08901218194528973,
+            "curve_vs_fixed_improvement_pct": 0.059253549834208566,
+            "fixed_100pct_mae": 21.67840320577098,
+            "n": 147,
+            "weight": 0.6
+          },
+          "Tier 3": {
+            "base_mae": 25.48080190040362,
+            "curve_mae": 25.66120306768425,
+            "curve_vs_base_improvement_pct": -0.7079885789535306,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 25.66120306768425,
+            "n": 200,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 25.154520018381096,
+            "curve_mae": 25.144152995002884,
+            "curve_vs_base_improvement_pct": 0.04121336193509699,
+            "curve_vs_fixed_improvement_pct": -0.0216141228181169,
+            "fixed_100pct_mae": 25.138719481299294,
+            "n": 119,
+            "weight": 1.4
+          },
+          "Tier 5": {
+            "base_mae": 24.065970588991092,
+            "curve_mae": 24.046083162933428,
+            "curve_vs_base_improvement_pct": 0.08263712441650667,
+            "curve_vs_fixed_improvement_pct": 0.015984575719831418,
+            "fixed_100pct_mae": 24.049927441795926,
+            "n": 238,
+            "weight": 1.8
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.19856395808793234,
+        "vs_fixed_100pct_mae_improvement_pct": 0.2628597315817263,
+        "weights": {
+          "Tier 1": 0.2,
+          "Tier 2": 0.6,
+          "Tier 3": 1.0,
+          "Tier 4": 1.4,
+          "Tier 5": 1.8
+        }
+      },
+      "mild_70_85_100_115_130": {
+        "metrics": {
+          "bias": -1.7501279925991202,
+          "mae": 24.686105326131983,
+          "n": 967,
+          "rmse": 33.377932682437276
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 25.802629081655056,
+            "curve_mae": 26.000460065949266,
+            "curve_vs_base_improvement_pct": -0.7667086313885068,
+            "curve_vs_fixed_improvement_pct": 0.3338945114733171,
+            "fixed_100pct_mae": 26.087565013707067,
+            "n": 263,
+            "weight": 0.7
+          },
+          "Tier 2": {
+            "base_mae": 21.646290147153998,
+            "curve_mae": 21.67358624697843,
+            "curve_vs_base_improvement_pct": -0.12610059108914676,
+            "curve_vs_fixed_improvement_pct": 0.022220081187838456,
+            "fixed_100pct_mae": 21.67840320577098,
+            "n": 147,
+            "weight": 0.85
+          },
+          "Tier 3": {
+            "base_mae": 25.48080190040362,
+            "curve_mae": 25.66120306768425,
+            "curve_vs_base_improvement_pct": -0.7079885789535306,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 25.66120306768425,
+            "n": 200,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 25.154520018381096,
+            "curve_mae": 25.140757048938145,
+            "curve_vs_base_improvement_pct": 0.05471370327437636,
+            "curve_vs_fixed_improvement_pct": -0.00810529605681327,
+            "fixed_100pct_mae": 25.138719481299294,
+            "n": 119,
+            "weight": 1.15
+          },
+          "Tier 5": {
+            "base_mae": 24.065970588991092,
+            "curve_mae": 24.047625934280045,
+            "curve_vs_base_improvement_pct": 0.07622653174619427,
+            "curve_vs_fixed_improvement_pct": 0.009569706692259027,
+            "fixed_100pct_mae": 24.049927441795926,
+            "n": 238,
+            "weight": 1.3
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.36206532426613763,
+        "vs_fixed_100pct_mae_improvement_pct": 0.10011130437457791,
+        "weights": {
+          "Tier 1": 0.7,
+          "Tier 2": 0.85,
+          "Tier 3": 1.0,
+          "Tier 4": 1.15,
+          "Tier 5": 1.3
+        }
+      }
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.009451671769027888,
+    "fixed_beta_train_2021_24": 0.14050515164299968,
     "fixed_same_weight_matchup_metrics": {
-      "bias": -1.7127127716720894,
-      "mae": 24.710843674056036,
+      "bias": -1.712712771672054,
+      "mae": 24.710843674056044,
       "n": 967,
       "rmse": 33.40214277106885
     },
     "fixed_sign_check": {
-      "confirmation_beta": 0.24652860249799163,
-      "confirmation_pvalue": 0.02098253380632343,
-      "discovery_beta": 0.10447651370743911,
-      "discovery_pvalue": 0.09576969103009034
+      "confirmation_beta": 0.24652860249799055,
+      "confirmation_pvalue": 0.0209825338063238,
+      "discovery_beta": 0.10447651370743832,
+      "discovery_pvalue": 0.0957696910300927
     },
-    "fixed_vs_base_mae_improvement_pct": -0.462639783362381,
+    "fixed_vs_base_mae_improvement_pct": -0.46263978336239536,
     "holdout_rows": 967,
     "interaction_sign_check": {
-      "confirmation_2024_beta": -0.2240812549232837,
-      "confirmation_2024_pvalue": 0.49664966512790554,
-      "discovery_2021_23_beta": -0.20682038248668166,
-      "discovery_2021_23_pvalue": 0.22043418811548499,
+      "confirmation_2024_beta": -0.2240812549232825,
+      "confirmation_2024_pvalue": 0.49664966512790776,
+      "discovery_2021_23_beta": -0.20682038248668103,
+      "discovery_2021_23_pvalue": 0.22043418811548576,
       "same_sign": true,
       "supports_elite_less_matchup_sensitive": true
     },
     "market": "RB rushing yards",
     "strength_aware_matchup_metrics": {
-      "bias": -1.6615898749006999,
-      "mae": 24.684336885825154,
+      "bias": -1.6615898749006646,
+      "mae": 24.684336885825157,
       "n": 967,
       "rmse": 33.359982356159776
     },
-    "strength_aware_vs_base_mae_improvement_pct": -0.3548756797575791,
-    "strength_aware_vs_fixed_mae_improvement_pct": 0.10726783990265874,
+    "strength_aware_vs_base_mae_improvement_pct": -0.35487567975757905,
+    "strength_aware_vs_fixed_mae_improvement_pct": 0.10726783990267309,
     "tiers": {
       "Tier 1": {
-        "base_mae": 25.802629081655045,
-        "fixed_matchup_mae": 26.087565013707056,
+        "base_mae": 25.802629081655056,
+        "fixed_matchup_mae": 26.087565013707067,
         "n": 263,
-        "strength_aware_mae": 25.942964765649577,
-        "strength_aware_vs_base_improvement_pct": -0.5438813368607746,
-        "strength_aware_vs_fixed_improvement_pct": 0.5542880218276505
+        "strength_aware_mae": 25.942964765649585,
+        "strength_aware_vs_base_improvement_pct": -0.5438813368607606,
+        "strength_aware_vs_fixed_improvement_pct": 0.5542880218276638
       },
       "Tier 2": {
         "base_mae": 21.646290147153998,
@@ -157,80 +417,210 @@
         "strength_aware_vs_fixed_improvement_pct": -0.018899709344350573
       },
       "Tier 3": {
-        "base_mae": 25.480801900403616,
+        "base_mae": 25.48080190040362,
         "fixed_matchup_mae": 25.66120306768425,
         "n": 200,
         "strength_aware_mae": 25.730092867708617,
-        "strength_aware_vs_base_improvement_pct": -0.9783482022245619,
+        "strength_aware_vs_base_improvement_pct": -0.9783482022245478,
         "strength_aware_vs_fixed_improvement_pct": -0.2684589644634391
       },
       "Tier 4": {
-        "base_mae": 25.15452001838109,
-        "fixed_matchup_mae": 25.13871948129929,
+        "base_mae": 25.154520018381096,
+        "fixed_matchup_mae": 25.138719481299294,
         "n": 119,
         "strength_aware_mae": 25.14478315327325,
-        "strength_aware_vs_base_improvement_pct": 0.03870821268195452,
-        "strength_aware_vs_fixed_improvement_pct": -0.024120846642444044
+        "strength_aware_vs_base_improvement_pct": 0.038708212681982754,
+        "strength_aware_vs_fixed_improvement_pct": -0.02412084664242991
       },
       "Tier 5": {
-        "base_mae": 24.06597058899109,
-        "fixed_matchup_mae": 24.04992744179592,
+        "base_mae": 24.065970588991092,
+        "fixed_matchup_mae": 24.049927441795926,
         "n": 238,
         "strength_aware_mae": 24.038566022620355,
-        "strength_aware_vs_base_improvement_pct": 0.11387268287974313,
-        "strength_aware_vs_fixed_improvement_pct": 0.04724097069756492
+        "strength_aware_vs_base_improvement_pct": 0.11387268287975788,
+        "strength_aware_vs_fixed_improvement_pct": 0.047240970697594455
       }
     }
   },
-  "research_version": "nfl-player-strength-yardage-ratio-2026-09-24",
+  "research_version": "nfl-player-strength-yardage-ratio-tier-weights-2026-09-24",
   "wr_receiving_yards": {
     "aware_beta_train_2021_24": {
-      "same_weight_matchup": 0.0011003679435039352,
-      "strength_x_matchup": -0.08493065733937358
+      "same_weight_matchup": 0.0011003679435038242,
+      "strength_x_matchup": -0.08493065733937365
     },
     "aware_pvalue_train_2021_24": {
-      "same_weight_matchup": 0.9836260975882333,
-      "strength_x_matchup": 0.5561928464856345
+      "same_weight_matchup": 0.9836260975882348,
+      "strength_x_matchup": 0.556192846485634
     },
     "base_metrics": {
-      "bias": 2.810774722015493,
+      "bias": 2.810774722015497,
       "mae": 26.257674321330462,
       "n": 1404,
-      "rmse": 33.29415696298102
+      "rmse": 33.29415696298103
     },
-    "fixed_beta_pvalue_train_2021_24": 0.7935366854384345,
-    "fixed_beta_train_2021_24": -0.013780786346593528,
+    "explicit_tier_weight_curves": {
+      "aggressive_20_60_100_140_180": {
+        "metrics": {
+          "bias": 2.7951470009156023,
+          "mae": 26.262240163257616,
+          "n": 1404,
+          "rmse": 33.303427618780646
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 29.353482119631884,
+            "curve_mae": 29.354442678850646,
+            "curve_vs_base_improvement_pct": -0.0032723859297044584,
+            "curve_vs_fixed_improvement_pct": 0.013087402367249685,
+            "fixed_100pct_mae": 29.35828491572569,
+            "n": 400,
+            "weight": 0.2
+          },
+          "Tier 2": {
+            "base_mae": 26.712753520942563,
+            "curve_mae": 26.726246835774006,
+            "curve_vs_base_improvement_pct": -0.050512631806618045,
+            "curve_vs_fixed_improvement_pct": 0.03364676142988548,
+            "fixed_100pct_mae": 26.73524237899497,
+            "n": 168,
+            "weight": 0.6
+          },
+          "Tier 3": {
+            "base_mae": 25.375532839847757,
+            "curve_mae": 25.38815985455771,
+            "curve_vs_base_improvement_pct": -0.049760589421492085,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 25.38815985455771,
+            "n": 293,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 25.69496092997606,
+            "curve_mae": 25.688075615947525,
+            "curve_vs_base_improvement_pct": 0.02679635920559403,
+            "curve_vs_fixed_improvement_pct": 0.00765756830837756,
+            "fixed_100pct_mae": 25.690042848527103,
+            "n": 229,
+            "weight": 1.4
+          },
+          "Tier 5": {
+            "base_mae": 23.304019531009406,
+            "curve_mae": 23.309230878426796,
+            "curve_vs_base_improvement_pct": -0.02236244013808684,
+            "curve_vs_fixed_improvement_pct": -0.009937627674686486,
+            "fixed_100pct_mae": 23.306914724019066,
+            "n": 314,
+            "weight": 1.8
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.01738859988618333,
+        "vs_fixed_100pct_mae_improvement_pct": 0.0075155879395156335,
+        "weights": {
+          "Tier 1": 0.2,
+          "Tier 2": 0.6,
+          "Tier 3": 1.0,
+          "Tier 4": 1.4,
+          "Tier 5": 1.8
+        }
+      },
+      "mild_70_85_100_115_130": {
+        "metrics": {
+          "bias": 2.7939208859960725,
+          "mae": 26.26347385707343,
+          "n": 1404,
+          "rmse": 33.30347300222128
+        },
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 29.353482119631884,
+            "curve_mae": 29.356844076897552,
+            "curve_vs_base_improvement_pct": -0.011453350753977708,
+            "curve_vs_fixed_improvement_pct": 0.00490777588770653,
+            "fixed_100pct_mae": 29.35828491572569,
+            "n": 400,
+            "weight": 0.7
+          },
+          "Tier 2": {
+            "base_mae": 26.712753520942563,
+            "curve_mae": 26.73186905028711,
+            "curve_vs_base_improvement_pct": -0.07155956172604888,
+            "curve_vs_fixed_improvement_pct": 0.012617535536200411,
+            "fixed_100pct_mae": 26.73524237899497,
+            "n": 168,
+            "weight": 0.85
+          },
+          "Tier 3": {
+            "base_mae": 25.375532839847757,
+            "curve_mae": 25.38815985455771,
+            "curve_vs_base_improvement_pct": -0.049760589421492085,
+            "curve_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 25.38815985455771,
+            "n": 293,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 25.69496092997606,
+            "curve_mae": 25.689305136309763,
+            "curve_vs_base_improvement_pct": 0.02201129506174141,
+            "curve_vs_fixed_improvement_pct": 0.002871588115636399,
+            "fixed_100pct_mae": 25.690042848527103,
+            "n": 229,
+            "weight": 1.15
+          },
+          "Tier 5": {
+            "base_mae": 23.304019531009406,
+            "curve_mae": 23.307783281921967,
+            "curve_vs_base_improvement_pct": -0.016150651210849812,
+            "curve_vs_fixed_improvement_pct": -0.0037266103780188645,
+            "fixed_100pct_mae": 23.306914724019066,
+            "n": 314,
+            "weight": 1.3
+          }
+        },
+        "vs_base_mae_improvement_pct": -0.022087012246377196,
+        "vs_fixed_100pct_mae_improvement_pct": 0.002818345477331889,
+        "weights": {
+          "Tier 1": 0.7,
+          "Tier 2": 0.85,
+          "Tier 3": 1.0,
+          "Tier 4": 1.15,
+          "Tier 5": 1.3
+        }
+      }
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.7935366854384331,
+    "fixed_beta_train_2021_24": -0.013780786346593608,
     "fixed_same_weight_matchup_metrics": {
-      "bias": 2.7931852170443516,
-      "mae": 26.26421407336291,
+      "bias": 2.7931852170443547,
+      "mae": 26.264214073362922,
       "n": 1404,
       "rmse": 33.303541399950205
     },
     "fixed_sign_check": {
-      "confirmation_beta": 0.04029981917528006,
-      "confirmation_pvalue": 0.6798764733615174,
-      "discovery_beta": -0.035920759963543186,
-      "discovery_pvalue": 0.5662619564582545
+      "confirmation_beta": 0.040299819175280034,
+      "confirmation_pvalue": 0.6798764733615176,
+      "discovery_beta": -0.035920759963543256,
+      "discovery_pvalue": 0.5662619564582535
     },
-    "fixed_vs_base_mae_improvement_pct": -0.024906059662474576,
+    "fixed_vs_base_mae_improvement_pct": -0.024906059662515165,
     "holdout_rows": 1404,
     "interaction_sign_check": {
       "confirmation_2024_beta": -0.750650210056123,
-      "confirmation_2024_pvalue": 0.006287765440262,
-      "discovery_2021_23_beta": 0.18080534616364394,
-      "discovery_2021_23_pvalue": 0.28129832192458604,
+      "confirmation_2024_pvalue": 0.00628776544026198,
+      "discovery_2021_23_beta": 0.1808053461636436,
+      "discovery_2021_23_pvalue": 0.2812983219245869,
       "same_sign": false,
       "supports_elite_less_matchup_sensitive": false
     },
     "market": "WR receiving yards",
     "strength_aware_matchup_metrics": {
-      "bias": 2.799165762422481,
+      "bias": 2.799165762422484,
       "mae": 26.264056538214078,
       "n": 1404,
       "rmse": 33.29527292109084
     },
     "strength_aware_vs_base_mae_improvement_pct": -0.024306101163082808,
-    "strength_aware_vs_fixed_mae_improvement_pct": 0.0005998091105768274,
+    "strength_aware_vs_fixed_mae_improvement_pct": 0.0005998091106174076,
     "tiers": {
       "Tier 1": {
         "base_mae": 29.353482119631884,
@@ -250,27 +640,27 @@
       },
       "Tier 3": {
         "base_mae": 25.375532839847757,
-        "fixed_matchup_mae": 25.388159854557706,
+        "fixed_matchup_mae": 25.38815985455771,
         "n": 293,
         "strength_aware_mae": 25.381287009669393,
         "strength_aware_vs_base_improvement_pct": -0.022676055151045177,
-        "strength_aware_vs_fixed_improvement_pct": 0.02707106354964794
+        "strength_aware_vs_fixed_improvement_pct": 0.02707106354966193
       },
       "Tier 4": {
-        "base_mae": 25.694960929976055,
+        "base_mae": 25.69496092997606,
         "fixed_matchup_mae": 25.690042848527103,
         "n": 229,
         "strength_aware_mae": 25.698988749517454,
-        "strength_aware_vs_base_improvement_pct": -0.01567552312056667,
+        "strength_aware_vs_base_improvement_pct": -0.015675523120552842,
         "strength_aware_vs_fixed_improvement_pct": -0.03482244480127178
       },
       "Tier 5": {
-        "base_mae": 23.304019531009402,
+        "base_mae": 23.304019531009406,
         "fixed_matchup_mae": 23.306914724019066,
         "n": 314,
-        "strength_aware_mae": 23.290430318003278,
-        "strength_aware_vs_base_improvement_pct": 0.058312742949953054,
-        "strength_aware_vs_fixed_improvement_pct": 0.0707275339142172
+        "strength_aware_mae": 23.29043031800328,
+        "strength_aware_vs_base_improvement_pct": 0.05831274294995305,
+        "strength_aware_vs_fixed_improvement_pct": 0.07072753391420196
       }
     }
   }
