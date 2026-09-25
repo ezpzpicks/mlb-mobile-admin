@@ -105,8 +105,8 @@ def _add_market_strength_and_slot_matchup(
 
     # Defense-slot residual from PRIOR games only. Four neutral prior games shrink
     # early samples toward 1.0, matching the model's general early-season philosophy.
-    def history_signal(group: pd.DataFrame) -> pd.Series:
-        vals = pd.to_numeric(group["actual_vs_player_baseline"], errors="coerce")
+    def history_signal(vals: pd.Series) -> pd.Series:
+        vals = pd.to_numeric(vals, errors="coerce")
         shifted = vals.shift(1)
         roll_sum = shifted.rolling(8, min_periods=1).sum()
         roll_n = shifted.rolling(8, min_periods=1).count()
@@ -114,10 +114,8 @@ def _add_market_strength_and_slot_matchup(
         return (shrunk_ratio - 1.0).clip(-0.45, 0.45)
 
     df["slot_matchup_edge"] = (
-        df.groupby(["opponent", "slot"], group_keys=False)
-        .apply(history_signal)
-        .reset_index(level=[0, 1], drop=True)
-        .reindex(df.index)
+        df.groupby(["opponent", "slot"])["actual_vs_player_baseline"]
+        .transform(history_signal)
     )
     df["slot_matchup_edge"] = pd.to_numeric(df["slot_matchup_edge"], errors="coerce").fillna(0.0)
 
@@ -358,12 +356,6 @@ def main() -> None:
         pd.to_numeric(data["raw_targets"], errors="coerce")
         * pd.to_numeric(data["ypt8"], errors="coerce")
     )
-
-    rush_enriched = _add_market_strength_and_slot_matchup(
-        data[data["position"].eq("RB")].copy(),
-        actual_col="rushing_yards",
-        player_only_baseline_col="_player_only_baseline",
-    ) if False else None
 
     # Add the baseline columns before enrichment so strength and opponent history
     # are market-specific.
