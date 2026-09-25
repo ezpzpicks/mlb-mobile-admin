@@ -76,9 +76,28 @@ def main() -> None:
     assert "TE1" in slot_model.TRACKED_SLOTS and "TE" not in slot_model.TRACKED_SLOTS
     history = build_history()
 
+    # Exact-slot defense evidence is current-season only, so it must begin near
+    # league average and progressively earn trust as usable games accumulate.
+    assert slot_model._slot_season_weight(0) == 0.0
+    assert slot_model._slot_season_weight(1) == 0.35
+    assert slot_model._slot_season_weight(2) == 0.60
+    assert slot_model._slot_season_weight(3) == 0.75
+    assert slot_model._slot_season_weight(4) == 0.85
+    assert slot_model._slot_season_weight(5) == 0.90
+
+    week1 = history[history["week"] == 1].copy()
+    early_wr2 = slot_model._profile_from_history(week1, "NYG", "WR2", "Receiving Yards")
+    assert int(early_wr2["sample"]) == 1
+    assert early_wr2["season_weight"] == 0.35
+    assert early_wr2["weighted_defense_slot_avg"] < early_wr2["defense_slot_avg"]
+    assert early_wr2["weighted_defense_slot_avg"] > early_wr2["league_slot_avg"]
+
     wr2 = slot_model._profile_from_history(history, "NYG", "WR2", "Receiving Yards")
     assert int(wr2["sample"]) == 3
+    assert wr2["season_weight"] == 0.75
     assert wr2["defense_slot_avg"] > wr2["league_slot_avg"]
+    assert wr2["weighted_defense_slot_avg"] > early_wr2["weighted_defense_slot_avg"]
+    assert abs(early_wr2["adjustment_pct"]) < abs(wr2["adjustment_pct"])
     assert wr2["slot_outlier_pct"] > 0.20
     assert 0.03 < wr2["adjustment_pct"] <= slot_model.MARKET_CAP["Receiving Yards"]
 
