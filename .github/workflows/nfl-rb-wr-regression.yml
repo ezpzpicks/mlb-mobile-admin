@@ -38,8 +38,6 @@ jobs:
           python -m pip install scipy statsmodels pyarrow
       - name: Compile research scripts
         run: python -m py_compile research/nfl_rb_wr_prop_regression.py research/nfl_player_strength_interaction.py
-      - name: Run historical regression
-        run: python -m research.nfl_rb_wr_prop_regression --output-dir artifacts/nfl_rb_wr_prop_regression
       - name: Run player-strength interaction test
         run: python -m research.nfl_player_strength_interaction
       - name: Save auditable results
@@ -58,8 +56,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nfl-rb-wr-prop-regression
-          path: |
-            artifacts/nfl_rb_wr_prop_regression/
-            artifacts/nfl_player_strength_interaction/
+          path: artifacts/nfl_player_strength_interaction/
           if-no-files-found: error
           retention-days: 14
