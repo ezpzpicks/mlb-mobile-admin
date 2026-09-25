@@ -1,0 +1,277 @@
+{
+  "method": "Slots reconstructed from lagged pregame workload; strength is player trailing-8 average yards divided by the contemporaneous league average of lagged average yards for that exact slot; tiers use absolute ratio bands (<75%, 75-90%, 90-110%, 110-125%, >=125%); defense-slot matchup learned from prior normalized performances only with four-game neutral shrinkage; current regression is baseline; same-weight slot matchup compared with strength-aware interaction; 2021-23 discovery, 2024 sign confirmation, 2021-24 refit, untouched 2025 holdout.",
+  "rb_receiving_yards": {
+    "aware_beta_train_2021_24": {
+      "same_weight_matchup": 0.09825267211212307,
+      "strength_x_matchup": 0.23094819601516106
+    },
+    "aware_pvalue_train_2021_24": {
+      "same_weight_matchup": 0.21383974369629288,
+      "strength_x_matchup": 0.14899626110090414
+    },
+    "base_metrics": {
+      "bias": -1.123751495371565,
+      "mae": 14.025078112640015,
+      "n": 701,
+      "rmse": 19.230284320811815
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.0166471018619289,
+    "fixed_beta_train_2021_24": 0.1795992412379995,
+    "fixed_same_weight_matchup_metrics": {
+      "bias": -1.0381282434524526,
+      "mae": 14.040377913596378,
+      "n": 701,
+      "rmse": 19.203636503400332
+    },
+    "fixed_sign_check": {
+      "confirmation_beta": 0.09607879648906717,
+      "confirmation_pvalue": 0.5536517236749535,
+      "discovery_beta": 0.19948137899006557,
+      "discovery_pvalue": 0.018242066723865302
+    },
+    "fixed_vs_base_mae_improvement_pct": -0.10908888231128164,
+    "holdout_rows": 701,
+    "interaction_sign_check": {
+      "confirmation_2024_beta": 0.017356979662631715,
+      "confirmation_2024_pvalue": 0.9622343054896279,
+      "discovery_2021_23_beta": 0.27731120819439675,
+      "discovery_2021_23_pvalue": 0.11974819234837844,
+      "same_sign": true,
+      "supports_elite_less_matchup_sensitive": false
+    },
+    "market": "RB receiving yards",
+    "strength_aware_matchup_metrics": {
+      "bias": -1.096947367951471,
+      "mae": 14.053210480052833,
+      "n": 701,
+      "rmse": 19.23979976038664
+    },
+    "strength_aware_vs_base_mae_improvement_pct": -0.20058617276051852,
+    "strength_aware_vs_fixed_mae_improvement_pct": -0.09139758584437976,
+    "tiers": {
+      "Tier 1": {
+        "base_mae": 15.125829192751524,
+        "fixed_matchup_mae": 15.164276798411626,
+        "n": 282,
+        "strength_aware_mae": 15.187961678584788,
+        "strength_aware_vs_base_improvement_pct": -0.41077077521831395,
+        "strength_aware_vs_fixed_improvement_pct": -0.15618865632710577
+      },
+      "Tier 2": {
+        "base_mae": 13.013030247671969,
+        "fixed_matchup_mae": 12.991094786847716,
+        "n": 68,
+        "strength_aware_mae": 12.99078403165866,
+        "strength_aware_vs_base_improvement_pct": 0.17095338741173907,
+        "strength_aware_vs_fixed_improvement_pct": 0.0023920631336743696
+      },
+      "Tier 3": {
+        "base_mae": 13.356273159892954,
+        "fixed_matchup_mae": 13.368030878819393,
+        "n": 94,
+        "strength_aware_mae": 13.364772273071747,
+        "strength_aware_vs_base_improvement_pct": -0.06363386759949402,
+        "strength_aware_vs_fixed_improvement_pct": 0.02437610877163276
+      },
+      "Tier 4": {
+        "base_mae": 13.551744125733098,
+        "fixed_matchup_mae": 13.602121168360803,
+        "n": 94,
+        "strength_aware_mae": 13.572507113196847,
+        "strength_aware_vs_base_improvement_pct": -0.1532126586150857,
+        "strength_aware_vs_fixed_improvement_pct": 0.21771644876123727
+      },
+      "Tier 5": {
+        "base_mae": 13.201572042418272,
+        "fixed_matchup_mae": 13.174172529683448,
+        "n": 163,
+        "strength_aware_mae": 13.207471022663118,
+        "strength_aware_vs_base_improvement_pct": -0.04468392268656587,
+        "strength_aware_vs_fixed_improvement_pct": -0.25275585927422123
+      }
+    }
+  },
+  "rb_rushing_yards": {
+    "aware_beta_train_2021_24": {
+      "same_weight_matchup": 0.1852189441008223,
+      "strength_x_matchup": -0.21349904779241788
+    },
+    "aware_pvalue_train_2021_24": {
+      "same_weight_matchup": 0.0013553397364882917,
+      "strength_x_matchup": 0.15389389581080004
+    },
+    "base_metrics": {
+      "bias": -2.2125999087318937,
+      "mae": 24.597047944730992,
+      "n": 967,
+      "rmse": 33.37891587423264
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.009451671769027477,
+    "fixed_beta_train_2021_24": 0.1405051516430006,
+    "fixed_same_weight_matchup_metrics": {
+      "bias": -1.7127127716720894,
+      "mae": 24.710843674056036,
+      "n": 967,
+      "rmse": 33.40214277106885
+    },
+    "fixed_sign_check": {
+      "confirmation_beta": 0.24652860249799163,
+      "confirmation_pvalue": 0.02098253380632343,
+      "discovery_beta": 0.10447651370743911,
+      "discovery_pvalue": 0.09576969103009034
+    },
+    "fixed_vs_base_mae_improvement_pct": -0.462639783362381,
+    "holdout_rows": 967,
+    "interaction_sign_check": {
+      "confirmation_2024_beta": -0.2240812549232837,
+      "confirmation_2024_pvalue": 0.49664966512790554,
+      "discovery_2021_23_beta": -0.20682038248668166,
+      "discovery_2021_23_pvalue": 0.22043418811548499,
+      "same_sign": true,
+      "supports_elite_less_matchup_sensitive": true
+    },
+    "market": "RB rushing yards",
+    "strength_aware_matchup_metrics": {
+      "bias": -1.6615898749006999,
+      "mae": 24.684336885825154,
+      "n": 967,
+      "rmse": 33.359982356159776
+    },
+    "strength_aware_vs_base_mae_improvement_pct": -0.3548756797575791,
+    "strength_aware_vs_fixed_mae_improvement_pct": 0.10726783990265874,
+    "tiers": {
+      "Tier 1": {
+        "base_mae": 25.802629081655045,
+        "fixed_matchup_mae": 26.087565013707056,
+        "n": 263,
+        "strength_aware_mae": 25.942964765649577,
+        "strength_aware_vs_base_improvement_pct": -0.5438813368607746,
+        "strength_aware_vs_fixed_improvement_pct": 0.5542880218276505
+      },
+      "Tier 2": {
+        "base_mae": 21.646290147153998,
+        "fixed_matchup_mae": 21.67840320577098,
+        "n": 147,
+        "strength_aware_mae": 21.682500360967367,
+        "strength_aware_vs_base_improvement_pct": -0.16728138432594253,
+        "strength_aware_vs_fixed_improvement_pct": -0.018899709344350573
+      },
+      "Tier 3": {
+        "base_mae": 25.480801900403616,
+        "fixed_matchup_mae": 25.66120306768425,
+        "n": 200,
+        "strength_aware_mae": 25.730092867708617,
+        "strength_aware_vs_base_improvement_pct": -0.9783482022245619,
+        "strength_aware_vs_fixed_improvement_pct": -0.2684589644634391
+      },
+      "Tier 4": {
+        "base_mae": 25.15452001838109,
+        "fixed_matchup_mae": 25.13871948129929,
+        "n": 119,
+        "strength_aware_mae": 25.14478315327325,
+        "strength_aware_vs_base_improvement_pct": 0.03870821268195452,
+        "strength_aware_vs_fixed_improvement_pct": -0.024120846642444044
+      },
+      "Tier 5": {
+        "base_mae": 24.06597058899109,
+        "fixed_matchup_mae": 24.04992744179592,
+        "n": 238,
+        "strength_aware_mae": 24.038566022620355,
+        "strength_aware_vs_base_improvement_pct": 0.11387268287974313,
+        "strength_aware_vs_fixed_improvement_pct": 0.04724097069756492
+      }
+    }
+  },
+  "research_version": "nfl-player-strength-yardage-ratio-2026-09-24",
+  "wr_receiving_yards": {
+    "aware_beta_train_2021_24": {
+      "same_weight_matchup": 0.0011003679435039352,
+      "strength_x_matchup": -0.08493065733937358
+    },
+    "aware_pvalue_train_2021_24": {
+      "same_weight_matchup": 0.9836260975882333,
+      "strength_x_matchup": 0.5561928464856345
+    },
+    "base_metrics": {
+      "bias": 2.810774722015493,
+      "mae": 26.257674321330462,
+      "n": 1404,
+      "rmse": 33.29415696298102
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.7935366854384345,
+    "fixed_beta_train_2021_24": -0.013780786346593528,
+    "fixed_same_weight_matchup_metrics": {
+      "bias": 2.7931852170443516,
+      "mae": 26.26421407336291,
+      "n": 1404,
+      "rmse": 33.303541399950205
+    },
+    "fixed_sign_check": {
+      "confirmation_beta": 0.04029981917528006,
+      "confirmation_pvalue": 0.6798764733615174,
+      "discovery_beta": -0.035920759963543186,
+      "discovery_pvalue": 0.5662619564582545
+    },
+    "fixed_vs_base_mae_improvement_pct": -0.024906059662474576,
+    "holdout_rows": 1404,
+    "interaction_sign_check": {
+      "confirmation_2024_beta": -0.750650210056123,
+      "confirmation_2024_pvalue": 0.006287765440262,
+      "discovery_2021_23_beta": 0.18080534616364394,
+      "discovery_2021_23_pvalue": 0.28129832192458604,
+      "same_sign": false,
+      "supports_elite_less_matchup_sensitive": false
+    },
+    "market": "WR receiving yards",
+    "strength_aware_matchup_metrics": {
+      "bias": 2.799165762422481,
+      "mae": 26.264056538214078,
+      "n": 1404,
+      "rmse": 33.29527292109084
+    },
+    "strength_aware_vs_base_mae_improvement_pct": -0.024306101163082808,
+    "strength_aware_vs_fixed_mae_improvement_pct": 0.0005998091105768274,
+    "tiers": {
+      "Tier 1": {
+        "base_mae": 29.353482119631884,
+        "fixed_matchup_mae": 29.35828491572569,
+        "n": 400,
+        "strength_aware_mae": 29.369780429219176,
+        "strength_aware_vs_base_improvement_pct": -0.05552427995038879,
+        "strength_aware_vs_fixed_improvement_pct": -0.039155943633915904
+      },
+      "Tier 2": {
+        "base_mae": 26.712753520942563,
+        "fixed_matchup_mae": 26.73524237899497,
+        "n": 168,
+        "strength_aware_mae": 26.73715815856686,
+        "strength_aware_vs_base_improvement_pct": -0.09135949839526647,
+        "strength_aware_vs_fixed_improvement_pct": -0.007165746039381282
+      },
+      "Tier 3": {
+        "base_mae": 25.375532839847757,
+        "fixed_matchup_mae": 25.388159854557706,
+        "n": 293,
+        "strength_aware_mae": 25.381287009669393,
+        "strength_aware_vs_base_improvement_pct": -0.022676055151045177,
+        "strength_aware_vs_fixed_improvement_pct": 0.02707106354964794
+      },
+      "Tier 4": {
+        "base_mae": 25.694960929976055,
+        "fixed_matchup_mae": 25.690042848527103,
+        "n": 229,
+        "strength_aware_mae": 25.698988749517454,
+        "strength_aware_vs_base_improvement_pct": -0.01567552312056667,
+        "strength_aware_vs_fixed_improvement_pct": -0.03482244480127178
+      },
+      "Tier 5": {
+        "base_mae": 23.304019531009402,
+        "fixed_matchup_mae": 23.306914724019066,
+        "n": 314,
+        "strength_aware_mae": 23.290430318003278,
+        "strength_aware_vs_base_improvement_pct": 0.058312742949953054,
+        "strength_aware_vs_fixed_improvement_pct": 0.0707275339142172
+      }
+    }
+  }
+}
