@@ -1,0 +1,793 @@
+{
+  "method": "Player grade is trailing-8 pregame average yardage divided by the same week's league average of that lagged yardage for the exact slot. Slot matchup histories use only prior games. 2021-23 discovery, 2024 confirmation/refit, untouched 2025 holdout.",
+  "qb_passing_yards": {
+    "base_metrics": {
+      "bias": 8.933143699245631,
+      "mae": 58.83690523779805,
+      "n": 530,
+      "rmse": 76.13485277337426
+    },
+    "extreme_metrics": {
+      "bias": 7.52655248948348,
+      "mae": 58.847240724436936,
+      "n": 530,
+      "rmse": 76.05871871583444
+    },
+    "extreme_vs_base_mae_improvement_pct": -0.017566332894489525,
+    "extreme_vs_fixed_mae_improvement_pct": -0.21794358314833415,
+    "fixed_100pct_metrics": {
+      "bias": 7.240050712981609,
+      "mae": 58.71926585243973,
+      "n": 530,
+      "rmse": 76.00944258415583
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.04320659798249523,
+    "fixed_beta_train_2021_24": -0.0863069160920788,
+    "holdout_rows": 530,
+    "market": "QB passing yards",
+    "position": "QB",
+    "slots": {
+      "QB1": {
+        "base_metrics": {
+          "bias": 8.933143699245631,
+          "mae": 58.83690523779805,
+          "n": 530,
+          "rmse": 76.13485277337426
+        },
+        "extreme_metrics": {
+          "bias": 7.52655248948348,
+          "mae": 58.847240724436936,
+          "n": 530,
+          "rmse": 76.05871871583444
+        },
+        "extreme_vs_base_mae_improvement_pct": -0.017566332894489525,
+        "extreme_vs_fixed_mae_improvement_pct": -0.21794358314833415,
+        "fixed_100pct_metrics": {
+          "bias": 7.240050712981609,
+          "mae": 58.71926585243973,
+          "n": 530,
+          "rmse": 76.00944258415583
+        },
+        "n": 530,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 59.76752127019509,
+            "extreme_mae": 59.76752127019509,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": -0.5113976144097512,
+            "fixed_100pct_mae": 59.46342672447981,
+            "n": 64,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 59.657246932190475,
+            "extreme_mae": 59.50519242655573,
+            "extreme_vs_base_improvement_pct": 0.25488019218784513,
+            "extreme_vs_fixed_improvement_pct": -0.24260931273297043,
+            "fixed_100pct_mae": 59.361176683773024,
+            "n": 145,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 54.40876799053649,
+            "extreme_mae": 54.36026847607541,
+            "extreme_vs_base_improvement_pct": 0.08913915211150067,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 54.36026847607541,
+            "n": 187,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 61.92353710693835,
+            "extreme_mae": 61.86935490119796,
+            "extreme_vs_base_improvement_pct": 0.08749856399000529,
+            "extreme_vs_fixed_improvement_pct": -0.10276157919866076,
+            "fixed_100pct_mae": 61.80584224167338,
+            "n": 71,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 65.66868032936374,
+            "extreme_mae": 66.31061774281514,
+            "extreme_vs_base_improvement_pct": -0.9775396889837595,
+            "extreme_vs_fixed_improvement_pct": -0.5529526788988651,
+            "fixed_100pct_mae": 65.9459677475294,
+            "n": 63,
+            "weight": 2.0
+          }
+        }
+      }
+    }
+  },
+  "rb_receiving_yards": {
+    "base_metrics": {
+      "bias": -1.081188749397165,
+      "mae": 14.017250681688648,
+      "n": 705,
+      "rmse": 19.2141595857678
+    },
+    "extreme_metrics": {
+      "bias": -0.9925241240386735,
+      "mae": 14.01226323284474,
+      "n": 705,
+      "rmse": 19.167413581877657
+    },
+    "extreme_vs_base_mae_improvement_pct": 0.03558079224781929,
+    "extreme_vs_fixed_mae_improvement_pct": 0.14335738202344434,
+    "fixed_100pct_metrics": {
+      "bias": -1.0037356233932677,
+      "mae": 14.03237968499674,
+      "n": 705,
+      "rmse": 19.188921415455585
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.018972768336238628,
+    "fixed_beta_train_2021_24": 0.1744761146631285,
+    "holdout_rows": 705,
+    "market": "RB receiving yards",
+    "position": "RB",
+    "slots": {
+      "RB1": {
+        "base_metrics": {
+          "bias": -2.1208115097847857,
+          "mae": 14.928498741008672,
+          "n": 481,
+          "rmse": 20.589805472254348
+        },
+        "extreme_metrics": {
+          "bias": -1.9468585565473389,
+          "mae": 14.931845372375756,
+          "n": 481,
+          "rmse": 20.52181612716385
+        },
+        "extreme_vs_base_mae_improvement_pct": -0.022417735534855616,
+        "extreme_vs_fixed_mae_improvement_pct": -0.0068528883146857155,
+        "fixed_100pct_metrics": {
+          "bias": -1.928269978141168,
+          "mae": 14.93082217980731,
+          "n": 481,
+          "rmse": 20.525852207378023
+        },
+        "n": 481,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 17.1428197863034,
+            "extreme_mae": 17.1428197863034,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 0.001534047406405903,
+            "fixed_100pct_mae": 17.14308276932,
+            "n": 148,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 15.418601309183162,
+            "extreme_mae": 15.349576230368722,
+            "extreme_vs_base_improvement_pct": 0.4476740621947899,
+            "extreme_vs_fixed_improvement_pct": -0.24877677353341837,
+            "fixed_100pct_mae": 15.311484812472195,
+            "n": 51,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 13.860631810029156,
+            "extreme_mae": 13.946297829632483,
+            "extreme_vs_base_improvement_pct": -0.6180527754971551,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 13.946297829632483,
+            "n": 71,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 15.134361508259868,
+            "extreme_mae": 15.302468562547777,
+            "extreme_vs_base_improvement_pct": -1.1107640992727756,
+            "extreme_vs_fixed_improvement_pct": -0.43578954249433793,
+            "fixed_100pct_mae": 15.236071356887486,
+            "n": 62,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 12.98447400845466,
+            "extreme_mae": 12.908132289994384,
+            "extreme_vs_base_improvement_pct": 0.5879461764147446,
+            "extreme_vs_fixed_improvement_pct": 0.2866081257132419,
+            "fixed_100pct_mae": 12.945234383630494,
+            "n": 149,
+            "weight": 2.0
+          }
+        }
+      },
+      "RB2": {
+        "base_metrics": {
+          "bias": 1.1512154816137534,
+          "mae": 12.06050819716663,
+          "n": 224,
+          "rmse": 15.862056964961104
+        },
+        "extreme_metrics": {
+          "bias": 1.0567386529107363,
+          "mae": 12.037624799298223,
+          "n": 224,
+          "rmse": 15.873249951012822
+        },
+        "extreme_vs_base_mae_improvement_pct": 0.1897382555884574,
+        "extreme_vs_fixed_mae_improvement_pct": 0.5412652588866701,
+        "fixed_100pct_metrics": {
+          "bias": 0.9815368080073572,
+          "mae": 12.103134863550824,
+          "n": 224,
+          "rmse": 15.943673767219103
+        },
+        "n": 224,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 12.446225671164651,
+            "extreme_mae": 12.446225671164651,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 0.7334733566030895,
+            "fixed_100pct_mae": 12.538189953876621,
+            "n": 133,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 10.24336454933891,
+            "extreme_mae": 10.332266554058506,
+            "extreme_vs_base_improvement_pct": -0.8678984750702239,
+            "extreme_vs_fixed_improvement_pct": 0.8530905552305442,
+            "fixed_100pct_mae": 10.421168558778097,
+            "n": 19,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 11.417228948297101,
+            "extreme_mae": 11.233977555677342,
+            "extreme_vs_base_improvement_pct": 1.6050426373125455,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 11.233977555677342,
+            "n": 24,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 10.368371555356129,
+            "extreme_mae": 10.280379389076973,
+            "extreme_vs_base_improvement_pct": 0.8486594621862324,
+            "extreme_vs_fixed_improvement_pct": 0.28449608938347926,
+            "fixed_100pct_mae": 10.309710111170025,
+            "n": 31,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 15.067581322812737,
+            "extreme_mae": 15.085861991361742,
+            "extreme_vs_base_improvement_pct": -0.12132450562140255,
+            "extreme_vs_fixed_improvement_pct": -0.06062547603116946,
+            "fixed_100pct_mae": 15.076721657087239,
+            "n": 17,
+            "weight": 2.0
+          }
+        }
+      }
+    }
+  },
+  "rb_rushing_yards": {
+    "base_metrics": {
+      "bias": -2.186771575485535,
+      "mae": 24.630531768761585,
+      "n": 980,
+      "rmse": 33.42717365443671
+    },
+    "extreme_metrics": {
+      "bias": -1.7856482580389117,
+      "mae": 24.659369766821797,
+      "n": 980,
+      "rmse": 33.37014474978409
+    },
+    "extreme_vs_base_mae_improvement_pct": -0.11708232015025453,
+    "extreme_vs_fixed_mae_improvement_pct": 0.37794077006399823,
+    "fixed_100pct_metrics": {
+      "bias": -1.6321117935076253,
+      "mae": 24.752921147620448,
+      "n": 980,
+      "rmse": 33.438899835026476
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.0034019284767437983,
+    "fixed_beta_train_2021_24": 0.15754753822298292,
+    "holdout_rows": 980,
+    "market": "RB rushing yards",
+    "position": "RB",
+    "slots": {
+      "RB1": {
+        "base_metrics": {
+          "bias": -6.038164149669828,
+          "mae": 28.28559278731654,
+          "n": 543,
+          "rmse": 38.4352316963396
+        },
+        "extreme_metrics": {
+          "bias": -5.598866644251428,
+          "mae": 28.234900214923083,
+          "n": 543,
+          "rmse": 38.30100522406267
+        },
+        "extreme_vs_base_mae_improvement_pct": 0.17921693483541185,
+        "extreme_vs_fixed_mae_improvement_pct": 0.42858508378472265,
+        "fixed_100pct_metrics": {
+          "bias": -5.477142305549741,
+          "mae": 28.356431651274054,
+          "n": 543,
+          "rmse": 38.37581455019509
+        },
+        "n": 543,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 32.00634378234705,
+            "extreme_mae": 32.00634378234705,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 1.0536228475825233,
+            "fixed_100pct_mae": 32.34716085970922,
+            "n": 116,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 23.32368415141659,
+            "extreme_mae": 23.342029425847986,
+            "extreme_vs_base_improvement_pct": -0.07865513146336513,
+            "extreme_vs_fixed_improvement_pct": 0.2238720812312075,
+            "fixed_100pct_mae": 23.39440296265209,
+            "n": 79,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 29.26667825016695,
+            "extreme_mae": 29.51679171012695,
+            "extreme_vs_base_improvement_pct": -0.8546014611636739,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 29.51679171012695,
+            "n": 133,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 27.415964540977697,
+            "extreme_mae": 26.99979789255126,
+            "extreme_vs_base_improvement_pct": 1.5179719385922266,
+            "extreme_vs_fixed_improvement_pct": 0.4553610493350373,
+            "fixed_100pct_mae": 27.123306867316636,
+            "n": 74,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 27.535605485774163,
+            "extreme_mae": 27.312597672434787,
+            "extreme_vs_base_improvement_pct": 0.8098889034947455,
+            "extreme_vs_fixed_improvement_pct": 0.34106476923371043,
+            "fixed_100pct_mae": 27.40607012225328,
+            "n": 141,
+            "weight": 2.0
+          }
+        }
+      },
+      "RB2": {
+        "base_metrics": {
+          "bias": 2.5988260624597057,
+          "mae": 20.08888844364639,
+          "n": 437,
+          "rmse": 25.888001136785185
+        },
+        "extreme_metrics": {
+          "bias": 2.952515549085567,
+          "mae": 20.216548180279467,
+          "n": 437,
+          "rmse": 25.97006496097686
+        },
+        "extreme_vs_base_mae_improvement_pct": -0.6354743667933165,
+        "extreme_vs_fixed_mae_improvement_pct": 0.2899306375397092,
+        "fixed_100pct_metrics": {
+          "bias": 3.145580581867362,
+          "mae": 20.275332581295714,
+          "n": 437,
+          "rmse": 26.031094564867658
+        },
+        "n": 437,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 20.969015368362655,
+            "extreme_mae": 20.969015368362655,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 1.0618969731682013,
+            "fixed_100pct_mae": 21.194074605085063,
+            "n": 156,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 20.32535090532687,
+            "extreme_mae": 20.40901418447411,
+            "extreme_vs_base_improvement_pct": -0.4116203431711074,
+            "extreme_vs_fixed_improvement_pct": 0.40825938580141413,
+            "fixed_100pct_mae": 20.492677463621355,
+            "n": 64,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 19.433161577703423,
+            "extreme_mae": 19.676197779229405,
+            "extreme_vs_base_improvement_pct": -1.2506261554724505,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 19.676197779229405,
+            "n": 72,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 19.910908320118473,
+            "extreme_mae": 20.186723291343935,
+            "extreme_vs_base_improvement_pct": -1.3852455487767534,
+            "extreme_vs_fixed_improvement_pct": -0.4664426697874796,
+            "fixed_100pct_mae": 20.093000961219996,
+            "n": 42,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 19.13989914008114,
+            "extreme_mae": 19.34718088514802,
+            "extreme_vs_base_improvement_pct": -1.0829824313588343,
+            "extreme_vs_fixed_improvement_pct": -0.5468719161139589,
+            "fixed_100pct_mae": 19.241952053256647,
+            "n": 103,
+            "weight": 2.0
+          }
+        }
+      }
+    }
+  },
+  "research_version": "nfl-all-slots-extreme-yardage-tier-weights-2026-09-24",
+  "te_receiving_yards": {
+    "base_metrics": {
+      "bias": -0.3257806259659367,
+      "mae": 20.156981646918634,
+      "n": 532,
+      "rmse": 26.491827565538003
+    },
+    "extreme_metrics": {
+      "bias": -0.1304894071625809,
+      "mae": 20.193180780444568,
+      "n": 532,
+      "rmse": 26.494700473333364
+    },
+    "extreme_vs_base_mae_improvement_pct": -0.17958608168632725,
+    "extreme_vs_fixed_mae_improvement_pct": 0.008925268400908345,
+    "fixed_100pct_metrics": {
+      "bias": -0.07505617991988986,
+      "mae": 20.19498323690198,
+      "n": 532,
+      "rmse": 26.475524302693085
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.2685771968589783,
+    "fixed_beta_train_2021_24": 0.08089990661513917,
+    "holdout_rows": 532,
+    "market": "TE receiving yards",
+    "position": "TE",
+    "slots": {
+      "TE1": {
+        "base_metrics": {
+          "bias": -0.3257806259659367,
+          "mae": 20.156981646918634,
+          "n": 532,
+          "rmse": 26.491827565538003
+        },
+        "extreme_metrics": {
+          "bias": -0.1304894071625809,
+          "mae": 20.193180780444568,
+          "n": 532,
+          "rmse": 26.494700473333364
+        },
+        "extreme_vs_base_mae_improvement_pct": -0.17958608168632725,
+        "extreme_vs_fixed_mae_improvement_pct": 0.008925268400908345,
+        "fixed_100pct_metrics": {
+          "bias": -0.07505617991988986,
+          "mae": 20.19498323690198,
+          "n": 532,
+          "rmse": 26.475524302693085
+        },
+        "n": 532,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 23.928159582988663,
+            "extreme_mae": 23.928159582988663,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 0.017861150253373804,
+            "fixed_100pct_mae": 23.93243419101881,
+            "n": 143,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 18.454457324094992,
+            "extreme_mae": 18.566180296960304,
+            "extreme_vs_base_improvement_pct": -0.6053983105720563,
+            "extreme_vs_fixed_improvement_pct": 0.5981558596343893,
+            "fixed_100pct_mae": 18.67790326982561,
+            "n": 58,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 22.269719206678328,
+            "extreme_mae": 22.266333844091836,
+            "extreme_vs_base_improvement_pct": 0.015201640196149937,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 22.266333844091836,
+            "n": 110,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 17.51193379233802,
+            "extreme_mae": 17.606317654992647,
+            "extreme_vs_base_improvement_pct": -0.5389688184860719,
+            "extreme_vs_fixed_improvement_pct": -0.21304823122417946,
+            "fixed_100pct_mae": 17.568887451032456,
+            "n": 89,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 16.842406596538837,
+            "extreme_mae": 16.87839320803776,
+            "extreme_vs_base_improvement_pct": -0.21366668292118743,
+            "extreme_vs_fixed_improvement_pct": -0.12587961677410014,
+            "fixed_100pct_mae": 16.85717346268399,
+            "n": 132,
+            "weight": 2.0
+          }
+        }
+      }
+    }
+  },
+  "tier_definition": {
+    "Tier 1": ">=125% of exact-slot league-average pregame yardage",
+    "Tier 2": "110%-125%",
+    "Tier 3": "90%-110%",
+    "Tier 4": "75%-90%",
+    "Tier 5": "<75%"
+  },
+  "tier_matchup_weights": {
+    "Tier 1": 0.0,
+    "Tier 2": 0.5,
+    "Tier 3": 1.0,
+    "Tier 4": 1.5,
+    "Tier 5": 2.0
+  },
+  "wr_receiving_yards": {
+    "base_metrics": {
+      "bias": 2.7606993989175366,
+      "mae": 26.20692447035708,
+      "n": 1414,
+      "rmse": 33.19450178180033
+    },
+    "extreme_metrics": {
+      "bias": 2.7673902129318804,
+      "mae": 26.205233058301623,
+      "n": 1414,
+      "rmse": 33.190722199168114
+    },
+    "extreme_vs_base_mae_improvement_pct": 0.006454065441256158,
+    "extreme_vs_fixed_mae_improvement_pct": -0.0026055761481667632,
+    "fixed_100pct_metrics": {
+      "bias": 2.7685706691887355,
+      "mae": 26.204550278789824,
+      "n": 1414,
+      "rmse": 33.190811614998914
+    },
+    "fixed_beta_pvalue_train_2021_24": 0.9113689988648177,
+    "fixed_beta_train_2021_24": 0.005756454277932227,
+    "holdout_rows": 1414,
+    "market": "WR receiving yards",
+    "position": "WR",
+    "slots": {
+      "WR1": {
+        "base_metrics": {
+          "bias": 0.754935957067697,
+          "mae": 29.420023180223378,
+          "n": 543,
+          "rmse": 37.38900164593172
+        },
+        "extreme_metrics": {
+          "bias": 0.7596626460696341,
+          "mae": 29.418759340677738,
+          "n": 543,
+          "rmse": 37.38465252411276
+        },
+        "extreme_vs_base_mae_improvement_pct": 0.004295848231994204,
+        "extreme_vs_fixed_mae_improvement_pct": 0.0013752952669394683,
+        "fixed_100pct_metrics": {
+          "bias": 0.7595012259137144,
+          "mae": 29.419163941046993,
+          "n": 543,
+          "rmse": 37.38577807056152
+        },
+        "n": 543,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 34.864523950860786,
+            "extreme_mae": 34.864523950860786,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 0.00020417157533821303,
+            "fixed_100pct_mae": 34.86459513445391,
+            "n": 113,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 30.755910657348267,
+            "extreme_mae": 30.754742498768543,
+            "extreme_vs_base_improvement_pct": 0.003798159621211904,
+            "extreme_vs_fixed_improvement_pct": -0.0037984481635299746,
+            "fixed_100pct_mae": 30.7535743401888,
+            "n": 71,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 28.165536049085407,
+            "extreme_mae": 28.165601302063596,
+            "extreme_vs_base_improvement_pct": -0.000231676677749374,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 28.165601302063596,
+            "n": 140,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 28.667721035085684,
+            "extreme_mae": 28.66706233686549,
+            "extreme_vs_base_improvement_pct": 0.002297699978963147,
+            "extreme_vs_fixed_improvement_pct": 0.0007659117252110224,
+            "fixed_100pct_mae": 28.667281902938885,
+            "n": 106,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 25.396090682754494,
+            "extreme_mae": 25.39128856753566,
+            "extreme_vs_base_improvement_pct": 0.018908875695952163,
+            "extreme_vs_fixed_improvement_pct": 0.009455331796423112,
+            "fixed_100pct_mae": 25.393689625145072,
+            "n": 113,
+            "weight": 2.0
+          }
+        }
+      },
+      "WR2": {
+        "base_metrics": {
+          "bias": 3.435474638210541,
+          "mae": 25.784036064897023,
+          "n": 512,
+          "rmse": 32.30115667642735
+        },
+        "extreme_metrics": {
+          "bias": 3.4466479244733055,
+          "mae": 25.781289963258263,
+          "n": 512,
+          "rmse": 32.29756139935524
+        },
+        "extreme_vs_base_mae_improvement_pct": 0.010650394809594507,
+        "extreme_vs_fixed_mae_improvement_pct": 0.0011060979490407534,
+        "fixed_100pct_metrics": {
+          "bias": 3.4498729538974637,
+          "mae": 25.781575132732037,
+          "n": 512,
+          "rmse": 32.296877423733775
+        },
+        "n": 512,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 31.416224810215567,
+            "extreme_mae": 31.416224810215567,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": 0.008093900235527543,
+            "fixed_100pct_mae": 31.41876781393766,
+            "n": 146,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 24.683088624930825,
+            "extreme_mae": 24.677074168051675,
+            "extreme_vs_base_improvement_pct": 0.024366711032569925,
+            "extreme_vs_fixed_improvement_pct": -0.024378591554456902,
+            "fixed_100pct_mae": 24.671059711172532,
+            "n": 60,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 25.265473623746132,
+            "extreme_mae": 25.254804945852815,
+            "extreme_vs_base_improvement_pct": 0.04222631268344902,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 25.254804945852815,
+            "n": 79,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 24.105859682145788,
+            "extreme_mae": 24.10885447375748,
+            "extreme_vs_base_improvement_pct": -0.012423500556211841,
+            "extreme_vs_fixed_improvement_pct": -0.004140823895217511,
+            "fixed_100pct_mae": 24.107856209886915,
+            "n": 69,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 21.989845513265504,
+            "extreme_mae": 21.987257211405183,
+            "extreme_vs_base_improvement_pct": 0.01177044131010192,
+            "extreme_vs_fixed_improvement_pct": 0.005885567033673847,
+            "fixed_100pct_mae": 21.988551362335347,
+            "n": 158,
+            "weight": 2.0
+          }
+        }
+      },
+      "WR3": {
+        "base_metrics": {
+          "bias": 4.832132898656933,
+          "mae": 21.95011740667504,
+          "n": 359,
+          "rmse": 27.157254175569303
+        },
+        "extreme_metrics": {
+          "bias": 4.835401690639373,
+          "mae": 21.949283457555023,
+          "n": 359,
+          "rmse": 27.15421337711877
+        },
+        "extreme_vs_base_mae_improvement_pct": 0.0037992922979291845,
+        "extreme_vs_fixed_mae_improvement_pct": -0.01689612855004044,
+        "fixed_100pct_metrics": {
+          "bias": 4.835695844474161,
+          "mae": 21.945575504906667,
+          "n": 359,
+          "rmse": 27.15346021414001
+        },
+        "n": 359,
+        "tiers": {
+          "Tier 1": {
+            "base_mae": 22.868347264249465,
+            "extreme_mae": 22.868347264249465,
+            "extreme_vs_base_improvement_pct": 0.0,
+            "extreme_vs_fixed_improvement_pct": -0.028637723170946806,
+            "fixed_100pct_mae": 22.861800165206258,
+            "n": 144,
+            "weight": 0.0
+          },
+          "Tier 2": {
+            "base_mae": 21.854176670678957,
+            "extreme_mae": 21.84506548422081,
+            "extreme_vs_base_improvement_pct": 0.041690824575285265,
+            "extreme_vs_fixed_improvement_pct": -0.04172561608206019,
+            "fixed_100pct_mae": 21.835954297762672,
+            "n": 39,
+            "weight": 0.5
+          },
+          "Tier 3": {
+            "base_mae": 19.981150987511345,
+            "extreme_mae": 19.97928877720812,
+            "extreme_vs_base_improvement_pct": 0.009319835000447878,
+            "extreme_vs_fixed_improvement_pct": 0.0,
+            "fixed_100pct_mae": 19.97928877720812,
+            "n": 76,
+            "weight": 1.0
+          },
+          "Tier 4": {
+            "base_mae": 22.3197150788435,
+            "extreme_mae": 22.32744470163687,
+            "extreme_vs_base_improvement_pct": -0.03463136857287604,
+            "extreme_vs_fixed_improvement_pct": -0.011541124957944253,
+            "fixed_100pct_mae": 22.324868160705748,
+            "n": 51,
+            "weight": 1.5
+          },
+          "Tier 5": {
+            "base_mae": 21.99723079012361,
+            "extreme_mae": 21.993215805600443,
+            "extreme_vs_base_improvement_pct": 0.018252227116557745,
+            "extreme_vs_fixed_improvement_pct": 0.009126946493764148,
+            "fixed_100pct_mae": 21.995223297862022,
+            "n": 49,
+            "weight": 2.0
+          }
+        }
+      }
+    }
+  }
+}
