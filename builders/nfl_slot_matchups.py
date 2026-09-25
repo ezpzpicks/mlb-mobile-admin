@@ -19,7 +19,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "nfl-v4.15-slot-matchup-amplification-2026-09-20"
+MODEL_VERSION = "nfl-v4.16-progressive-slot-weighting-2026-09-24"
 
 TRACKED_SLOTS = {"QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE1"}
 SLOT_FAMILIES = {
@@ -136,6 +136,28 @@ def _num(value: Any, default: float = 0.0) -> float:
         return number if math.isfinite(number) else float(default)
     except Exception:
         return float(default)
+
+
+def _slot_season_weight(sample_games: float | int) -> float:
+    """Progressively trust current-season exact-slot defense data as the sample matures.
+
+    Historical slot labels are not reliably available for prior seasons, so league
+    average acts as the preseason/early-season prior. This mirrors the broader NFL
+    matchup progression while keying the weight to the defense-slot sample actually
+    available instead of assuming every prior week produced a usable observation.
+    """
+    games = max(0, int(math.floor(_num(sample_games, 0.0))))
+    if games <= 0:
+        return 0.0
+    if games == 1:
+        return 0.35
+    if games == 2:
+        return 0.60
+    if games == 3:
+        return 0.75
+    if games == 4:
+        return 0.85
+    return 0.90
 
 
 def _slot(value: Any) -> str:
@@ -384,13 +406,25 @@ def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, marke
     if not (math.isfinite(league_slot) and league_slot > 0.20 and math.isfinite(defense_slot_avg)) or league_slot_n < 8:
         return {"adjustment_pct": 0.0, "sample": float(sample)}
 
-    absolute_index = defense_slot_avg / league_slot
+    # Prior-season exact-slot labels are not dependable enough to backfill this
+    # layer. Use the current league slot average as the prior, then progressively
+    # increase the defense-specific weight as usable games accumulate.
+    season_weight = _slot_season_weight(sample)
+    weighted_defense_slot_avg = league_slot + season_weight * (defense_slot_avg - league_slot)
+    absolute_index_raw = defense_slot_avg / league_slot
+    absolute_index = weighted_defense_slot_avg / league_slot
+
     family_slots = SLOT_FAMILIES.get(slot, (slot,))
     family_rows = market_rows[market_rows["slot"].isin(family_slots)].copy()
     defense_family = family_rows[family_rows["opponent"].astype(str) == opponent].copy()
     league_family = float(pd.to_numeric(family_rows["actual"], errors="coerce").mean()) if not family_rows.empty else league_slot
     defense_family_avg = float(pd.to_numeric(defense_family["actual"], errors="coerce").mean()) if not defense_family.empty else defense_slot_avg
-    family_index = defense_family_avg / league_family if math.isfinite(league_family) and league_family > 0.20 else 1.0
+    weighted_defense_family_avg = (
+        league_family + season_weight * (defense_family_avg - league_family)
+        if math.isfinite(league_family) and league_family > 0.20
+        else defense_family_avg
+    )
+    family_index = weighted_defense_family_avg / league_family if math.isfinite(league_family) and league_family > 0.20 else 1.0
 
     if slot == "TE1":
         broad_rows = market_rows[market_rows["slot"].astype(str) == "TE_ALL"].copy()
@@ -398,14 +432,15 @@ def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, marke
         league_broad = float(pd.to_numeric(broad_rows["actual"], errors="coerce").mean()) if not broad_rows.empty else math.nan
         defense_broad_avg = float(pd.to_numeric(defense_broad["actual"], errors="coerce").mean()) if not defense_broad.empty else math.nan
         if math.isfinite(league_broad) and league_broad > 0.20 and math.isfinite(defense_broad_avg):
-            family_index = defense_broad_avg / league_broad
+            weighted_defense_broad_avg = league_broad + season_weight * (defense_broad_avg - league_broad)
+            family_index = weighted_defense_broad_avg / league_broad
             outlier_index = absolute_index / max(family_index, 0.25)
         else:
             # Without an all-TE baseline, broad TE defense already owns this signal.
             outlier_index = 1.0
     elif len(family_slots) == 1:
-        # QB has no same-position depth peer. Use the exact-slot absolute index
-        # so an extreme QB matchup can still move passing/rushing projections.
+        # QB has no same-position depth peer. Use the progressively weighted
+        # exact-slot absolute index so one early result cannot dominate.
         outlier_index = absolute_index
     else:
         outlier_index = absolute_index / max(family_index, 0.25)
@@ -422,11 +457,14 @@ def _profile_from_history(history: pd.DataFrame, opponent: str, slot: str, marke
         "sample": float(sample),
         "league_sample": float(league_slot_n),
         "defense_slot_avg": defense_slot_avg,
+        "weighted_defense_slot_avg": weighted_defense_slot_avg,
         "league_slot_avg": league_slot,
-        "absolute_edge_pct": absolute_index - 1.0,
+        "absolute_edge_pct": absolute_index_raw - 1.0,
+        "weighted_absolute_edge_pct": absolute_index - 1.0,
         "family_edge_pct": family_index - 1.0,
         "slot_outlier_pct": outlier_index - 1.0,
         "sample_weight": sample_weight,
+        "season_weight": season_weight,
     }
 
 
@@ -566,9 +604,12 @@ def _append_reason(row: dict[str, Any], opponent: str, slot: str, market: str, p
             f"base {base_adjustment:+.1%}, applied {adjustment:+.1%}"
         )
     else:
+        season_weight = _num(profile.get("season_weight"), 1.0)
+        weighted_avg = _num(profile.get("weighted_defense_slot_avg"), defense_avg)
         note = (
-            f"slot matchup {opponent} vs {slot} {market}: {defense_avg:.1f} vs {league_avg:.1f} league "
-            f"({absolute:+.0%}); slot outlier {outlier:+.0%}; {sample}g; applied {adjustment:+.1%}"
+            f"slot matchup {opponent} vs {slot} {market}: {defense_avg:.1f} observed vs {league_avg:.1f} league "
+            f"({absolute:+.0%}); weighted {weighted_avg:.1f} at {season_weight:.0%} current-season trust; "
+            f"slot outlier {outlier:+.0%}; {sample}g; applied {adjustment:+.1%}"
         )
     current = str(row.get("Confluence", "") or "").strip()
     row["Confluence"] = f"{current} • {note}".strip(" •")
