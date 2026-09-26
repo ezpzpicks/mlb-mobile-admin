@@ -32,14 +32,19 @@ away_value = calibration._priced_spread_market(pricing_builder, sim, 0.0, "Home"
 assert away_value["team"] == "Away"
 assert away_value["odds"] == 180
 
-# The selected spread gates remain point-edge driven below 20 points, while
-# every 20+ market spread is projection-only regardless of model strength.
-assert calibration._grade_spread(0.01, 5.99, 0, 0, 19.5) == "No Play"
-assert calibration._grade_spread(0.01, 6.00, 0, 0, 19.5) == "B Spread"
-assert calibration._grade_spread(0.01, 9.50, 0, 0, 19.5) == "A Spread"
-assert calibration._grade_spread(0.99, 20.0, 100, 6, 20.0) == "No Play"
-assert calibration._grade_spread(0.99, 20.0, 100, 6, -20.0) == "No Play"
-assert calibration._grade_spread(0.99, 20.0, 100, 6, 35.5) == "No Play"
+# Spread grades use stabilized projection edge:
+# abs(point edge) / max(abs(market spread), 3.5). A 150%+ edge qualifies;
+# confluence upgrades the qualifying play from B to A. Every 20+ market spread
+# remains projection-only regardless of model strength.
+assert calibration._grade_spread(0.01, 5.24, 0, 0, 3.5) == "No Play"
+assert calibration._grade_spread(0.01, 5.25, 0, 0, 3.5) == "B Spread"
+assert calibration._grade_spread(0.01, 5.25, 0, 1, 3.5) == "A Spread"
+assert calibration._grade_spread(0.01, 5.25, 0, 1, 0.5) == "A Spread"
+assert calibration._grade_spread(0.99, 40.0, 100, 6, 20.0) == "No Play"
+assert calibration._grade_spread(0.99, 40.0, 100, 6, -20.0) == "No Play"
+assert calibration._grade_spread(0.99, 80.0, 100, 6, 35.5) == "No Play"
+assert calibration.SPREAD_EDGE_DENOMINATOR_FLOOR == 3.5
+assert calibration.SPREAD_PROJECTION_EDGE_THRESHOLD_PCT == 150.0
 assert calibration.SPREAD_NO_GRADE_THRESHOLD == 20.0
 assert calibration.ATS_CALIBRATION_PROVEN is False
 assert abs(calibration.MARGIN_RESIDUAL_SD - 17.75939215594032) < 1e-9
@@ -92,8 +97,8 @@ assert "Home spread odds" in builder_source or "spread odds" in builder_source
 assert "total_over_odds=total_over_odds" in builder_source
 assert "total_under_odds=total_under_odds" in builder_source
 assert "install_market_calibration(cfb_builder)" in app_source
-assert "cfb-v2.1-calibrated-pricing-2026-08-21" in app_source
+assert "cfb-v2.5-stabilized-spread-edge-2026-09-25" in app_source
 assert "Price-aware veto" in module_source
 assert "TEAM_RESIDUAL_FEATURES: tuple[str, ...] = ()" in module_source
 
-print("CFB v2.1 calibrated-pricing smoke tests passed")
+print("CFB stabilized spread-edge smoke tests passed")
