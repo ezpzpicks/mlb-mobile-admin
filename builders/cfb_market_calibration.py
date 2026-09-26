@@ -23,22 +23,21 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-MODEL_VERSION = "cfb-v2.3-independent-total-2026-09-19-20pt-spread-no-grade"
+MODEL_VERSION = "cfb-v2.5-stabilized-spread-edge-2026-09-25"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
 # 2024 out-of-sample residual distribution from the 2021-23-trained CFB v2 model.
 MARGIN_RESIDUAL_SD = 17.75939215594032
 MARGIN_ROBUST_SIGMA = 16.871932143212987
 
-# 2025 leakage-safe FBS-vs-FBS backtesting showed a material hit-rate/ROI lift
-# when the point-edge gates were made substantially stricter. Spread A/B grading
-# is intentionally simple: point edge determines the grade, while probability,
-# reliability, and confluence are tracked as diagnostics. Actual price must still
-# have positive no-vig edge and positive EV or the play is vetoed.
-SPREAD_B_PROBABILITY = 0.55
-SPREAD_B_POINT_EDGE = 6.0
-SPREAD_A_PROBABILITY = 0.58
-SPREAD_A_POINT_EDGE = 9.5
+# 2026 in-season FBS-vs-FBS validation now grades spreads from a stabilized
+# projection-vs-market edge. The denominator is floored at 3.5 points so near
+# pick'em markets cannot manufacture enormous percentage edges. A 150%+ edge is
+# the qualification threshold; independent spread confluence upgrades it to A.
+# Actual price must still have positive no-vig edge and positive EV or the play
+# is vetoed after grading.
+SPREAD_EDGE_DENOMINATOR_FLOOR = 3.5
+SPREAD_PROJECTION_EDGE_THRESHOLD_PCT = 150.0
 SPREAD_NO_GRADE_THRESHOLD = 20.0
 
 # 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and
@@ -152,6 +151,11 @@ def _priced_total_market(
     return max(options, key=lambda option: (option["ev"], option["price_edge"], option["probability"]))
 
 
+def _stabilized_spread_projection_edge_pct(point_edge: float, market_spread: float) -> float:
+    denominator = max(abs(float(market_spread)), SPREAD_EDGE_DENOMINATOR_FLOOR)
+    return abs(float(point_edge)) / denominator * 100.0
+
+
 def _grade_spread(
     probability: float,
     point_edge: float,
@@ -159,17 +163,16 @@ def _grade_spread(
     confluence: int,
     market_spread: float = 0.0,
 ) -> str:
-    # The underlying projection and spread probability are still calculated for
-    # every matchup, but 20+ point market spreads are projection-only. Recent
-    # production results showed this extreme-spread regime is not calibrated well
-    # enough to contribute an official A/B spread grade or betting record.
+    # Grade only truly exceptional projection-vs-market disagreements. Probability
+    # and reliability remain diagnostics; confluence separates A from B.
     if abs(float(market_spread)) >= SPREAD_NO_GRADE_THRESHOLD:
         return "No Play"
-    if point_edge >= SPREAD_A_POINT_EDGE:
+    projection_edge_pct = _stabilized_spread_projection_edge_pct(point_edge, market_spread)
+    if projection_edge_pct < SPREAD_PROJECTION_EDGE_THRESHOLD_PCT:
+        return "No Play"
+    if int(confluence) >= 1:
         return "A Spread"
-    if point_edge >= SPREAD_B_POINT_EDGE:
-        return "B Spread"
-    return "No Play"
+    return "B Spread"
 
 
 def _grade_total(pick: str, point_edge: float, probability: float, reliability: float, confluence: int) -> str:
@@ -311,9 +314,25 @@ def install_market_calibration(cfb_builder: Any) -> None:
             projection, moneyline["pick"], game_obj["Home Team"], "moneyline"
         )
 
-        spread["grade"] = _grade_spread(
-            spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread
+        away_classification = str(game_obj.get("Away Classification", "")).strip().upper()
+        home_classification = str(game_obj.get("Home Classification", "")).strip().upper()
+        fbs_vs_fbs = away_classification == "FBS" and home_classification == "FBS"
+        if fbs_vs_fbs:
+            spread["grade"] = _grade_spread(
+                spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread
+            )
+        else:
+            spread["grade"] = "No Play"
+            spread_support = list(spread_support) + [
+                "Spread A/B grades are validated for FBS-vs-FBS matchups only"
+            ]
+        stabilized_edge_pct = _stabilized_spread_projection_edge_pct(
+            spread["model_edge_points"], market_home_spread
         )
+        spread["projection_edge_pct"] = stabilized_edge_pct
+        spread_support = list(spread_support) + [
+            f"Stabilized projection edge: {stabilized_edge_pct:.1f}%"
+        ]
         if abs(market_home_spread) >= SPREAD_NO_GRADE_THRESHOLD:
             spread_support = list(spread_support) + [
                 "20+ point market spread is projection-only; spread grade disabled"
