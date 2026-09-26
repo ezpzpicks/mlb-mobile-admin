@@ -230,7 +230,7 @@ elif selected_sport == "CFB":
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
     _install_cfb_evaluation_cache(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.4-covers-personnel-weather-2026-09-11"
+    cfb_builder.MODEL_VERSION = "cfb-v2.5-stabilized-spread-edge-2026-09-25"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
