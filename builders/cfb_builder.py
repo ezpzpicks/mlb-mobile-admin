@@ -2832,10 +2832,19 @@ def reliability_score(game: pd.Series, projection: dict[str, Any], simulation: d
     return round(clamp(score, 20.0, 98.0), 1), {k: round(v, 1) for k, v in parts.items()}, reasons
 
 
-def _grade_spread(probability: float, point_edge: float, reliability: float, confluence: int) -> str:
-    if probability >= 0.57 and point_edge >= 4.0 and reliability >= 72 and confluence >= 4: return "A Spread"
-    if probability >= 0.545 and point_edge >= 2.5 and reliability >= 62 and confluence >= 3: return "B Spread"
-    return "No Play"
+def _grade_spread(
+    probability: float,
+    point_edge: float,
+    reliability: float,
+    confluence: int,
+    market_spread: float = 0.0,
+) -> str:
+    if abs(float(market_spread)) >= 20.0:
+        return "No Play"
+    stabilized_edge_pct = abs(float(point_edge)) / max(abs(float(market_spread)), 3.5) * 100.0
+    if stabilized_edge_pct < 150.0:
+        return "No Play"
+    return "A Spread" if int(confluence) >= 1 else "B Spread"
 
 
 def _grade_total(probability: float, point_edge: float, reliability: float, confluence: int) -> str:
@@ -2890,7 +2899,9 @@ def evaluate_game(game: pd.Series, ratings: pd.DataFrame, away_personnel: Person
     total_direction = "over" if total["pick"].startswith("Over") else "under"
     total_conf, total_support = _confluence(projection, game["Home Team"], game["Home Team"], "total", total_direction)
     ml_conf, ml_support = _confluence(projection, moneyline["pick"], game["Home Team"], "moneyline")
-    spread["grade"] = _grade_spread(spread["probability"], spread["model_edge_points"], reliability, spread_conf)
+    spread["grade"] = _grade_spread(
+        spread["probability"], spread["model_edge_points"], reliability, spread_conf, market_home_spread
+    )
     total["grade"] = _grade_total(total["probability"], total["model_edge_points"], reliability, total_conf)
     moneyline["grade"] = _grade_ml(moneyline["edge"], moneyline["ev"], reliability, ml_conf)
     if not market_availability.get("spread", False): spread["grade"] = "No Play"
