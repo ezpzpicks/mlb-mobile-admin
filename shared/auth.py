@@ -4,12 +4,11 @@ import os
 
 import streamlit as st
 
-# Install the layered NFL v4.23 calibration wrapper before app_mobile_admin
-# later imports the slot layer's installer. This preserves the v4.19 WR1/WR2
-# receiving calibration, v4.20 RB receiving target hybrid, v4.21 RB rushing
-# calibration, and v4.22 RB count-prop reconciliation, then neutralizes the
-# validated harmful TE1 Receiving Yards matchup layer only.
-import builders.nfl_te_receiving_v423  # noqa: F401
+# Install the layered NFL v4.24 calibration wrapper before app_mobile_admin
+# later imports the slot layer's installer. This preserves all validated
+# v4.19-v4.23 receiving/rushing/count-prop changes, then applies the guarded
+# WR2 Targets/Receptions half-neutralization of the live role overlay only.
+import builders.nfl_wr_countprops_v424  # noqa: F401
 
 ADMIN_AUTH_QUERY_KEY = "ezpz_admin_auth"
 
