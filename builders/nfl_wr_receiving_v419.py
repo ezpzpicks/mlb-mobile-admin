@@ -1,14 +1,19 @@
-"""Guarded v4.19 calibration for WR1/WR2 receiving yards only.
+"""Guarded NFL receiving calibrations layered on the v4.18 slot model.
 
-This patch leaves the fitted RB/WR regression, count props, WR3, RB, TE, rushing,
-passing and TD paths unchanged.  It replaces only the final Receiving Yards row
-for WR1/WR2 after the v4.18 slot layer has run.
-
-Validated candidate reconstruction:
+WR1/WR2 receiving yards (v4.19):
 - start from the regression target baseline before the live target-role overlay
-- keep the regression/live efficiency estimate, but shrink YPT 80% to 8.15
+- shrink YPT 80% to the 8.15 WR prior
 - discard the broad/variable-tier receiving-yard matchup multiplier
 - apply only the exact-slot residual at 3x strength
+
+RB receiving yards (v4.20):
+- keep the existing RB receiving efficiency and matchup calculation unchanged
+- reconcile final projected targets against the independent Routes x TPRR estimate
+- if regression targets are above Routes x TPRR, pull them back by at most 1 target
+- only restore targets upward for a high-TPRR receiving archetype with a suppressive
+  live-role overlay, capped at 1.5 targets
+
+All other markets and positions remain on their existing paths.
 """
 from __future__ import annotations
 
@@ -18,11 +23,20 @@ from typing import Any
 from builders import nfl_slot_matchups as slot_matchups
 from builders.nfl_prop_grading import install_unified_prop_grading
 
-MODEL_VERSION = "nfl-v4.19-wr12-receiving-calibration-2026-10-01"
+MODEL_VERSION = "nfl-v4.20-rb-receiving-target-hybrid-2026-10-01"
 WR_SLOTS = {"WR1", "WR2"}
 YPT_PRIOR = 8.15
 EFFICIENCY_PRIOR_WEIGHT = 0.80
 EXACT_SLOT_STRENGTH = 3.0
+
+# Forward-validated RB receiving target reconciliation.  These values were fit on
+# completed games before 2026-09-27 and then checked on the untouched 09-27 slate.
+RB_TARGET_DOWN_CAP = 1.0
+RB_TARGET_UP_CAP = 1.5
+RB_ROUTE_TARGET_RATIO_MIN = 1.15
+RB_ROUTE_PARTICIPATION_MIN = 0.45
+RB_TPRR_MIN = 0.20
+RB_ROLE_OVERLAY_MAX = 0.85
 
 
 def _num(value: Any, default: float = 0.0) -> float:
@@ -50,6 +64,78 @@ def _live_role_overlay(row: dict[str, Any] | None) -> float:
     token = tail[:x_pos if x_pos >= 0 else None].strip()
     value = _num(token, 1.0)
     return value if value > 0.01 else 1.0
+
+
+def _apply_rb_receiving_target_hybrid(nfl_builder: Any, rows: list[dict[str, Any]], exact_slot: str) -> None:
+    """Reconcile RB receiving-yard targets with the independent route/TPRR estimate.
+
+    This intentionally leaves YPT/efficiency untouched.  It reproduces the tested
+    target-only hybrid using the fully adjusted v4.18 receiving-yard row.
+    """
+    if exact_slot not in {"RB1", "RB2", "RB3", "RB4"}:
+        return
+
+    row = _row(rows, "Receiving Yards")
+    if row is None:
+        return
+
+    targets = max(0.0, _num(row.get("Projected Targets"), 0.0))
+    routes = max(0.0, _num(row.get("Projected Routes"), 0.0))
+    tprr = max(0.0, _num(row.get("Targets Per Route"), 0.0))
+    route_participation = max(0.0, _num(row.get("Route Participation"), 0.0))
+    if targets <= 0.0 or routes <= 0.0 or tprr <= 0.0:
+        return
+
+    route_targets = routes * tprr
+    role_overlay = _live_role_overlay(row)
+    new_targets = targets
+    mode = ""
+
+    if route_targets < targets:
+        # Regression target volume can run materially above the route-based target
+        # estimate.  Pull it back, but never by more than one target.
+        new_targets = max(route_targets, targets - RB_TARGET_DOWN_CAP)
+        mode = "down"
+    else:
+        target_ratio = route_targets / targets if targets > 0 else 1.0
+        is_receiving_archetype = (
+            target_ratio >= RB_ROUTE_TARGET_RATIO_MIN
+            and route_participation >= RB_ROUTE_PARTICIPATION_MIN
+            and tprr >= RB_TPRR_MIN
+            and role_overlay < RB_ROLE_OVERLAY_MAX
+        )
+        if is_receiving_archetype:
+            new_targets = min(route_targets, targets + RB_TARGET_UP_CAP)
+            mode = "up-archetype"
+
+    if not mode or abs(new_targets - targets) < 1e-9:
+        return
+
+    scale = new_targets / targets
+    old_projection = max(0.0, _num(row.get("Projection"), 0.0))
+    old_receptions = max(0.0, _num(row.get("Projected Receptions"), 0.0))
+    new_projection = max(0.0, old_projection * scale)
+
+    row["Projected Targets"] = round(new_targets, 2)
+    row["Projected Receptions"] = round(old_receptions * scale, 2)
+    # Keep Efficiency, Routes, Route Participation and TPRR unchanged.  TPRR is
+    # the independent role estimate used to cross-check the regression targets.
+    row["Raw Projection"] = round(new_projection, 2)
+    row["Calibration Adjustment"] = 0.0
+    row["Projection"] = round(new_projection, 2)
+    row["Fair Line"] = nfl_builder._fair_line(new_projection, "Receiving Yards")
+    row["_sd"] = nfl_builder._prop_sd(
+        "Receiving Yards", new_projection, _num(row.get("Reliability"), 70.0)
+    )
+
+    note = (
+        f"v4.20 RB receiving target hybrid ({mode}): regression targets "
+        f"{targets:.2f} -> {new_targets:.2f}; Routes x TPRR {route_targets:.2f} "
+        f"({routes:.2f} x {tprr:.3f}); route participation {route_participation:.1%}; "
+        f"live role overlay {role_overlay:.2f}x; YPT unchanged"
+    )
+    previous = str(row.get("Confluence", "") or "").strip()
+    row["Confluence"] = f"{previous} • {note}".strip(" •")
 
 
 def _install() -> None:
@@ -113,6 +199,10 @@ def _install() -> None:
             nfl_builder, rows, season, projection_week, opponent, slot,
             player_profile, profiles_frame,
         )
+
+        # RB target reconciliation is intentionally applied to the fully adjusted
+        # v4.18 row so it matches the historical audit construction exactly.
+        _apply_rb_receiving_target_hybrid(nfl_builder, result, exact_slot)
 
         if candidate is None:
             return result
