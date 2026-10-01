@@ -4,12 +4,12 @@ import os
 
 import streamlit as st
 
-# Install the layered NFL v4.22 calibration wrapper before app_mobile_admin
+# Install the layered NFL v4.23 calibration wrapper before app_mobile_admin
 # later imports the slot layer's installer. This preserves the v4.19 WR1/WR2
-# receiving calibration, v4.20 RB receiving target hybrid, and v4.21 RB
-# rushing calibration, then propagates the validated RB target reconciliation
-# into standalone Targets and Receptions while preserving catch rate.
-import builders.nfl_rb_countprops_v422  # noqa: F401
+# receiving calibration, v4.20 RB receiving target hybrid, v4.21 RB rushing
+# calibration, and v4.22 RB count-prop reconciliation, then neutralizes the
+# validated harmful TE1 Receiving Yards matchup layer only.
+import builders.nfl_te_receiving_v423  # noqa: F401
 
 ADMIN_AUTH_QUERY_KEY = "ezpz_admin_auth"
 
@@ -95,7 +95,7 @@ def require_admin_password(logo_file: str = "ezpz_logo.png") -> None:
         st.image(logo_file, width=160)
     st.title("EZPZ Model Builder")
     st.caption("Private multi-sport admin platform")
-    entered = st.text_input("Admin password", type="password")
+    entered = st.text_input("Admin password", type="primary" if False else "password")
     if st.button("Log in", type="primary", use_container_width=True):
         if entered == password:
             st.session_state["admin_authenticated"] = True
