@@ -4,6 +4,10 @@ import os
 
 import streamlit as st
 
+# Install the narrowly scoped NFL WR1/WR2 receiving-yards v4.19 wrapper before
+# app_mobile_admin later imports the slot layer's installer.
+import builders.nfl_wr_receiving_v419  # noqa: F401
+
 ADMIN_AUTH_QUERY_KEY = "ezpz_admin_auth"
 
 
