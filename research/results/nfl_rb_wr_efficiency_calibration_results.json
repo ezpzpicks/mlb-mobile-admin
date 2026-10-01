@@ -1,0 +1,394 @@
+{
+  "rb_receiving_yards": {
+    "baseline_regression_mae": 13.366640945242976,
+    "best_full_grid": [
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 13.366640945242976
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 13.397110851518939
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 13.44957197477885
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 13.455139652281163
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 13.492825589278791
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.75,
+        "yardage_mae": 13.519156371707338
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 13.547305549889186
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 1.0,
+        "yardage_mae": 13.605046720831453
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 13.613868717668268
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.75,
+        "yardage_mae": 13.625624668481157
+      }
+    ],
+    "efficiency_grid": [
+      {
+        "raw_eff_share": 0.0,
+        "yardage_mae": 13.366640945242976
+      },
+      {
+        "raw_eff_share": 0.25,
+        "yardage_mae": 13.455139652281163
+      },
+      {
+        "raw_eff_share": 0.5,
+        "yardage_mae": 13.613868717668268
+      },
+      {
+        "raw_eff_share": 0.75,
+        "yardage_mae": 13.831074296403298
+      },
+      {
+        "raw_eff_share": 1.0,
+        "yardage_mae": 14.10153735360935
+      }
+    ],
+    "high_efficiency_segments": {
+      "top10_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 13.091541231840932,
+        "blend50_raw_eff_yardage_mae": 14.1580503632709,
+        "cutoff": 8.667613978341896,
+        "n": 71,
+        "raw_eff_yardage_mae": 16.725838914309634,
+        "regression_eff_yardage_mae": 12.320062095058596
+      },
+      "top25_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 13.5949050291122,
+        "blend50_raw_eff_yardage_mae": 14.182050964256678,
+        "cutoff": 7.16396070793359,
+        "n": 177,
+        "raw_eff_yardage_mae": 15.762508407367731,
+        "regression_eff_yardage_mae": 13.205822334157295
+      }
+    },
+    "n": 708,
+    "opportunity_grid": [
+      {
+        "raw_opp_share": 0.0,
+        "yardage_mae": 13.366640945242976
+      },
+      {
+        "raw_opp_share": 0.25,
+        "yardage_mae": 13.397110851518939
+      },
+      {
+        "raw_opp_share": 0.5,
+        "yardage_mae": 13.44957197477885
+      },
+      {
+        "raw_opp_share": 0.75,
+        "yardage_mae": 13.519156371707338
+      },
+      {
+        "raw_opp_share": 1.0,
+        "yardage_mae": 13.605046720831453
+      }
+    ],
+    "raw_components_mae": 14.506461562736558,
+    "selected_efficiency_features": [
+      "raw_ypt"
+    ],
+    "selected_opportunity_features": [
+      "raw_targets",
+      "targets_avg3",
+      "team_targets_avg8",
+      "opp_targets_avg8"
+    ]
+  },
+  "rb_rushing_yards": {
+    "baseline_regression_mae": 24.068714235896753,
+    "best_full_grid": [
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 24.068714235896753
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 24.073574983941807
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 24.131224040070034
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 24.131250551123124
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 24.145591919049306
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 24.196293289540254
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.75,
+        "yardage_mae": 24.282929120560738
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 24.313561084937934
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 24.33876304055056
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.75,
+        "yardage_mae": 24.35445439084162
+      }
+    ],
+    "efficiency_grid": [
+      {
+        "raw_eff_share": 0.0,
+        "yardage_mae": 24.068714235896753
+      },
+      {
+        "raw_eff_share": 0.25,
+        "yardage_mae": 24.145591919049306
+      },
+      {
+        "raw_eff_share": 0.5,
+        "yardage_mae": 24.33876304055056
+      },
+      {
+        "raw_eff_share": 0.75,
+        "yardage_mae": 24.61852594116901
+      },
+      {
+        "raw_eff_share": 1.0,
+        "yardage_mae": 24.97868423939913
+      }
+    ],
+    "high_efficiency_segments": {
+      "top10_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 28.342461393799518,
+        "blend50_raw_eff_yardage_mae": 30.1620136778631,
+        "cutoff": 5.594096149707236,
+        "n": 102,
+        "raw_eff_yardage_mae": 34.5494353855425,
+        "regression_eff_yardage_mae": 26.949561635215524
+      },
+      "top25_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 26.552413747434933,
+        "blend50_raw_eff_yardage_mae": 27.454459437090474,
+        "cutoff": 4.881880490425466,
+        "n": 254,
+        "raw_eff_yardage_mae": 29.839663314680106,
+        "regression_eff_yardage_mae": 25.94307546467011
+      }
+    },
+    "n": 1013,
+    "opportunity_grid": [
+      {
+        "raw_opp_share": 0.0,
+        "yardage_mae": 24.068714235896753
+      },
+      {
+        "raw_opp_share": 0.25,
+        "yardage_mae": 24.073574983941807
+      },
+      {
+        "raw_opp_share": 0.5,
+        "yardage_mae": 24.131250551123124
+      },
+      {
+        "raw_opp_share": 0.75,
+        "yardage_mae": 24.282929120560738
+      },
+      {
+        "raw_opp_share": 1.0,
+        "yardage_mae": 24.513819496345747
+      }
+    ],
+    "raw_components_mae": 25.437274467566002,
+    "selected_efficiency_features": [
+      "raw_rb_ypc",
+      "team_total",
+      "team_spread"
+    ],
+    "selected_opportunity_features": [
+      "raw_rb_carries",
+      "carries_avg3",
+      "carry_share_avg3",
+      "team_rush_avg8",
+      "opp_carries_avg8",
+      "team_total"
+    ]
+  },
+  "wr_receiving_yards": {
+    "baseline_regression_mae": 25.306368504075923,
+    "best_full_grid": [
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 25.250316658416434
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 25.306368504075923
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 25.31210053043179
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 25.355214138740138
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 25.41425685238087
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.25,
+        "yardage_mae": 25.421567157990804
+      },
+      {
+        "raw_eff_share": 0.25,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 25.49238071976259
+      },
+      {
+        "raw_eff_share": 0.75,
+        "raw_opp_share": 0.0,
+        "yardage_mae": 25.50725465608855
+      },
+      {
+        "raw_eff_share": 0.0,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 25.560235219510687
+      },
+      {
+        "raw_eff_share": 0.5,
+        "raw_opp_share": 0.5,
+        "yardage_mae": 25.5613007536324
+      }
+    ],
+    "efficiency_grid": [
+      {
+        "raw_eff_share": 0.25,
+        "yardage_mae": 25.250316658416434
+      },
+      {
+        "raw_eff_share": 0.0,
+        "yardage_mae": 25.306368504075923
+      },
+      {
+        "raw_eff_share": 0.5,
+        "yardage_mae": 25.31210053043179
+      },
+      {
+        "raw_eff_share": 0.75,
+        "yardage_mae": 25.50725465608855
+      },
+      {
+        "raw_eff_share": 1.0,
+        "yardage_mae": 25.804441079212104
+      }
+    ],
+    "high_efficiency_segments": {
+      "top10_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 25.865418397561108,
+        "blend50_raw_eff_yardage_mae": 26.88535880924412,
+        "cutoff": 10.38323015104817,
+        "n": 152,
+        "raw_eff_yardage_mae": 30.378540587152507,
+        "regression_eff_yardage_mae": 25.255626947007798
+      },
+      "top25_raw_eff": {
+        "blend25_raw_eff_yardage_mae": 27.220401411094052,
+        "blend50_raw_eff_yardage_mae": 27.890997235410975,
+        "cutoff": 8.997364415362131,
+        "n": 380,
+        "raw_eff_yardage_mae": 29.893506996597214,
+        "regression_eff_yardage_mae": 26.78575032616938
+      }
+    },
+    "n": 1519,
+    "opportunity_grid": [
+      {
+        "raw_opp_share": 0.0,
+        "yardage_mae": 25.306368504075923
+      },
+      {
+        "raw_opp_share": 0.25,
+        "yardage_mae": 25.41425685238087
+      },
+      {
+        "raw_opp_share": 0.5,
+        "yardage_mae": 25.560235219510687
+      },
+      {
+        "raw_opp_share": 0.75,
+        "yardage_mae": 25.721972647590515
+      },
+      {
+        "raw_opp_share": 1.0,
+        "yardage_mae": 25.904762248252762
+      }
+    ],
+    "raw_components_mae": 26.41096843849512,
+    "selected_efficiency_features": [
+      "raw_ypt",
+      "air_yards_per_target8",
+      "team_total",
+      "team_spread",
+      "home"
+    ],
+    "selected_opportunity_features": [
+      "raw_targets",
+      "targets_avg8",
+      "target_share_avg3",
+      "team_total"
+    ]
+  }
+}
