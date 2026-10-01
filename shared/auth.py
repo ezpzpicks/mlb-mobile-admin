@@ -95,7 +95,7 @@ def require_admin_password(logo_file: str = "ezpz_logo.png") -> None:
         st.image(logo_file, width=160)
     st.title("EZPZ Model Builder")
     st.caption("Private multi-sport admin platform")
-    entered = st.text_input("Admin password", type="primary" if False else "password")
+    entered = st.text_input("Admin password", type="password")
     if st.button("Log in", type="primary", use_container_width=True):
         if entered == password:
             st.session_state["admin_authenticated"] = True
