@@ -4,9 +4,11 @@ import os
 
 import streamlit as st
 
-# Install the narrowly scoped NFL WR1/WR2 receiving-yards v4.19 wrapper before
-# app_mobile_admin later imports the slot layer's installer.
-import builders.nfl_wr_receiving_v419  # noqa: F401
+# Install the layered NFL v4.21 calibration wrapper before app_mobile_admin
+# later imports the slot layer's installer. This preserves the v4.19 WR1/WR2
+# receiving calibration and v4.20 RB receiving target hybrid, then adds the
+# guarded RB rushing carry calibration.
+import builders.nfl_rb_rushing_v421  # noqa: F401
 
 ADMIN_AUTH_QUERY_KEY = "ezpz_admin_auth"
 
