@@ -210,3 +210,6 @@ def _install() -> None:
 
 
 _install()
+
+# Continue the layered loader chain without touching shared/auth.py.
+import builders.nfl_qb_countprops_v426  # noqa: E402,F401
