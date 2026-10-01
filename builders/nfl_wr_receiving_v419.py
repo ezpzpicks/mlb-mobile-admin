@@ -16,6 +16,7 @@ import math
 from typing import Any
 
 from builders import nfl_slot_matchups as slot_matchups
+from builders.nfl_prop_grading import install_unified_prop_grading
 
 MODEL_VERSION = "nfl-v4.19-wr12-receiving-calibration-2026-10-01"
 WR_SLOTS = {"WR1", "WR2"}
@@ -148,6 +149,7 @@ def _install() -> None:
 
     def patched_install(nfl_builder: Any) -> None:
         original_install(nfl_builder)
+        install_unified_prop_grading(nfl_builder)
         nfl_builder.MODEL_VERSION = MODEL_VERSION
 
     slot_matchups._apply_slot_overlay = patched_apply
