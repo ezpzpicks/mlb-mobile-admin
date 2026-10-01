@@ -7,7 +7,7 @@ v4.25 changes only QB Passing Yards:
 - leave the underlying calibrated/base YPA estimate unchanged apart from reversing
   the matchup overlay already applied by the slot layer.
 
-All v4.19-v4.24 behavior remains installed underneath this wrapper.
+This module is imported by the existing v4.24 loader after v4.19-v4.24 are installed.
 """
 from __future__ import annotations
 
@@ -17,7 +17,6 @@ from typing import Any
 import pandas as pd
 
 from builders import nfl_slot_matchups as slot_matchups
-from builders import nfl_wr_countprops_v424 as v424  # installs v4.19-v4.24 first
 
 MODEL_VERSION = "nfl-v4.25-qb-passing-efficiency-matchup-neutral-2026-10-01"
 
@@ -63,13 +62,7 @@ def _qb_passing_components(
     player_profile: dict[str, Any] | None,
     profiles_frame: Any,
 ) -> tuple[float, float]:
-    """Reconstruct the exact opportunity and efficiency factors used by v4.18.
-
-    The base slot layer computes Passing Yards as an opportunity factor derived
-    from Passing Attempts multiplied by a separate efficiency factor. Variable
-    tiers can independently scale both deviations, so reproduce that same logic
-    here from copies of the pre-overlay rows.
-    """
+    """Reconstruct the exact opportunity and efficiency factors used by v4.18."""
     if exact_slot != "QB":
         return 1.0, 1.0
 
@@ -131,8 +124,7 @@ def _neutralize_qb_passing_efficiency_matchup(
         return
 
     # Reverse only the efficiency-side matchup adjustment. Projected Player
-    # Attempts has already received the opportunity-side factor and is deliberately
-    # left untouched.
+    # Attempts already contains any opportunity-side matchup and stays unchanged.
     new_projection = max(0.0, old_projection / efficiency_factor)
     new_efficiency = (
         max(0.0, old_efficiency / efficiency_factor)
@@ -148,7 +140,6 @@ def _neutralize_qb_passing_efficiency_matchup(
     row["_sd"] = nfl_builder._prop_sd(
         "Passing Yards", new_projection, _num(row.get("Reliability"), 70.0)
     )
-    # The final matchup index now represents the opportunity side only.
     row["Matchup Index"] = round(opportunity_factor, 3)
 
     previous = str(row.get("Confluence", "") or "").strip()
@@ -179,8 +170,6 @@ def _install() -> None:
         profiles_frame: Any = None,
     ) -> list[dict[str, Any]]:
         exact_slot = slot_matchups._slot(slot)
-        # The wrapped slot layer mutates rows in place, so preserve the inputs used
-        # to calculate its matchup factors before invoking the v4.24 chain.
         pre_rows = [dict(row) for row in rows]
         opportunity_factor, efficiency_factor = _qb_passing_components(
             nfl_builder,
