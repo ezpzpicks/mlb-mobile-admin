@@ -69,8 +69,6 @@ def _apply_wr2_count_calibration(
     if role_overlay <= 0.05:
         return
 
-    # Forward-validated rule: retain half of the live-role effect.
-    # Equivalent to targets / sqrt(role_overlay).
     factor = role_overlay ** (-WR2_ROLE_NEUTRALIZATION)
     if not math.isfinite(factor) or factor <= 0.0 or abs(factor - 1.0) < 1e-9:
         return
@@ -84,9 +82,6 @@ def _apply_wr2_count_calibration(
         if old_projection <= 0.0:
             continue
 
-        # This is an opportunity-only calibration. Scale the target fields and the
-        # count projection together. For Receptions, scaling projected receptions by
-        # the same factor preserves the model's existing catch-rate estimate.
         _scale_field(row, "Projected Targets", factor)
         _scale_field(row, "Targets Per Route", factor)
         if market == "Receptions":
@@ -152,3 +147,7 @@ def _install() -> None:
 
 
 _install()
+
+# Keep v4.24 as the existing loader entry point used by shared/auth.py, then
+# layer v4.25 on top without modifying authentication behavior.
+import builders.nfl_qb_passing_v425  # noqa: E402,F401
