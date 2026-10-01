@@ -1,0 +1,670 @@
+{
+  "audit_version": "nfl-season-weight-audit-2026-10-01",
+  "best_fixed_weights_by_week": {
+    "2025_W2": [
+      {
+        "avg_current_weight": 0.15,
+        "bias": 3.155,
+        "mae": 8.6337,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.15,
+        "season": 2025,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.1,
+        "bias": 3.2519,
+        "mae": 8.6369,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.1,
+        "season": 2025,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.2,
+        "bias": 3.0619,
+        "mae": 8.6506,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.2,
+        "season": 2025,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.05,
+        "bias": 3.3469,
+        "mae": 8.6581,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.05,
+        "season": 2025,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.0,
+        "bias": 3.4419,
+        "mae": 8.7044,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.0,
+        "season": 2025,
+        "week": 2
+      }
+    ],
+    "2025_W3": [
+      {
+        "avg_current_weight": 0.0,
+        "bias": -6.0137,
+        "mae": 11.8425,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.0,
+        "season": 2025,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.05,
+        "bias": -6.0262,
+        "mae": 11.8637,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.05,
+        "season": 2025,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.1,
+        "bias": -6.0375,
+        "mae": 11.8925,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.1,
+        "season": 2025,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.15,
+        "bias": -6.05,
+        "mae": 11.9225,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.15,
+        "season": 2025,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.2,
+        "bias": -6.0606,
+        "mae": 11.9544,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.2,
+        "season": 2025,
+        "week": 3
+      }
+    ],
+    "2025_W4": [
+      {
+        "avg_current_weight": 0.0,
+        "bias": -6.7494,
+        "mae": 9.5419,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.0,
+        "season": 2025,
+        "week": 4
+      },
+      {
+        "avg_current_weight": 0.05,
+        "bias": -6.8381,
+        "mae": 9.5744,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.05,
+        "season": 2025,
+        "week": 4
+      },
+      {
+        "avg_current_weight": 0.1,
+        "bias": -6.9287,
+        "mae": 9.605,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.1,
+        "season": 2025,
+        "week": 4
+      },
+      {
+        "avg_current_weight": 0.15,
+        "bias": -7.0212,
+        "mae": 9.6375,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.15,
+        "season": 2025,
+        "week": 4
+      },
+      {
+        "avg_current_weight": 0.2,
+        "bias": -7.1125,
+        "mae": 9.6713,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.2,
+        "season": 2025,
+        "week": 4
+      }
+    ],
+    "2026_W2": [
+      {
+        "avg_current_weight": 0.0,
+        "bias": 3.2163,
+        "mae": 11.43,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.0,
+        "season": 2026,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.05,
+        "bias": 3.2313,
+        "mae": 11.5775,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.05,
+        "season": 2026,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.1,
+        "bias": 3.2475,
+        "mae": 11.775,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.1,
+        "season": 2026,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.15,
+        "bias": 3.2662,
+        "mae": 12.01,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.15,
+        "season": 2026,
+        "week": 2
+      },
+      {
+        "avg_current_weight": 0.2,
+        "bias": 3.2819,
+        "mae": 12.3256,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.2,
+        "season": 2026,
+        "week": 2
+      }
+    ],
+    "2026_W3": [
+      {
+        "avg_current_weight": 0.35,
+        "bias": -0.6294,
+        "mae": 7.6306,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.35,
+        "season": 2026,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.3,
+        "bias": -0.4925,
+        "mae": 7.635,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.3,
+        "season": 2026,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.25,
+        "bias": -0.3569,
+        "mae": 7.6931,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.25,
+        "season": 2026,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.4,
+        "bias": -0.7656,
+        "mae": 7.6931,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.4,
+        "season": 2026,
+        "week": 3
+      },
+      {
+        "avg_current_weight": 0.2,
+        "bias": -0.2212,
+        "mae": 7.755,
+        "mode": "fixed_weight",
+        "n": 16,
+        "parameter": 0.2,
+        "season": 2026,
+        "week": 3
+      }
+    ]
+  },
+  "fixed_weight_grid": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6
+  ],
+  "historical_selection": {
+    "2025_metrics": {
+      "bias": -3.2902,
+      "mae": 10.079,
+      "multiplier": 0.5,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    "best_multiplier_on_2025_W2_W4": 0.5,
+    "untouched_2026_W2_W3_validation": {
+      "bias": 1.5784,
+      "mae": 9.7609,
+      "multiplier": 0.5,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    }
+  },
+  "method": "Production team-score regression and public nflverse inputs; only the prior/current team-metric blend changes. Current-personnel lineup absence overlays are held neutral so comparisons isolate season weight.",
+  "multiplier_summary": [
+    {
+      "bias": -3.2902,
+      "mae": 10.079,
+      "multiplier": 0.5,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.3815,
+      "mae": 10.1165,
+      "multiplier": 0.75,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.4738,
+      "mae": 10.1596,
+      "multiplier": 1.0,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.5102,
+      "mae": 10.1935,
+      "multiplier": 1.1,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.5646,
+      "mae": 10.2442,
+      "multiplier": 1.25,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.62,
+      "mae": 10.3079,
+      "multiplier": 1.4,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.6567,
+      "mae": 10.3496,
+      "multiplier": 1.5,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.7473,
+      "mae": 10.4552,
+      "multiplier": 1.75,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": -3.8392,
+      "mae": 10.5788,
+      "multiplier": 2.0,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": 3.2406,
+      "mae": 11.6756,
+      "multiplier": 0.5,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.2519,
+      "mae": 11.8244,
+      "multiplier": 0.75,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.2662,
+      "mae": 12.01,
+      "multiplier": 1.0,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.27,
+      "mae": 12.1062,
+      "multiplier": 1.1,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.2781,
+      "mae": 12.2469,
+      "multiplier": 1.25,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.285,
+      "mae": 12.3888,
+      "multiplier": 1.4,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.2894,
+      "mae": 12.4831,
+      "multiplier": 1.5,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.3019,
+      "mae": 12.7219,
+      "multiplier": 1.75,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": 3.3144,
+      "mae": 12.9556,
+      "multiplier": 2.0,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": -0.0838,
+      "mae": 7.8463,
+      "multiplier": 0.5,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.2894,
+      "mae": 7.7219,
+      "multiplier": 0.75,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.4925,
+      "mae": 7.635,
+      "multiplier": 1.0,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.5756,
+      "mae": 7.6206,
+      "multiplier": 1.1,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.6981,
+      "mae": 7.6619,
+      "multiplier": 1.25,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.8219,
+      "mae": 7.7181,
+      "multiplier": 1.4,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -0.9031,
+      "mae": 7.7556,
+      "multiplier": 1.5,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -1.1056,
+      "mae": 7.8519,
+      "multiplier": 1.75,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": -1.3112,
+      "mae": 7.96,
+      "multiplier": 2.0,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": 1.5784,
+      "mae": 9.7609,
+      "multiplier": 0.5,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.4812,
+      "mae": 9.7731,
+      "multiplier": 0.75,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.3869,
+      "mae": 9.8225,
+      "multiplier": 1.0,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.3472,
+      "mae": 9.8634,
+      "multiplier": 1.1,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.29,
+      "mae": 9.9544,
+      "multiplier": 1.25,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.2316,
+      "mae": 10.0534,
+      "multiplier": 1.4,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.1931,
+      "mae": 10.1194,
+      "multiplier": 1.5,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.0981,
+      "mae": 10.2869,
+      "multiplier": 1.75,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": 1.0016,
+      "mae": 10.4578,
+      "multiplier": 2.0,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": -1.3428,
+      "mae": 9.9518,
+      "multiplier": 0.5,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.4364,
+      "mae": 9.9791,
+      "multiplier": 0.75,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.5295,
+      "mae": 10.0248,
+      "multiplier": 1.0,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.5673,
+      "mae": 10.0615,
+      "multiplier": 1.1,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.6228,
+      "mae": 10.1282,
+      "multiplier": 1.25,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.6794,
+      "mae": 10.2061,
+      "multiplier": 1.4,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.7167,
+      "mae": 10.2575,
+      "multiplier": 1.5,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.8091,
+      "mae": 10.3879,
+      "multiplier": 1.75,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    },
+    {
+      "bias": -1.9029,
+      "mae": 10.5304,
+      "multiplier": 2.0,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    }
+  ],
+  "multipliers": [
+    0.5,
+    0.75,
+    1.0,
+    1.1,
+    1.25,
+    1.4,
+    1.5,
+    1.75,
+    2.0
+  ],
+  "production_summary": [
+    {
+      "bias": -3.4738,
+      "mae": 10.1596,
+      "n": 48,
+      "scope": "2025_W2_W4"
+    },
+    {
+      "bias": 3.2662,
+      "mae": 12.01,
+      "n": 16,
+      "scope": "2026_W2"
+    },
+    {
+      "bias": -0.4925,
+      "mae": 7.635,
+      "n": 16,
+      "scope": "2026_W3"
+    },
+    {
+      "bias": 1.3869,
+      "mae": 9.8225,
+      "n": 32,
+      "scope": "2026_W2_W3"
+    },
+    {
+      "bias": -1.5295,
+      "mae": 10.0248,
+      "n": 80,
+      "scope": "all_audit_weeks"
+    }
+  ],
+  "production_week4_effective_weight_three_games": 0.4096,
+  "week4_effective_weight_by_multiplier": {
+    "0.5": 0.2048,
+    "0.75": 0.3072,
+    "1.0": 0.4096,
+    "1.1": 0.4506,
+    "1.25": 0.512,
+    "1.4": 0.5734,
+    "1.5": 0.6144,
+    "1.75": 0.7168,
+    "2.0": 0.8192
+  }
+}
