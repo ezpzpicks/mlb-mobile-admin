@@ -2,7 +2,7 @@
 
 Completed graded FBS-vs-FBS games: 211
 
-Positive support means the component points toward the side selected by the model.
+Positive support means the component points toward the side selected by the model. Internal alignment categories use only football-model inputs.
 
 ## 8+ model edge
 
@@ -25,6 +25,15 @@ Record: 22-32 (40.7%)
 | 5+ of 7 | 6-6 | 50.0% |
 | 6+ of 7 | 1-3 | 25.0% |
 
+### Internal football-input alignment
+
+| Relationship | Aligned | Not aligned |
+|---|---:|---:|
+| Current power ↔ current scoring | 8-13 (38.1%) | 14-19 (42.4%) |
+| Current power ↔ defensive change | 9-15 (37.5%) | 13-17 (43.3%) |
+| Prior power ↔ current power shift | 9-4 (69.2%) | 13-28 (31.7%) |
+| Current scoring ↔ defensive change | 13-15 (46.4%) | 9-17 (34.6%) |
+
 ## 10+ model edge
 
 Record: 15-24 (38.5%)
@@ -45,4 +54,13 @@ Record: 15-24 (38.5%)
 | 4+ of 7 | 7-7 | 50.0% |
 | 5+ of 7 | 2-4 | 33.3% |
 | 6+ of 7 | 1-2 | 33.3% |
+
+### Internal football-input alignment
+
+| Relationship | Aligned | Not aligned |
+|---|---:|---:|
+| Current power ↔ current scoring | 6-9 (40.0%) | 9-15 (37.5%) |
+| Current power ↔ defensive change | 6-11 (35.3%) | 9-13 (40.9%) |
+| Prior power ↔ current power shift | 4-2 (66.7%) | 11-22 (33.3%) |
+| Current scoring ↔ defensive change | 9-12 (42.9%) | 6-12 (33.3%) |
 

@@ -3,10 +3,12 @@
   "n": 211,
   "thresholds": {
     "8": {
-      "n": 54,
-      "wins": 22,
-      "losses": 32,
-      "win_rate": 0.4074074074074074,
+      "overall": {
+        "n": 54,
+        "wins": 22,
+        "losses": 32,
+        "win_rate": 0.4074074074074074
+      },
       "feature_differences": [
         {
           "feature": "current_power_margin",
@@ -53,47 +55,111 @@
       ],
       "agreement": [
         {
-          "min_supporting_components": 3,
           "n": 37,
           "wins": 13,
           "losses": 24,
-          "win_rate": 0.35135135135135137
+          "win_rate": 0.35135135135135137,
+          "min_supporting_components": 3
         },
         {
-          "min_supporting_components": 4,
           "n": 24,
           "wins": 12,
           "losses": 12,
-          "win_rate": 0.5
+          "win_rate": 0.5,
+          "min_supporting_components": 4
         },
         {
-          "min_supporting_components": 5,
           "n": 12,
           "wins": 6,
           "losses": 6,
-          "win_rate": 0.5
+          "win_rate": 0.5,
+          "min_supporting_components": 5
         },
         {
-          "min_supporting_components": 6,
           "n": 4,
           "wins": 1,
           "losses": 3,
-          "win_rate": 0.25
+          "win_rate": 0.25,
+          "min_supporting_components": 6
         },
         {
-          "min_supporting_components": 7,
           "n": 0,
           "wins": 0,
           "losses": 0,
-          "win_rate": null
+          "win_rate": null,
+          "min_supporting_components": 7
         }
-      ]
+      ],
+      "internal_alignments": {
+        "current_power_scoring_align": {
+          "label": "Current power \u2194 current scoring",
+          "aligned": {
+            "n": 21,
+            "wins": 8,
+            "losses": 13,
+            "win_rate": 0.38095238095238093
+          },
+          "not_aligned": {
+            "n": 33,
+            "wins": 14,
+            "losses": 19,
+            "win_rate": 0.42424242424242425
+          }
+        },
+        "current_power_allowed_align": {
+          "label": "Current power \u2194 defensive change",
+          "aligned": {
+            "n": 24,
+            "wins": 9,
+            "losses": 15,
+            "win_rate": 0.375
+          },
+          "not_aligned": {
+            "n": 30,
+            "wins": 13,
+            "losses": 17,
+            "win_rate": 0.43333333333333335
+          }
+        },
+        "prior_current_power_align": {
+          "label": "Prior power \u2194 current power shift",
+          "aligned": {
+            "n": 13,
+            "wins": 9,
+            "losses": 4,
+            "win_rate": 0.6923076923076923
+          },
+          "not_aligned": {
+            "n": 41,
+            "wins": 13,
+            "losses": 28,
+            "win_rate": 0.3170731707317073
+          }
+        },
+        "current_scoring_allowed_align": {
+          "label": "Current scoring \u2194 defensive change",
+          "aligned": {
+            "n": 28,
+            "wins": 13,
+            "losses": 15,
+            "win_rate": 0.4642857142857143
+          },
+          "not_aligned": {
+            "n": 26,
+            "wins": 9,
+            "losses": 17,
+            "win_rate": 0.34615384615384615
+          }
+        }
+      }
     },
     "10": {
-      "n": 39,
-      "wins": 15,
-      "losses": 24,
-      "win_rate": 0.38461538461538464,
+      "overall": {
+        "n": 39,
+        "wins": 15,
+        "losses": 24,
+        "win_rate": 0.38461538461538464
+      },
       "feature_differences": [
         {
           "feature": "current_allowed_diff",
@@ -140,41 +206,103 @@
       ],
       "agreement": [
         {
-          "min_supporting_components": 3,
           "n": 25,
           "wins": 8,
           "losses": 17,
-          "win_rate": 0.32
+          "win_rate": 0.32,
+          "min_supporting_components": 3
         },
         {
-          "min_supporting_components": 4,
           "n": 14,
           "wins": 7,
           "losses": 7,
-          "win_rate": 0.5
+          "win_rate": 0.5,
+          "min_supporting_components": 4
         },
         {
-          "min_supporting_components": 5,
           "n": 6,
           "wins": 2,
           "losses": 4,
-          "win_rate": 0.3333333333333333
+          "win_rate": 0.3333333333333333,
+          "min_supporting_components": 5
         },
         {
-          "min_supporting_components": 6,
           "n": 3,
           "wins": 1,
           "losses": 2,
-          "win_rate": 0.3333333333333333
+          "win_rate": 0.3333333333333333,
+          "min_supporting_components": 6
         },
         {
-          "min_supporting_components": 7,
           "n": 0,
           "wins": 0,
           "losses": 0,
-          "win_rate": null
+          "win_rate": null,
+          "min_supporting_components": 7
         }
-      ]
+      ],
+      "internal_alignments": {
+        "current_power_scoring_align": {
+          "label": "Current power \u2194 current scoring",
+          "aligned": {
+            "n": 15,
+            "wins": 6,
+            "losses": 9,
+            "win_rate": 0.4
+          },
+          "not_aligned": {
+            "n": 24,
+            "wins": 9,
+            "losses": 15,
+            "win_rate": 0.375
+          }
+        },
+        "current_power_allowed_align": {
+          "label": "Current power \u2194 defensive change",
+          "aligned": {
+            "n": 17,
+            "wins": 6,
+            "losses": 11,
+            "win_rate": 0.35294117647058826
+          },
+          "not_aligned": {
+            "n": 22,
+            "wins": 9,
+            "losses": 13,
+            "win_rate": 0.4090909090909091
+          }
+        },
+        "prior_current_power_align": {
+          "label": "Prior power \u2194 current power shift",
+          "aligned": {
+            "n": 6,
+            "wins": 4,
+            "losses": 2,
+            "win_rate": 0.6666666666666666
+          },
+          "not_aligned": {
+            "n": 33,
+            "wins": 11,
+            "losses": 22,
+            "win_rate": 0.3333333333333333
+          }
+        },
+        "current_scoring_allowed_align": {
+          "label": "Current scoring \u2194 defensive change",
+          "aligned": {
+            "n": 21,
+            "wins": 9,
+            "losses": 12,
+            "win_rate": 0.42857142857142855
+          },
+          "not_aligned": {
+            "n": 18,
+            "wins": 6,
+            "losses": 12,
+            "win_rate": 0.3333333333333333
+          }
+        }
+      }
     }
   }
 }
