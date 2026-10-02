@@ -15,6 +15,7 @@ import pandas as pd
 from research import cfb_margin_advanced_residual_regression as adv
 from research import cfb_margin_balance_interactions as bal
 from research import cfb_margin_scoring_context_residual as ctx
+from research.cfb_historical_markets import attach_market_spread
 base = adv.base
 # Older historical research predates this live-builder field. Use the same
 # neutral value as production so early/missing rows do not receive fake signal.
@@ -83,6 +84,9 @@ def selection_key(m):
 
 def main():
     df=base.build_dataset().copy()
+    # Use the exact cfbfastR market extractor from the validated 2025 ATS backtest.
+    # This remains evaluation-only and never enters a football prediction feature.
+    df=attach_market_spread(df,base.cfb)
     df['market_home_spread']=pd.to_numeric(df['market_home_spread'],errors='coerce')
     df['actual_margin']=pd.to_numeric(df['actual_margin'],errors='coerce')
     df['spread_margin']=pd.to_numeric(df['spread_margin'],errors='coerce')
