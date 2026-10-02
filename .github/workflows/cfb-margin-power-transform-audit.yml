@@ -1,0 +1,40 @@
+name: CFB margin power transform audit
+on:
+  push:
+    branches: [audit-ncaaf-margin-2026-10-02]
+    paths:
+      - 'research/cfb_margin_power_transform_audit.py'
+      - '.github/workflows/cfb-margin-power-transform-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run robust power audit
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+          EZPZ_CFB_CACHE_SECONDS: '86400'
+          PYTHONUNBUFFERED: '1'
+          PYTHONPATH: '.'
+        run: python research/cfb_margin_power_transform_audit.py
+      - name: Commit results
+        run: |
+          git add research/results/cfb_margin_power_transform_results.json research/results/CFB_MARGIN_POWER_TRANSFORM_RESULTS.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: persist CFB power transform audit'
+          git pull --rebase origin audit-ncaaf-margin-2026-10-02
+          git push
