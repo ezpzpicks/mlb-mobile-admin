@@ -2,7 +2,8 @@
 
 The upstream cfb_ratings_weekly data contains as-of-week opponent-adjusted EPA
 and drive-efficiency ratings built only through each snapshot week. Market lines
-remain evaluation-only through the imported harness.
+remain evaluation-only through the imported harness. Team matching is inherited
+from the base harness and uses ESPN team ids directly from the PBP game rows.
 """
 from __future__ import annotations
 import io
@@ -20,25 +21,6 @@ m.FAMILIES={
  'all_adjusted':['adj_off_epa_diff','adj_def_epa_diff','adj_st_epa_diff','adj_net_diff','fei_off_diff','fei_def_diff','fei_net_diff','off_pace_diff','net_z_diff'],
 }
 
-def load_team_map(season:int)->dict[int,str]:
-    last_exc=None
-    for year in range(int(season), max(2014, int(season)-3)-1, -1):
-        url=f'{m.BASE_URL}/cfb_crosswalk/cfb_teams_crosswalk_{year}.parquet'
-        try:
-            df=pd.read_parquet(io.BytesIO(m.download_bytes(url)))
-            break
-        except Exception as exc:
-            last_exc=exc
-    else:
-        raise last_exc if last_exc else RuntimeError(f'No team crosswalk available for {season}')
-    df.columns=[str(c).lower() for c in df.columns]
-    ids=pd.to_numeric(df.get('espn_team_id'),errors='coerce');names=df.get('espn_team');keys=df.get('norm_key');out={}
-    for i,name,key in zip(ids,names,keys):
-        if pd.isna(i):continue
-        raw=key if pd.notna(key) and str(key).strip() else name
-        if pd.notna(raw) and str(raw).strip():out[int(i)]=m.norm(raw)
-    return out
-
 def load_ratings(season:int)->pd.DataFrame:
     url=f'{m.BASE_URL}/cfb_ratings_weekly/cfb_ratings_weekly_{season}.rds'
     data=pyreadr.read_r(io.BytesIO(m.download_bytes(url)));df=next(iter(data.values())).copy();df.columns=[str(c).lower() for c in df.columns]
@@ -49,6 +31,12 @@ def load_ratings(season:int)->pd.DataFrame:
     return df
 
 m.load_fpi=load_ratings
-m.load_team_map=load_team_map
 
-if __name__=='__main__':m.main()
+if __name__=='__main__':
+    m.main()
+    src_json=m.OUT/'cfb_weekly_fpi_edge_search.json';dst_json=m.OUT/'cfb_weekly_adjusted_ratings_edge_search.json'
+    src_md=m.OUT/'CFB_WEEKLY_FPI_EDGE_SEARCH.md';dst_md=m.OUT/'CFB_WEEKLY_ADJUSTED_RATINGS_EDGE_SEARCH.md'
+    if src_json.exists():src_json.replace(dst_json)
+    if src_md.exists():
+        text=src_md.read_text().replace('CFB Weekly Opponent-Adjusted FPI Edge Search','CFB Weekly Opponent-Adjusted EPA/FEI Edge Search').replace('FPI layer','Adjusted ratings layer')
+        dst_md.write_text(text);src_md.unlink()
