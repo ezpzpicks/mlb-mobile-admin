@@ -1,0 +1,166 @@
+{
+  "season": 2026,
+  "population": "completed FBS-vs-FBS games with recovered closing/home spread",
+  "n_rows": 215,
+  "production_home_indicator_coefficient": 4.804668259201711,
+  "challenger_home_indicator_multiplier": 0.25,
+  "challenger_home_indicator_coefficient": 1.2011670648004278,
+  "baseline": {
+    "games_with_market": 215,
+    "graded_bets": 211,
+    "pushes": 4,
+    "no_edge": 0,
+    "mae": 13.484839123660551,
+    "thresholds": [
+      {
+        "threshold": 0.0,
+        "n": 211,
+        "wins": 94,
+        "losses": 117,
+        "win_rate": 0.44549763033175355
+      },
+      {
+        "threshold": 1.0,
+        "n": 194,
+        "wins": 82,
+        "losses": 112,
+        "win_rate": 0.422680412371134
+      },
+      {
+        "threshold": 2.0,
+        "n": 175,
+        "wins": 77,
+        "losses": 98,
+        "win_rate": 0.44
+      },
+      {
+        "threshold": 3.0,
+        "n": 150,
+        "wins": 68,
+        "losses": 82,
+        "win_rate": 0.4533333333333333
+      },
+      {
+        "threshold": 4.0,
+        "n": 132,
+        "wins": 59,
+        "losses": 73,
+        "win_rate": 0.44696969696969696
+      },
+      {
+        "threshold": 5.0,
+        "n": 105,
+        "wins": 46,
+        "losses": 59,
+        "win_rate": 0.4380952380952381
+      },
+      {
+        "threshold": 6.0,
+        "n": 88,
+        "wins": 41,
+        "losses": 47,
+        "win_rate": 0.4659090909090909
+      },
+      {
+        "threshold": 8.0,
+        "n": 54,
+        "wins": 22,
+        "losses": 32,
+        "win_rate": 0.4074074074074074
+      },
+      {
+        "threshold": 10.0,
+        "n": 39,
+        "wins": 15,
+        "losses": 24,
+        "win_rate": 0.38461538461538464
+      },
+      {
+        "threshold": 12.0,
+        "n": 23,
+        "wins": 11,
+        "losses": 12,
+        "win_rate": 0.4782608695652174
+      }
+    ]
+  },
+  "challenger": {
+    "games_with_market": 215,
+    "graded_bets": 211,
+    "pushes": 4,
+    "no_edge": 0,
+    "mae": 13.751428953627896,
+    "thresholds": [
+      {
+        "threshold": 0.0,
+        "n": 211,
+        "wins": 96,
+        "losses": 115,
+        "win_rate": 0.4549763033175355
+      },
+      {
+        "threshold": 1.0,
+        "n": 191,
+        "wins": 81,
+        "losses": 110,
+        "win_rate": 0.42408376963350786
+      },
+      {
+        "threshold": 2.0,
+        "n": 168,
+        "wins": 74,
+        "losses": 94,
+        "win_rate": 0.44047619047619047
+      },
+      {
+        "threshold": 3.0,
+        "n": 148,
+        "wins": 66,
+        "losses": 82,
+        "win_rate": 0.44594594594594594
+      },
+      {
+        "threshold": 4.0,
+        "n": 128,
+        "wins": 56,
+        "losses": 72,
+        "win_rate": 0.4375
+      },
+      {
+        "threshold": 5.0,
+        "n": 115,
+        "wins": 48,
+        "losses": 67,
+        "win_rate": 0.41739130434782606
+      },
+      {
+        "threshold": 6.0,
+        "n": 100,
+        "wins": 44,
+        "losses": 56,
+        "win_rate": 0.44
+      },
+      {
+        "threshold": 8.0,
+        "n": 69,
+        "wins": 34,
+        "losses": 35,
+        "win_rate": 0.4927536231884058
+      },
+      {
+        "threshold": 10.0,
+        "n": 46,
+        "wins": 23,
+        "losses": 23,
+        "win_rate": 0.5
+      },
+      {
+        "threshold": 12.0,
+        "n": 29,
+        "wins": 12,
+        "losses": 17,
+        "win_rate": 0.41379310344827586
+      }
+    ]
+  }
+}
