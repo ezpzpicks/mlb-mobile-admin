@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
           cache: pip
       - name: Install dependencies
-        run: pip install numpy pandas pyarrow requests streamlit scipy
+        run: pip install numpy pandas pyarrow polars requests streamlit scipy
       - name: Run edge-quality search
         env:
           PYTHONUNBUFFERED: '1'
