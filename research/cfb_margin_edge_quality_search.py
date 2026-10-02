@@ -16,6 +16,9 @@ from research import cfb_margin_advanced_residual_regression as adv
 from research import cfb_margin_balance_interactions as bal
 from research import cfb_margin_scoring_context_residual as ctx
 base = adv.base
+# Older historical research predates this live-builder field. Use the same
+# neutral value as production so early/missing rows do not receive fake signal.
+base.METRIC_DEFAULTS.setdefault('Power Success', 0.68)
 
 TRAIN=(2021,2022,2023); VALID=2024; HOLDOUT=2025
 ALPHAS=(1.0,4.0,16.0,64.0,256.0)
