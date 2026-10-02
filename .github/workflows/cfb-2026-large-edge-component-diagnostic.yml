@@ -1,0 +1,42 @@
+name: CFB 2026 large-edge component diagnostic
+
+on:
+  push:
+    branches:
+      - audit-ncaaf-margin-2026-10-02
+    paths:
+      - 'research/cfb_2026_large_edge_component_diagnostic.py'
+      - '.github/workflows/cfb-2026-large-edge-component-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: pip install numpy pandas pyarrow polars requests streamlit scipy
+      - name: Run 2026 component diagnostic
+        env:
+          PYTHONUNBUFFERED: '1'
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+          PYTHONPATH: '.'
+        run: python research/cfb_2026_large_edge_component_diagnostic.py
+      - name: Commit results
+        run: |
+          git add research/results/cfb_2026_large_edge_component_diagnostic.json research/results/CFB_2026_LARGE_EDGE_COMPONENT_DIAGNOSTIC.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: persist 2026 large-edge component diagnostic'
+          git pull --rebase origin audit-ncaaf-margin-2026-10-02
+          git push
