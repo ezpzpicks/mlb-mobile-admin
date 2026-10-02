@@ -1,0 +1,2526 @@
+{
+  "protocol": {
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "validation_selection": 2024,
+    "holdout_1": 2025,
+    "holdout_2": 2026,
+    "market_predictor": false,
+    "target": "actual_margin - independent spread_margin",
+    "fixed_edge_thresholds": [
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0
+    ],
+    "2026_retuned": false
+  },
+  "rows": {
+    "train": 2257,
+    "2024": 798,
+    "2025": 807,
+    "2026": 215
+  },
+  "features": [
+    "abs_spread_margin",
+    "abs_spread_margin_sq",
+    "allowed_shift_abs",
+    "balance_gap",
+    "cross_matchup",
+    "current_allowed_diff",
+    "current_power_margin",
+    "current_power_x_allowed",
+    "current_power_x_scoring",
+    "current_scoring_diff",
+    "current_scoring_x_allowed",
+    "defense_diff",
+    "epa_matchup",
+    "expected_combined_ppd",
+    "expected_possessions",
+    "explosive_def_diff",
+    "explosive_matchup",
+    "explosive_matchup_adv",
+    "finish_def_diff",
+    "finish_matchup_adv",
+    "finishing_matchup",
+    "havoc_balance_diff",
+    "havoc_pressure",
+    "home_indicator",
+    "line_def_diff",
+    "line_matchup_adv",
+    "line_yards_matchup",
+    "margin_x_balance",
+    "margin_x_possessions",
+    "margin_x_ppd",
+    "margin_x_total",
+    "margin_x_two_way",
+    "neutral",
+    "off_def_product",
+    "offense_diff",
+    "pass_def_diff",
+    "pass_matchup_adv",
+    "pass_ppa_matchup",
+    "plays_per_possession",
+    "point_share",
+    "poss_level",
+    "poss_x_epa",
+    "poss_x_explosive",
+    "poss_x_finishing",
+    "poss_x_success",
+    "poss_x_ypp",
+    "power_shift_abs",
+    "power_success_diff",
+    "power_x_balance",
+    "power_x_two_way",
+    "prior_papg_diff",
+    "prior_power_margin",
+    "prior_ppg_diff",
+    "prior_x_current_power",
+    "red_zone_matchup",
+    "rush_def_diff",
+    "rush_matchup_adv",
+    "rush_ppa_matchup",
+    "sack_matchup_adv",
+    "sack_pressure",
+    "scoring_shift_abs",
+    "sign_x_possessions",
+    "sign_x_total",
+    "signed_margin_sq",
+    "signed_margin_sqrt",
+    "spread_margin",
+    "spread_score_sum",
+    "structural_total",
+    "success_def_diff",
+    "success_matchup",
+    "third_def_diff",
+    "third_down_matchup",
+    "third_matchup_adv",
+    "total_level",
+    "turnover_pressure",
+    "turnover_pressure_adv",
+    "two_way_strength",
+    "week",
+    "ypp_allowed_diff",
+    "ypp_matchup",
+    "ypp_matchup_adv"
+  ],
+  "excluded_features": [],
+  "baseline": {
+    "2024": {
+      "n": 782,
+      "auc": 0.5307642995447172,
+      "corr": 0.09545112922564378,
+      "mae": 13.036447636876698,
+      "monotonic_steps": 2,
+      "monotonic_possible": 4,
+      "violation_sum": 0.03442772795140492,
+      "slope_2_to_10": 0.0030219780219780112,
+      "high_edge_win_rate": 0.525,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 546,
+          "wins": 285,
+          "losses": 261,
+          "win_rate": 0.521978021978022
+        },
+        {
+          "threshold": 4.0,
+          "n": 359,
+          "wins": 186,
+          "losses": 173,
+          "win_rate": 0.5181058495821727
+        },
+        {
+          "threshold": 6.0,
+          "n": 218,
+          "wins": 114,
+          "losses": 104,
+          "win_rate": 0.5229357798165137
+        },
+        {
+          "threshold": 8.0,
+          "n": 135,
+          "wins": 75,
+          "losses": 60,
+          "win_rate": 0.5555555555555556
+        },
+        {
+          "threshold": 10.0,
+          "n": 80,
+          "wins": 42,
+          "losses": 38,
+          "win_rate": 0.525
+        }
+      ]
+    },
+    "2025": {
+      "n": 795,
+      "auc": 0.5387905903825192,
+      "corr": 0.10223578672648335,
+      "mae": 12.395363344383886,
+      "monotonic_steps": 3,
+      "monotonic_possible": 4,
+      "violation_sum": 0.008280072592417254,
+      "slope_2_to_10": 0.08807847082494968,
+      "high_edge_win_rate": 0.6285714285714286,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 568,
+          "wins": 307,
+          "losses": 261,
+          "win_rate": 0.5404929577464789
+        },
+        {
+          "threshold": 4.0,
+          "n": 357,
+          "wins": 190,
+          "losses": 167,
+          "win_rate": 0.5322128851540616
+        },
+        {
+          "threshold": 6.0,
+          "n": 223,
+          "wins": 124,
+          "losses": 99,
+          "win_rate": 0.5560538116591929
+        },
+        {
+          "threshold": 8.0,
+          "n": 128,
+          "wins": 75,
+          "losses": 53,
+          "win_rate": 0.5859375
+        },
+        {
+          "threshold": 10.0,
+          "n": 70,
+          "wins": 44,
+          "losses": 26,
+          "win_rate": 0.6285714285714286
+        }
+      ]
+    },
+    "2026": {
+      "n": 211,
+      "auc": 0.49527186761229314,
+      "corr": -0.05664068165353759,
+      "mae": 13.484839123660551,
+      "monotonic_steps": 2,
+      "monotonic_possible": 4,
+      "violation_sum": 0.08129370629370625,
+      "slope_2_to_10": -0.055384615384615365,
+      "high_edge_win_rate": 0.38461538461538464,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 175,
+          "wins": 77,
+          "losses": 98,
+          "win_rate": 0.44
+        },
+        {
+          "threshold": 4.0,
+          "n": 132,
+          "wins": 59,
+          "losses": 73,
+          "win_rate": 0.44696969696969696
+        },
+        {
+          "threshold": 6.0,
+          "n": 88,
+          "wins": 41,
+          "losses": 47,
+          "win_rate": 0.4659090909090909
+        },
+        {
+          "threshold": 8.0,
+          "n": 54,
+          "wins": 22,
+          "losses": 32,
+          "win_rate": 0.4074074074074074
+        },
+        {
+          "threshold": 10.0,
+          "n": 39,
+          "wins": 15,
+          "losses": 24,
+          "win_rate": 0.38461538461538464
+        }
+      ]
+    }
+  },
+  "chosen_on_2024": {
+    "spec": {
+      "kind": "extra",
+      "depth": 6,
+      "leaf": 30,
+      "trees": 350,
+      "max_features": 1.0
+    },
+    "cap": 2.0,
+    "validation": {
+      "n": 782,
+      "auc": 0.5039697344565096,
+      "corr": 0.09888810593727093,
+      "mae": 12.974895118667101,
+      "monotonic_steps": 4,
+      "monotonic_possible": 4,
+      "violation_sum": 0.0,
+      "slope_2_to_10": 0.050252100840336156,
+      "high_edge_win_rate": 0.5588235294117647,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 525,
+          "wins": 267,
+          "losses": 258,
+          "win_rate": 0.5085714285714286
+        },
+        {
+          "threshold": 4.0,
+          "n": 323,
+          "wins": 166,
+          "losses": 157,
+          "win_rate": 0.5139318885448917
+        },
+        {
+          "threshold": 6.0,
+          "n": 197,
+          "wins": 106,
+          "losses": 91,
+          "win_rate": 0.5380710659898477
+        },
+        {
+          "threshold": 8.0,
+          "n": 120,
+          "wins": 66,
+          "losses": 54,
+          "win_rate": 0.55
+        },
+        {
+          "threshold": 10.0,
+          "n": 68,
+          "wins": 38,
+          "losses": 30,
+          "win_rate": 0.5588235294117647
+        }
+      ]
+    },
+    "holdout_2025": {
+      "n": 795,
+      "auc": 0.49447566495448303,
+      "corr": 0.10734874987040512,
+      "mae": 12.3917649360173,
+      "monotonic_steps": 4,
+      "monotonic_possible": 4,
+      "violation_sum": 0.0,
+      "slope_2_to_10": 0.09605911330049266,
+      "high_edge_win_rate": 0.6190476190476191,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 522,
+          "wins": 273,
+          "losses": 249,
+          "win_rate": 0.5229885057471264
+        },
+        {
+          "threshold": 4.0,
+          "n": 336,
+          "wins": 176,
+          "losses": 160,
+          "win_rate": 0.5238095238095238
+        },
+        {
+          "threshold": 6.0,
+          "n": 187,
+          "wins": 103,
+          "losses": 84,
+          "win_rate": 0.5508021390374331
+        },
+        {
+          "threshold": 8.0,
+          "n": 108,
+          "wins": 63,
+          "losses": 45,
+          "win_rate": 0.5833333333333334
+        },
+        {
+          "threshold": 10.0,
+          "n": 63,
+          "wins": 39,
+          "losses": 24,
+          "win_rate": 0.6190476190476191
+        }
+      ]
+    },
+    "holdout_2026": {
+      "n": 211,
+      "auc": 0.5113262696382901,
+      "corr": -0.04647458194376676,
+      "mae": 13.37249500436902,
+      "monotonic_steps": 3,
+      "monotonic_possible": 4,
+      "violation_sum": 0.04326923076923078,
+      "slope_2_to_10": 0.008928571428571452,
+      "high_edge_win_rate": 0.4375,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 161,
+          "wins": 69,
+          "losses": 92,
+          "win_rate": 0.42857142857142855
+        },
+        {
+          "threshold": 4.0,
+          "n": 124,
+          "wins": 56,
+          "losses": 68,
+          "win_rate": 0.45161290322580644
+        },
+        {
+          "threshold": 6.0,
+          "n": 82,
+          "wins": 39,
+          "losses": 43,
+          "win_rate": 0.47560975609756095
+        },
+        {
+          "threshold": 8.0,
+          "n": 52,
+          "wins": 25,
+          "losses": 27,
+          "win_rate": 0.4807692307692308
+        },
+        {
+          "threshold": 10.0,
+          "n": 32,
+          "wins": 14,
+          "losses": 18,
+          "win_rate": 0.4375
+        }
+      ]
+    }
+  },
+  "candidates_2024": [
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 6,
+        "leaf": 30,
+        "trees": 350,
+        "max_features": 1.0
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5039697344565096,
+        "corr": 0.09888810593727093,
+        "mae": 12.974895118667101,
+        "monotonic_steps": 4,
+        "monotonic_possible": 4,
+        "violation_sum": 0.0,
+        "slope_2_to_10": 0.050252100840336156,
+        "high_edge_win_rate": 0.5588235294117647,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 267,
+            "losses": 258,
+            "win_rate": 0.5085714285714286
+          },
+          {
+            "threshold": 4.0,
+            "n": 323,
+            "wins": 166,
+            "losses": 157,
+            "win_rate": 0.5139318885448917
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 106,
+            "losses": 91,
+            "win_rate": 0.5380710659898477
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 66,
+            "losses": 54,
+            "win_rate": 0.55
+          },
+          {
+            "threshold": 10.0,
+            "n": 68,
+            "wins": 38,
+            "losses": 30,
+            "win_rate": 0.5588235294117647
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 7,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.510074140965992,
+        "corr": 0.09943999736276328,
+        "mae": 12.971936655333145,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.01376811594202898,
+        "slope_2_to_10": 0.027627677557015007,
+        "high_edge_win_rate": 0.5362318840579711,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 266,
+            "losses": 257,
+            "win_rate": 0.5086042065009561
+          },
+          {
+            "threshold": 4.0,
+            "n": 327,
+            "wins": 167,
+            "losses": 160,
+            "win_rate": 0.5107033639143731
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 108,
+            "losses": 89,
+            "win_rate": 0.5482233502538071
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 66,
+            "losses": 54,
+            "win_rate": 0.55
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 37,
+            "losses": 32,
+            "win_rate": 0.5362318840579711
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 6,
+        "leaf": 30,
+        "trees": 350,
+        "max_features": 1.0
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49493818429461994,
+        "corr": 0.10211848648742182,
+        "mae": 12.999867955900921,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.014050572519083926,
+        "slope_2_to_10": 0.018035695086549786,
+        "high_edge_win_rate": 0.5352112676056338,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 271,
+            "losses": 253,
+            "win_rate": 0.517175572519084
+          },
+          {
+            "threshold": 4.0,
+            "n": 320,
+            "wins": 161,
+            "losses": 159,
+            "win_rate": 0.503125
+          },
+          {
+            "threshold": 6.0,
+            "n": 194,
+            "wins": 102,
+            "losses": 92,
+            "win_rate": 0.5257731958762887
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 38,
+            "losses": 33,
+            "win_rate": 0.5352112676056338
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 5,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5113350125944585,
+        "corr": 0.09869973780681378,
+        "mae": 12.978139862734984,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.024307243558580494,
+        "slope_2_to_10": 0.01893557422969183,
+        "high_edge_win_rate": 0.5294117647058824,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 268,
+            "losses": 257,
+            "win_rate": 0.5104761904761905
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 168,
+            "losses": 156,
+            "win_rate": 0.5185185185185185
+          },
+          {
+            "threshold": 6.0,
+            "n": 196,
+            "wins": 105,
+            "losses": 91,
+            "win_rate": 0.5357142857142857
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 67,
+            "losses": 54,
+            "win_rate": 0.5537190082644629
+          },
+          {
+            "threshold": 10.0,
+            "n": 68,
+            "wins": 36,
+            "losses": 32,
+            "win_rate": 0.5294117647058824
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 20,
+        "lr": 0.05,
+        "iters": 120,
+        "l2": 20.0
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4963171988450736,
+        "corr": 0.10763727068338842,
+        "mae": 13.074419784189331,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03389830508474578,
+        "slope_2_to_10": -0.008474576271186418,
+        "high_edge_win_rate": 0.5,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 270,
+            "losses": 261,
+            "win_rate": 0.5084745762711864
+          },
+          {
+            "threshold": 4.0,
+            "n": 341,
+            "wins": 175,
+            "losses": 166,
+            "win_rate": 0.5131964809384164
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 111,
+            "losses": 102,
+            "win_rate": 0.5211267605633803
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 36,
+            "losses": 36,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 20,
+        "lr": 0.05,
+        "iters": 120,
+        "l2": 20.0
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49576068667055134,
+        "corr": 0.1064114613169129,
+        "mae": 13.084672214953079,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03626107977437554,
+        "slope_2_to_10": -0.016212610948643014,
+        "high_edge_win_rate": 0.4931506849315068,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 534,
+            "wins": 272,
+            "losses": 262,
+            "win_rate": 0.5093632958801498
+          },
+          {
+            "threshold": 4.0,
+            "n": 343,
+            "wins": 177,
+            "losses": 166,
+            "win_rate": 0.5160349854227405
+          },
+          {
+            "threshold": 6.0,
+            "n": 214,
+            "wins": 112,
+            "losses": 102,
+            "win_rate": 0.5233644859813084
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 63,
+            "losses": 56,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 36,
+            "losses": 37,
+            "win_rate": 0.4931506849315068
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 20,
+        "lr": 0.05,
+        "iters": 120,
+        "l2": 20.0
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5002650853182006,
+        "corr": 0.10556208268998928,
+        "mae": 13.053409247028899,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03913043478260869,
+        "slope_2_to_10": -0.002868068833651982,
+        "high_edge_win_rate": 0.5,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 263,
+            "losses": 260,
+            "win_rate": 0.502868068833652
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 171,
+            "losses": 160,
+            "win_rate": 0.5166163141993958
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 115,
+            "wins": 62,
+            "losses": 53,
+            "win_rate": 0.5391304347826087
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 35,
+            "losses": 35,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 10.0
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5082026214360967,
+        "corr": 0.10710649641053507,
+        "mae": 13.039238708361363,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.05652173913043479,
+        "slope_2_to_10": -0.009615384615384581,
+        "high_edge_win_rate": 0.5,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 265,
+            "losses": 255,
+            "win_rate": 0.5096153846153846
+          },
+          {
+            "threshold": 4.0,
+            "n": 340,
+            "wins": 175,
+            "losses": 165,
+            "win_rate": 0.5147058823529411
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 108,
+            "losses": 98,
+            "win_rate": 0.5242718446601942
+          },
+          {
+            "threshold": 8.0,
+            "n": 115,
+            "wins": 64,
+            "losses": 51,
+            "win_rate": 0.5565217391304348
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 36,
+            "losses": 36,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 10.0
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5081960776615168,
+        "corr": 0.10657403348290061,
+        "mae": 13.046311565945997,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.05857345299952765,
+        "slope_2_to_10": -0.01642785912979583,
+        "high_edge_win_rate": 0.4931506849315068,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 266,
+            "losses": 256,
+            "win_rate": 0.5095785440613027
+          },
+          {
+            "threshold": 4.0,
+            "n": 340,
+            "wins": 175,
+            "losses": 165,
+            "win_rate": 0.5147058823529411
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 108,
+            "losses": 98,
+            "win_rate": 0.5242718446601942
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 64,
+            "losses": 52,
+            "win_rate": 0.5517241379310345
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 36,
+            "losses": 37,
+            "win_rate": 0.4931506849315068
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 10.0
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5101483982412061,
+        "corr": 0.10687193798892139,
+        "mae": 13.020388873841014,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.06140350877192979,
+        "slope_2_to_10": -0.006796116504854344,
+        "high_edge_win_rate": 0.5,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 515,
+            "wins": 261,
+            "losses": 254,
+            "win_rate": 0.5067961165048543
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 107,
+            "losses": 92,
+            "win_rate": 0.5376884422110553
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 64,
+            "losses": 50,
+            "win_rate": 0.5614035087719298
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 35,
+            "losses": 35,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 1,
+        "leaf": 30,
+        "lr": 0.04,
+        "iters": 160,
+        "loss": "huber"
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5052683246073298,
+        "corr": 0.09558694203060024,
+        "mae": 13.034730844149555,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.07225725094577556,
+        "slope_2_to_10": -0.03048433048433047,
+        "high_edge_win_rate": 0.47692307692307695,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 540,
+            "wins": 274,
+            "losses": 266,
+            "win_rate": 0.5074074074074074
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 168,
+            "losses": 157,
+            "win_rate": 0.5169230769230769
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 108,
+            "losses": 90,
+            "win_rate": 0.5454545454545454
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 67,
+            "losses": 55,
+            "win_rate": 0.5491803278688525
+          },
+          {
+            "threshold": 10.0,
+            "n": 65,
+            "wins": 31,
+            "losses": 34,
+            "win_rate": 0.47692307692307695
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 1,
+        "leaf": 30,
+        "lr": 0.04,
+        "iters": 160,
+        "loss": "huber"
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4937791398187438,
+        "corr": 0.09773518599073798,
+        "mae": 13.082151203423527,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.07695852534562209,
+        "slope_2_to_10": -0.03688935833113283,
+        "high_edge_win_rate": 0.4714285714285714,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 541,
+            "wins": 275,
+            "losses": 266,
+            "win_rate": 0.5083179297597042
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 172,
+            "losses": 161,
+            "win_rate": 0.5165165165165165
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 109,
+            "losses": 92,
+            "win_rate": 0.5422885572139303
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 1,
+        "leaf": 30,
+        "lr": 0.04,
+        "iters": 160,
+        "loss": "huber"
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.494008329404369,
+        "corr": 0.09783646977615228,
+        "mae": 13.081406578639434,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.07695852534562209,
+        "slope_2_to_10": -0.03783068783068788,
+        "high_edge_win_rate": 0.4714285714285714,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 540,
+            "wins": 275,
+            "losses": 265,
+            "win_rate": 0.5092592592592593
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 172,
+            "losses": 161,
+            "win_rate": 0.5165165165165165
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 109,
+            "losses": 92,
+            "win_rate": 0.5422885572139303
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 10.0
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5045103430217335,
+        "corr": 0.10168314586149282,
+        "mae": 12.97902421222884,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.07720588235294118,
+        "slope_2_to_10": -0.015658263305322107,
+        "high_edge_win_rate": 0.4852941176470588,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 263,
+            "losses": 262,
+            "win_rate": 0.5009523809523809
+          },
+          {
+            "threshold": 4.0,
+            "n": 327,
+            "wins": 172,
+            "losses": 155,
+            "win_rate": 0.5259938837920489
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 112,
+            "losses": 89,
+            "win_rate": 0.5572139303482587
+          },
+          {
+            "threshold": 8.0,
+            "n": 112,
+            "wins": 63,
+            "losses": 49,
+            "win_rate": 0.5625
+          },
+          {
+            "threshold": 10.0,
+            "n": 68,
+            "wins": 33,
+            "losses": 35,
+            "win_rate": 0.4852941176470588
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 40,
+        "lr": 0.04,
+        "iters": 120,
+        "loss": "squared_error"
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49827125569699826,
+        "corr": 0.0993422440688478,
+        "mae": 12.995577344641141,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.07890979883192734,
+        "slope_2_to_10": -0.02613337805355248,
+        "high_edge_win_rate": 0.47761194029850745,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 534,
+            "wins": 269,
+            "losses": 265,
+            "win_rate": 0.5037453183520599
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 172,
+            "losses": 157,
+            "win_rate": 0.5227963525835866
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 111,
+            "losses": 89,
+            "win_rate": 0.555
+          },
+          {
+            "threshold": 8.0,
+            "n": 115,
+            "wins": 64,
+            "losses": 51,
+            "win_rate": 0.5565217391304348
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 32,
+            "losses": 35,
+            "win_rate": 0.47761194029850745
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 1,
+        "leaf": 30,
+        "lr": 0.04,
+        "iters": 160,
+        "loss": "huber"
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5005530792441468,
+        "corr": 0.09741284018693333,
+        "mae": 13.074063307635923,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.08461898083216451,
+        "slope_2_to_10": -0.04372252076209088,
+        "high_edge_win_rate": 0.463768115942029,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 534,
+            "wins": 271,
+            "losses": 263,
+            "win_rate": 0.5074906367041199
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 170,
+            "losses": 159,
+            "win_rate": 0.5167173252279635
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 107,
+            "losses": 90,
+            "win_rate": 0.5431472081218274
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 32,
+            "losses": 37,
+            "win_rate": 0.463768115942029
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 40,
+        "lr": 0.04,
+        "iters": 120,
+        "loss": "squared_error"
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49140190835692565,
+        "corr": 0.10992492814882114,
+        "mae": 13.042023652836145,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.09188034188034189,
+        "slope_2_to_10": -0.0380581516095535,
+        "high_edge_win_rate": 0.4722222222222222,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 535,
+            "wins": 273,
+            "losses": 262,
+            "win_rate": 0.5102803738317757
+          },
+          {
+            "threshold": 4.0,
+            "n": 352,
+            "wins": 183,
+            "losses": 169,
+            "win_rate": 0.5198863636363636
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 109,
+            "losses": 97,
+            "win_rate": 0.529126213592233
+          },
+          {
+            "threshold": 8.0,
+            "n": 117,
+            "wins": 66,
+            "losses": 51,
+            "win_rate": 0.5641025641025641
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 34,
+            "losses": 38,
+            "win_rate": 0.4722222222222222
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 40,
+        "lr": 0.04,
+        "iters": 120,
+        "loss": "squared_error"
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4917164726853308,
+        "corr": 0.10943277845491747,
+        "mae": 13.050540522709746,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.09356860924077082,
+        "slope_2_to_10": -0.04448866100354587,
+        "high_edge_win_rate": 0.4657534246575342,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 537,
+            "wins": 274,
+            "losses": 263,
+            "win_rate": 0.5102420856610801
+          },
+          {
+            "threshold": 4.0,
+            "n": 352,
+            "wins": 183,
+            "losses": 169,
+            "win_rate": 0.5198863636363636
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 109,
+            "losses": 97,
+            "win_rate": 0.529126213592233
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 66,
+            "losses": 52,
+            "win_rate": 0.559322033898305
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 34,
+            "losses": 39,
+            "win_rate": 0.4657534246575342
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 40,
+        "lr": 0.04,
+        "iters": 120,
+        "loss": "squared_error"
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49287642864632486,
+        "corr": 0.10931110788103753,
+        "mae": 13.014320644161744,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.1012210012210012,
+        "slope_2_to_10": -0.03892924401398978,
+        "high_edge_win_rate": 0.4714285714285714,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 271,
+            "losses": 260,
+            "win_rate": 0.5103578154425612
+          },
+          {
+            "threshold": 4.0,
+            "n": 340,
+            "wins": 180,
+            "losses": 160,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 108,
+            "losses": 90,
+            "win_rate": 0.5454545454545454
+          },
+          {
+            "threshold": 8.0,
+            "n": 117,
+            "wins": 67,
+            "losses": 50,
+            "win_rate": 0.5726495726495726
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.03,
+        "iters": 140,
+        "loss": "huber"
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4944843307829368,
+        "corr": 0.10102792689380714,
+        "mae": 12.994905783673895,
+        "monotonic_steps": 3,
+        "monotonic_possible": 4,
+        "violation_sum": 0.10870947234583594,
+        "slope_2_to_10": -0.04315196998123827,
+        "high_edge_win_rate": 0.46153846153846156,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 533,
+            "wins": 269,
+            "losses": 264,
+            "win_rate": 0.5046904315196998
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 173,
+            "losses": 156,
+            "win_rate": 0.5258358662613982
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 109,
+            "losses": 93,
+            "win_rate": 0.5396039603960396
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 69,
+            "losses": 52,
+            "win_rate": 0.5702479338842975
+          },
+          {
+            "threshold": 10.0,
+            "n": 65,
+            "wins": 30,
+            "losses": 35,
+            "win_rate": 0.46153846153846156
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 6,
+        "leaf": 30,
+        "trees": 350,
+        "max_features": 1.0
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.489545121056493,
+        "corr": 0.10141798829252037,
+        "mae": 13.014273087996253,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.020650118698563258,
+        "slope_2_to_10": 0.011709724847721037,
+        "high_edge_win_rate": 0.5277777777777778,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 529,
+            "wins": 273,
+            "losses": 256,
+            "win_rate": 0.5160680529300568
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 163,
+            "losses": 162,
+            "win_rate": 0.5015384615384615
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 103,
+            "losses": 94,
+            "win_rate": 0.5228426395939086
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 6,
+        "leaf": 30,
+        "trees": 350,
+        "max_features": 1.0
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4894272088879572,
+        "corr": 0.101461871728441,
+        "mae": 13.012384487600693,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.020650118698563258,
+        "slope_2_to_10": 0.011709724847721037,
+        "high_edge_win_rate": 0.5277777777777778,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 529,
+            "wins": 273,
+            "losses": 256,
+            "win_rate": 0.5160680529300568
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 163,
+            "losses": 162,
+            "win_rate": 0.5015384615384615
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 103,
+            "losses": 94,
+            "win_rate": 0.5228426395939086
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 7,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49725713537575283,
+        "corr": 0.10094679897808162,
+        "mae": 13.01649858046311,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03326449512632368,
+        "slope_2_to_10": 0.0006338099584221046,
+        "high_edge_win_rate": 0.5131578947368421,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 266,
+            "losses": 253,
+            "win_rate": 0.51252408477842
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 163,
+            "losses": 163,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 105,
+            "losses": 93,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 76,
+            "wins": 39,
+            "losses": 37,
+            "win_rate": 0.5131578947368421
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 7,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49718512699659595,
+        "corr": 0.10136561731001618,
+        "mae": 13.012042341274666,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03326449512632368,
+        "slope_2_to_10": 0.0006338099584221046,
+        "high_edge_win_rate": 0.5131578947368421,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 266,
+            "losses": 253,
+            "win_rate": 0.51252408477842
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 163,
+            "losses": 163,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 105,
+            "losses": 93,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 76,
+            "wins": 39,
+            "losses": 37,
+            "win_rate": 0.5131578947368421
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 5,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5034518410909781,
+        "corr": 0.10049389739164012,
+        "mae": 13.012418889055125,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03467227646794202,
+        "slope_2_to_10": 0.002350427350427342,
+        "high_edge_win_rate": 0.5138888888888888,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 266,
+            "losses": 254,
+            "win_rate": 0.5115384615384615
+          },
+          {
+            "threshold": 4.0,
+            "n": 323,
+            "wins": 163,
+            "losses": 160,
+            "win_rate": 0.5046439628482973
+          },
+          {
+            "threshold": 6.0,
+            "n": 192,
+            "wins": 101,
+            "losses": 91,
+            "win_rate": 0.5260416666666666
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 65,
+            "losses": 55,
+            "win_rate": 0.5416666666666666
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 37,
+            "losses": 35,
+            "win_rate": 0.5138888888888888
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 3,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 15.0
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5128376256281407,
+        "corr": 0.11118293920873236,
+        "mae": 13.013701198545993,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.03855663214166394,
+        "slope_2_to_10": -0.01650182472100281,
+        "high_edge_win_rate": 0.4931506849315068,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 264,
+            "losses": 254,
+            "win_rate": 0.5096525096525096
+          },
+          {
+            "threshold": 4.0,
+            "n": 352,
+            "wins": 187,
+            "losses": 165,
+            "win_rate": 0.53125
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 109,
+            "losses": 96,
+            "win_rate": 0.5317073170731708
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 61,
+            "losses": 57,
+            "win_rate": 0.5169491525423728
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 36,
+            "losses": 37,
+            "win_rate": 0.4931506849315068
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 5,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5053195665829145,
+        "corr": 0.09935491759564637,
+        "mae": 13.022837747139024,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.04017663514658332,
+        "slope_2_to_10": -0.004644937805070026,
+        "high_edge_win_rate": 0.5068493150684932,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 267,
+            "losses": 255,
+            "win_rate": 0.5114942528735632
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 165,
+            "losses": 161,
+            "win_rate": 0.5061349693251533
+          },
+          {
+            "threshold": 6.0,
+            "n": 193,
+            "wins": 101,
+            "losses": 92,
+            "win_rate": 0.5233160621761658
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 65,
+            "losses": 55,
+            "win_rate": 0.5416666666666666
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 37,
+            "losses": 36,
+            "win_rate": 0.5068493150684932
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 5,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5052933940536013,
+        "corr": 0.09935180639184818,
+        "mae": 13.022826827825632,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.04017663514658332,
+        "slope_2_to_10": -0.004644937805070026,
+        "high_edge_win_rate": 0.5068493150684932,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 267,
+            "losses": 255,
+            "win_rate": 0.5114942528735632
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 165,
+            "losses": 161,
+            "win_rate": 0.5061349693251533
+          },
+          {
+            "threshold": 6.0,
+            "n": 193,
+            "wins": 101,
+            "losses": 92,
+            "win_rate": 0.5233160621761658
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 65,
+            "losses": 55,
+            "win_rate": 0.5416666666666666
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 37,
+            "losses": 36,
+            "win_rate": 0.5068493150684932
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 3,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 15.0
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5181739676558329,
+        "corr": 0.10470039408269234,
+        "mae": 12.992722478096097,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.05293597332789002,
+        "slope_2_to_10": -0.016511950490823768,
+        "high_edge_win_rate": 0.49295774647887325,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 528,
+            "wins": 269,
+            "losses": 259,
+            "win_rate": 0.509469696969697
+          },
+          {
+            "threshold": 4.0,
+            "n": 344,
+            "wins": 183,
+            "losses": 161,
+            "win_rate": 0.5319767441860465
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 113,
+            "losses": 94,
+            "win_rate": 0.5458937198067633
+          },
+          {
+            "threshold": 8.0,
+            "n": 109,
+            "wins": 57,
+            "losses": 52,
+            "win_rate": 0.5229357798165137
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 35,
+            "losses": 36,
+            "win_rate": 0.49295774647887325
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 2,
+        "leaf": 20,
+        "lr": 0.05,
+        "iters": 120,
+        "l2": 20.0
+      },
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.4997021023065793,
+        "corr": 0.10095694577044914,
+        "mae": 12.999535228581305,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.06170182235614868,
+        "slope_2_to_10": -0.009147517496004787,
+        "high_edge_win_rate": 0.4927536231884058,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 264,
+            "losses": 262,
+            "win_rate": 0.5019011406844106
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 169,
+            "losses": 156,
+            "win_rate": 0.52
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 112,
+            "wins": 61,
+            "losses": 51,
+            "win_rate": 0.5446428571428571
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 34,
+            "losses": 35,
+            "win_rate": 0.4927536231884058
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.03,
+        "iters": 140,
+        "loss": "huber"
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5048009896518546,
+        "corr": 0.10451948193979328,
+        "mae": 13.044218231977363,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.12457122461129738,
+        "slope_2_to_10": -0.05888017219405811,
+        "high_edge_win_rate": 0.44776119402985076,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 527,
+            "wins": 267,
+            "losses": 260,
+            "win_rate": 0.5066413662239089
+          },
+          {
+            "threshold": 4.0,
+            "n": 340,
+            "wins": 181,
+            "losses": 159,
+            "win_rate": 0.5323529411764706
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 109,
+            "losses": 97,
+            "win_rate": 0.529126213592233
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 70,
+            "losses": 53,
+            "win_rate": 0.5691056910569106
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 30,
+            "losses": 37,
+            "win_rate": 0.44776119402985076
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.03,
+        "iters": 140,
+        "loss": "huber"
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49702708366074705,
+        "corr": 0.10427116851633339,
+        "mae": 13.07072244768321,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.12552981707911287,
+        "slope_2_to_10": -0.046588486140724916,
+        "high_edge_win_rate": 0.45714285714285713,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 536,
+            "wins": 270,
+            "losses": 266,
+            "win_rate": 0.503731343283582
+          },
+          {
+            "threshold": 4.0,
+            "n": 351,
+            "wins": 188,
+            "losses": 163,
+            "win_rate": 0.5356125356125356
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 110,
+            "losses": 103,
+            "win_rate": 0.5164319248826291
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 71,
+            "losses": 55,
+            "win_rate": 0.5634920634920635
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 32,
+            "losses": 38,
+            "win_rate": 0.45714285714285713
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "gbr",
+        "depth": 2,
+        "leaf": 30,
+        "lr": 0.03,
+        "iters": 140,
+        "loss": "huber"
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.49783906962124785,
+        "corr": 0.10512206325564599,
+        "mae": 13.059995347810625,
+        "monotonic_steps": 2,
+        "monotonic_possible": 4,
+        "violation_sum": 0.13003775358704933,
+        "slope_2_to_10": -0.0475300400534045,
+        "high_edge_win_rate": 0.45714285714285713,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 535,
+            "wins": 270,
+            "losses": 265,
+            "win_rate": 0.5046728971962616
+          },
+          {
+            "threshold": 4.0,
+            "n": 351,
+            "wins": 188,
+            "losses": 163,
+            "win_rate": 0.5356125356125356
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 110,
+            "losses": 103,
+            "win_rate": 0.5164319248826291
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 71,
+            "losses": 54,
+            "win_rate": 0.568
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 32,
+            "losses": 38,
+            "win_rate": 0.45714285714285713
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "extra",
+        "depth": 7,
+        "leaf": 20,
+        "trees": 350,
+        "max_features": 0.7
+      },
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5027748691099476,
+        "corr": 0.10241739158382603,
+        "mae": 12.998083551389005,
+        "monotonic_steps": 1,
+        "monotonic_possible": 4,
+        "violation_sum": 0.02399317638998566,
+        "slope_2_to_10": 0.012520257201108165,
+        "high_edge_win_rate": 0.527027027027027,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 266,
+            "losses": 251,
+            "win_rate": 0.5145067698259188
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 161,
+            "losses": 160,
+            "win_rate": 0.5015576323987538
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 106,
+            "losses": 91,
+            "win_rate": 0.5380710659898477
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 63,
+            "losses": 55,
+            "win_rate": 0.5338983050847458
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 3,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 15.0
+      },
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.515625,
+        "corr": 0.11563641314788205,
+        "mae": 13.047319096695981,
+        "monotonic_steps": 1,
+        "monotonic_possible": 4,
+        "violation_sum": 0.024337592702204036,
+        "slope_2_to_10": -0.00757778806559295,
+        "high_edge_win_rate": 0.5064935064935064,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 533,
+            "wins": 274,
+            "losses": 259,
+            "win_rate": 0.5140712945590994
+          },
+          {
+            "threshold": 4.0,
+            "n": 373,
+            "wins": 198,
+            "losses": 175,
+            "win_rate": 0.5308310991957105
+          },
+          {
+            "threshold": 6.0,
+            "n": 217,
+            "wins": 114,
+            "losses": 103,
+            "win_rate": 0.5253456221198156
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 65,
+            "losses": 61,
+            "win_rate": 0.5158730158730159
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 39,
+            "losses": 38,
+            "win_rate": 0.5064935064935064
+          }
+        ]
+      }
+    },
+    {
+      "spec": {
+        "kind": "hgb",
+        "depth": 3,
+        "leaf": 30,
+        "lr": 0.035,
+        "iters": 140,
+        "l2": 15.0
+      },
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "auc": 0.5153632747068677,
+        "corr": 0.11552755187207764,
+        "mae": 13.038345379647703,
+        "monotonic_steps": 1,
+        "monotonic_possible": 4,
+        "violation_sum": 0.02972972972972976,
+        "slope_2_to_10": -0.013207547169811318,
+        "high_edge_win_rate": 0.5,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 530,
+            "wins": 272,
+            "losses": 258,
+            "win_rate": 0.5132075471698113
+          },
+          {
+            "threshold": 4.0,
+            "n": 370,
+            "wins": 196,
+            "losses": 174,
+            "win_rate": 0.5297297297297298
+          },
+          {
+            "threshold": 6.0,
+            "n": 216,
+            "wins": 113,
+            "losses": 103,
+            "win_rate": 0.5231481481481481
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 65,
+            "losses": 60,
+            "win_rate": 0.52
+          },
+          {
+            "threshold": 10.0,
+            "n": 76,
+            "wins": 38,
+            "losses": 38,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    }
+  ]
+}
