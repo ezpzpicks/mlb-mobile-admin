@@ -1,0 +1,7382 @@
+{
+  "protocol": {
+    "market_predictor": false,
+    "fpi_snapshot_rule": "latest valid snapshot with snapshot week < game week; joined directly by ESPN team id",
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "select": 2024,
+    "holdout": 2025,
+    "final": 2026
+  },
+  "baseline": {
+    "2024": {
+      "n": 782,
+      "steps": 2,
+      "possible": 4,
+      "violation": 0.03442772795140492,
+      "slope": 0.0030219780219780112,
+      "high": 0.525,
+      "auc": 0.5307642995447172,
+      "corr": 0.09545112922564378,
+      "mae": 13.036447636876698,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 546,
+          "wins": 285,
+          "losses": 261,
+          "win_rate": 0.521978021978022
+        },
+        {
+          "threshold": 4.0,
+          "n": 359,
+          "wins": 186,
+          "losses": 173,
+          "win_rate": 0.5181058495821727
+        },
+        {
+          "threshold": 6.0,
+          "n": 218,
+          "wins": 114,
+          "losses": 104,
+          "win_rate": 0.5229357798165137
+        },
+        {
+          "threshold": 8.0,
+          "n": 135,
+          "wins": 75,
+          "losses": 60,
+          "win_rate": 0.5555555555555556
+        },
+        {
+          "threshold": 10.0,
+          "n": 80,
+          "wins": 42,
+          "losses": 38,
+          "win_rate": 0.525
+        }
+      ]
+    },
+    "2025": {
+      "n": 795,
+      "steps": 3,
+      "possible": 4,
+      "violation": 0.008280072592417254,
+      "slope": 0.08807847082494968,
+      "high": 0.6285714285714286,
+      "auc": 0.5387905903825192,
+      "corr": 0.10223578672648327,
+      "mae": 12.395363344383886,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 568,
+          "wins": 307,
+          "losses": 261,
+          "win_rate": 0.5404929577464789
+        },
+        {
+          "threshold": 4.0,
+          "n": 357,
+          "wins": 190,
+          "losses": 167,
+          "win_rate": 0.5322128851540616
+        },
+        {
+          "threshold": 6.0,
+          "n": 223,
+          "wins": 124,
+          "losses": 99,
+          "win_rate": 0.5560538116591929
+        },
+        {
+          "threshold": 8.0,
+          "n": 128,
+          "wins": 75,
+          "losses": 53,
+          "win_rate": 0.5859375
+        },
+        {
+          "threshold": 10.0,
+          "n": 70,
+          "wins": 44,
+          "losses": 26,
+          "win_rate": 0.6285714285714286
+        }
+      ]
+    },
+    "2026": {
+      "n": 211,
+      "steps": 2,
+      "possible": 4,
+      "violation": 0.08129370629370625,
+      "slope": -0.055384615384615365,
+      "high": 0.38461538461538464,
+      "auc": 0.49527186761229314,
+      "corr": -0.05664068165353759,
+      "mae": 13.484839123660551,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 175,
+          "wins": 77,
+          "losses": 98,
+          "win_rate": 0.44
+        },
+        {
+          "threshold": 4.0,
+          "n": 132,
+          "wins": 59,
+          "losses": 73,
+          "win_rate": 0.44696969696969696
+        },
+        {
+          "threshold": 6.0,
+          "n": 88,
+          "wins": 41,
+          "losses": 47,
+          "win_rate": 0.4659090909090909
+        },
+        {
+          "threshold": 8.0,
+          "n": 54,
+          "wins": 22,
+          "losses": 32,
+          "win_rate": 0.4074074074074074
+        },
+        {
+          "threshold": 10.0,
+          "n": 39,
+          "wins": 15,
+          "losses": 24,
+          "win_rate": 0.38461538461538464
+        }
+      ]
+    }
+  },
+  "chosen_on_2024": {
+    "family": "all_adjusted",
+    "features": [
+      "adj_off_epa_diff",
+      "adj_def_epa_diff",
+      "adj_st_epa_diff",
+      "adj_net_diff",
+      "fei_off_diff",
+      "fei_def_diff",
+      "fei_net_diff",
+      "off_pace_diff",
+      "net_z_diff"
+    ],
+    "alpha": 16.0,
+    "cap": 2.0,
+    "validation": {
+      "n": 782,
+      "steps": 3,
+      "possible": 4,
+      "violation": 0.014285714285714346,
+      "slope": 0.033333333333333326,
+      "high": 0.5333333333333333,
+      "auc": 0.5101915327855984,
+      "corr": 0.09224022769445259,
+      "mae": 13.016405683692938,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 530,
+          "wins": 265,
+          "losses": 265,
+          "win_rate": 0.5
+        },
+        {
+          "threshold": 4.0,
+          "n": 328,
+          "wins": 171,
+          "losses": 157,
+          "win_rate": 0.5213414634146342
+        },
+        {
+          "threshold": 6.0,
+          "n": 198,
+          "wins": 107,
+          "losses": 91,
+          "win_rate": 0.5404040404040404
+        },
+        {
+          "threshold": 8.0,
+          "n": 126,
+          "wins": 69,
+          "losses": 57,
+          "win_rate": 0.5476190476190477
+        },
+        {
+          "threshold": 10.0,
+          "n": 75,
+          "wins": 40,
+          "losses": 35,
+          "win_rate": 0.5333333333333333
+        }
+      ]
+    }
+  },
+  "holdout_2025": {
+    "n": 795,
+    "steps": 3,
+    "possible": 4,
+    "violation": 0.005195699021786959,
+    "slope": 0.08722880787295906,
+    "high": 0.6176470588235294,
+    "auc": 0.5012532284947263,
+    "corr": 0.10374191768418665,
+    "mae": 12.399296886787443,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 526,
+        "wins": 279,
+        "losses": 247,
+        "win_rate": 0.5304182509505704
+      },
+      {
+        "threshold": 4.0,
+        "n": 337,
+        "wins": 177,
+        "losses": 160,
+        "win_rate": 0.5252225519287834
+      },
+      {
+        "threshold": 6.0,
+        "n": 206,
+        "wins": 109,
+        "losses": 97,
+        "win_rate": 0.529126213592233
+      },
+      {
+        "threshold": 8.0,
+        "n": 112,
+        "wins": 64,
+        "losses": 48,
+        "win_rate": 0.5714285714285714
+      },
+      {
+        "threshold": 10.0,
+        "n": 68,
+        "wins": 42,
+        "losses": 26,
+        "win_rate": 0.6176470588235294
+      }
+    ]
+  },
+  "holdout_2026": {
+    "n": 211,
+    "steps": 3,
+    "possible": 4,
+    "violation": 0.05354391371340528,
+    "slope": -0.01068134002265736,
+    "high": 0.43243243243243246,
+    "auc": 0.5674823878383389,
+    "corr": -0.05275617744154969,
+    "mae": 13.516523610217126,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 167,
+        "wins": 74,
+        "losses": 93,
+        "win_rate": 0.4431137724550898
+      },
+      {
+        "threshold": 4.0,
+        "n": 131,
+        "wins": 59,
+        "losses": 72,
+        "win_rate": 0.45038167938931295
+      },
+      {
+        "threshold": 6.0,
+        "n": 88,
+        "wins": 42,
+        "losses": 46,
+        "win_rate": 0.4772727272727273
+      },
+      {
+        "threshold": 8.0,
+        "n": 59,
+        "wins": 25,
+        "losses": 34,
+        "win_rate": 0.423728813559322
+      },
+      {
+        "threshold": 10.0,
+        "n": 37,
+        "wins": 16,
+        "losses": 21,
+        "win_rate": 0.43243243243243246
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.014285714285714346,
+        "slope": 0.033333333333333326,
+        "high": 0.5333333333333333,
+        "auc": 0.5101915327855984,
+        "corr": 0.09224022769445259,
+        "mae": 13.016405683692938,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 530,
+            "wins": 265,
+            "losses": 265,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 328,
+            "wins": 171,
+            "losses": 157,
+            "win_rate": 0.5213414634146342
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 107,
+            "losses": 91,
+            "win_rate": 0.5404040404040404
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.014285714285714346,
+        "slope": 0.033333333333333326,
+        "high": 0.5333333333333333,
+        "auc": 0.5094261866136376,
+        "corr": 0.09191425997823671,
+        "mae": 13.020478379346057,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 530,
+            "wins": 265,
+            "losses": 265,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 169,
+            "losses": 157,
+            "win_rate": 0.5184049079754601
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 107,
+            "losses": 91,
+            "win_rate": 0.5404040404040404
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.014285714285714346,
+        "slope": 0.032388153749212334,
+        "high": 0.5333333333333333,
+        "auc": 0.509635512062379,
+        "corr": 0.09199031467473873,
+        "mae": 13.019553058847265,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 529,
+            "wins": 265,
+            "losses": 264,
+            "win_rate": 0.500945179584121
+          },
+          {
+            "threshold": 4.0,
+            "n": 327,
+            "wins": 170,
+            "losses": 157,
+            "win_rate": 0.5198776758409785
+          },
+          {
+            "threshold": 6.0,
+            "n": 198,
+            "wins": 107,
+            "losses": 91,
+            "win_rate": 0.5404040404040404
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.512257980115123,
+        "corr": 0.09340878257323487,
+        "mae": 13.034030657627678,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 528,
+            "wins": 264,
+            "losses": 264,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 176,
+            "losses": 158,
+            "win_rate": 0.5269461077844312
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 110,
+            "losses": 97,
+            "win_rate": 0.5314009661835749
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.5121206174777604,
+        "corr": 0.09294531797227366,
+        "mae": 13.037327894224815,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 528,
+            "wins": 264,
+            "losses": 264,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 176,
+            "losses": 158,
+            "win_rate": 0.5269461077844312
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 110,
+            "losses": 98,
+            "win_rate": 0.5288461538461539
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.5115319204604919,
+        "corr": 0.09365061869116495,
+        "mae": 13.029548340257485,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 528,
+            "wins": 264,
+            "losses": 264,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 174,
+            "losses": 157,
+            "win_rate": 0.525679758308157
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 110,
+            "losses": 95,
+            "win_rate": 0.5365853658536586
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03151876586411684,
+        "high": 0.5324675324675324,
+        "auc": 0.5108974358974359,
+        "corr": 0.09281544849995976,
+        "mae": 13.041453681827596,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 527,
+            "wins": 264,
+            "losses": 263,
+            "win_rate": 0.5009487666034156
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 173,
+            "losses": 158,
+            "win_rate": 0.5226586102719033
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 110,
+            "losses": 98,
+            "win_rate": 0.5288461538461539
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03151876586411684,
+        "high": 0.5324675324675324,
+        "auc": 0.5108451072736787,
+        "corr": 0.09236763549741395,
+        "mae": 13.045305685941752,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 527,
+            "wins": 264,
+            "losses": 263,
+            "win_rate": 0.5009487666034156
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 173,
+            "losses": 158,
+            "win_rate": 0.5226586102719033
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 110,
+            "losses": 99,
+            "win_rate": 0.5263157894736842
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.03151876586411684,
+        "high": 0.5324675324675324,
+        "auc": 0.5077088116590461,
+        "corr": 0.09322318914983435,
+        "mae": 13.035091347230438,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 527,
+            "wins": 264,
+            "losses": 263,
+            "win_rate": 0.5009487666034156
+          },
+          {
+            "threshold": 4.0,
+            "n": 328,
+            "wins": 171,
+            "losses": 157,
+            "win_rate": 0.5213414634146342
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 110,
+            "losses": 96,
+            "win_rate": 0.5339805825242718
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.030566391783121816,
+        "high": 0.5324675324675324,
+        "auc": 0.5086769101957783,
+        "corr": 0.09294744630348971,
+        "mae": 13.039807034195933,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 264,
+            "losses": 262,
+            "win_rate": 0.5019011406844106
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 110,
+            "losses": 97,
+            "win_rate": 0.5314009661835749
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.030566391783121816,
+        "high": 0.5324675324675324,
+        "auc": 0.5086049569261564,
+        "corr": 0.09249729287898897,
+        "mae": 13.0435315074057,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 264,
+            "losses": 262,
+            "win_rate": 0.5019011406844106
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 110,
+            "losses": 98,
+            "win_rate": 0.5288461538461539
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015151515151515249,
+        "slope": 0.030566391783121816,
+        "high": 0.5324675324675324,
+        "auc": 0.5079573774995585,
+        "corr": 0.09331298931943331,
+        "mae": 13.033937865879858,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 264,
+            "losses": 262,
+            "win_rate": 0.5019011406844106
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 172,
+            "losses": 157,
+            "win_rate": 0.5227963525835866
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 110,
+            "losses": 95,
+            "win_rate": 0.5365853658536586
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 69,
+            "losses": 57,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015846994535519188,
+        "slope": 0.028553218610580022,
+        "high": 0.5333333333333333,
+        "auc": 0.5166637231238185,
+        "corr": 0.0962984192668425,
+        "mae": 12.998953289757559,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 264,
+            "losses": 259,
+            "win_rate": 0.5047801147227533
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 67,
+            "losses": 55,
+            "win_rate": 0.5491803278688525
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015846994535519188,
+        "slope": 0.028553218610580022,
+        "high": 0.5333333333333333,
+        "auc": 0.5162843331567207,
+        "corr": 0.09576862121322338,
+        "mae": 13.001564499060343,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 264,
+            "losses": 259,
+            "win_rate": 0.5047801147227533
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 67,
+            "losses": 55,
+            "win_rate": 0.5491803278688525
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015846994535519188,
+        "slope": 0.028553218610580022,
+        "high": 0.5333333333333333,
+        "auc": 0.5162843331567207,
+        "corr": 0.09576823770601527,
+        "mae": 13.00156648288949,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 264,
+            "losses": 259,
+            "win_rate": 0.5047801147227533
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 67,
+            "losses": 55,
+            "win_rate": 0.5491803278688525
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015919564306661083,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.5072907467373172,
+        "corr": 0.09453403941493706,
+        "mae": 13.019142322807898,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 339,
+            "wins": 178,
+            "losses": 161,
+            "win_rate": 0.5250737463126843
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 110,
+            "losses": 96,
+            "win_rate": 0.5339805825242718
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015919564306661083,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.5071795375004089,
+        "corr": 0.09497447289214014,
+        "mae": 13.015630601600563,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 176,
+            "losses": 160,
+            "win_rate": 0.5238095238095238
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 110,
+            "losses": 96,
+            "win_rate": 0.5339805825242718
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015919564306661083,
+        "slope": 0.03246753246753242,
+        "high": 0.5324675324675324,
+        "auc": 0.5070094527851372,
+        "corr": 0.09404487639851303,
+        "mae": 13.021648588472058,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 339,
+            "wins": 178,
+            "losses": 161,
+            "win_rate": 0.5250737463126843
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 110,
+            "losses": 97,
+            "win_rate": 0.5314009661835749
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 68,
+            "losses": 56,
+            "win_rate": 0.5483870967741935
+          },
+          {
+            "threshold": 10.0,
+            "n": 77,
+            "wins": 41,
+            "losses": 36,
+            "win_rate": 0.5324675324675324
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.01683650863978725,
+        "slope": 0.03863939985612996,
+        "high": 0.5405405405405406,
+        "auc": 0.5014918341708543,
+        "corr": 0.09386174105087094,
+        "mae": 13.001837240396874,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 264,
+            "losses": 262,
+            "win_rate": 0.5019011406844106
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 175,
+            "losses": 158,
+            "win_rate": 0.5255255255255256
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 40,
+            "losses": 34,
+            "win_rate": 0.5405405405405406
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.01866666666666672,
+        "slope": 0.030487033523086682,
+        "high": 0.5333333333333333,
+        "auc": 0.50928597128185,
+        "corr": 0.09291939507821817,
+        "mae": 13.008624870543908,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 527,
+            "wins": 265,
+            "losses": 262,
+            "win_rate": 0.5028462998102466
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 172,
+            "losses": 158,
+            "win_rate": 0.5212121212121212
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 69,
+            "losses": 56,
+            "win_rate": 0.552
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5242574289807105,
+        "corr": 0.09603989736573132,
+        "mae": 12.991623634128393,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5242574289807105,
+        "corr": 0.09603989736573132,
+        "mae": 12.991623634128393,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5242574289807105,
+        "corr": 0.09603989736573132,
+        "mae": 12.991623634128393,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5241527724177628,
+        "corr": 0.09600338484481602,
+        "mae": 12.991506808818745,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5241527724177628,
+        "corr": 0.09600338484481602,
+        "mae": 12.991506808818745,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03233817839590092,
+        "high": 0.5342465753424658,
+        "auc": 0.5241527724177628,
+        "corr": 0.09600338484481602,
+        "mae": 12.991506808818745,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 263,
+            "losses": 261,
+            "win_rate": 0.5019083969465649
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605295429149284,
+        "mae": 12.99166551173442,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605295429149284,
+        "mae": 12.99166551173442,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605295429149284,
+        "mae": 12.99166551173442,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605231940431878,
+        "mae": 12.991663474235224,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605231940431878,
+        "mae": 12.991663474235224,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09605231940431878,
+        "mae": 12.991663474235224,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09604979320537488,
+        "mae": 12.991655368313927,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09604979320537488,
+        "mae": 12.991655368313927,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020375273397030047,
+        "slope": 0.03138943248532289,
+        "high": 0.5342465753424658,
+        "auc": 0.524303216227,
+        "corr": 0.09604979320537488,
+        "mae": 12.991655368313927,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 264,
+            "losses": 261,
+            "win_rate": 0.5028571428571429
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 174,
+            "losses": 158,
+            "win_rate": 0.5240963855421686
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 112,
+            "losses": 90,
+            "win_rate": 0.5544554455445545
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02311827956989243,
+        "slope": 0.033333333333333326,
+        "high": 0.5333333333333333,
+        "auc": 0.49612935733589847,
+        "corr": 0.09220021504667351,
+        "mae": 13.017181553785056,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 259,
+            "losses": 259,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 177,
+            "losses": 158,
+            "win_rate": 0.5283582089552239
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 107,
+            "losses": 93,
+            "win_rate": 0.535
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02311827956989243,
+        "slope": 0.033333333333333326,
+        "high": 0.5333333333333333,
+        "auc": 0.49607700713925806,
+        "corr": 0.09183516668843145,
+        "mae": 13.019960518476116,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 259,
+            "losses": 259,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 177,
+            "losses": 159,
+            "win_rate": 0.5267857142857143
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 107,
+            "losses": 93,
+            "win_rate": 0.535
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02311827956989243,
+        "slope": 0.033333333333333326,
+        "high": 0.5333333333333333,
+        "auc": 0.49607700713925806,
+        "corr": 0.09183516668843145,
+        "mae": 13.019960518476116,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 259,
+            "losses": 259,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 177,
+            "losses": 159,
+            "win_rate": 0.5267857142857143
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 107,
+            "losses": 93,
+            "win_rate": 0.535
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02408675799086757,
+        "slope": 0.03520259828701644,
+        "high": 0.5342465753424658,
+        "auc": 0.5236752768493141,
+        "corr": 0.09582580192118029,
+        "mae": 12.989988277639917,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 111,
+            "losses": 91,
+            "win_rate": 0.5495049504950495
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 67,
+            "losses": 53,
+            "win_rate": 0.5583333333333333
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02408675799086757,
+        "slope": 0.03520259828701644,
+        "high": 0.5342465753424658,
+        "auc": 0.523642571673393,
+        "corr": 0.09580504284481296,
+        "mae": 12.989989327281815,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 111,
+            "losses": 91,
+            "win_rate": 0.5495049504950495
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 67,
+            "losses": 53,
+            "win_rate": 0.5583333333333333
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02408675799086757,
+        "slope": 0.03424657534246578,
+        "high": 0.5342465753424658,
+        "auc": 0.5236621947789457,
+        "corr": 0.09583142332427162,
+        "mae": 12.989988119561435,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 111,
+            "losses": 91,
+            "win_rate": 0.5495049504950495
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 67,
+            "losses": 53,
+            "win_rate": 0.5583333333333333
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02408675799086757,
+        "slope": 0.03424657534246578,
+        "high": 0.5342465753424658,
+        "auc": 0.5236491127085773,
+        "corr": 0.09583285870637134,
+        "mae": 12.989988079458097,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 111,
+            "losses": 91,
+            "win_rate": 0.5495049504950495
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 67,
+            "losses": 53,
+            "win_rate": 0.5583333333333333
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "drive_fei",
+      "features": [
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02408675799086757,
+        "slope": 0.03424657534246578,
+        "high": 0.5342465753424658,
+        "auc": 0.5236360306382088,
+        "corr": 0.0958332194709812,
+        "mae": 12.98998806939522,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 262,
+            "losses": 262,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 111,
+            "losses": 91,
+            "win_rate": 0.5495049504950495
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 67,
+            "losses": 53,
+            "win_rate": 0.5583333333333333
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_adjusted",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_st_epa_diff",
+        "adj_net_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "fei_net_diff",
+        "off_pace_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.024972972972973073,
+        "slope": 0.022265122265122228,
+        "high": 0.527027027027027,
+        "auc": 0.5141817991522319,
+        "corr": 0.09399639084045132,
+        "mae": 12.999627546557624,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 265,
+            "losses": 260,
+            "win_rate": 0.5047619047619047
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 173,
+            "losses": 157,
+            "win_rate": 0.5242424242424243
+          },
+          {
+            "threshold": 6.0,
+            "n": 197,
+            "wins": 107,
+            "losses": 90,
+            "win_rate": 0.5431472081218274
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 69,
+            "losses": 56,
+            "win_rate": 0.552
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02669198123743588,
+        "slope": 0.023195609402505868,
+        "high": 0.527027027027027,
+        "auc": 0.5234005533715765,
+        "corr": 0.0952604390891791,
+        "mae": 12.985062539910441,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 263,
+            "losses": 259,
+            "win_rate": 0.5038314176245211
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 174,
+            "losses": 156,
+            "win_rate": 0.5272727272727272
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 110,
+            "losses": 92,
+            "win_rate": 0.5445544554455446
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 67,
+            "losses": 54,
+            "win_rate": 0.5537190082644629
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02669198123743588,
+        "slope": 0.022228562535664187,
+        "high": 0.527027027027027,
+        "auc": 0.5237603103067091,
+        "corr": 0.09526732198188592,
+        "mae": 12.983307550714997,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 263,
+            "losses": 258,
+            "win_rate": 0.5047984644913628
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 109,
+            "losses": 92,
+            "win_rate": 0.5422885572139303
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 67,
+            "losses": 54,
+            "win_rate": 0.5537190082644629
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0277368957319144,
+        "slope": 0.03329055239791512,
+        "high": 0.5342465753424658,
+        "auc": 0.5244113029827315,
+        "corr": 0.09484851901627173,
+        "mae": 12.989166820386826,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 262,
+            "losses": 261,
+            "win_rate": 0.5009560229445507
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 111,
+            "losses": 94,
+            "win_rate": 0.5414634146341464
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 68,
+            "losses": 53,
+            "win_rate": 0.5619834710743802
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0277368957319144,
+        "slope": 0.03329055239791512,
+        "high": 0.5342465753424658,
+        "auc": 0.5218764921736514,
+        "corr": 0.09480148248576424,
+        "mae": 12.988867300009609,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 262,
+            "losses": 261,
+            "win_rate": 0.5009560229445507
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 111,
+            "losses": 94,
+            "win_rate": 0.5414634146341464
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 68,
+            "losses": 53,
+            "win_rate": 0.5619834710743802
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0277368957319144,
+        "slope": 0.03329055239791512,
+        "high": 0.5342465753424658,
+        "auc": 0.5218568690680987,
+        "corr": 0.09479817526484723,
+        "mae": 12.988846275820647,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 262,
+            "losses": 261,
+            "win_rate": 0.5009560229445507
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 111,
+            "losses": 94,
+            "win_rate": 0.5414634146341464
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 68,
+            "losses": 53,
+            "win_rate": 0.5619834710743802
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0277368957319144,
+        "slope": 0.03329055239791512,
+        "high": 0.5342465753424658,
+        "auc": 0.5218568690680987,
+        "corr": 0.09479883987457517,
+        "mae": 12.98885050767416,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 262,
+            "losses": 261,
+            "win_rate": 0.5009560229445507
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 111,
+            "losses": 94,
+            "win_rate": 0.5414634146341464
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 68,
+            "losses": 53,
+            "win_rate": 0.5619834710743802
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0277368957319144,
+        "slope": 0.03329055239791512,
+        "high": 0.5342465753424658,
+        "auc": 0.5218503280329145,
+        "corr": 0.09481180608441932,
+        "mae": 12.988932370027104,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 262,
+            "losses": 261,
+            "win_rate": 0.5009560229445507
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 111,
+            "losses": 94,
+            "win_rate": 0.5414634146341464
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 68,
+            "losses": 53,
+            "win_rate": 0.5619834710743802
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.028778634741567832,
+        "slope": 0.035198956294846706,
+        "high": 0.5342465753424658,
+        "auc": 0.5088907206782854,
+        "corr": 0.09456796462221839,
+        "mae": 12.995600441237807,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 262,
+            "losses": 263,
+            "win_rate": 0.4990476190476191
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 175,
+            "losses": 156,
+            "win_rate": 0.5287009063444109
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 39,
+            "losses": 34,
+            "win_rate": 0.5342465753424658
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.029691876750700286,
+        "slope": 0.03815028901734102,
+        "high": 0.5333333333333333,
+        "auc": 0.5107055244823864,
+        "corr": 0.09368152135726057,
+        "mae": 13.003862431475273,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 257,
+            "losses": 262,
+            "win_rate": 0.4951830443159923
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 175,
+            "losses": 157,
+            "win_rate": 0.5271084337349398
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 107,
+            "losses": 92,
+            "win_rate": 0.5376884422110553
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.029691876750700286,
+        "slope": 0.03815028901734102,
+        "high": 0.5333333333333333,
+        "auc": 0.5107055244823864,
+        "corr": 0.09368152135726057,
+        "mae": 13.003862431475273,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 257,
+            "losses": 262,
+            "win_rate": 0.4951830443159923
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 175,
+            "losses": 157,
+            "win_rate": 0.5271084337349398
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 107,
+            "losses": 92,
+            "win_rate": 0.5376884422110553
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.029691876750700286,
+        "slope": 0.03815028901734102,
+        "high": 0.5333333333333333,
+        "auc": 0.5107055244823864,
+        "corr": 0.09368152135726057,
+        "mae": 13.003862431475273,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 257,
+            "losses": 262,
+            "win_rate": 0.4951830443159923
+          },
+          {
+            "threshold": 4.0,
+            "n": 332,
+            "wins": 175,
+            "losses": 157,
+            "win_rate": 0.5271084337349398
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 107,
+            "losses": 92,
+            "win_rate": 0.5376884422110553
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 40,
+            "losses": 35,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03035002215330085,
+        "slope": 0.023195609402505868,
+        "high": 0.527027027027027,
+        "auc": 0.523956541362236,
+        "corr": 0.0952667832272689,
+        "mae": 12.982552696536384,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 263,
+            "losses": 259,
+            "win_rate": 0.5038314176245211
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 176,
+            "losses": 154,
+            "win_rate": 0.5333333333333333
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 110,
+            "losses": 92,
+            "win_rate": 0.5445544554455446
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03035002215330085,
+        "slope": 0.023195609402505868,
+        "high": 0.527027027027027,
+        "auc": 0.523956541362236,
+        "corr": 0.09526700598426419,
+        "mae": 12.982588558947429,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 263,
+            "losses": 259,
+            "win_rate": 0.5038314176245211
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 176,
+            "losses": 155,
+            "win_rate": 0.5317220543806647
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 110,
+            "losses": 92,
+            "win_rate": 0.5445544554455446
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03035002215330085,
+        "slope": 0.023195609402505868,
+        "high": 0.527027027027027,
+        "auc": 0.5239434592918676,
+        "corr": 0.09526785398366995,
+        "mae": 12.982735560957622,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 263,
+            "losses": 259,
+            "win_rate": 0.5038314176245211
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 176,
+            "losses": 155,
+            "win_rate": 0.5317220543806647
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 110,
+            "losses": 92,
+            "win_rate": 0.5445544554455446
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 74,
+            "wins": 39,
+            "losses": 35,
+            "win_rate": 0.527027027027027
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03063315715672532,
+        "slope": 0.020547945205479423,
+        "high": 0.5205479452054794,
+        "auc": 0.49766757172298737,
+        "corr": 0.09026170489719225,
+        "mae": 13.034721837668094,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 257,
+            "losses": 257,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 170,
+            "losses": 161,
+            "win_rate": 0.513595166163142
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 106,
+            "losses": 93,
+            "win_rate": 0.5326633165829145
+          },
+          {
+            "threshold": 8.0,
+            "n": 127,
+            "wins": 70,
+            "losses": 57,
+            "win_rate": 0.5511811023622047
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03063315715672532,
+        "slope": 0.020547945205479423,
+        "high": 0.5205479452054794,
+        "auc": 0.49766757172298737,
+        "corr": 0.09020510998303259,
+        "mae": 13.0353013209474,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 257,
+            "losses": 257,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 170,
+            "losses": 161,
+            "win_rate": 0.513595166163142
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 106,
+            "losses": 93,
+            "win_rate": 0.5326633165829145
+          },
+          {
+            "threshold": 8.0,
+            "n": 127,
+            "wins": 70,
+            "losses": 57,
+            "win_rate": 0.5511811023622047
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03063315715672532,
+        "slope": 0.020547945205479423,
+        "high": 0.5205479452054794,
+        "auc": 0.49611992252931325,
+        "corr": 0.09137005331125231,
+        "mae": 13.026348370495565,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 257,
+            "losses": 257,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 170,
+            "losses": 160,
+            "win_rate": 0.5151515151515151
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 106,
+            "losses": 93,
+            "win_rate": 0.5326633165829145
+          },
+          {
+            "threshold": 8.0,
+            "n": 127,
+            "wins": 70,
+            "losses": 57,
+            "win_rate": 0.5511811023622047
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5207056468756746,
+        "corr": 0.09331449376950833,
+        "mae": 12.994051470873053,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5207056468756746,
+        "corr": 0.09331449376950833,
+        "mae": 12.994051470873053,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5207056468756746,
+        "corr": 0.09331449376950833,
+        "mae": 12.994051470873053,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179225536368394,
+        "corr": 0.09318589344044355,
+        "mae": 12.994103430316155,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179225536368394,
+        "corr": 0.09318589344044355,
+        "mae": 12.994103430316155,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179225536368394,
+        "corr": 0.09318589344044355,
+        "mae": 12.994103430316155,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09313994048314268,
+        "mae": 12.994117399915119,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09313994048314268,
+        "mae": 12.994117399915119,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09313994048314268,
+        "mae": 12.994117399915119,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09314217477968588,
+        "mae": 12.994116775969669,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09314217477968588,
+        "mae": 12.994116775969669,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09314217477968588,
+        "mae": 12.994116775969669,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09315106507643667,
+        "mae": 12.9941142374644,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09315106507643667,
+        "mae": 12.9941142374644,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "adj_epa",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "adj_net_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0340739035340164,
+        "slope": 0.0243647390986092,
+        "high": 0.5205479452054794,
+        "auc": 0.5179160125588697,
+        "corr": 0.09315106507643667,
+        "mae": 12.9941142374644,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 260,
+            "losses": 264,
+            "win_rate": 0.4961832061068702
+          },
+          {
+            "threshold": 4.0,
+            "n": 330,
+            "wins": 175,
+            "losses": 155,
+            "win_rate": 0.5303030303030303
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 66,
+            "losses": 53,
+            "win_rate": 0.5546218487394958
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.019573286336083684,
+        "high": 0.5205479452054794,
+        "auc": 0.4985607369027058,
+        "corr": 0.08949964521308791,
+        "mae": 13.042928172797989,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 513,
+            "wins": 257,
+            "losses": 256,
+            "win_rate": 0.5009746588693957
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 172,
+            "losses": 162,
+            "win_rate": 0.5149700598802395
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 106,
+            "losses": 94,
+            "win_rate": 0.53
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.019573286336083684,
+        "high": 0.5205479452054794,
+        "auc": 0.4985214842727796,
+        "corr": 0.08929256209344508,
+        "mae": 13.04478651896872,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 513,
+            "wins": 257,
+            "losses": 256,
+            "win_rate": 0.5009746588693957
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 172,
+            "losses": 162,
+            "win_rate": 0.5149700598802395
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 106,
+            "losses": 95,
+            "win_rate": 0.527363184079602
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.019573286336083684,
+        "high": 0.5205479452054794,
+        "auc": 0.49495524497487436,
+        "corr": 0.09079363989497498,
+        "mae": 13.031434067757905,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 513,
+            "wins": 257,
+            "losses": 256,
+            "win_rate": 0.5009746588693957
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 170,
+            "losses": 161,
+            "win_rate": 0.513595166163142
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 106,
+            "losses": 94,
+            "win_rate": 0.53
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.018602419913650636,
+        "high": 0.5205479452054794,
+        "auc": 0.5014293657802636,
+        "corr": 0.08965925680370063,
+        "mae": 13.041209889938116,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 258,
+            "losses": 256,
+            "win_rate": 0.5019455252918288
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 171,
+            "losses": 162,
+            "win_rate": 0.5135135135135135
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 106,
+            "losses": 94,
+            "win_rate": 0.53
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.018602419913650636,
+        "high": 0.5205479452054794,
+        "auc": 0.5013901154613548,
+        "corr": 0.08950148610225717,
+        "mae": 13.042636673954926,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 258,
+            "losses": 256,
+            "win_rate": 0.5019455252918288
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 171,
+            "losses": 162,
+            "win_rate": 0.5135135135135135
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 106,
+            "losses": 94,
+            "win_rate": 0.53
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03500761035007616,
+        "slope": 0.018602419913650636,
+        "high": 0.5205479452054794,
+        "auc": 0.4977918806634172,
+        "corr": 0.0909313634537845,
+        "mae": 13.030288137252,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 514,
+            "wins": 258,
+            "losses": 256,
+            "win_rate": 0.5019455252918288
+          },
+          {
+            "threshold": 4.0,
+            "n": 331,
+            "wins": 170,
+            "losses": 161,
+            "win_rate": 0.513595166163142
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 106,
+            "losses": 94,
+            "win_rate": 0.53
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 70,
+            "losses": 56,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5254317111459968,
+        "corr": 0.09544750159360645,
+        "mae": 12.997007325403448,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 175,
+            "losses": 160,
+            "win_rate": 0.5223880597014925
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5254317111459968,
+        "corr": 0.09544750159360645,
+        "mae": 12.997007325403448,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 175,
+            "losses": 160,
+            "win_rate": 0.5223880597014925
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5254317111459968,
+        "corr": 0.09544750159360645,
+        "mae": 12.997007325403448,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 175,
+            "losses": 160,
+            "win_rate": 0.5223880597014925
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.52537284144427,
+        "corr": 0.09544541112950251,
+        "mae": 12.997595337691575,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.52537284144427,
+        "corr": 0.09544541112950251,
+        "mae": 12.997595337691575,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.52537284144427,
+        "corr": 0.09544541112950251,
+        "mae": 12.997595337691575,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228903526272067,
+        "corr": 0.09544457963987928,
+        "mae": 12.997810068457747,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228903526272067,
+        "corr": 0.09544457963987928,
+        "mae": 12.997810068457747,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228903526272067,
+        "corr": 0.09544457963987928,
+        "mae": 12.997810068457747,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228576474512856,
+        "corr": 0.09544462113203418,
+        "mae": 12.997799571835765,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228576474512856,
+        "corr": 0.09544462113203418,
+        "mae": 12.997799571835765,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.5228576474512856,
+        "corr": 0.09544462113203418,
+        "mae": 12.997799571835765,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.522838024345733,
+        "corr": 0.09544478514542273,
+        "mae": 12.997757862425411,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.522838024345733,
+        "corr": 0.09544478514542273,
+        "mae": 12.997757862425411,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03524743230625582,
+        "slope": 0.02777777777777779,
+        "high": 0.5277777777777778,
+        "auc": 0.522838024345733,
+        "corr": 0.09544478514542273,
+        "mae": 12.997757862425411,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 526,
+            "wins": 263,
+            "losses": 263,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 333,
+            "wins": 174,
+            "losses": 159,
+            "win_rate": 0.5225225225225225
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03590366769774633,
+        "slope": 0.017668866510661796,
+        "high": 0.5205479452054794,
+        "auc": 0.5028100363112957,
+        "corr": 0.0933704783531465,
+        "mae": 13.007014554394024,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 262,
+            "losses": 259,
+            "win_rate": 0.5028790786948176
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 199,
+            "wins": 108,
+            "losses": 91,
+            "win_rate": 0.542713567839196
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03590366769774633,
+        "slope": 0.01576783048272612,
+        "high": 0.5205479452054794,
+        "auc": 0.507323455336408,
+        "corr": 0.09318229772583113,
+        "mae": 13.008822097629098,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 264,
+            "losses": 259,
+            "win_rate": 0.5047801147227533
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "net_only",
+      "features": [
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03590366769774633,
+        "slope": 0.015749480714116637,
+        "high": 0.5205479452054794,
+        "auc": 0.5071206620220456,
+        "corr": 0.0931260767336265,
+        "mae": 13.009357106824304,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 263,
+            "losses": 258,
+            "win_rate": 0.5047984644913628
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 69,
+            "losses": 55,
+            "win_rate": 0.5564516129032258
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 38,
+            "losses": 35,
+            "win_rate": 0.5205479452054794
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5252289377289378,
+        "corr": 0.09427855424371742,
+        "mae": 12.993227412175077,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 179,
+            "losses": 156,
+            "win_rate": 0.5343283582089552
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.525222396650968,
+        "corr": 0.0942790146954989,
+        "mae": 12.993241836977576,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 179,
+            "losses": 157,
+            "win_rate": 0.5327380952380952
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5252093144950288,
+        "corr": 0.0942808338999033,
+        "mae": 12.993303456394285,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 179,
+            "losses": 156,
+            "win_rate": 0.5343283582089552
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248495552066981,
+        "corr": 0.0938840020856447,
+        "mae": 12.995443454598627,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 179,
+            "losses": 157,
+            "win_rate": 0.5327380952380952
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248495552066981,
+        "corr": 0.0938840020856447,
+        "mae": 12.995443454598627,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 179,
+            "losses": 157,
+            "win_rate": 0.5327380952380952
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248430141287285,
+        "corr": 0.09388789930566424,
+        "mae": 12.995430567276069,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 337,
+            "wins": 179,
+            "losses": 158,
+            "win_rate": 0.5311572700296736
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248430141287285,
+        "corr": 0.09388789930566424,
+        "mae": 12.995430567276069,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 337,
+            "wins": 179,
+            "losses": 158,
+            "win_rate": 0.5311572700296736
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248364730507588,
+        "corr": 0.09390319729118438,
+        "mae": 12.995385055286928,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 179,
+            "losses": 157,
+            "win_rate": 0.5327380952380952
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020959692898272597,
+        "high": 0.52,
+        "auc": 0.5248364730507588,
+        "corr": 0.09390319729118438,
+        "mae": 12.995385055286928,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 260,
+            "losses": 261,
+            "win_rate": 0.4990403071017274
+          },
+          {
+            "threshold": 4.0,
+            "n": 336,
+            "wins": 179,
+            "losses": 157,
+            "win_rate": 0.5327380952380952
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 111,
+            "losses": 93,
+            "win_rate": 0.5441176470588235
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020000000000000018,
+        "high": 0.52,
+        "auc": 0.5224717263754162,
+        "corr": 0.09432867955135235,
+        "mae": 12.993707743690363,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 261,
+            "losses": 261,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 176,
+            "losses": 158,
+            "win_rate": 0.5269461077844312
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 109,
+            "losses": 91,
+            "win_rate": 0.545
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020000000000000018,
+        "high": 0.52,
+        "auc": 0.5222493311791524,
+        "corr": 0.09413764562305936,
+        "mae": 12.994713119991495,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 261,
+            "losses": 261,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 176,
+            "losses": 159,
+            "win_rate": 0.5253731343283582
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 109,
+            "losses": 91,
+            "win_rate": 0.545
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.020000000000000018,
+        "high": 0.52,
+        "auc": 0.5222493311791524,
+        "corr": 0.09413764562305936,
+        "mae": 12.994713119991495,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 261,
+            "losses": 261,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 176,
+            "losses": 159,
+            "win_rate": 0.5253731343283582
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 109,
+            "losses": 91,
+            "win_rate": 0.545
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.018084291187739465,
+        "high": 0.52,
+        "auc": 0.5250784929356358,
+        "corr": 0.09428902919385128,
+        "mae": 12.993504687220375,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 262,
+            "losses": 260,
+            "win_rate": 0.5019157088122606
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 178,
+            "losses": 156,
+            "win_rate": 0.5329341317365269
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.018084291187739465,
+        "high": 0.52,
+        "auc": 0.5247448979591837,
+        "corr": 0.09396012376096119,
+        "mae": 12.995229673286376,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 262,
+            "losses": 260,
+            "win_rate": 0.5019157088122606
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 178,
+            "losses": 157,
+            "win_rate": 0.5313432835820896
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "off_def",
+      "features": [
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037377049180327804,
+        "slope": 0.018084291187739465,
+        "high": 0.52,
+        "auc": 0.5247448979591837,
+        "corr": 0.09396012376096119,
+        "mae": 12.995229673286376,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 262,
+            "losses": 260,
+            "win_rate": 0.5019157088122606
+          },
+          {
+            "threshold": 4.0,
+            "n": 335,
+            "wins": 178,
+            "losses": 157,
+            "win_rate": 0.5313432835820896
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 108,
+            "losses": 92,
+            "win_rate": 0.54
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 68,
+            "losses": 54,
+            "win_rate": 0.5573770491803278
+          },
+          {
+            "threshold": 10.0,
+            "n": 75,
+            "wins": 39,
+            "losses": 36,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03779599271402545,
+        "slope": 0.02873380072232845,
+        "high": 0.5277777777777778,
+        "auc": 0.5234725047586031,
+        "corr": 0.09539675733752544,
+        "mae": 12.993289830376304,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03779599271402545,
+        "slope": 0.02873380072232845,
+        "high": 0.5277777777777778,
+        "auc": 0.5234397995826819,
+        "corr": 0.09539694931832765,
+        "mae": 12.9930948637066,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03779599271402545,
+        "slope": 0.02873380072232845,
+        "high": 0.5277777777777778,
+        "auc": 0.5209249084249085,
+        "corr": 0.09539656564529743,
+        "mae": 12.993361552951153,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03779599271402545,
+        "slope": 0.02873380072232845,
+        "high": 0.5277777777777778,
+        "auc": 0.5209249084249085,
+        "corr": 0.09539657540661926,
+        "mae": 12.993358046957256,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    },
+    {
+      "family": "special_teams",
+      "features": [
+        "adj_st_epa_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "validation": {
+        "n": 782,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03779599271402545,
+        "slope": 0.02873380072232845,
+        "high": 0.5277777777777778,
+        "auc": 0.5209183673469387,
+        "corr": 0.09539661379721996,
+        "mae": 12.9933441155288,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 261,
+            "losses": 262,
+            "win_rate": 0.49904397705544934
+          },
+          {
+            "threshold": 4.0,
+            "n": 334,
+            "wins": 175,
+            "losses": 159,
+            "win_rate": 0.5239520958083832
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 111,
+            "losses": 92,
+            "win_rate": 0.5467980295566502
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          }
+        ]
+      }
+    }
+  ]
+}
