@@ -21,12 +21,21 @@ m.FAMILIES={
 }
 
 def load_team_map(season:int)->dict[int,str]:
-    url=f'{m.BASE_URL}/cfb_crosswalk/cfb_teams_crosswalk_{season}.parquet'
-    df=pd.read_parquet(io.BytesIO(m.download_bytes(url)));df.columns=[str(c).lower() for c in df.columns]
+    last_exc=None
+    for year in range(int(season), max(2014, int(season)-3)-1, -1):
+        url=f'{m.BASE_URL}/cfb_crosswalk/cfb_teams_crosswalk_{year}.parquet'
+        try:
+            df=pd.read_parquet(io.BytesIO(m.download_bytes(url)))
+            break
+        except Exception as exc:
+            last_exc=exc
+    else:
+        raise last_exc if last_exc else RuntimeError(f'No team crosswalk available for {season}')
+    df.columns=[str(c).lower() for c in df.columns]
     ids=pd.to_numeric(df.get('espn_team_id'),errors='coerce');names=df.get('espn_team');keys=df.get('norm_key');out={}
     for i,name,key in zip(ids,names,keys):
         if pd.isna(i):continue
-        raw=name if pd.notna(name) and str(name).strip() else key
+        raw=key if pd.notna(key) and str(key).strip() else name
         if pd.notna(raw) and str(raw).strip():out[int(i)]=m.norm(raw)
     return out
 
