@@ -1,0 +1,40 @@
+name: 2025 CFB edge direction analysis
+
+on:
+  push:
+    branches:
+      - audit-ncaaf-margin-2026-10-02
+    paths:
+      - 'research/cfb_2025_edge_direction_analysis.py'
+      - '.github/workflows/cfb-2025-edge-direction-analysis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: pip install pandas numpy
+      - name: Run edge direction analysis
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: python research/cfb_2025_edge_direction_analysis.py
+      - name: Commit results
+        run: |
+          git add research/results/cfb_2025_edge_direction_analysis.json research/results/CFB_2025_EDGE_DIRECTION_ANALYSIS.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: persist 2025 CFB edge direction analysis'
+          git pull --rebase origin audit-ncaaf-margin-2026-10-02
+          git push
