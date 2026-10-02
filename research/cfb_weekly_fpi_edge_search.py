@@ -59,36 +59,47 @@ def load_fpi(season):
         s=df.snapshot_is_contemporaneous.astype(str).str.lower();df=df[s.isin(['true','1','yes'])].copy()
     return df
 
-def load_team_map(season):
-    # Team talent is only used as an ESPN team-id -> school-name crosswalk.
-    url=f'{BASE_URL}/cfb_team_talent/cfb_team_talent_{season}.parquet'
-    df=pd.read_parquet(io.BytesIO(download_bytes(url)))
-    df.columns=[str(c).lower() for c in df.columns]
-    idc='team_id' if 'team_id' in df.columns else next((c for c in df.columns if c.endswith('team_id')),None)
-    namec='team' if 'team' in df.columns else next((c for c in df.columns if c in ('school','team_name')),None)
-    if idc is None or namec is None:return {}
-    ids=pd.to_numeric(df[idc],errors='coerce')
-    return {int(i):norm(n) for i,n in zip(ids,df[namec]) if pd.notna(i) and str(n).strip()}
+def load_game_team_ids(season):
+    """Return game_id -> ESPN home/away team ids directly from the PBP asset.
+
+    The SportsDataverse PBP schema contains home_team_id/away_team_id. Joining on
+    those ids is materially safer than a provider-name crosswalk (Miami, USC,
+    Louisiana, etc.) and removes name matching from this audit entirely.
+    """
+    path=ens.base.cfb._download_open_asset('cfbfastR_cfb_pbp',season,('play_by_play','pbp'))
+    if path is None or not Path(path).exists():raise RuntimeError(f'PBP unavailable for {season}')
+    aliases={
+      'game_id':('game_id','id_game','gameId'),
+      'home_team_id':('home_team_id','homeTeamId','home_id'),
+      'away_team_id':('away_team_id','awayTeamId','away_id'),
+    }
+    frame=ens.base.cfb._read_open_parquet(Path(path),aliases)
+    if frame is None or frame.empty:raise RuntimeError(f'No PBP team ids for {season}')
+    frame=frame.copy();frame['game_id']=frame['game_id'].astype(str)
+    for c in ('home_team_id','away_team_id'):frame[c]=pd.to_numeric(frame[c],errors='coerce')
+    frame=frame.dropna(subset=['home_team_id','away_team_id'])
+    return frame.groupby('game_id',as_index=False)[['home_team_id','away_team_id']].first()
 
 def fpi_lookup(season):
-    df=load_fpi(season);mapping=load_team_map(season)
+    df=load_fpi(season)
     if 'team_id' not in df.columns:raise RuntimeError(f'FPI {season} missing team_id')
-    df['team']=pd.to_numeric(df.team_id,errors='coerce').map(lambda x:mapping.get(int(x)) if pd.notna(x) else None)
-    df=df[df.team.notna()].copy();df['week']=pd.to_numeric(df.week,errors='coerce')
-    # one last snapshot for each team/week after cleaning
-    sort_cols=['team','week']+(['run_date_time_key'] if 'run_date_time_key' in df.columns else [])
-    df=df.sort_values(sort_cols).drop_duplicates(['team','week'],keep='last')
+    df['team_id']=pd.to_numeric(df.team_id,errors='coerce');df['week']=pd.to_numeric(df.week,errors='coerce')
+    df=df[df.team_id.notna() & df.week.notna()].copy()
+    sort_cols=['team_id','week']+(['run_date_time_key'] if 'run_date_time_key' in df.columns else [])
+    df=df.sort_values(sort_cols).drop_duplicates(['team_id','week'],keep='last')
     return df
 
-def prior_snapshot(fpi,team,week):
-    rows=fpi[(fpi.team==norm(team))&(fpi.week < int(week))]
+def prior_snapshot(fpi,team_id,week):
+    try:tid=float(team_id)
+    except Exception:return None
+    rows=fpi[(fpi.team_id==tid)&(fpi.week < int(week))]
     if rows.empty:return None
     return rows.sort_values('week').iloc[-1]
 
 def build_season(season):
-    base=ens.season_rows(season).copy()
-    # season_rows does not retain matchup identity; reconstruct in identical order using the same source.
     games=ens.base.games_from_pbp(season);games=ens.attach_market_spread(games,ens.base.cfb)
+    game_ids=load_game_team_ids(season)
+    games=games.copy();games['game_id']=games.game_id.astype(str);games=games.merge(game_ids,on='game_id',how='left')
     ids=ens.fbs_ids(season)
     game_rows=[]
     prior=ens.base.team_summary(ens.base.games_from_pbp(season-1))
@@ -99,11 +110,11 @@ def build_season(season):
             hs=float(g.market_home_spread) if pd.notna(g.market_home_spread) else np.nan
             if not np.isfinite(hs):continue
             a,h=str(g.away_team),str(g.home_team);ascore,hscore=ens.base.spread_scores(a,h,ens.base.truthy(g.neutral),prior,cur)
-            game_rows.append({'season':season,'week':int(wk),'game_id':str(g.game_id),'away_team':a,'home_team':h,'actual':float(g.actual_margin),'market_home_spread':hs,'baseline':float(hscore-ascore)})
+            game_rows.append({'season':season,'week':int(wk),'game_id':str(g.game_id),'away_team':a,'home_team':h,'away_team_id':g.away_team_id,'home_team_id':g.home_team_id,'actual':float(g.actual_margin),'market_home_spread':hs,'baseline':float(hscore-ascore)})
     df=pd.DataFrame(game_rows)
     fpi=fpi_lookup(season);matched=0
     for idx,row in df.iterrows():
-        a=prior_snapshot(fpi,row.away_team,row.week);h=prior_snapshot(fpi,row.home_team,row.week)
+        a=prior_snapshot(fpi,row.away_team_id,row.week);h=prior_snapshot(fpi,row.home_team_id,row.week)
         if a is None or h is None:continue
         matched+=1
         for col in RAW:
@@ -114,7 +125,7 @@ def build_season(season):
                 df.loc[idx,f'{col}_diff']=av-hv if np.isfinite(av) and np.isfinite(hv) else np.nan
             else:
                 df.loc[idx,f'{col}_diff']=hv-av if np.isfinite(av) and np.isfinite(hv) else np.nan
-    print(season,'rows',len(df),'matched prior FPI',matched)
+    print(season,'rows',len(df),'matched prior weekly ratings',matched)
     return df
 
 def fit_ridge(train,features,alpha):
@@ -157,16 +168,17 @@ def main():
             m=fit_ridge(tr,usable,alpha)
             for cap in CAPS:
                 met=metrics(va,predict(va,m,cap));cand.append({'family':fam,'features':usable,'alpha':alpha,'cap':cap,'validation':met})
+    if not cand:raise RuntimeError('No weekly rating features matched any historical games')
     cand.sort(key=lambda x:key(x['validation']),reverse=True);chosen=cand[0]
     m25=fit_ridge(pd.concat([tr,va]),chosen['features'],chosen['alpha']);p25=predict(ho,m25,chosen['cap']);r25=metrics(ho,p25)
     m26=fit_ridge(pd.concat([tr,va,ho]),chosen['features'],chosen['alpha']);p26=predict(fi,m26,chosen['cap']);r26=metrics(fi,p26)
-    out={'protocol':{'market_predictor':False,'fpi_snapshot_rule':'latest contemporaneous, in-sequence snapshot with snapshot week < game week','train':list(TRAIN),'select':VALID,'holdout':HOLD,'final':FINAL},'baseline':baseline,'chosen_on_2024':chosen,'holdout_2025':r25,'holdout_2026':r26,'candidates':cand}
+    out={'protocol':{'market_predictor':False,'fpi_snapshot_rule':'latest valid snapshot with snapshot week < game week; joined directly by ESPN team id','train':list(TRAIN),'select':VALID,'holdout':HOLD,'final':FINAL},'baseline':baseline,'chosen_on_2024':chosen,'holdout_2025':r25,'holdout_2026':r26,'candidates':cand}
     (OUT/'cfb_weekly_fpi_edge_search.json').write_text(json.dumps(clean(out),indent=2,allow_nan=False))
     lines=['# CFB Weekly Opponent-Adjusted FPI Edge Search','',f"Chosen on 2024: {chosen['family']} alpha={chosen['alpha']} cap={chosen['cap']}",'','| Season | Model | Steps | slope | AUC | MAE | 2+ | 4+ | 6+ | 8+ | 10+ |','|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
     for yr,b,c in [(2024,baseline[2024],chosen['validation']),(2025,baseline[2025],r25),(2026,baseline[2026],r26)]:
         for label,m in [('Baseline',b),('FPI layer',c)]:lines.append(f"| {yr} | {label} | {m['steps']}/{m['possible']} | {100*m['slope']:+.1f}pp | {m['auc']:.3f} | {m['mae']:.3f} | "+' | '.join(rt(m,t) for t in TH)+' |')
     lines+=['','## Top 2024 candidates','','| Family | Alpha | Cap | Steps | slope | 10+ | AUC | MAE |','|---|---:|---:|---:|---:|---:|---:|---:|']
     for r in cand[:15]:
-        m=r['validation'];lines.append(f"| {r['family']} | {r['alpha']:.0f} | {r['cap']:.0f} | {m['steps']}/{m['possible']} | {100*m['slope']:+.1f}pp | {100*(m['high'] or 0):.1f}% | {m['auc']:.3f} | {m['mae']:.3f} |")
+        mm=r['validation'];lines.append(f"| {r['family']} | {r['alpha']:.0f} | {r['cap']:.0f} | {mm['steps']}/{mm['possible']} | {100*mm['slope']:+.1f}pp | {100*(mm['high'] or 0):.1f}% | {mm['auc']:.3f} | {mm['mae']:.3f} |")
     (OUT/'CFB_WEEKLY_FPI_EDGE_SEARCH.md').write_text('\n'.join(lines)+'\n');print('\n'.join(lines))
 if __name__=='__main__':main()
