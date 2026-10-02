@@ -1,0 +1,370 @@
+{
+  "protocol": {
+    "train": [
+      2021,
+      2022,
+      2023
+    ],
+    "validation": 2024,
+    "holdout": 2025,
+    "sportsbook_predictors_used": false,
+    "target": "actual_margin - fixed independent spread_margin",
+    "selection": "2026-derived families; family/alpha/cap selected on 2024 only"
+  },
+  "dataset": {
+    "rows": 4546,
+    "train": 2693,
+    "validation": 919,
+    "holdout": 934
+  },
+  "baseline": {
+    "validation": {
+      "n": 919,
+      "mae": 13.356056529763583,
+      "rmse": 16.79421002971174,
+      "bias": 0.2784925802696765,
+      "corr": 0.6387273422925646
+    },
+    "holdout": {
+      "n": 934,
+      "mae": 12.622848839715251,
+      "rmse": 16.07306742569906,
+      "bias": -0.5131716709158117,
+      "corr": 0.6915295545193824
+    }
+  },
+  "chosen_on_2024": {
+    "family": "finishing_plus_turnover",
+    "features": [
+      "finish_def_diff",
+      "turnover_pressure_adv"
+    ],
+    "alpha": 1.0,
+    "cap": 2.0,
+    "n": 919,
+    "mae": 13.287574669855909,
+    "rmse": 16.72175774796847,
+    "bias": -0.05986037977530934,
+    "corr": 0.6427570590443897
+  },
+  "chosen_2025": {
+    "n": 934,
+    "mae": 12.68181913944584,
+    "rmse": 16.138441512618073,
+    "bias": -0.8216348891551633,
+    "corr": 0.6891045835338978
+  },
+  "chosen_holdout_mae_improvement": -0.058970299730589204,
+  "family_results": [
+    {
+      "family": "finishing_plus_turnover",
+      "features": [
+        "finish_def_diff",
+        "turnover_pressure_adv"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.287574669855909,
+      "rmse": 16.72175774796847,
+      "bias": -0.05986037977530934,
+      "corr": 0.6427570590443897,
+      "holdout": {
+        "n": 934,
+        "mae": 12.68181913944584,
+        "rmse": 16.138441512618073,
+        "bias": -0.8216348891551633,
+        "corr": 0.6891045835338978
+      },
+      "valid_mae_improvement": 0.06848185990767419,
+      "holdout_mae_improvement": -0.058970299730589204
+    },
+    {
+      "family": "finishing_plus_trench",
+      "features": [
+        "finish_def_diff",
+        "rush_matchup_adv",
+        "line_matchup_adv",
+        "power_success_diff"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.29291347027073,
+      "rmse": 16.72848232029727,
+      "bias": -0.029400289955357886,
+      "corr": 0.6423981208846083,
+      "holdout": {
+        "n": 934,
+        "mae": 12.657133758234199,
+        "rmse": 16.092924584678396,
+        "bias": -0.8549627229063881,
+        "corr": 0.6903030229844173
+      },
+      "valid_mae_improvement": 0.06314305949285348,
+      "holdout_mae_improvement": -0.03428491851894755
+    },
+    {
+      "family": "finish_trench_disruption",
+      "features": [
+        "finish_def_diff",
+        "rush_matchup_adv",
+        "line_matchup_adv",
+        "sack_matchup_adv",
+        "havoc_balance_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 3.0,
+      "n": 919,
+      "mae": 13.298001321788874,
+      "rmse": 16.726841953715475,
+      "bias": -0.09669434039743764,
+      "corr": 0.6423278688669688,
+      "holdout": {
+        "n": 934,
+        "mae": 12.66103825843994,
+        "rmse": 16.091399427534892,
+        "bias": -0.8934405622977304,
+        "corr": 0.6905381511706112
+      },
+      "valid_mae_improvement": 0.05805520797470898,
+      "holdout_mae_improvement": -0.03818941872468784
+    },
+    {
+      "family": "finishing_plus_pass",
+      "features": [
+        "finish_def_diff",
+        "pass_matchup_adv"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.312206379482918,
+      "rmse": 16.74614764236156,
+      "bias": -0.05508281575098975,
+      "corr": 0.6412448985700061,
+      "holdout": {
+        "n": 934,
+        "mae": 12.726178222281925,
+        "rmse": 16.195177590065228,
+        "bias": -0.8648709081576932,
+        "corr": 0.6860998150124574
+      },
+      "valid_mae_improvement": 0.04385015028066519,
+      "holdout_mae_improvement": -0.1033293825666739
+    },
+    {
+      "family": "finishing_plus_explosive",
+      "features": [
+        "finish_def_diff",
+        "explosive_matchup_adv"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.319288783109753,
+      "rmse": 16.763697771013153,
+      "bias": -0.06393284210924362,
+      "corr": 0.6405091231595957,
+      "holdout": {
+        "n": 934,
+        "mae": 12.69540310934753,
+        "rmse": 16.155482902135788,
+        "bias": -0.8997412365366977,
+        "corr": 0.6874552894765719
+      },
+      "valid_mae_improvement": 0.03676774665382965,
+      "holdout_mae_improvement": -0.0725542696322794
+    },
+    {
+      "family": "finishing_defense",
+      "features": [
+        "finish_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "n": 919,
+      "mae": 13.321684824757543,
+      "rmse": 16.76731289120995,
+      "bias": -0.1214742901368691,
+      "corr": 0.6402487161742186,
+      "holdout": {
+        "n": 934,
+        "mae": 12.700427419941235,
+        "rmse": 16.168625164059975,
+        "bias": -0.9332170325120732,
+        "corr": 0.6869855082959565
+      },
+      "valid_mae_improvement": 0.03437170500603948,
+      "holdout_mae_improvement": -0.07757858022598363
+    },
+    {
+      "family": "finishing_plus_ypp",
+      "features": [
+        "finish_def_diff",
+        "ypp_matchup_adv"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.321875193252357,
+      "rmse": 16.768899722172225,
+      "bias": -0.07279778550385294,
+      "corr": 0.640116063967938,
+      "holdout": {
+        "n": 934,
+        "mae": 12.68880662423204,
+        "rmse": 16.15613326297037,
+        "bias": -0.8913460969568586,
+        "corr": 0.6874991342250854
+      },
+      "valid_mae_improvement": 0.034181336511226235,
+      "holdout_mae_improvement": -0.06595778451678846
+    },
+    {
+      "family": "finishing_plus_rush",
+      "features": [
+        "finish_def_diff",
+        "rush_matchup_adv"
+      ],
+      "alpha": 256.0,
+      "cap": 4.0,
+      "n": 919,
+      "mae": 13.323608857231932,
+      "rmse": 16.760618410963616,
+      "bias": -0.12059274090942411,
+      "corr": 0.6408736960099196,
+      "holdout": {
+        "n": 934,
+        "mae": 12.703297616434105,
+        "rmse": 16.157646179116572,
+        "bias": -0.9448172285194051,
+        "corr": 0.6874320429951667
+      },
+      "valid_mae_improvement": 0.03244767253165115,
+      "holdout_mae_improvement": -0.08044877671885331
+    },
+    {
+      "family": "scoring_defense_core",
+      "features": [
+        "finish_def_diff",
+        "ypp_allowed_diff",
+        "third_def_diff",
+        "rush_def_diff",
+        "line_def_diff",
+        "pass_def_diff",
+        "success_def_diff",
+        "explosive_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.32382873095285,
+      "rmse": 16.78230203970649,
+      "bias": -0.06639757696018825,
+      "corr": 0.639220594705131,
+      "holdout": {
+        "n": 934,
+        "mae": 12.711136009881173,
+        "rmse": 16.171718187698655,
+        "bias": -0.8687879110160245,
+        "corr": 0.6872989740899493
+      },
+      "valid_mae_improvement": 0.03222779881073379,
+      "holdout_mae_improvement": -0.08828717016592158
+    },
+    {
+      "family": "finishing_plus_third",
+      "features": [
+        "finish_def_diff",
+        "third_matchup_adv"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.325538277764425,
+      "rmse": 16.77747587870212,
+      "bias": -0.07286069494282739,
+      "corr": 0.6394876644979489,
+      "holdout": {
+        "n": 934,
+        "mae": 12.694777448382933,
+        "rmse": 16.174424513681597,
+        "bias": -0.8846901638192697,
+        "corr": 0.6868307362014693
+      },
+      "valid_mae_improvement": 0.030518251999158252,
+      "holdout_mae_improvement": -0.07192860866768136
+    },
+    {
+      "family": "finish_ypp_third",
+      "features": [
+        "finish_def_diff",
+        "ypp_matchup_adv",
+        "third_matchup_adv"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.326495948967924,
+      "rmse": 16.783279144702238,
+      "bias": -0.0639617822268783,
+      "corr": 0.6392215228049885,
+      "holdout": {
+        "n": 934,
+        "mae": 12.690899111523127,
+        "rmse": 16.169617446400807,
+        "bias": -0.8823175047372548,
+        "corr": 0.6869550268392558
+      },
+      "valid_mae_improvement": 0.02956058079565871,
+      "holdout_mae_improvement": -0.06805027180787526
+    },
+    {
+      "family": "finishing_plus_disruption",
+      "features": [
+        "finish_def_diff",
+        "sack_matchup_adv",
+        "havoc_balance_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 5.0,
+      "n": 919,
+      "mae": 13.329512247316893,
+      "rmse": 16.779784896016714,
+      "bias": -0.12564372197051268,
+      "corr": 0.6394249528858721,
+      "holdout": {
+        "n": 934,
+        "mae": 12.707192725280539,
+        "rmse": 16.182116426963226,
+        "bias": -0.9349533701523622,
+        "corr": 0.6864860548592269
+      },
+      "valid_mae_improvement": 0.026544282446689493,
+      "holdout_mae_improvement": -0.08434388556528738
+    },
+    {
+      "family": "finishing_matchup",
+      "features": [
+        "finish_matchup_adv"
+      ],
+      "alpha": 1.0,
+      "cap": 2.0,
+      "n": 919,
+      "mae": 13.34124390728362,
+      "rmse": 16.786705052405164,
+      "bias": -0.016674444315604175,
+      "corr": 0.6389777199529849,
+      "holdout": {
+        "n": 934,
+        "mae": 12.632359927972102,
+        "rmse": 16.092664797426167,
+        "bias": -0.8123867154727553,
+        "corr": 0.6908818557052179
+      },
+      "valid_mae_improvement": 0.014812622479963622,
+      "holdout_mae_improvement": -0.009511088256850542
+    }
+  ]
+}
