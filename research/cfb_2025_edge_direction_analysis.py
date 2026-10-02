@@ -4,10 +4,8 @@ Uses the previously generated leakage-safe 2025 game-edge backtest file.
 """
 from __future__ import annotations
 import json
-import math
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 SOURCE = "https://raw.githubusercontent.com/ezpzpicks/mlb-mobile-admin/research/cfb-2025-grade-backtest/research/results/cfb_2025_game_edges.csv"
 OUT = Path("research/results/cfb_2025_edge_direction_analysis.json")
@@ -41,11 +39,8 @@ df["model_abs_error"]=df.model_error.abs()
 df["market_abs_error"]=df.market_error.abs()
 # The amount/direction the closing market missed the actual margin.
 df["realized_market_miss"]=df.actual_margin-df.market_margin
-# Reconstruct signed model edge from model margin vs market margin. Positive=home, negative=away.
+# Signed model edge: positive=home relative to market, negative=away.
 df["signed_edge"]=df.projected_margin-df.market_margin
-# Verify it matches stored pick direction/absolute edge.
-df["sign_correct"]=(np.sign(df.signed_edge)==np.sign(df.realized_market_miss))
-df.loc[df.realized_market_miss.abs()<1e-9,"sign_correct"]=np.nan
 
 results={}
 results["overall"]=rec(df)
