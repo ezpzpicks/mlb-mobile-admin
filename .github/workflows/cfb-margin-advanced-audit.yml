@@ -33,7 +33,13 @@ jobs:
           EZPZ_CFB_CACHE_SECONDS: '86400'
           PYTHONUNBUFFERED: '1'
           PYTHONPATH: '.'
-        run: python research/cfb_margin_advanced_residual_regression.py
+        run: |
+          python - <<'PY'
+          from research import cfb_totals_efficiency_regression as base
+          base.METRIC_DEFAULTS.setdefault("Power Success", 0.68)
+          import runpy
+          runpy.run_path("research/cfb_margin_advanced_residual_regression.py", run_name="__main__")
+          PY
       - name: Commit research results
         run: |
           git add research/results/cfb_margin_advanced_residual_results.json research/results/CFB_MARGIN_ADVANCED_RESIDUAL_RESULTS.md
