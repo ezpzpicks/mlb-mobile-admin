@@ -1,0 +1,180 @@
+{
+  "season": 2026,
+  "n": 211,
+  "thresholds": {
+    "8": {
+      "n": 54,
+      "wins": 22,
+      "losses": 32,
+      "win_rate": 0.4074074074074074,
+      "feature_differences": [
+        {
+          "feature": "current_power_margin",
+          "winner_mean_support": 1.1754211550417653,
+          "loser_mean_support": 2.4796016639215797,
+          "std_diff": -0.31511461523880685
+        },
+        {
+          "feature": "home_indicator",
+          "winner_mean_support": 0.4367880235637918,
+          "loser_mean_support": -0.9008752986003208,
+          "std_diff": 0.2791760595548177
+        },
+        {
+          "feature": "prior_power_margin",
+          "winner_mean_support": -3.4634116303872036,
+          "loser_mean_support": -6.529605032186561,
+          "std_diff": 0.2700680241897155
+        },
+        {
+          "feature": "prior_ppg_diff",
+          "winner_mean_support": 0.38958819671277206,
+          "loser_mean_support": -0.1146347133842972,
+          "std_diff": 0.20339999781319926
+        },
+        {
+          "feature": "current_allowed_diff",
+          "winner_mean_support": -0.15186082630630637,
+          "loser_mean_support": 0.08750073615917789,
+          "std_diff": -0.19574248926692397
+        },
+        {
+          "feature": "prior_papg_diff",
+          "winner_mean_support": -0.07900500147003243,
+          "loser_mean_support": -0.1322822544764259,
+          "std_diff": 0.025570392935520138
+        },
+        {
+          "feature": "current_scoring_diff",
+          "winner_mean_support": -0.12784183236173946,
+          "loser_mean_support": -0.12074412675023882,
+          "std_diff": -0.003689998832912702
+        }
+      ],
+      "agreement": [
+        {
+          "min_supporting_components": 3,
+          "n": 37,
+          "wins": 13,
+          "losses": 24,
+          "win_rate": 0.35135135135135137
+        },
+        {
+          "min_supporting_components": 4,
+          "n": 24,
+          "wins": 12,
+          "losses": 12,
+          "win_rate": 0.5
+        },
+        {
+          "min_supporting_components": 5,
+          "n": 12,
+          "wins": 6,
+          "losses": 6,
+          "win_rate": 0.5
+        },
+        {
+          "min_supporting_components": 6,
+          "n": 4,
+          "wins": 1,
+          "losses": 3,
+          "win_rate": 0.25
+        },
+        {
+          "min_supporting_components": 7,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "win_rate": null
+        }
+      ]
+    },
+    "10": {
+      "n": 39,
+      "wins": 15,
+      "losses": 24,
+      "win_rate": 0.38461538461538464,
+      "feature_differences": [
+        {
+          "feature": "current_allowed_diff",
+          "winner_mean_support": -0.5253544945254288,
+          "loser_mean_support": -0.11026316183625991,
+          "std_diff": -0.4151759544606867
+        },
+        {
+          "feature": "current_scoring_diff",
+          "winner_mean_support": 0.29400932104903116,
+          "loser_mean_support": -0.42239447945704595,
+          "std_diff": 0.362093850700909
+        },
+        {
+          "feature": "prior_power_margin",
+          "winner_mean_support": -4.400889759307376,
+          "loser_mean_support": -6.833339929474147,
+          "std_diff": 0.22645530465330682
+        },
+        {
+          "feature": "current_power_margin",
+          "winner_mean_support": 1.2173682123281906,
+          "loser_mean_support": 1.8276315852833889,
+          "std_diff": -0.18719506961063173
+        },
+        {
+          "feature": "home_indicator",
+          "winner_mean_support": -0.3203112172801141,
+          "loser_mean_support": -1.2011670648004278,
+          "std_diff": 0.18635975756351053
+        },
+        {
+          "feature": "prior_papg_diff",
+          "winner_mean_support": 0.10943617437410155,
+          "loser_mean_support": -0.15198357331678813,
+          "std_diff": 0.1331683264919984
+        },
+        {
+          "feature": "prior_ppg_diff",
+          "winner_mean_support": -0.1311510145930727,
+          "loser_mean_support": -0.14727968946676984,
+          "std_diff": 0.006519802389639779
+        }
+      ],
+      "agreement": [
+        {
+          "min_supporting_components": 3,
+          "n": 25,
+          "wins": 8,
+          "losses": 17,
+          "win_rate": 0.32
+        },
+        {
+          "min_supporting_components": 4,
+          "n": 14,
+          "wins": 7,
+          "losses": 7,
+          "win_rate": 0.5
+        },
+        {
+          "min_supporting_components": 5,
+          "n": 6,
+          "wins": 2,
+          "losses": 4,
+          "win_rate": 0.3333333333333333
+        },
+        {
+          "min_supporting_components": 6,
+          "n": 3,
+          "wins": 1,
+          "losses": 2,
+          "win_rate": 0.3333333333333333
+        },
+        {
+          "min_supporting_components": 7,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "win_rate": null
+        }
+      ]
+    }
+  }
+}
