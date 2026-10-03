@@ -18,56 +18,53 @@ jobs:
           python-version: '3.12'
       - name: Install focused dependencies
         run: pip install --disable-pip-version-check streamlit pandas numpy requests polars lxml html5lib beautifulsoup4
-      - name: Replay exact v2.6 correction for Oct 2 games
+      - name: Replay and debug v2.6 inputs for Oct 2 ET games
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
         run: |
           PYTHONPATH=. python - <<'PY'
-          import json
-          import math
+          import json, math
           import pandas as pd
           from builders import cfb_builder as cb
           from builders import cfb_game_regression as spread
           from builders import cfb_2026_regime as regime
 
-          season = 2026
-          target_date = '2026-10-02'
-          games = cb._parse_games(cb._espn_games_payload(season), season)
-          day = games[games['Game Date'].astype(str) == target_date].copy()
-          if day.empty:
-              raise RuntimeError(f'No games found for {target_date}; schedule rows={len(games)}')
-          # Core user-facing FBS games; print any additional rows too for transparency.
-          rows = []
-          for _, g in day.sort_values(['Game Time','Away Team']).iterrows():
-              away_base, home_base, away_features, home_features = spread._regression_base(cb, g)
-              projection = {
-                  'regression_away_features': away_features,
-                  'regression_home_features': home_features,
-                  'regression_base_margin': home_base - away_base,
-                  'margin': home_base - away_base,
+          season=2026
+          games=cb._parse_games(cb._espn_games_payload(season),season)
+          targets=[('Liberty','Delaware'),('Pittsburgh','Virginia Tech'),('Penn State','Northwestern')]
+          selected=[]
+          for away,home in targets:
+              m=games[(games['Away Team'].astype(str)==away)&(games['Home Team'].astype(str)==home)]
+              if not m.empty:selected.append(m.iloc[0])
+          if not selected:
+              raise RuntimeError('No target games found')
+
+          weeks=sorted(set(int(g.get('Week',0)) for g in selected))
+          debug={}
+          for wk in weeks:
+              ctx=regime._context(cb,season,wk)
+              debug[str(wk)]={k:len(v) for k,v in ctx.items()}
+          print('CONTEXT_COUNTS',json.dumps(debug,indent=2))
+
+          rows=[]
+          for g in selected:
+              away=str(g.get('Away Team'));home=str(g.get('Home Team'));wk=int(g.get('Week',0))
+              away_base,home_base,af,hf=spread._regression_base(cb,g)
+              projection={'regression_away_features':af,'regression_home_features':hf,'regression_base_margin':home_base-away_base,'margin':home_base-away_base}
+              ctx=regime._context(cb,season,wk)
+              aid=ctx.get('ids',{}).get(away);hid=ctx.get('ids',{}).get(home)
+              raw_debug={
+                  'away_id':aid,'home_id':hid,
+                  'away_gamecontrol':ctx.get('gamecontrol',{}).get(aid),'home_gamecontrol':ctx.get('gamecontrol',{}).get(hid),
+                  'away_def_returning':ctx.get('def_returning',{}).get(aid),'home_def_returning':ctx.get('def_returning',{}).get(hid),
+                  'away_explosive':ctx.get('explosive',{}).get(away),'home_explosive':ctx.get('explosive',{}).get(home),
+                  'away_havoc':ctx.get('havoc_off',{}).get(aid),'home_havoc':ctx.get('havoc_off',{}).get(hid),
+                  'away_current_power_delta':af.get('current_power_delta'),'home_current_power_delta':hf.get('current_power_delta'),
               }
-              features = regime._feature_row(cb, g, projection)
-              if features is None:
-                  corr = None
-                  contrib = None
-              else:
-                  corr, contrib = regime._predict_correction(features)
-              rows.append({
-                  'week': int(g.get('Week', 0)),
-                  'away': str(g.get('Away Team','')),
-                  'home': str(g.get('Home Team','')),
-                  'away_class': str(g.get('Away Classification','')),
-                  'home_class': str(g.get('Home Classification','')),
-                  'game_time': str(g.get('Game Time','')),
-                  'market_home_spread': None if not math.isfinite(float(g.get('Home Spread', float('nan')))) else float(g.get('Home Spread')),
-                  'core_regression_margin_before_live_overlays': float(home_base-away_base),
-                  'correction': corr,
-                  'home_score_shift': None if corr is None else corr/2.0,
-                  'away_score_shift': None if corr is None else -corr/2.0,
-                  'features': features,
-                  'contributions': contrib,
-              })
+              features=regime._feature_row(cb,g,projection)
+              corr,contrib=(regime._predict_correction(features) if features is not None else (None,None))
+              rows.append({'week':wk,'away':away,'home':home,'game_time':str(g.get('Game Time','')),'core_margin':float(home_base-away_base),'debug':raw_debug,'features':features,'correction':corr,'contributions':contrib,'home_shift':None if corr is None else corr/2,'away_shift':None if corr is None else -corr/2})
           print('TONIGHT_REPLAY_JSON_START')
-          print(json.dumps(rows, indent=2, allow_nan=False))
+          print(json.dumps(rows,indent=2,allow_nan=False))
           print('TONIGHT_REPLAY_JSON_END')
           PY
