@@ -1,0 +1,33 @@
+{
+  "features": [
+    "gamecontrol_diff",
+    "def_returning_diff",
+    "explosive_diff",
+    "current_power_margin",
+    "havoc_off_diff"
+  ],
+  "alpha": 4.0,
+  "cap": 8.0,
+  "mu": {
+    "gamecontrol_diff": 2.5072434782608695,
+    "def_returning_diff": 0.043474568849501745,
+    "explosive_diff": -0.012986484257947113,
+    "current_power_margin": -1.1370206673719765,
+    "havoc_off_diff": 0.008264319709601408
+  },
+  "sd": {
+    "gamecontrol_diff": 14.895739436306537,
+    "def_returning_diff": 0.2169457181066098,
+    "explosive_diff": 0.10976521571038278,
+    "current_power_margin": 11.441119001645289,
+    "havoc_off_diff": 0.050592311857964985
+  },
+  "b": {
+    "intercept": 0.33212597431128954,
+    "gamecontrol_diff": 1.3608957338347005,
+    "def_returning_diff": 1.54531877318752,
+    "explosive_diff": 1.4673239916442995,
+    "current_power_margin": -1.812176772806967,
+    "havoc_off_diff": -1.4777889807750926
+  }
+}
