@@ -17,53 +17,69 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install focused dependencies
-        run: pip install --disable-pip-version-check streamlit pandas numpy requests polars lxml html5lib beautifulsoup4
-      - name: Replay and debug v2.6 inputs for Oct 2 ET games
+        run: pip install --disable-pip-version-check streamlit pandas numpy requests polars pyarrow lxml html5lib beautifulsoup4
+      - name: Replay v2.6 with direct feed name-ID mapping
         env:
           EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
         run: |
           PYTHONPATH=. python - <<'PY'
           import json, math
+          import numpy as np
           import pandas as pd
+          import requests, tempfile, pathlib
           from builders import cfb_builder as cb
           from builders import cfb_game_regression as spread
           from builders import cfb_2026_regime as regime
 
-          season=2026
+          season=2026; week=5
+          urls={
+            'fpi':'https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_fpi_weekly/cfb_fpi_weekly_2026.parquet',
+            'ret':'https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_returning_production/cfb_returning_production_2026.parquet',
+            'sum':'https://github.com/sportsdataverse/sportsdataverse-data/releases/download/cfb_team_summaries_weekly/cfb_team_summaries_weekly_2026.parquet',
+          }
+          frames={}
+          for key,url in urls.items():
+              p=pathlib.Path(tempfile.gettempdir())/f'{key}.parquet'
+              p.write_bytes(requests.get(url,timeout=60).content)
+              frames[key]=pd.read_parquet(p)
+              print(key,'COLUMNS',list(frames[key].columns))
+
+          def canon(x): return cb._canonical_team_name(x)
+          def namecol(df):
+              candidates=[c for c in df.columns if str(c).lower() in {'team','team_name','school','team_display_name','pos_team','pos_team_name'}]
+              return candidates[0] if candidates else None
+          for k,df in frames.items(): print(k,'NAMECOL',namecol(df))
+
+          # Build a broad canonical name -> id mapping from all three feeds.
+          name_to_id={}
+          for df in frames.values():
+              nc=namecol(df)
+              idc=next((c for c in df.columns if str(c).lower() in {'team_id','pos_team_id'}),None)
+              if nc and idc:
+                  for _,r in df[[nc,idc]].dropna().drop_duplicates().iterrows():
+                      try:name_to_id[canon(r[nc])]=float(r[idc])
+                      except:pass
+          print('NAME_TO_ID_TARGETS',json.dumps({k:name_to_id.get(k) for k in ['Liberty','Delaware','Pittsburgh','Virginia Tech','Penn State','Northwestern']},indent=2))
+
           games=cb._parse_games(cb._espn_games_payload(season),season)
           targets=[('Liberty','Delaware'),('Pittsburgh','Virginia Tech'),('Penn State','Northwestern')]
-          selected=[]
+          ctx=regime._context(cb,season,week)
+          rows=[]
           for away,home in targets:
               m=games[(games['Away Team'].astype(str)==away)&(games['Home Team'].astype(str)==home)]
-              if not m.empty:selected.append(m.iloc[0])
-          if not selected:
-              raise RuntimeError('No target games found')
-
-          weeks=sorted(set(int(g.get('Week',0)) for g in selected))
-          debug={}
-          for wk in weeks:
-              ctx=regime._context(cb,season,wk)
-              debug[str(wk)]={k:len(v) for k,v in ctx.items()}
-          print('CONTEXT_COUNTS',json.dumps(debug,indent=2))
-
-          rows=[]
-          for g in selected:
-              away=str(g.get('Away Team'));home=str(g.get('Home Team'));wk=int(g.get('Week',0))
+              if m.empty: continue
+              g=m.iloc[0]
               away_base,home_base,af,hf=spread._regression_base(cb,g)
-              projection={'regression_away_features':af,'regression_home_features':hf,'regression_base_margin':home_base-away_base,'margin':home_base-away_base}
-              ctx=regime._context(cb,season,wk)
-              aid=ctx.get('ids',{}).get(away);hid=ctx.get('ids',{}).get(home)
-              raw_debug={
-                  'away_id':aid,'home_id':hid,
-                  'away_gamecontrol':ctx.get('gamecontrol',{}).get(aid),'home_gamecontrol':ctx.get('gamecontrol',{}).get(hid),
-                  'away_def_returning':ctx.get('def_returning',{}).get(aid),'home_def_returning':ctx.get('def_returning',{}).get(hid),
-                  'away_explosive':ctx.get('explosive',{}).get(away),'home_explosive':ctx.get('explosive',{}).get(home),
-                  'away_havoc':ctx.get('havoc_off',{}).get(aid),'home_havoc':ctx.get('havoc_off',{}).get(hid),
-                  'away_current_power_delta':af.get('current_power_delta'),'home_current_power_delta':hf.get('current_power_delta'),
+              aid=name_to_id.get(away); hid=name_to_id.get(home)
+              features={
+                  'gamecontrol_diff': float(ctx['gamecontrol'][hid]-ctx['gamecontrol'][aid]),
+                  'def_returning_diff': float(ctx['def_returning'][hid]-ctx['def_returning'][aid]),
+                  'explosive_diff': float(ctx['explosive'][home]-ctx['explosive'][away]),
+                  'current_power_margin': float(hf.get('current_power_delta')-af.get('current_power_delta')),
+                  'havoc_off_diff': float(ctx['havoc_off'][hid]-ctx['havoc_off'][aid]),
               }
-              features=regime._feature_row(cb,g,projection)
-              corr,contrib=(regime._predict_correction(features) if features is not None else (None,None))
-              rows.append({'week':wk,'away':away,'home':home,'game_time':str(g.get('Game Time','')),'core_margin':float(home_base-away_base),'debug':raw_debug,'features':features,'correction':corr,'contributions':contrib,'home_shift':None if corr is None else corr/2,'away_shift':None if corr is None else -corr/2})
+              corr,contrib=regime._predict_correction(features)
+              rows.append({'away':away,'home':home,'game_time':str(g.get('Game Time','')),'core_margin':float(home_base-away_base),'features':features,'correction':corr,'contributions':contrib,'home_shift':corr/2,'away_shift':-corr/2})
           print('TONIGHT_REPLAY_JSON_START')
           print(json.dumps(rows,indent=2,allow_nan=False))
           print('TONIGHT_REPLAY_JSON_END')
