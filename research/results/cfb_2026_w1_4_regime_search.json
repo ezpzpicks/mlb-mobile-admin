@@ -1,0 +1,4260 @@
+{
+  "protocol": {
+    "season": 2026,
+    "selection_weeks": [
+      2,
+      3
+    ],
+    "hard_holdout_week": 4,
+    "market_predictor": false,
+    "selection_guardrail": "candidate walk-forward MAE must be <= baseline before edge-order ranking"
+  },
+  "counts": {
+    "1": 51,
+    "2": 49,
+    "3": 57,
+    "4": 58
+  },
+  "baseline_dev": {
+    "n": 105,
+    "mae": 12.140470674803622,
+    "steps": 2,
+    "possible": 4,
+    "violation": 0.0975845410628019,
+    "slope": -0.06425120772946857,
+    "high": 0.391304347826087,
+    "auc": 0.5230263157894737,
+    "corr": 0.013185539870354982,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 90,
+        "wins": 41,
+        "losses": 49,
+        "win_rate": 0.45555555555555555
+      },
+      {
+        "threshold": 4.0,
+        "n": 66,
+        "wins": 32,
+        "losses": 34,
+        "win_rate": 0.48484848484848486
+      },
+      {
+        "threshold": 6.0,
+        "n": 45,
+        "wins": 22,
+        "losses": 23,
+        "win_rate": 0.4888888888888889
+      },
+      {
+        "threshold": 8.0,
+        "n": 31,
+        "wins": 15,
+        "losses": 16,
+        "win_rate": 0.4838709677419355
+      },
+      {
+        "threshold": 10.0,
+        "n": 23,
+        "wins": 9,
+        "losses": 14,
+        "win_rate": 0.391304347826087
+      }
+    ]
+  },
+  "chosen": {
+    "family": "power_confirmation",
+    "features": [
+      "prior_power_margin",
+      "current_power_margin",
+      "current_scoring_diff",
+      "current_allowed_diff",
+      "gamecontrol_diff",
+      "adjavgingamewp_diff",
+      "adj_net_diff",
+      "fei_net_diff",
+      "net_z_diff",
+      "off_epa_diff",
+      "def_epa_edge",
+      "off_success_diff",
+      "def_success_edge",
+      "pass_epa_diff",
+      "rush_epa_diff",
+      "early_epa_diff",
+      "def_early_epa_edge",
+      "power_x_prior",
+      "power_x_scoring",
+      "power_x_allowed",
+      "power_x_gamecontrol",
+      "power_x_ingamewp",
+      "power_x_adjnet",
+      "power_x_feinet",
+      "power_x_netz",
+      "power_x_comp_epa",
+      "power_x_comp_success",
+      "power_x_comp_early",
+      "power_reversal_mag",
+      "power_scoring_conflict_mag",
+      "power_quality_conflict_mag"
+    ],
+    "alpha": 16.0,
+    "cap": 6.0,
+    "dev": {
+      "n": 105,
+      "mae": 11.967714036081553,
+      "steps": 4,
+      "possible": 4,
+      "violation": 0.0,
+      "slope": 0.04938271604938271,
+      "high": 0.5555555555555556,
+      "auc": 0.5457184325108854,
+      "corr": 0.10250708758755195,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 81,
+          "wins": 41,
+          "losses": 40,
+          "win_rate": 0.5061728395061729
+        },
+        {
+          "threshold": 4.0,
+          "n": 66,
+          "wins": 34,
+          "losses": 32,
+          "win_rate": 0.5151515151515151
+        },
+        {
+          "threshold": 6.0,
+          "n": 53,
+          "wins": 28,
+          "losses": 25,
+          "win_rate": 0.5283018867924528
+        },
+        {
+          "threshold": 8.0,
+          "n": 37,
+          "wins": 20,
+          "losses": 17,
+          "win_rate": 0.5405405405405406
+        },
+        {
+          "threshold": 10.0,
+          "n": 27,
+          "wins": 15,
+          "losses": 12,
+          "win_rate": 0.5555555555555556
+        }
+      ]
+    }
+  },
+  "week4_baseline": {
+    "n": 57,
+    "mae": 13.718508429287139,
+    "steps": 0,
+    "possible": 3,
+    "violation": 0.14680851063829786,
+    "slope": -0.14680851063829786,
+    "high": null,
+    "auc": 0.41728395061728396,
+    "corr": -0.12328836575232247,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 47,
+        "wins": 21,
+        "losses": 26,
+        "win_rate": 0.44680851063829785
+      },
+      {
+        "threshold": 4.0,
+        "n": 36,
+        "wins": 16,
+        "losses": 20,
+        "win_rate": 0.4444444444444444
+      },
+      {
+        "threshold": 6.0,
+        "n": 23,
+        "wins": 10,
+        "losses": 13,
+        "win_rate": 0.43478260869565216
+      },
+      {
+        "threshold": 8.0,
+        "n": 10,
+        "wins": 3,
+        "losses": 7,
+        "win_rate": 0.3
+      },
+      {
+        "threshold": 10.0,
+        "n": 6,
+        "wins": 2,
+        "losses": 4,
+        "win_rate": 0.3333333333333333
+      }
+    ]
+  },
+  "week4_challenger": {
+    "n": 57,
+    "mae": 14.030995215571004,
+    "steps": 2,
+    "possible": 4,
+    "violation": 0.08658008658008659,
+    "slope": -0.07469512195121952,
+    "high": 0.4375,
+    "auc": 0.49137931034482757,
+    "corr": -0.04357847100838366,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 41,
+        "wins": 21,
+        "losses": 20,
+        "win_rate": 0.5121951219512195
+      },
+      {
+        "threshold": 4.0,
+        "n": 33,
+        "wins": 17,
+        "losses": 16,
+        "win_rate": 0.5151515151515151
+      },
+      {
+        "threshold": 6.0,
+        "n": 28,
+        "wins": 14,
+        "losses": 14,
+        "win_rate": 0.5
+      },
+      {
+        "threshold": 8.0,
+        "n": 21,
+        "wins": 9,
+        "losses": 12,
+        "win_rate": 0.42857142857142855
+      },
+      {
+        "threshold": 10.0,
+        "n": 16,
+        "wins": 7,
+        "losses": 9,
+        "win_rate": 0.4375
+      }
+    ]
+  },
+  "pooled_w2_4_baseline": {
+    "n": 162,
+    "mae": 12.695706181010786,
+    "steps": 2,
+    "possible": 4,
+    "violation": 0.09127789046653145,
+    "slope": -0.07324439969796126,
+    "high": 0.3793103448275862,
+    "auc": 0.49118773946360156,
+    "corr": -0.04253950851601294,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 137,
+        "wins": 62,
+        "losses": 75,
+        "win_rate": 0.45255474452554745
+      },
+      {
+        "threshold": 4.0,
+        "n": 102,
+        "wins": 48,
+        "losses": 54,
+        "win_rate": 0.47058823529411764
+      },
+      {
+        "threshold": 6.0,
+        "n": 68,
+        "wins": 32,
+        "losses": 36,
+        "win_rate": 0.47058823529411764
+      },
+      {
+        "threshold": 8.0,
+        "n": 41,
+        "wins": 18,
+        "losses": 23,
+        "win_rate": 0.43902439024390244
+      },
+      {
+        "threshold": 10.0,
+        "n": 29,
+        "wins": 11,
+        "losses": 18,
+        "win_rate": 0.3793103448275862
+      }
+    ]
+  },
+  "pooled_w2_4_challenger": {
+    "n": 162,
+    "mae": 12.693683339975987,
+    "steps": 3,
+    "possible": 4,
+    "violation": 0.01851851851851849,
+    "slope": 0.0034311856652687878,
+    "high": 0.5116279069767442,
+    "auc": 0.5251524390243902,
+    "corr": 0.03210209495959923,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 122,
+        "wins": 62,
+        "losses": 60,
+        "win_rate": 0.5081967213114754
+      },
+      {
+        "threshold": 4.0,
+        "n": 99,
+        "wins": 51,
+        "losses": 48,
+        "win_rate": 0.5151515151515151
+      },
+      {
+        "threshold": 6.0,
+        "n": 81,
+        "wins": 42,
+        "losses": 39,
+        "win_rate": 0.5185185185185185
+      },
+      {
+        "threshold": 8.0,
+        "n": 58,
+        "wins": 29,
+        "losses": 29,
+        "win_rate": 0.5
+      },
+      {
+        "threshold": 10.0,
+        "n": 43,
+        "wins": 22,
+        "losses": 21,
+        "win_rate": 0.5116279069767442
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.967714036081553,
+        "steps": 4,
+        "possible": 4,
+        "violation": 0.0,
+        "slope": 0.04938271604938271,
+        "high": 0.5555555555555556,
+        "auc": 0.5457184325108854,
+        "corr": 0.10250708758755195,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 81,
+            "wins": 41,
+            "losses": 40,
+            "win_rate": 0.5061728395061729
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 34,
+            "losses": 32,
+            "win_rate": 0.5151515151515151
+          },
+          {
+            "threshold": 6.0,
+            "n": 53,
+            "wins": 28,
+            "losses": 25,
+            "win_rate": 0.5283018867924528
+          },
+          {
+            "threshold": 8.0,
+            "n": 37,
+            "wins": 20,
+            "losses": 17,
+            "win_rate": 0.5405405405405406
+          },
+          {
+            "threshold": 10.0,
+            "n": 27,
+            "wins": 15,
+            "losses": 12,
+            "win_rate": 0.5555555555555556
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.045667884079853,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0019860973187686426,
+        "slope": 0.038461538461538436,
+        "high": 0.5384615384615384,
+        "auc": 0.5072568940493469,
+        "corr": 0.08897716962350191,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 80,
+            "wins": 40,
+            "losses": 40,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 68,
+            "wins": 34,
+            "losses": 34,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 53,
+            "wins": 28,
+            "losses": 25,
+            "win_rate": 0.5283018867924528
+          },
+          {
+            "threshold": 8.0,
+            "n": 38,
+            "wins": 20,
+            "losses": 18,
+            "win_rate": 0.5263157894736842
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 14,
+            "losses": 12,
+            "win_rate": 0.5384615384615384
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.01226027283734,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.010638297872340385,
+        "slope": 0.05823068309070545,
+        "high": 0.5263157894736842,
+        "auc": 0.48403483309143686,
+        "corr": 0.05422743631552773,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 94,
+            "wins": 44,
+            "losses": 50,
+            "win_rate": 0.46808510638297873
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 24,
+            "losses": 23,
+            "win_rate": 0.5106382978723404
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 17,
+            "losses": 17,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 19,
+            "wins": 10,
+            "losses": 9,
+            "win_rate": 0.5263157894736842
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.127880078333353,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.024090694378837985,
+        "slope": 0.08280542986425332,
+        "high": 0.5769230769230769,
+        "auc": 0.5108853410740203,
+        "corr": 0.10254728465003414,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 85,
+            "wins": 42,
+            "losses": 43,
+            "win_rate": 0.49411764705882355
+          },
+          {
+            "threshold": 4.0,
+            "n": 73,
+            "wins": 37,
+            "losses": 36,
+            "win_rate": 0.5068493150684932
+          },
+          {
+            "threshold": 6.0,
+            "n": 58,
+            "wins": 28,
+            "losses": 30,
+            "win_rate": 0.4827586206896552
+          },
+          {
+            "threshold": 8.0,
+            "n": 39,
+            "wins": 19,
+            "losses": 20,
+            "win_rate": 0.48717948717948717
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.105404263424399,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02941176470588236,
+        "slope": 0.03260869565217389,
+        "high": 0.5,
+        "auc": 0.4785766158315178,
+        "corr": 0.025668352215014043,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 92,
+            "wins": 43,
+            "losses": 49,
+            "win_rate": 0.4673913043478261
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 31,
+            "losses": 35,
+            "win_rate": 0.4696969696969697
+          },
+          {
+            "threshold": 6.0,
+            "n": 46,
+            "wins": 23,
+            "losses": 23,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 16,
+            "losses": 18,
+            "win_rate": 0.47058823529411764
+          },
+          {
+            "threshold": 10.0,
+            "n": 20,
+            "wins": 10,
+            "losses": 10,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.994792816025168,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03191489361702127,
+        "slope": 0.0357142857142857,
+        "high": 0.5,
+        "auc": 0.5069090909090909,
+        "corr": 0.04789364391983181,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 39,
+            "losses": 45,
+            "win_rate": 0.4642857142857143
+          },
+          {
+            "threshold": 4.0,
+            "n": 64,
+            "wins": 30,
+            "losses": 34,
+            "win_rate": 0.46875
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 25,
+            "losses": 22,
+            "win_rate": 0.5319148936170213
+          },
+          {
+            "threshold": 8.0,
+            "n": 32,
+            "wins": 16,
+            "losses": 16,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 20,
+            "wins": 10,
+            "losses": 10,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.094658164863743,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03423423423423422,
+        "slope": 0.021138211382113803,
+        "high": 0.5333333333333333,
+        "auc": 0.5301379811183733,
+        "corr": 0.11728942859708684,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 82,
+            "wins": 42,
+            "losses": 40,
+            "win_rate": 0.5121951219512195
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 36,
+            "losses": 34,
+            "win_rate": 0.5142857142857142
+          },
+          {
+            "threshold": 6.0,
+            "n": 57,
+            "wins": 30,
+            "losses": 27,
+            "win_rate": 0.5263157894736842
+          },
+          {
+            "threshold": 8.0,
+            "n": 37,
+            "wins": 21,
+            "losses": 16,
+            "win_rate": 0.5675675675675675
+          },
+          {
+            "threshold": 10.0,
+            "n": 30,
+            "wins": 16,
+            "losses": 14,
+            "win_rate": 0.5333333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.08805546461773,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0357142857142857,
+        "slope": 0.059313725490196034,
+        "high": 0.5416666666666666,
+        "auc": 0.5203340595497459,
+        "corr": 0.08239674524253068,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 85,
+            "wins": 41,
+            "losses": 44,
+            "win_rate": 0.4823529411764706
+          },
+          {
+            "threshold": 4.0,
+            "n": 74,
+            "wins": 37,
+            "losses": 37,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 26,
+            "losses": 30,
+            "win_rate": 0.4642857142857143
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 13,
+            "losses": 11,
+            "win_rate": 0.5416666666666666
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.03136348714516,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04166666666666663,
+        "slope": 0.04255319148936171,
+        "high": 0.5,
+        "auc": 0.4934640522875817,
+        "corr": 0.05078391907864275,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 94,
+            "wins": 43,
+            "losses": 51,
+            "win_rate": 0.4574468085106383
+          },
+          {
+            "threshold": 4.0,
+            "n": 69,
+            "wins": 32,
+            "losses": 37,
+            "win_rate": 0.463768115942029
+          },
+          {
+            "threshold": 6.0,
+            "n": 48,
+            "wins": 26,
+            "losses": 22,
+            "win_rate": 0.5416666666666666
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 17,
+            "losses": 17,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 18,
+            "wins": 9,
+            "losses": 9,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.990820611270802,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.045454545454545414,
+        "slope": 0.0,
+        "high": 0.5,
+        "auc": 0.548,
+        "corr": 0.08098795142044891,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 82,
+            "wins": 41,
+            "losses": 41,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 33,
+            "losses": 33,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 50,
+            "wins": 26,
+            "losses": 24,
+            "win_rate": 0.52
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 18,
+            "losses": 15,
+            "win_rate": 0.5454545454545454
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 12,
+            "losses": 12,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 10.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.124133743843942,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.049295774647887314,
+        "slope": 0.021739130434782594,
+        "high": 0.5217391304347826,
+        "auc": 0.5361842105263158,
+        "corr": 0.04193476344211537,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 80,
+            "wins": 40,
+            "losses": 40,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 71,
+            "wins": 32,
+            "losses": 39,
+            "win_rate": 0.4507042253521127
+          },
+          {
+            "threshold": 6.0,
+            "n": 50,
+            "wins": 24,
+            "losses": 26,
+            "win_rate": 0.48
+          },
+          {
+            "threshold": 8.0,
+            "n": 35,
+            "wins": 17,
+            "losses": 18,
+            "win_rate": 0.4857142857142857
+          },
+          {
+            "threshold": 10.0,
+            "n": 23,
+            "wins": 12,
+            "losses": 11,
+            "win_rate": 0.5217391304347826
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.120716142710044,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04960317460317454,
+        "slope": 0.04809523809523819,
+        "high": 0.56,
+        "auc": 0.5054426705370102,
+        "corr": 0.09336578017551268,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 43,
+            "losses": 41,
+            "win_rate": 0.5119047619047619
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 37,
+            "losses": 35,
+            "win_rate": 0.5138888888888888
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 26,
+            "losses": 30,
+            "win_rate": 0.4642857142857143
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 18,
+            "losses": 18,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 14,
+            "losses": 11,
+            "win_rate": 0.56
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.021512798600842,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.05319148936170215,
+        "slope": 0.04022988505747127,
+        "high": 0.5,
+        "auc": 0.49310094408133626,
+        "corr": 0.04976381237345549,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 87,
+            "wins": 40,
+            "losses": 47,
+            "win_rate": 0.45977011494252873
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 31,
+            "losses": 35,
+            "win_rate": 0.4696969696969697
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 26,
+            "losses": 21,
+            "win_rate": 0.5531914893617021
+          },
+          {
+            "threshold": 8.0,
+            "n": 32,
+            "wins": 16,
+            "losses": 16,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 20,
+            "wins": 10,
+            "losses": 10,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.061193637052561,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.06240487062404876,
+        "slope": 0.04754901960784308,
+        "high": 0.5416666666666666,
+        "auc": 0.4985486211901306,
+        "corr": 0.08022354116836079,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 85,
+            "wins": 42,
+            "losses": 43,
+            "win_rate": 0.49411764705882355
+          },
+          {
+            "threshold": 4.0,
+            "n": 73,
+            "wins": 37,
+            "losses": 36,
+            "win_rate": 0.5068493150684932
+          },
+          {
+            "threshold": 6.0,
+            "n": 54,
+            "wins": 24,
+            "losses": 30,
+            "win_rate": 0.4444444444444444
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 13,
+            "losses": 11,
+            "win_rate": 0.5416666666666666
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_full",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.068368538287674,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.009143124290389437,
+        "slope": 0.053197509903791684,
+        "high": 0.5263157894736842,
+        "auc": 0.5214545454545455,
+        "corr": 0.04435682158508987,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 93,
+            "wins": 44,
+            "losses": 49,
+            "win_rate": 0.4731182795698925
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          },
+          {
+            "threshold": 6.0,
+            "n": 46,
+            "wins": 24,
+            "losses": 22,
+            "win_rate": 0.5217391304347826
+          },
+          {
+            "threshold": 8.0,
+            "n": 35,
+            "wins": 18,
+            "losses": 17,
+            "win_rate": 0.5142857142857142
+          },
+          {
+            "threshold": 10.0,
+            "n": 19,
+            "wins": 10,
+            "losses": 9,
+            "win_rate": 0.5263157894736842
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.049340579047247,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.023255813953488413,
+        "slope": 0.05366726296958846,
+        "high": 0.5769230769230769,
+        "auc": 0.5493468795355588,
+        "corr": 0.10750341736026255,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 45,
+            "losses": 41,
+            "win_rate": 0.5232558139534884
+          },
+          {
+            "threshold": 4.0,
+            "n": 71,
+            "wins": 36,
+            "losses": 35,
+            "win_rate": 0.5070422535211268
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 28,
+            "losses": 28,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 38,
+            "wins": 20,
+            "losses": 18,
+            "win_rate": 0.5263157894736842
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_full",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.139209137533934,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.0237394957983193,
+        "slope": 0.054117647058823604,
+        "high": 0.56,
+        "auc": 0.5341321713870734,
+        "corr": 0.07539259448493978,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 85,
+            "wins": 43,
+            "losses": 42,
+            "win_rate": 0.5058823529411764
+          },
+          {
+            "threshold": 4.0,
+            "n": 73,
+            "wins": 36,
+            "losses": 37,
+            "win_rate": 0.4931506849315068
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 27,
+            "losses": 29,
+            "win_rate": 0.48214285714285715
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 20,
+            "losses": 16,
+            "win_rate": 0.5555555555555556
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 14,
+            "losses": 11,
+            "win_rate": 0.56
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.014875087477506,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.02537682433073085,
+        "slope": 0.05263157894736842,
+        "high": 0.5263157894736842,
+        "auc": 0.4989106753812636,
+        "corr": 0.05577026273867546,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 95,
+            "wins": 45,
+            "losses": 50,
+            "win_rate": 0.47368421052631576
+          },
+          {
+            "threshold": 4.0,
+            "n": 69,
+            "wins": 32,
+            "losses": 37,
+            "win_rate": 0.463768115942029
+          },
+          {
+            "threshold": 6.0,
+            "n": 49,
+            "wins": 26,
+            "losses": 23,
+            "win_rate": 0.5306122448979592
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 17,
+            "losses": 16,
+            "win_rate": 0.5151515151515151
+          },
+          {
+            "threshold": 10.0,
+            "n": 19,
+            "wins": 10,
+            "losses": 9,
+            "win_rate": 0.5263157894736842
+          }
+        ]
+      }
+    },
+    {
+      "family": "returning",
+      "features": [
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.139308456551602,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.026926959405869255,
+        "slope": 0.008799171842650055,
+        "high": 0.47619047619047616,
+        "auc": 0.5244883040935673,
+        "corr": 0.007243776656659933,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 92,
+            "wins": 43,
+            "losses": 49,
+            "win_rate": 0.4673913043478261
+          },
+          {
+            "threshold": 4.0,
+            "n": 67,
+            "wins": 31,
+            "losses": 36,
+            "win_rate": 0.4626865671641791
+          },
+          {
+            "threshold": 6.0,
+            "n": 45,
+            "wins": 21,
+            "losses": 24,
+            "win_rate": 0.4666666666666667
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 16,
+            "losses": 20,
+            "win_rate": 0.4444444444444444
+          },
+          {
+            "threshold": 10.0,
+            "n": 21,
+            "wins": 10,
+            "losses": 11,
+            "win_rate": 0.47619047619047616
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.042306487161223,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.02941176470588236,
+        "slope": 0.04751131221719451,
+        "high": 0.5769230769230769,
+        "auc": 0.5511611030478955,
+        "corr": 0.11040910462383309,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 85,
+            "wins": 45,
+            "losses": 40,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 38,
+            "losses": 34,
+            "win_rate": 0.5277777777777778
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 28,
+            "losses": 28,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 40,
+            "wins": 21,
+            "losses": 19,
+            "win_rate": 0.525
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_full",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.03523472962718,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.031101472847203437,
+        "slope": 0.026881720430107503,
+        "high": 0.5,
+        "auc": 0.5036310820624547,
+        "corr": 0.04643594034090168,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 93,
+            "wins": 44,
+            "losses": 49,
+            "win_rate": 0.4731182795698925
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 24,
+            "losses": 23,
+            "win_rate": 0.5106382978723404
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 20,
+            "wins": 10,
+            "losses": 10,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 64.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.029786320245544,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.033436952016579036,
+        "slope": 0.026266416510318913,
+        "high": 0.5384615384615384,
+        "auc": 0.5391872278664731,
+        "corr": 0.09435162496704677,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 82,
+            "wins": 42,
+            "losses": 40,
+            "win_rate": 0.5121951219512195
+          },
+          {
+            "threshold": 4.0,
+            "n": 68,
+            "wins": 34,
+            "losses": 34,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 51,
+            "wins": 28,
+            "losses": 23,
+            "win_rate": 0.5490196078431373
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 19,
+            "losses": 17,
+            "win_rate": 0.5277777777777778
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 14,
+            "losses": 12,
+            "win_rate": 0.5384615384615384
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.02123465423519,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.03556358154635059,
+        "slope": 0.04244482173174868,
+        "high": 0.5263157894736842,
+        "auc": 0.4989106753812636,
+        "corr": 0.054757428780498475,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 93,
+            "wins": 45,
+            "losses": 48,
+            "win_rate": 0.4838709677419355
+          },
+          {
+            "threshold": 4.0,
+            "n": 69,
+            "wins": 32,
+            "losses": 37,
+            "win_rate": 0.463768115942029
+          },
+          {
+            "threshold": 6.0,
+            "n": 49,
+            "wins": 26,
+            "losses": 23,
+            "win_rate": 0.5306122448979592
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 17,
+            "losses": 16,
+            "win_rate": 0.5151515151515151
+          },
+          {
+            "threshold": 10.0,
+            "n": 19,
+            "wins": 10,
+            "losses": 9,
+            "win_rate": 0.5263157894736842
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.10567181707506,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.039922480620155076,
+        "slope": 0.05366726296958846,
+        "high": 0.5769230769230769,
+        "auc": 0.5203193033381712,
+        "corr": 0.10599839086256144,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 45,
+            "losses": 41,
+            "win_rate": 0.5232558139534884
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 36,
+            "losses": 36,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 60,
+            "wins": 29,
+            "losses": 31,
+            "win_rate": 0.48333333333333334
+          },
+          {
+            "threshold": 8.0,
+            "n": 41,
+            "wins": 21,
+            "losses": 20,
+            "win_rate": 0.5121951219512195
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_early",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.950327332590547,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.043569393569393544,
+        "slope": 0.024542614904060678,
+        "high": 0.5185185185185185,
+        "auc": 0.5029027576197388,
+        "corr": 0.04314791148506164,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 83,
+            "wins": 41,
+            "losses": 42,
+            "win_rate": 0.4939759036144578
+          },
+          {
+            "threshold": 4.0,
+            "n": 62,
+            "wins": 31,
+            "losses": 31,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 52,
+            "wins": 25,
+            "losses": 27,
+            "win_rate": 0.4807692307692308
+          },
+          {
+            "threshold": 8.0,
+            "n": 35,
+            "wins": 19,
+            "losses": 16,
+            "win_rate": 0.5428571428571428
+          },
+          {
+            "threshold": 10.0,
+            "n": 27,
+            "wins": 14,
+            "losses": 13,
+            "win_rate": 0.5185185185185185
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 10.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.092359817517982,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.04726890756302521,
+        "slope": 0.023809523809523836,
+        "high": 0.5,
+        "auc": 0.48802612481857766,
+        "corr": 0.06493232001064052,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 40,
+            "losses": 44,
+            "win_rate": 0.47619047619047616
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 33,
+            "losses": 39,
+            "win_rate": 0.4583333333333333
+          },
+          {
+            "threshold": 6.0,
+            "n": 54,
+            "wins": 25,
+            "losses": 29,
+            "win_rate": 0.46296296296296297
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 13,
+            "losses": 13,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_early",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.93864058849321,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.04879009668383477,
+        "slope": 0.007500000000000062,
+        "high": 0.52,
+        "auc": 0.5410014513788098,
+        "corr": 0.03432094035300323,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 80,
+            "wins": 41,
+            "losses": 39,
+            "win_rate": 0.5125
+          },
+          {
+            "threshold": 4.0,
+            "n": 62,
+            "wins": 32,
+            "losses": 30,
+            "win_rate": 0.5161290322580645
+          },
+          {
+            "threshold": 6.0,
+            "n": 51,
+            "wins": 25,
+            "losses": 26,
+            "win_rate": 0.49019607843137253
+          },
+          {
+            "threshold": 8.0,
+            "n": 35,
+            "wins": 19,
+            "losses": 16,
+            "win_rate": 0.5428571428571428
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 13,
+            "losses": 12,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 8.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.083601925028187,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.05091813849172977,
+        "slope": 0.011494252873563204,
+        "high": 0.5517241379310345,
+        "auc": 0.5424836601307189,
+        "corr": 0.12333429939479883,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 87,
+            "wins": 47,
+            "losses": 40,
+            "win_rate": 0.5402298850574713
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 39,
+            "losses": 33,
+            "win_rate": 0.5416666666666666
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 28,
+            "losses": 28,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 41,
+            "wins": 23,
+            "losses": 18,
+            "win_rate": 0.5609756097560976
+          },
+          {
+            "threshold": 10.0,
+            "n": 29,
+            "wins": 16,
+            "losses": 13,
+            "win_rate": 0.5517241379310345
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_early",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 16.0,
+      "cap": 6.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.048228911777144,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.055179444191861826,
+        "slope": 0.01533406352683453,
+        "high": 0.5454545454545454,
+        "auc": 0.4970909090909091,
+        "corr": 0.061134051375227344,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 83,
+            "wins": 44,
+            "losses": 39,
+            "win_rate": 0.5301204819277109
+          },
+          {
+            "threshold": 4.0,
+            "n": 64,
+            "wins": 31,
+            "losses": 33,
+            "win_rate": 0.484375
+          },
+          {
+            "threshold": 6.0,
+            "n": 53,
+            "wins": 27,
+            "losses": 26,
+            "win_rate": 0.5094339622641509
+          },
+          {
+            "threshold": 8.0,
+            "n": 44,
+            "wins": 22,
+            "losses": 22,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 33,
+            "wins": 18,
+            "losses": 15,
+            "win_rate": 0.5454545454545454
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation_returning",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.085296050309552,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.05714285714285716,
+        "slope": 0.021645021645021634,
+        "high": 0.47619047619047616,
+        "auc": 0.5047272727272727,
+        "corr": 0.033644463903570274,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 88,
+            "wins": 40,
+            "losses": 48,
+            "win_rate": 0.45454545454545453
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 31,
+            "losses": 35,
+            "win_rate": 0.4696969696969697
+          },
+          {
+            "threshold": 6.0,
+            "n": 45,
+            "wins": 24,
+            "losses": 21,
+            "win_rate": 0.5333333333333333
+          },
+          {
+            "threshold": 8.0,
+            "n": 31,
+            "wins": 15,
+            "losses": 16,
+            "win_rate": 0.4838709677419355
+          },
+          {
+            "threshold": 10.0,
+            "n": 21,
+            "wins": 10,
+            "losses": 11,
+            "win_rate": 0.47619047619047616
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.1401088189137,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.05897009966777411,
+        "slope": -0.023255813953488413,
+        "high": 0.5,
+        "auc": 0.5014513788098693,
+        "corr": 0.03573249598765426,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 45,
+            "losses": 41,
+            "win_rate": 0.5232558139534884
+          },
+          {
+            "threshold": 4.0,
+            "n": 69,
+            "wins": 36,
+            "losses": 33,
+            "win_rate": 0.5217391304347826
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 26,
+            "losses": 30,
+            "win_rate": 0.4642857142857143
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 18,
+            "losses": 18,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 12,
+            "losses": 12,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.093762321110749,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.062308478038815174,
+        "slope": 0.0031460674157303137,
+        "high": 0.52,
+        "auc": 0.4909288824383164,
+        "corr": 0.049013868093086124,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 89,
+            "wins": 46,
+            "losses": 43,
+            "win_rate": 0.5168539325842697
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 36,
+            "losses": 34,
+            "win_rate": 0.5142857142857142
+          },
+          {
+            "threshold": 6.0,
+            "n": 55,
+            "wins": 25,
+            "losses": 30,
+            "win_rate": 0.45454545454545453
+          },
+          {
+            "threshold": 8.0,
+            "n": 36,
+            "wins": 18,
+            "losses": 18,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 13,
+            "losses": 12,
+            "win_rate": 0.52
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.062376419121945,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.065912146364274,
+        "slope": 0.009398496240601462,
+        "high": 0.47368421052631576,
+        "auc": 0.4785766158315178,
+        "corr": 0.03639356643427077,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 39,
+            "losses": 45,
+            "win_rate": 0.4642857142857143
+          },
+          {
+            "threshold": 4.0,
+            "n": 65,
+            "wins": 30,
+            "losses": 35,
+            "win_rate": 0.46153846153846156
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 25,
+            "losses": 22,
+            "win_rate": 0.5319148936170213
+          },
+          {
+            "threshold": 8.0,
+            "n": 32,
+            "wins": 15,
+            "losses": 17,
+            "win_rate": 0.46875
+          },
+          {
+            "threshold": 10.0,
+            "n": 19,
+            "wins": 9,
+            "losses": 10,
+            "win_rate": 0.47368421052631576
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation_returning",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.109900255789064,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.06719367588932806,
+        "slope": -0.010570824524312905,
+        "high": 0.45454545454545453,
+        "auc": 0.5112973760932945,
+        "corr": 0.010798476847166,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 40,
+            "losses": 46,
+            "win_rate": 0.46511627906976744
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 31,
+            "losses": 35,
+            "win_rate": 0.4696969696969697
+          },
+          {
+            "threshold": 6.0,
+            "n": 46,
+            "wins": 24,
+            "losses": 22,
+            "win_rate": 0.5217391304347826
+          },
+          {
+            "threshold": 8.0,
+            "n": 31,
+            "wins": 15,
+            "losses": 16,
+            "win_rate": 0.4838709677419355
+          },
+          {
+            "threshold": 10.0,
+            "n": 22,
+            "wins": 10,
+            "losses": 12,
+            "win_rate": 0.45454545454545453
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.96873610946648,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.06862745098039219,
+        "slope": 0.0,
+        "high": 0.5,
+        "auc": 0.5450909090909091,
+        "corr": 0.07762016050113739,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 80,
+            "wins": 40,
+            "losses": 40,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 64,
+            "wins": 32,
+            "losses": 32,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 51,
+            "wins": 25,
+            "losses": 26,
+            "win_rate": 0.49019607843137253
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 19,
+            "losses": 15,
+            "win_rate": 0.5588235294117647
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 12,
+            "losses": 12,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation_returning",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.040687401463863,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.07848214285714283,
+        "slope": -0.01397590361445783,
+        "high": 0.48,
+        "auc": 0.5583090379008746,
+        "corr": 0.03833103000094452,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 83,
+            "wins": 41,
+            "losses": 42,
+            "win_rate": 0.4939759036144578
+          },
+          {
+            "threshold": 4.0,
+            "n": 64,
+            "wins": 33,
+            "losses": 31,
+            "win_rate": 0.515625
+          },
+          {
+            "threshold": 6.0,
+            "n": 52,
+            "wins": 26,
+            "losses": 26,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 35,
+            "wins": 19,
+            "losses": 16,
+            "win_rate": 0.5428571428571428
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 12,
+            "losses": 13,
+            "win_rate": 0.48
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation_returning",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.125947572954356,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.0823474573474573,
+        "slope": -0.0356425702811245,
+        "high": 0.4583333333333333,
+        "auc": 0.5433673469387755,
+        "corr": 0.019226779152102864,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 83,
+            "wins": 41,
+            "losses": 42,
+            "win_rate": 0.4939759036144578
+          },
+          {
+            "threshold": 4.0,
+            "n": 63,
+            "wins": 32,
+            "losses": 31,
+            "win_rate": 0.5079365079365079
+          },
+          {
+            "threshold": 6.0,
+            "n": 52,
+            "wins": 25,
+            "losses": 27,
+            "win_rate": 0.4807692307692308
+          },
+          {
+            "threshold": 8.0,
+            "n": 37,
+            "wins": 19,
+            "losses": 18,
+            "win_rate": 0.5135135135135135
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 11,
+            "losses": 13,
+            "win_rate": 0.4583333333333333
+          }
+        ]
+      }
+    },
+    {
+      "family": "power_confirmation_returning",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.05002281568991,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.08893280632411066,
+        "slope": -0.010570824524312905,
+        "high": 0.45454545454545453,
+        "auc": 0.508,
+        "corr": 0.02073960283178539,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 40,
+            "losses": 46,
+            "win_rate": 0.46511627906976744
+          },
+          {
+            "threshold": 4.0,
+            "n": 67,
+            "wins": 32,
+            "losses": 35,
+            "win_rate": 0.47761194029850745
+          },
+          {
+            "threshold": 6.0,
+            "n": 46,
+            "wins": 25,
+            "losses": 21,
+            "win_rate": 0.5434782608695652
+          },
+          {
+            "threshold": 8.0,
+            "n": 30,
+            "wins": 15,
+            "losses": 15,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 22,
+            "wins": 10,
+            "losses": 12,
+            "win_rate": 0.45454545454545453
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.118244827254713,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.04078624078624077,
+        "slope": 0.0,
+        "high": 0.5,
+        "auc": 0.46586782861292664,
+        "corr": 0.05910914457972174,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 42,
+            "losses": 42,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 4.0,
+            "n": 68,
+            "wins": 33,
+            "losses": 35,
+            "win_rate": 0.4852941176470588
+          },
+          {
+            "threshold": 6.0,
+            "n": 55,
+            "wins": 26,
+            "losses": 29,
+            "win_rate": 0.4727272727272727
+          },
+          {
+            "threshold": 8.0,
+            "n": 37,
+            "wins": 19,
+            "losses": 18,
+            "win_rate": 0.5135135135135135
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 12,
+            "losses": 12,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.060296911309047,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.04531738689925552,
+        "slope": -0.012939958592132539,
+        "high": 0.47619047619047616,
+        "auc": 0.49782135076252726,
+        "corr": 0.026282887161912537,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 92,
+            "wins": 45,
+            "losses": 47,
+            "win_rate": 0.4891304347826087
+          },
+          {
+            "threshold": 4.0,
+            "n": 69,
+            "wins": 33,
+            "losses": 36,
+            "win_rate": 0.4782608695652174
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 24,
+            "losses": 23,
+            "win_rate": 0.5106382978723404
+          },
+          {
+            "threshold": 8.0,
+            "n": 32,
+            "wins": 16,
+            "losses": 16,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 21,
+            "wins": 10,
+            "losses": 11,
+            "win_rate": 0.47619047619047616
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 16.0,
+      "cap": 8.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.092400969119446,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.04646933526243868,
+        "slope": 0.017633228840125414,
+        "high": 0.5517241379310345,
+        "auc": 0.5323166303558461,
+        "corr": 0.11921784078636731,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 88,
+            "wins": 47,
+            "losses": 41,
+            "win_rate": 0.5340909090909091
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 37,
+            "losses": 35,
+            "win_rate": 0.5138888888888888
+          },
+          {
+            "threshold": 6.0,
+            "n": 56,
+            "wins": 28,
+            "losses": 28,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 39,
+            "wins": 22,
+            "losses": 17,
+            "win_rate": 0.5641025641025641
+          },
+          {
+            "threshold": 10.0,
+            "n": 29,
+            "wins": 16,
+            "losses": 13,
+            "win_rate": 0.5517241379310345
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 16.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.015999550701268,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05017671645460703,
+        "slope": 0.03591954022988497,
+        "high": 0.5416666666666666,
+        "auc": 0.5359477124183006,
+        "corr": 0.08989868572276777,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 87,
+            "wins": 44,
+            "losses": 43,
+            "win_rate": 0.5057471264367817
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 36,
+            "losses": 36,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 6.0,
+            "n": 55,
+            "wins": 26,
+            "losses": 29,
+            "win_rate": 0.4727272727272727
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 19,
+            "losses": 15,
+            "win_rate": 0.5588235294117647
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 13,
+            "losses": 11,
+            "win_rate": 0.5416666666666666
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 8.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.113583279838265,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05105678635090399,
+        "slope": 0.023809523809523836,
+        "high": 0.5,
+        "auc": 0.48294629898403485,
+        "corr": 0.06362750001282222,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 84,
+            "wins": 40,
+            "losses": 44,
+            "win_rate": 0.47619047619047616
+          },
+          {
+            "threshold": 4.0,
+            "n": 72,
+            "wins": 33,
+            "losses": 39,
+            "win_rate": 0.4583333333333333
+          },
+          {
+            "threshold": 6.0,
+            "n": 55,
+            "wins": 25,
+            "losses": 30,
+            "win_rate": 0.45454545454545453
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 26,
+            "wins": 13,
+            "losses": 13,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.020515357356295,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05345329621210193,
+        "slope": 0.021276595744680826,
+        "high": 0.5,
+        "auc": 0.49491648511256353,
+        "corr": 0.05122451402991869,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 94,
+            "wins": 45,
+            "losses": 49,
+            "win_rate": 0.4787234042553192
+          },
+          {
+            "threshold": 4.0,
+            "n": 68,
+            "wins": 31,
+            "losses": 37,
+            "win_rate": 0.45588235294117646
+          },
+          {
+            "threshold": 6.0,
+            "n": 49,
+            "wins": 26,
+            "losses": 23,
+            "win_rate": 0.5306122448979592
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 17,
+            "losses": 16,
+            "win_rate": 0.5151515151515151
+          },
+          {
+            "threshold": 10.0,
+            "n": 18,
+            "wins": 9,
+            "losses": 9,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 64.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.102881835751717,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05567818121620127,
+        "slope": 0.012195121951219523,
+        "high": 0.5,
+        "auc": 0.5065359477124183,
+        "corr": 0.07681556057591182,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 82,
+            "wins": 40,
+            "losses": 42,
+            "win_rate": 0.4878048780487805
+          },
+          {
+            "threshold": 4.0,
+            "n": 75,
+            "wins": 36,
+            "losses": 39,
+            "win_rate": 0.48
+          },
+          {
+            "threshold": 6.0,
+            "n": 52,
+            "wins": 24,
+            "losses": 28,
+            "win_rate": 0.46153846153846156
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 18,
+            "losses": 16,
+            "win_rate": 0.5294117647058824
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 12,
+            "losses": 12,
+            "win_rate": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_compact",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge"
+      ],
+      "alpha": 4.0,
+      "cap": 4.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.029122019628197,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05605749699456958,
+        "slope": 0.030038759689922423,
+        "high": 0.5416666666666666,
+        "auc": 0.5363108206245462,
+        "corr": 0.0886246869861509,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 86,
+            "wins": 44,
+            "losses": 42,
+            "win_rate": 0.5116279069767442
+          },
+          {
+            "threshold": 4.0,
+            "n": 73,
+            "wins": 37,
+            "losses": 36,
+            "win_rate": 0.5068493150684932
+          },
+          {
+            "threshold": 6.0,
+            "n": 55,
+            "wins": 26,
+            "losses": 29,
+            "win_rate": 0.4727272727272727
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 19,
+            "losses": 15,
+            "win_rate": 0.5588235294117647
+          },
+          {
+            "threshold": 10.0,
+            "n": 24,
+            "wins": 13,
+            "losses": 11,
+            "win_rate": 0.5416666666666666
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_returning",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning"
+      ],
+      "alpha": 16.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.064796658342178,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.05833060913152449,
+        "slope": -0.008020050125313316,
+        "high": 0.47619047619047616,
+        "auc": 0.47895500725689405,
+        "corr": 0.030902888072333934,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 95,
+            "wins": 46,
+            "losses": 49,
+            "win_rate": 0.4842105263157895
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          },
+          {
+            "threshold": 6.0,
+            "n": 46,
+            "wins": 24,
+            "losses": 22,
+            "win_rate": 0.5217391304347826
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 16,
+            "losses": 17,
+            "win_rate": 0.48484848484848486
+          },
+          {
+            "threshold": 10.0,
+            "n": 21,
+            "wins": 10,
+            "losses": 11,
+            "win_rate": 0.47619047619047616
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_full",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge"
+      ],
+      "alpha": 64.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.105904148001223,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.0583484824246302,
+        "slope": -0.019138755980861233,
+        "high": 0.45454545454545453,
+        "auc": 0.5109090909090909,
+        "corr": 0.039348611027102125,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 95,
+            "wins": 45,
+            "losses": 50,
+            "win_rate": 0.47368421052631576
+          },
+          {
+            "threshold": 4.0,
+            "n": 70,
+            "wins": 33,
+            "losses": 37,
+            "win_rate": 0.4714285714285714
+          },
+          {
+            "threshold": 6.0,
+            "n": 47,
+            "wins": 24,
+            "losses": 23,
+            "win_rate": 0.5106382978723404
+          },
+          {
+            "threshold": 8.0,
+            "n": 34,
+            "wins": 17,
+            "losses": 17,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 10.0,
+            "n": 22,
+            "wins": 10,
+            "losses": 12,
+            "win_rate": 0.45454545454545453
+          }
+        ]
+      }
+    },
+    {
+      "family": "quality_turnover",
+      "features": [
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 256.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 12.123975459405985,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.06534526854219946,
+        "slope": -0.006521739130434745,
+        "high": 0.45,
+        "auc": 0.46187363834422657,
+        "corr": 0.03812093295567655,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 92,
+            "wins": 42,
+            "losses": 50,
+            "win_rate": 0.45652173913043476
+          },
+          {
+            "threshold": 4.0,
+            "n": 68,
+            "wins": 30,
+            "losses": 38,
+            "win_rate": 0.4411764705882353
+          },
+          {
+            "threshold": 6.0,
+            "n": 48,
+            "wins": 24,
+            "losses": 24,
+            "win_rate": 0.5
+          },
+          {
+            "threshold": 8.0,
+            "n": 33,
+            "wins": 16,
+            "losses": 17,
+            "win_rate": 0.48484848484848486
+          },
+          {
+            "threshold": 10.0,
+            "n": 20,
+            "wins": 9,
+            "losses": 11,
+            "win_rate": 0.45
+          }
+        ]
+      }
+    },
+    {
+      "family": "all_early",
+      "features": [
+        "prior_power_margin",
+        "current_power_margin",
+        "current_scoring_diff",
+        "current_allowed_diff",
+        "gamecontrol_diff",
+        "adjavgingamewp_diff",
+        "adj_net_diff",
+        "fei_net_diff",
+        "net_z_diff",
+        "adj_off_epa_diff",
+        "adj_def_epa_diff",
+        "fei_off_diff",
+        "fei_def_diff",
+        "off_epa_diff",
+        "def_epa_edge",
+        "off_success_diff",
+        "def_success_edge",
+        "pass_epa_diff",
+        "rush_epa_diff",
+        "early_epa_diff",
+        "def_early_epa_edge",
+        "explosive_diff",
+        "def_explosive_edge",
+        "power_x_prior",
+        "power_x_scoring",
+        "power_x_allowed",
+        "power_x_gamecontrol",
+        "power_x_ingamewp",
+        "power_x_adjnet",
+        "power_x_feinet",
+        "power_x_netz",
+        "power_x_comp_epa",
+        "power_x_comp_success",
+        "power_x_comp_early",
+        "power_reversal_mag",
+        "power_scoring_conflict_mag",
+        "power_quality_conflict_mag",
+        "off_returning_diff",
+        "def_returning_diff",
+        "overall_returning_diff",
+        "n_returning_diff",
+        "avg_overall_returning",
+        "turnover_margin_diff",
+        "expected_turnover_margin_diff",
+        "turnover_luck_diff",
+        "expected_turnovers_off_diff",
+        "expected_turnovers_def_diff"
+      ],
+      "alpha": 4.0,
+      "cap": 2.0,
+      "dev": {
+        "n": 105,
+        "mae": 11.953469807007275,
+        "steps": 1,
+        "possible": 4,
+        "violation": 0.06547619047619047,
+        "slope": -0.012445887445887482,
+        "high": 0.47619047619047616,
+        "auc": 0.5137981118373275,
+        "corr": 0.025174794720163228,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 88,
+            "wins": 43,
+            "losses": 45,
+            "win_rate": 0.48863636363636365
+          },
+          {
+            "threshold": 4.0,
+            "n": 66,
+            "wins": 31,
+            "losses": 35,
+            "win_rate": 0.4696969696969697
+          },
+          {
+            "threshold": 6.0,
+            "n": 44,
+            "wins": 23,
+            "losses": 21,
+            "win_rate": 0.5227272727272727
+          },
+          {
+            "threshold": 8.0,
+            "n": 31,
+            "wins": 16,
+            "losses": 15,
+            "win_rate": 0.5161290322580645
+          },
+          {
+            "threshold": 10.0,
+            "n": 21,
+            "wins": 10,
+            "losses": 11,
+            "win_rate": 0.47619047619047616
+          }
+        ]
+      }
+    }
+  ]
+}
