@@ -1,0 +1,73 @@
+name: CFB tonight v2.6 correction replay
+
+on:
+  push:
+    branches: [audit-ncaaf-margin-2026-10-02]
+    paths: ['.github/workflows/cfb-tonight-regime-replay.yml']
+  workflow_dispatch:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install focused dependencies
+        run: pip install --disable-pip-version-check streamlit pandas numpy requests polars lxml html5lib beautifulsoup4
+      - name: Replay exact v2.6 correction for Oct 2 games
+        env:
+          EZPZ_CFB_ALLOW_BLOCKING_OPEN_DATA: '1'
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          import json
+          import math
+          import pandas as pd
+          from builders import cfb_builder as cb
+          from builders import cfb_game_regression as spread
+          from builders import cfb_2026_regime as regime
+
+          season = 2026
+          target_date = '2026-10-02'
+          games = cb._parse_games(cb._espn_games_payload(season), season)
+          day = games[games['Game Date'].astype(str) == target_date].copy()
+          if day.empty:
+              raise RuntimeError(f'No games found for {target_date}; schedule rows={len(games)}')
+          # Core user-facing FBS games; print any additional rows too for transparency.
+          rows = []
+          for _, g in day.sort_values(['Game Time','Away Team']).iterrows():
+              away_base, home_base, away_features, home_features = spread._regression_base(cb, g)
+              projection = {
+                  'regression_away_features': away_features,
+                  'regression_home_features': home_features,
+                  'regression_base_margin': home_base - away_base,
+                  'margin': home_base - away_base,
+              }
+              features = regime._feature_row(cb, g, projection)
+              if features is None:
+                  corr = None
+                  contrib = None
+              else:
+                  corr, contrib = regime._predict_correction(features)
+              rows.append({
+                  'week': int(g.get('Week', 0)),
+                  'away': str(g.get('Away Team','')),
+                  'home': str(g.get('Home Team','')),
+                  'away_class': str(g.get('Away Classification','')),
+                  'home_class': str(g.get('Home Classification','')),
+                  'game_time': str(g.get('Game Time','')),
+                  'market_home_spread': None if not math.isfinite(float(g.get('Home Spread', float('nan')))) else float(g.get('Home Spread')),
+                  'core_regression_margin_before_live_overlays': float(home_base-away_base),
+                  'correction': corr,
+                  'home_score_shift': None if corr is None else corr/2.0,
+                  'away_score_shift': None if corr is None else -corr/2.0,
+                  'features': features,
+                  'contributions': contrib,
+              })
+          print('TONIGHT_REPLAY_JSON_START')
+          print(json.dumps(rows, indent=2, allow_nan=False))
+          print('TONIGHT_REPLAY_JSON_END')
+          PY
