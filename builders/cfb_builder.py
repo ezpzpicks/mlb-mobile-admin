@@ -2839,12 +2839,8 @@ def _grade_spread(
     confluence: int,
     market_spread: float = 0.0,
 ) -> str:
-    if abs(float(market_spread)) >= 20.0:
-        return "No Play"
-    stabilized_edge_pct = abs(float(point_edge)) / max(abs(float(market_spread)), 3.5) * 100.0
-    if stabilized_edge_pct < 150.0:
-        return "No Play"
-    return "A Spread" if int(confluence) >= 1 else "B Spread"
+    from builders.cfb_market_calibration import _grade_spread as grade_spread
+    return grade_spread(probability, point_edge, reliability, confluence, market_spread)
 
 
 def _grade_total(probability: float, point_edge: float, reliability: float, confluence: int) -> str:
