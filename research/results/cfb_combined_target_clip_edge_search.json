@@ -1,0 +1,3102 @@
+{
+  "market_predictor": false,
+  "chosen_on_2024": {
+    "target_clip": null,
+    "alpha": 64.0,
+    "cap": 8.0,
+    "validation": {
+      "steps": 4,
+      "possible": 4,
+      "violation": 0.0,
+      "slope": 0.09788186483240524,
+      "high": 0.6056338028169014,
+      "auc": 0.5157141361804575,
+      "corr": 0.1299149655640289,
+      "mae": 12.893418501262428,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 516,
+          "wins": 262,
+          "losses": 254,
+          "win_rate": 0.5077519379844961
+        },
+        {
+          "threshold": 4.0,
+          "n": 326,
+          "wins": 174,
+          "losses": 152,
+          "win_rate": 0.5337423312883436
+        },
+        {
+          "threshold": 6.0,
+          "n": 213,
+          "wins": 114,
+          "losses": 99,
+          "win_rate": 0.5352112676056338
+        },
+        {
+          "threshold": 8.0,
+          "n": 116,
+          "wins": 69,
+          "losses": 47,
+          "win_rate": 0.5948275862068966
+        },
+        {
+          "threshold": 10.0,
+          "n": 71,
+          "wins": 43,
+          "losses": 28,
+          "win_rate": 0.6056338028169014
+        }
+      ]
+    }
+  },
+  "baseline": {
+    "2024": {
+      "steps": 2,
+      "possible": 4,
+      "violation": 0.03442772795140492,
+      "slope": 0.0030219780219780112,
+      "high": 0.525,
+      "auc": 0.5307642995447172,
+      "corr": 0.09545112922564378,
+      "mae": 13.036447636876698,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 546,
+          "wins": 285,
+          "losses": 261,
+          "win_rate": 0.521978021978022
+        },
+        {
+          "threshold": 4.0,
+          "n": 359,
+          "wins": 186,
+          "losses": 173,
+          "win_rate": 0.5181058495821727
+        },
+        {
+          "threshold": 6.0,
+          "n": 218,
+          "wins": 114,
+          "losses": 104,
+          "win_rate": 0.5229357798165137
+        },
+        {
+          "threshold": 8.0,
+          "n": 135,
+          "wins": 75,
+          "losses": 60,
+          "win_rate": 0.5555555555555556
+        },
+        {
+          "threshold": 10.0,
+          "n": 80,
+          "wins": 42,
+          "losses": 38,
+          "win_rate": 0.525
+        }
+      ]
+    },
+    "2025": {
+      "steps": 3,
+      "possible": 4,
+      "violation": 0.008280072592417254,
+      "slope": 0.08807847082494968,
+      "high": 0.6285714285714286,
+      "auc": 0.5387905903825192,
+      "corr": 0.10223578672648327,
+      "mae": 12.395363344383886,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 568,
+          "wins": 307,
+          "losses": 261,
+          "win_rate": 0.5404929577464789
+        },
+        {
+          "threshold": 4.0,
+          "n": 357,
+          "wins": 190,
+          "losses": 167,
+          "win_rate": 0.5322128851540616
+        },
+        {
+          "threshold": 6.0,
+          "n": 223,
+          "wins": 124,
+          "losses": 99,
+          "win_rate": 0.5560538116591929
+        },
+        {
+          "threshold": 8.0,
+          "n": 128,
+          "wins": 75,
+          "losses": 53,
+          "win_rate": 0.5859375
+        },
+        {
+          "threshold": 10.0,
+          "n": 70,
+          "wins": 44,
+          "losses": 26,
+          "win_rate": 0.6285714285714286
+        }
+      ]
+    },
+    "2026": {
+      "steps": 2,
+      "possible": 4,
+      "violation": 0.08129370629370625,
+      "slope": -0.055384615384615365,
+      "high": 0.38461538461538464,
+      "auc": 0.49527186761229314,
+      "corr": -0.05664068165353759,
+      "mae": 13.484839123660551,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 175,
+          "wins": 77,
+          "losses": 98,
+          "win_rate": 0.44
+        },
+        {
+          "threshold": 4.0,
+          "n": 132,
+          "wins": 59,
+          "losses": 73,
+          "win_rate": 0.44696969696969696
+        },
+        {
+          "threshold": 6.0,
+          "n": 88,
+          "wins": 41,
+          "losses": 47,
+          "win_rate": 0.4659090909090909
+        },
+        {
+          "threshold": 8.0,
+          "n": 54,
+          "wins": 22,
+          "losses": 32,
+          "win_rate": 0.4074074074074074
+        },
+        {
+          "threshold": 10.0,
+          "n": 39,
+          "wins": 15,
+          "losses": 24,
+          "win_rate": 0.38461538461538464
+        }
+      ]
+    }
+  },
+  "holdout_2025": {
+    "steps": 3,
+    "possible": 4,
+    "violation": 0.008610142621641947,
+    "slope": 0.0655933927823329,
+    "high": 0.6129032258064516,
+    "auc": 0.5266485998193315,
+    "corr": 0.11566312654359535,
+    "mae": 12.273815754828687,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 539,
+        "wins": 295,
+        "losses": 244,
+        "win_rate": 0.5473098330241187
+      },
+      {
+        "threshold": 4.0,
+        "n": 323,
+        "wins": 174,
+        "losses": 149,
+        "win_rate": 0.5386996904024768
+      },
+      {
+        "threshold": 6.0,
+        "n": 188,
+        "wins": 105,
+        "losses": 83,
+        "win_rate": 0.5585106382978723
+      },
+      {
+        "threshold": 8.0,
+        "n": 117,
+        "wins": 70,
+        "losses": 47,
+        "win_rate": 0.5982905982905983
+      },
+      {
+        "threshold": 10.0,
+        "n": 62,
+        "wins": 38,
+        "losses": 24,
+        "win_rate": 0.6129032258064516
+      }
+    ]
+  },
+  "holdout_2026": {
+    "steps": 4,
+    "possible": 4,
+    "violation": 0.0,
+    "slope": 0.10236030828516374,
+    "high": 0.5416666666666666,
+    "auc": 0.5070780399274047,
+    "corr": 0.003872135816271398,
+    "mae": 13.628997564983084,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 173,
+        "wins": 76,
+        "losses": 97,
+        "win_rate": 0.4393063583815029
+      },
+      {
+        "threshold": 4.0,
+        "n": 127,
+        "wins": 56,
+        "losses": 71,
+        "win_rate": 0.4409448818897638
+      },
+      {
+        "threshold": 6.0,
+        "n": 97,
+        "wins": 45,
+        "losses": 52,
+        "win_rate": 0.4639175257731959
+      },
+      {
+        "threshold": 8.0,
+        "n": 74,
+        "wins": 36,
+        "losses": 38,
+        "win_rate": 0.4864864864864865
+      },
+      {
+        "threshold": 10.0,
+        "n": 48,
+        "wins": 26,
+        "losses": 22,
+        "win_rate": 0.5416666666666666
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "target_clip": null,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 4,
+        "possible": 4,
+        "violation": 0.0,
+        "slope": 0.09788186483240524,
+        "high": 0.6056338028169014,
+        "auc": 0.5157141361804575,
+        "corr": 0.1299149655640289,
+        "mae": 12.893418501262428,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 262,
+            "losses": 254,
+            "win_rate": 0.5077519379844961
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 174,
+            "losses": 152,
+            "win_rate": 0.5337423312883436
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 114,
+            "losses": 99,
+            "win_rate": 0.5352112676056338
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 69,
+            "losses": 47,
+            "win_rate": 0.5948275862068966
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 43,
+            "losses": 28,
+            "win_rate": 0.6056338028169014
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 4,
+        "possible": 4,
+        "violation": 0.0,
+        "slope": 0.08645096056622847,
+        "high": 0.5942028985507246,
+        "auc": 0.5151188046265767,
+        "corr": 0.12726825586422674,
+        "mae": 12.894303609498136,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 262,
+            "losses": 254,
+            "win_rate": 0.5077519379844961
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 174,
+            "losses": 152,
+            "win_rate": 0.5337423312883436
+          },
+          {
+            "threshold": 6.0,
+            "n": 212,
+            "wins": 114,
+            "losses": 98,
+            "win_rate": 0.5377358490566038
+          },
+          {
+            "threshold": 8.0,
+            "n": 117,
+            "wins": 68,
+            "losses": 49,
+            "win_rate": 0.5811965811965812
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 41,
+            "losses": 28,
+            "win_rate": 0.5942028985507246
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.00012141816415733864,
+        "slope": 0.0726291987904214,
+        "high": 0.5774647887323944,
+        "auc": 0.5114004383525794,
+        "corr": 0.12298368815434922,
+        "mae": 12.904504346103,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 261,
+            "losses": 256,
+            "win_rate": 0.504835589941973
+          },
+          {
+            "threshold": 4.0,
+            "n": 328,
+            "wins": 172,
+            "losses": 156,
+            "win_rate": 0.524390243902439
+          },
+          {
+            "threshold": 6.0,
+            "n": 210,
+            "wins": 115,
+            "losses": 95,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 67,
+            "losses": 49,
+            "win_rate": 0.5775862068965517
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 41,
+            "losses": 30,
+            "win_rate": 0.5774647887323944
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0004926108374383453,
+        "slope": 0.07992277992277996,
+        "high": 0.5857142857142857,
+        "auc": 0.511103695561139,
+        "corr": 0.12488183417429025,
+        "mae": 12.896963383318328,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 262,
+            "losses": 256,
+            "win_rate": 0.5057915057915058
+          },
+          {
+            "threshold": 4.0,
+            "n": 328,
+            "wins": 172,
+            "losses": 156,
+            "win_rate": 0.524390243902439
+          },
+          {
+            "threshold": 6.0,
+            "n": 210,
+            "wins": 115,
+            "losses": 95,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 68,
+            "losses": 48,
+            "win_rate": 0.5862068965517241
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 41,
+            "losses": 29,
+            "win_rate": 0.5857142857142857
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.002991399725788324,
+        "slope": 0.055628343705644734,
+        "high": 0.5633802816901409,
+        "auc": 0.5146436398129068,
+        "corr": 0.11770990166456188,
+        "mae": 12.925132886687129,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 262,
+            "losses": 254,
+            "win_rate": 0.5077519379844961
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 173,
+            "losses": 151,
+            "win_rate": 0.5339506172839507
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 113,
+            "losses": 95,
+            "win_rate": 0.5432692307692307
+          },
+          {
+            "threshold": 8.0,
+            "n": 113,
+            "wins": 64,
+            "losses": 49,
+            "win_rate": 0.5663716814159292
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 40,
+            "losses": 31,
+            "win_rate": 0.5633802816901409
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.007667169431875398,
+        "slope": 0.06482534986915456,
+        "high": 0.5735294117647058,
+        "auc": 0.520112517580872,
+        "corr": 0.12761801315077823,
+        "mae": 12.89000759948412,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 263,
+            "losses": 254,
+            "win_rate": 0.5087040618955513
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 171,
+            "losses": 154,
+            "win_rate": 0.5261538461538462
+          },
+          {
+            "threshold": 6.0,
+            "n": 210,
+            "wins": 111,
+            "losses": 99,
+            "win_rate": 0.5285714285714286
+          },
+          {
+            "threshold": 8.0,
+            "n": 117,
+            "wins": 68,
+            "losses": 49,
+            "win_rate": 0.5811965811965812
+          },
+          {
+            "threshold": 10.0,
+            "n": 68,
+            "wins": 39,
+            "losses": 29,
+            "win_rate": 0.5735294117647058
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.009113300492610832,
+        "slope": 0.07799227799227804,
+        "high": 0.5857142857142857,
+        "auc": 0.5179057413513372,
+        "corr": 0.13004031852115217,
+        "mae": 12.890871863985478,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 263,
+            "losses": 255,
+            "win_rate": 0.5077220077220077
+          },
+          {
+            "threshold": 4.0,
+            "n": 326,
+            "wins": 171,
+            "losses": 155,
+            "win_rate": 0.5245398773006135
+          },
+          {
+            "threshold": 6.0,
+            "n": 211,
+            "wins": 111,
+            "losses": 100,
+            "win_rate": 0.5260663507109005
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 69,
+            "losses": 47,
+            "win_rate": 0.5948275862068966
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 41,
+            "losses": 29,
+            "win_rate": 0.5857142857142857
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.01127049180327866,
+        "slope": 0.05190269749518306,
+        "high": 0.5625,
+        "auc": 0.5061755061165982,
+        "corr": 0.12330179346138272,
+        "mae": 12.890552321252727,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 519,
+            "wins": 265,
+            "losses": 254,
+            "win_rate": 0.5105973025048169
+          },
+          {
+            "threshold": 4.0,
+            "n": 320,
+            "wins": 167,
+            "losses": 153,
+            "win_rate": 0.521875
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 112,
+            "losses": 97,
+            "win_rate": 0.5358851674641149
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 70,
+            "losses": 52,
+            "win_rate": 0.5737704918032787
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 36,
+            "losses": 28,
+            "win_rate": 0.5625
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.011727616645649364,
+        "slope": 0.044193644193644244,
+        "high": 0.5538461538461539,
+        "auc": 0.5063743455497383,
+        "corr": 0.12144029617343556,
+        "mae": 12.899159885478205,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 264,
+            "losses": 254,
+            "win_rate": 0.5096525096525096
+          },
+          {
+            "threshold": 4.0,
+            "n": 320,
+            "wins": 167,
+            "losses": 153,
+            "win_rate": 0.521875
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 112,
+            "losses": 97,
+            "win_rate": 0.5358851674641149
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 69,
+            "losses": 53,
+            "win_rate": 0.5655737704918032
+          },
+          {
+            "threshold": 10.0,
+            "n": 65,
+            "wins": 36,
+            "losses": 29,
+            "win_rate": 0.5538461538461539
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.01236881559220393,
+        "slope": 0.06329431438127087,
+        "high": 0.5652173913043478,
+        "auc": 0.5186929643803356,
+        "corr": 0.12526620362610716,
+        "mae": 12.89875640394227,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 261,
+            "losses": 259,
+            "win_rate": 0.5019230769230769
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 166,
+            "losses": 155,
+            "win_rate": 0.5171339563862928
+          },
+          {
+            "threshold": 6.0,
+            "n": 212,
+            "wins": 115,
+            "losses": 97,
+            "win_rate": 0.5424528301886793
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 67,
+            "losses": 49,
+            "win_rate": 0.5775862068965517
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 39,
+            "losses": 30,
+            "win_rate": 0.5652173913043478
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.012677484787018245,
+        "slope": 0.07160633484162893,
+        "high": 0.5735294117647058,
+        "auc": 0.5175524676820014,
+        "corr": 0.12723718464938966,
+        "mae": 12.896379268429923,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 261,
+            "losses": 259,
+            "win_rate": 0.5019230769230769
+          },
+          {
+            "threshold": 4.0,
+            "n": 322,
+            "wins": 167,
+            "losses": 155,
+            "win_rate": 0.5186335403726708
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 115,
+            "losses": 98,
+            "win_rate": 0.539906103286385
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 68,
+            "losses": 48,
+            "win_rate": 0.5862068965517241
+          },
+          {
+            "threshold": 10.0,
+            "n": 68,
+            "wins": 39,
+            "losses": 29,
+            "win_rate": 0.5735294117647058
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.019042717447246504,
+        "slope": 0.06047201849262285,
+        "high": 0.5671641791044776,
+        "auc": 0.5013519972239864,
+        "corr": 0.1240481004835775,
+        "mae": 12.89428016251488,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 265,
+            "losses": 258,
+            "win_rate": 0.5066921606118547
+          },
+          {
+            "threshold": 4.0,
+            "n": 313,
+            "wins": 162,
+            "losses": 151,
+            "win_rate": 0.5175718849840255
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 115,
+            "losses": 98,
+            "win_rate": 0.539906103286385
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 68,
+            "losses": 48,
+            "win_rate": 0.5862068965517241
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 38,
+            "losses": 29,
+            "win_rate": 0.5671641791044776
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.019070010449320773,
+        "slope": 0.06906541514572107,
+        "high": 0.5757575757575758,
+        "auc": 0.5002029964901252,
+        "corr": 0.12560452408768785,
+        "mae": 12.889974195101502,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 265,
+            "losses": 258,
+            "win_rate": 0.5066921606118547
+          },
+          {
+            "threshold": 4.0,
+            "n": 313,
+            "wins": 162,
+            "losses": 151,
+            "win_rate": 0.5175718849840255
+          },
+          {
+            "threshold": 6.0,
+            "n": 214,
+            "wins": 115,
+            "losses": 99,
+            "win_rate": 0.5373831775700935
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 69,
+            "losses": 47,
+            "win_rate": 0.5948275862068966
+          },
+          {
+            "threshold": 10.0,
+            "n": 66,
+            "wins": 38,
+            "losses": 28,
+            "win_rate": 0.5757575757575758
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020555119141136502,
+        "slope": 0.05842631502680773,
+        "high": 0.5671641791044776,
+        "auc": 0.5091776438485247,
+        "corr": 0.12545235501888657,
+        "mae": 12.897826188146247,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 515,
+            "wins": 262,
+            "losses": 253,
+            "win_rate": 0.5087378640776699
+          },
+          {
+            "threshold": 4.0,
+            "n": 323,
+            "wins": 166,
+            "losses": 157,
+            "win_rate": 0.5139318885448917
+          },
+          {
+            "threshold": 6.0,
+            "n": 211,
+            "wins": 113,
+            "losses": 98,
+            "win_rate": 0.5355450236966824
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 67,
+            "losses": 47,
+            "win_rate": 0.5877192982456141
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 38,
+            "losses": 29,
+            "win_rate": 0.5671641791044776
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.020733652312599604,
+        "slope": 0.06701971167990595,
+        "high": 0.5757575757575758,
+        "auc": 0.5079384816753927,
+        "corr": 0.12717277596492457,
+        "mae": 12.897437907681716,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 515,
+            "wins": 262,
+            "losses": 253,
+            "win_rate": 0.5087378640776699
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 167,
+            "losses": 157,
+            "win_rate": 0.5154320987654321
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 114,
+            "losses": 99,
+            "win_rate": 0.5352112676056338
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 68,
+            "losses": 46,
+            "win_rate": 0.5964912280701754
+          },
+          {
+            "threshold": 10.0,
+            "n": 66,
+            "wins": 38,
+            "losses": 28,
+            "win_rate": 0.5757575757575758
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0222302331170392,
+        "slope": 0.04408420161844817,
+        "high": 0.547945205479452,
+        "auc": 0.5095946874284406,
+        "corr": 0.11715595347185288,
+        "mae": 12.922886911346069,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 518,
+            "wins": 261,
+            "losses": 257,
+            "win_rate": 0.5038610038610039
+          },
+          {
+            "threshold": 4.0,
+            "n": 327,
+            "wins": 172,
+            "losses": 155,
+            "win_rate": 0.5259938837920489
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 113,
+            "losses": 93,
+            "win_rate": 0.5485436893203883
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 65,
+            "losses": 49,
+            "win_rate": 0.5701754385964912
+          },
+          {
+            "threshold": 10.0,
+            "n": 73,
+            "wins": 40,
+            "losses": 33,
+            "win_rate": 0.547945205479452
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0232681121099948,
+        "slope": 0.04682042729932978,
+        "high": 0.5573770491803278,
+        "auc": 0.5153337696335079,
+        "corr": 0.1227161551078062,
+        "mae": 12.87937151324143,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 266,
+            "losses": 255,
+            "win_rate": 0.510556621880998
+          },
+          {
+            "threshold": 4.0,
+            "n": 317,
+            "wins": 165,
+            "losses": 152,
+            "win_rate": 0.5205047318611987
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 113,
+            "losses": 96,
+            "win_rate": 0.5406698564593302
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 72,
+            "losses": 52,
+            "win_rate": 0.5806451612903226
+          },
+          {
+            "threshold": 10.0,
+            "n": 61,
+            "wins": 34,
+            "losses": 27,
+            "win_rate": 0.5573770491803278
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02351453855878638,
+        "slope": 0.03608731693838074,
+        "high": 0.5428571428571428,
+        "auc": 0.5187542519231776,
+        "corr": 0.1180213410804088,
+        "mae": 12.92172696630415,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 262,
+            "losses": 255,
+            "win_rate": 0.5067698259187621
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 170,
+            "losses": 154,
+            "win_rate": 0.5246913580246914
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 109,
+            "losses": 96,
+            "win_rate": 0.5317073170731708
+          },
+          {
+            "threshold": 8.0,
+            "n": 113,
+            "wins": 64,
+            "losses": 49,
+            "win_rate": 0.5663716814159292
+          },
+          {
+            "threshold": 10.0,
+            "n": 70,
+            "wins": 38,
+            "losses": 32,
+            "win_rate": 0.5428571428571428
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.023738130934532697,
+        "slope": 0.07294031900877418,
+        "high": 0.5797101449275363,
+        "auc": 0.5111649056233439,
+        "corr": 0.12707839650729175,
+        "mae": 12.899906135142318,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 262,
+            "losses": 255,
+            "win_rate": 0.5067698259187621
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 174,
+            "losses": 155,
+            "win_rate": 0.5288753799392097
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 117,
+            "losses": 96,
+            "win_rate": 0.5492957746478874
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 70,
+            "losses": 46,
+            "win_rate": 0.603448275862069
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 40,
+            "losses": 29,
+            "win_rate": 0.5797101449275363
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.024276859504132275,
+        "slope": 0.05292145593869735,
+        "high": 0.5625,
+        "auc": 0.5102139663963451,
+        "corr": 0.12433441931224334,
+        "mae": 12.881160314526584,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 266,
+            "losses": 256,
+            "win_rate": 0.5095785440613027
+          },
+          {
+            "threshold": 4.0,
+            "n": 312,
+            "wins": 161,
+            "losses": 151,
+            "win_rate": 0.5160256410256411
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 113,
+            "losses": 94,
+            "win_rate": 0.5458937198067633
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 71,
+            "losses": 50,
+            "win_rate": 0.5867768595041323
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 36,
+            "losses": 28,
+            "win_rate": 0.5625
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02466624284806096,
+        "slope": 0.045208917761700884,
+        "high": 0.5538461538461539,
+        "auc": 0.5106413612565445,
+        "corr": 0.12241750558378453,
+        "mae": 12.88970432901592,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 265,
+            "losses": 256,
+            "win_rate": 0.508637236084453
+          },
+          {
+            "threshold": 4.0,
+            "n": 312,
+            "wins": 161,
+            "losses": 151,
+            "win_rate": 0.5160256410256411
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 113,
+            "losses": 94,
+            "win_rate": 0.5458937198067633
+          },
+          {
+            "threshold": 8.0,
+            "n": 121,
+            "wins": 70,
+            "losses": 51,
+            "win_rate": 0.5785123966942148
+          },
+          {
+            "threshold": 10.0,
+            "n": 65,
+            "wins": 36,
+            "losses": 29,
+            "win_rate": 0.5538461538461539
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02573529411764708,
+        "slope": 0.05292145593869735,
+        "high": 0.5625,
+        "auc": 0.5022555111073282,
+        "corr": 0.12563878632169242,
+        "mae": 12.887987588380541,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 266,
+            "losses": 256,
+            "win_rate": 0.5095785440613027
+          },
+          {
+            "threshold": 4.0,
+            "n": 316,
+            "wins": 165,
+            "losses": 151,
+            "win_rate": 0.5221518987341772
+          },
+          {
+            "threshold": 6.0,
+            "n": 211,
+            "wins": 114,
+            "losses": 97,
+            "win_rate": 0.5402843601895735
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 70,
+            "losses": 49,
+            "win_rate": 0.5882352941176471
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 36,
+            "losses": 28,
+            "win_rate": 0.5625
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.025985778926955416,
+        "slope": 0.045208917761700884,
+        "high": 0.5538461538461539,
+        "auc": 0.5028803351662738,
+        "corr": 0.12380380908092714,
+        "mae": 12.895312366769438,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 265,
+            "losses": 256,
+            "win_rate": 0.508637236084453
+          },
+          {
+            "threshold": 4.0,
+            "n": 316,
+            "wins": 165,
+            "losses": 151,
+            "win_rate": 0.5221518987341772
+          },
+          {
+            "threshold": 6.0,
+            "n": 211,
+            "wins": 114,
+            "losses": 97,
+            "win_rate": 0.5402843601895735
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 69,
+            "losses": 50,
+            "win_rate": 0.5798319327731093
+          },
+          {
+            "threshold": 10.0,
+            "n": 65,
+            "wins": 36,
+            "losses": 29,
+            "win_rate": 0.5538461538461539
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.026411657559198498,
+        "slope": 0.0450393031654982,
+        "high": 0.5555555555555556,
+        "auc": 0.5121138743455498,
+        "corr": 0.12419087663857031,
+        "mae": 12.880917948215272,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 267,
+            "losses": 256,
+            "win_rate": 0.5105162523900574
+          },
+          {
+            "threshold": 4.0,
+            "n": 315,
+            "wins": 164,
+            "losses": 151,
+            "win_rate": 0.5206349206349207
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 113,
+            "losses": 93,
+            "win_rate": 0.5485436893203883
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 71,
+            "losses": 51,
+            "win_rate": 0.5819672131147541
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 35,
+            "losses": 28,
+            "win_rate": 0.5555555555555556
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.02689549180327866,
+        "slope": 0.03729645593869735,
+        "high": 0.546875,
+        "auc": 0.5124298998148111,
+        "corr": 0.12230395585355047,
+        "mae": 12.889337669717086,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 266,
+            "losses": 256,
+            "win_rate": 0.5095785440613027
+          },
+          {
+            "threshold": 4.0,
+            "n": 315,
+            "wins": 164,
+            "losses": 151,
+            "win_rate": 0.5206349206349207
+          },
+          {
+            "threshold": 6.0,
+            "n": 206,
+            "wins": 113,
+            "losses": 93,
+            "win_rate": 0.5485436893203883
+          },
+          {
+            "threshold": 8.0,
+            "n": 122,
+            "wins": 70,
+            "losses": 52,
+            "win_rate": 0.5737704918032787
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 35,
+            "losses": 29,
+            "win_rate": 0.546875
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.028848675583530103,
+        "slope": 0.038771712158808924,
+        "high": 0.5483870967741935,
+        "auc": 0.516218745296662,
+        "corr": 0.12116338774874544,
+        "mae": 12.8863523506577,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 265,
+            "losses": 255,
+            "win_rate": 0.5096153846153846
+          },
+          {
+            "threshold": 4.0,
+            "n": 317,
+            "wins": 165,
+            "losses": 152,
+            "win_rate": 0.5205047318611987
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 113,
+            "losses": 96,
+            "win_rate": 0.5406698564593302
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 71,
+            "losses": 52,
+            "win_rate": 0.5772357723577236
+          },
+          {
+            "threshold": 10.0,
+            "n": 62,
+            "wins": 34,
+            "losses": 28,
+            "win_rate": 0.5483870967741935
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.029610194902548792,
+        "slope": 0.05940343781597568,
+        "high": 0.5652173913043478,
+        "auc": 0.5117496205579107,
+        "corr": 0.12451102710096988,
+        "mae": 12.905249723500063,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 261,
+            "losses": 255,
+            "win_rate": 0.5058139534883721
+          },
+          {
+            "threshold": 4.0,
+            "n": 328,
+            "wins": 173,
+            "losses": 155,
+            "win_rate": 0.5274390243902439
+          },
+          {
+            "threshold": 6.0,
+            "n": 213,
+            "wins": 117,
+            "losses": 96,
+            "win_rate": 0.5492957746478874
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 69,
+            "losses": 47,
+            "win_rate": 0.5948275862068966
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 39,
+            "losses": 30,
+            "win_rate": 0.5652173913043478
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03326612903225812,
+        "slope": 0.018092105263157854,
+        "high": 0.53125,
+        "auc": 0.5379936028675898,
+        "corr": 0.11709836606302326,
+        "mae": 12.904214180038926,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 532,
+            "wins": 273,
+            "losses": 259,
+            "win_rate": 0.5131578947368421
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 171,
+            "losses": 153,
+            "win_rate": 0.5277777777777778
+          },
+          {
+            "threshold": 6.0,
+            "n": 200,
+            "wins": 107,
+            "losses": 93,
+            "win_rate": 0.535
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 70,
+            "losses": 54,
+            "win_rate": 0.5645161290322581
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03326612903225812,
+        "slope": 0.01712570621468923,
+        "high": 0.53125,
+        "auc": 0.5372841444270016,
+        "corr": 0.1188843115234662,
+        "mae": 12.893248116237519,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 273,
+            "losses": 258,
+            "win_rate": 0.5141242937853108
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 171,
+            "losses": 153,
+            "win_rate": 0.5277777777777778
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 108,
+            "losses": 93,
+            "win_rate": 0.5373134328358209
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 70,
+            "losses": 54,
+            "win_rate": 0.5645161290322581
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03496417099085747,
+        "slope": 0.03328819068255684,
+        "high": 0.5352112676056338,
+        "auc": 0.5139870204637044,
+        "corr": 0.11831213323579208,
+        "mae": 12.921396774461908,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 261,
+            "losses": 259,
+            "win_rate": 0.5019230769230769
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 167,
+            "losses": 154,
+            "win_rate": 0.5202492211838006
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 114,
+            "losses": 95,
+            "win_rate": 0.5454545454545454
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 65,
+            "losses": 49,
+            "win_rate": 0.5701754385964912
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 38,
+            "losses": 33,
+            "win_rate": 0.5352112676056338
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03674999999999995,
+        "slope": 0.019971804511278224,
+        "high": 0.53125,
+        "auc": 0.5358254840397697,
+        "corr": 0.11758257996769339,
+        "mae": 12.901522362923382,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 532,
+            "wins": 272,
+            "losses": 260,
+            "win_rate": 0.5112781954887218
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 168,
+            "losses": 157,
+            "win_rate": 0.5169230769230769
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 109,
+            "losses": 94,
+            "win_rate": 0.5369458128078818
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 71,
+            "losses": 54,
+            "win_rate": 0.568
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 16.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03674999999999995,
+        "slope": 0.019008945386064013,
+        "high": 0.53125,
+        "auc": 0.5352015018609732,
+        "corr": 0.11938766926518281,
+        "mae": 12.890445045068272,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 272,
+            "losses": 259,
+            "win_rate": 0.512241054613936
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 168,
+            "losses": 157,
+            "win_rate": 0.5169230769230769
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 110,
+            "losses": 94,
+            "win_rate": 0.5392156862745098
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 71,
+            "losses": 54,
+            "win_rate": 0.568
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.03674999999999995,
+        "slope": 0.01712570621468923,
+        "high": 0.53125,
+        "auc": 0.5351818782419854,
+        "corr": 0.11952286502214678,
+        "mae": 12.890338327094808,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 273,
+            "losses": 258,
+            "win_rate": 0.5141242937853108
+          },
+          {
+            "threshold": 4.0,
+            "n": 324,
+            "wins": 171,
+            "losses": 153,
+            "win_rate": 0.5277777777777778
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 108,
+            "losses": 93,
+            "win_rate": 0.5373134328358209
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 71,
+            "losses": 54,
+            "win_rate": 0.568
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037553232675183956,
+        "slope": 0.03104530359808666,
+        "high": 0.5396825396825397,
+        "auc": 0.5172215242881072,
+        "corr": 0.11899913129499687,
+        "mae": 12.899184978569114,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 265,
+            "losses": 256,
+            "win_rate": 0.508637236084453
+          },
+          {
+            "threshold": 4.0,
+            "n": 317,
+            "wins": 166,
+            "losses": 151,
+            "win_rate": 0.5236593059936908
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 111,
+            "losses": 96,
+            "win_rate": 0.5362318840579711
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 71,
+            "losses": 52,
+            "win_rate": 0.5772357723577236
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 34,
+            "losses": 29,
+            "win_rate": 0.5396825396825397
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 64.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.037553232675183956,
+        "slope": 0.028144078144078155,
+        "high": 0.5396825396825397,
+        "auc": 0.521266642677222,
+        "corr": 0.12085938729455725,
+        "mae": 12.887914452964125,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 520,
+            "wins": 266,
+            "losses": 254,
+            "win_rate": 0.5115384615384615
+          },
+          {
+            "threshold": 4.0,
+            "n": 319,
+            "wins": 167,
+            "losses": 152,
+            "win_rate": 0.5235109717868338
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 110,
+            "losses": 95,
+            "win_rate": 0.5365853658536586
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 71,
+            "losses": 52,
+            "win_rate": 0.5772357723577236
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 34,
+            "losses": 29,
+            "win_rate": 0.5396825396825397
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.038686567164179064,
+        "slope": 0.01822946337017206,
+        "high": 0.5373134328358209,
+        "auc": 0.524628447328484,
+        "corr": 0.12011732253581779,
+        "mae": 12.894560338405022,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 272,
+            "losses": 252,
+            "win_rate": 0.5190839694656488
+          },
+          {
+            "threshold": 4.0,
+            "n": 318,
+            "wins": 167,
+            "losses": 151,
+            "win_rate": 0.5251572327044025
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 112,
+            "losses": 96,
+            "win_rate": 0.5384615384615384
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 72,
+            "losses": 53,
+            "win_rate": 0.576
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 36,
+            "losses": 31,
+            "win_rate": 0.5373134328358209
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": null,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04000997133241935,
+        "slope": 0.029397314117261653,
+        "high": 0.5352112676056338,
+        "auc": 0.5120334936054689,
+        "corr": 0.11640423939920087,
+        "mae": 12.929500433930674,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 261,
+            "losses": 255,
+            "win_rate": 0.5058139534883721
+          },
+          {
+            "threshold": 4.0,
+            "n": 327,
+            "wins": 173,
+            "losses": 154,
+            "win_rate": 0.5290519877675841
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 115,
+            "losses": 94,
+            "win_rate": 0.5502392344497608
+          },
+          {
+            "threshold": 8.0,
+            "n": 113,
+            "wins": 65,
+            "losses": 48,
+            "win_rate": 0.5752212389380531
+          },
+          {
+            "threshold": 10.0,
+            "n": 71,
+            "wins": 38,
+            "losses": 33,
+            "win_rate": 0.5352112676056338
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 16.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.0401785714285714,
+        "slope": 0.019008945386064013,
+        "high": 0.53125,
+        "auc": 0.5331192108430582,
+        "corr": 0.12010879587729921,
+        "mae": 12.887159094004902,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 531,
+            "wins": 272,
+            "losses": 259,
+            "win_rate": 0.512241054613936
+          },
+          {
+            "threshold": 4.0,
+            "n": 325,
+            "wins": 168,
+            "losses": 157,
+            "win_rate": 0.5169230769230769
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 110,
+            "losses": 94,
+            "win_rate": 0.5392156862745098
+          },
+          {
+            "threshold": 8.0,
+            "n": 126,
+            "wins": 72,
+            "losses": 54,
+            "win_rate": 0.5714285714285714
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04063715038254112,
+        "slope": 0.011749761829152106,
+        "high": 0.5223880597014925,
+        "auc": 0.5067826223522253,
+        "corr": 0.11785726829366396,
+        "mae": 12.914189202498164,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 517,
+            "wins": 264,
+            "losses": 253,
+            "win_rate": 0.5106382978723404
+          },
+          {
+            "threshold": 4.0,
+            "n": 320,
+            "wins": 168,
+            "losses": 152,
+            "win_rate": 0.525
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 111,
+            "losses": 96,
+            "win_rate": 0.5362318840579711
+          },
+          {
+            "threshold": 8.0,
+            "n": 119,
+            "wins": 67,
+            "losses": 52,
+            "win_rate": 0.5630252100840336
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 35,
+            "losses": 32,
+            "win_rate": 0.5223880597014925
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04070660522273428,
+        "slope": 0.006118648576749153,
+        "high": 0.5238095238095238,
+        "auc": 0.5374572379824831,
+        "corr": 0.11490876383976302,
+        "mae": 12.912845670734162,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 537,
+            "wins": 278,
+            "losses": 259,
+            "win_rate": 0.5176908752327747
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 201,
+            "wins": 107,
+            "losses": 94,
+            "win_rate": 0.5323383084577115
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 70,
+            "losses": 54,
+            "win_rate": 0.5645161290322581
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 33,
+            "losses": 30,
+            "win_rate": 0.5238095238095238
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04070660522273428,
+        "slope": 0.00515280739161339,
+        "high": 0.5238095238095238,
+        "auc": 0.5390336274618821,
+        "corr": 0.11656744559947269,
+        "mae": 12.904215843879326,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 536,
+            "wins": 278,
+            "losses": 258,
+            "win_rate": 0.5186567164179104
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 108,
+            "losses": 94,
+            "win_rate": 0.5346534653465347
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 70,
+            "losses": 54,
+            "win_rate": 0.5645161290322581
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 33,
+            "losses": 30,
+            "win_rate": 0.5238095238095238
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 64.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04096262160778297,
+        "slope": 0.027206532004996453,
+        "high": 0.5396825396825397,
+        "auc": 0.520316425879397,
+        "corr": 0.12235408320639321,
+        "mae": 12.881224630643658,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 267,
+            "losses": 254,
+            "win_rate": 0.5124760076775432
+          },
+          {
+            "threshold": 4.0,
+            "n": 319,
+            "wins": 167,
+            "losses": 152,
+            "win_rate": 0.5235109717868338
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 110,
+            "losses": 95,
+            "win_rate": 0.5365853658536586
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 72,
+            "losses": 52,
+            "win_rate": 0.5806451612903226
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 34,
+            "losses": 29,
+            "win_rate": 0.5396825396825397
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04271548436308159,
+        "slope": 0.02953972344611633,
+        "high": 0.5362318840579711,
+        "auc": 0.4996890079024729,
+        "corr": 0.11914147121838002,
+        "mae": 12.911047405780641,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 265,
+            "losses": 258,
+            "win_rate": 0.5066921606118547
+          },
+          {
+            "threshold": 4.0,
+            "n": 312,
+            "wins": 162,
+            "losses": 150,
+            "win_rate": 0.5192307692307693
+          },
+          {
+            "threshold": 6.0,
+            "n": 210,
+            "wins": 114,
+            "losses": 96,
+            "win_rate": 0.5428571428571428
+          },
+          {
+            "threshold": 8.0,
+            "n": 114,
+            "wins": 66,
+            "losses": 48,
+            "win_rate": 0.5789473684210527
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 37,
+            "losses": 32,
+            "win_rate": 0.5362318840579711
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 30.0,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04412525879917184,
+        "slope": 0.028479946073474927,
+        "high": 0.5362318840579711,
+        "auc": 0.5040837696335079,
+        "corr": 0.11815205087491915,
+        "mae": 12.921235480691625,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 516,
+            "wins": 262,
+            "losses": 254,
+            "win_rate": 0.5077519379844961
+          },
+          {
+            "threshold": 4.0,
+            "n": 323,
+            "wins": 167,
+            "losses": 156,
+            "win_rate": 0.5170278637770898
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 112,
+            "losses": 96,
+            "win_rate": 0.5384615384615384
+          },
+          {
+            "threshold": 8.0,
+            "n": 112,
+            "wins": 65,
+            "losses": 47,
+            "win_rate": 0.5803571428571429
+          },
+          {
+            "threshold": 10.0,
+            "n": 69,
+            "wins": 37,
+            "losses": 32,
+            "win_rate": 0.5362318840579711
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 12.0,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04419047619047611,
+        "slope": 0.00515280739161339,
+        "high": 0.5238095238095238,
+        "auc": 0.536734693877551,
+        "corr": 0.11695059755283917,
+        "mae": 12.902487875868568,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 536,
+            "wins": 278,
+            "losses": 258,
+            "win_rate": 0.5186567164179104
+          },
+          {
+            "threshold": 4.0,
+            "n": 329,
+            "wins": 171,
+            "losses": 158,
+            "win_rate": 0.5197568389057751
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 108,
+            "losses": 94,
+            "win_rate": 0.5346534653465347
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 71,
+            "losses": 54,
+            "win_rate": 0.568
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 33,
+            "losses": 30,
+            "win_rate": 0.5238095238095238
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04598577235772361,
+        "slope": 0.02069337811900196,
+        "high": 0.53125,
+        "auc": 0.5220534359135396,
+        "corr": 0.11860763053660493,
+        "mae": 12.901156380165272,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 266,
+            "losses": 255,
+            "win_rate": 0.510556621880998
+          },
+          {
+            "threshold": 4.0,
+            "n": 319,
+            "wins": 168,
+            "losses": 151,
+            "win_rate": 0.5266457680250783
+          },
+          {
+            "threshold": 6.0,
+            "n": 204,
+            "wins": 109,
+            "losses": 95,
+            "win_rate": 0.5343137254901961
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 71,
+            "losses": 52,
+            "win_rate": 0.5772357723577236
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 34,
+            "losses": 30,
+            "win_rate": 0.53125
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.04668656716417907,
+        "slope": 0.017313432835820874,
+        "high": 0.5373134328358209,
+        "auc": 0.5241749255879371,
+        "corr": 0.121867386407907,
+        "mae": 12.887553006011567,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 525,
+            "wins": 273,
+            "losses": 252,
+            "win_rate": 0.52
+          },
+          {
+            "threshold": 4.0,
+            "n": 318,
+            "wins": 167,
+            "losses": 151,
+            "win_rate": 0.5251572327044025
+          },
+          {
+            "threshold": 6.0,
+            "n": 208,
+            "wins": 112,
+            "losses": 96,
+            "win_rate": 0.5384615384615384
+          },
+          {
+            "threshold": 8.0,
+            "n": 125,
+            "wins": 73,
+            "losses": 52,
+            "win_rate": 0.584
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 36,
+            "losses": 31,
+            "win_rate": 0.5373134328358209
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.05019258545979788,
+        "slope": 0.005212487182408521,
+        "high": 0.5223880597014925,
+        "auc": 0.5249448903366759,
+        "corr": 0.11738581041331803,
+        "mae": 12.909474338885246,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 271,
+            "losses": 253,
+            "win_rate": 0.517175572519084
+          },
+          {
+            "threshold": 4.0,
+            "n": 318,
+            "wins": 167,
+            "losses": 151,
+            "win_rate": 0.5251572327044025
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 111,
+            "losses": 96,
+            "win_rate": 0.5362318840579711
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 71,
+            "losses": 53,
+            "win_rate": 0.5725806451612904
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 35,
+            "losses": 32,
+            "win_rate": 0.5223880597014925
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 16.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.053883126739185494,
+        "slope": 0.014725224452450392,
+        "high": 0.5223880597014925,
+        "auc": 0.5118082412297061,
+        "corr": 0.11955956119627434,
+        "mae": 12.902771356126843,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 522,
+            "wins": 265,
+            "losses": 257,
+            "win_rate": 0.5076628352490421
+          },
+          {
+            "threshold": 4.0,
+            "n": 311,
+            "wins": 161,
+            "losses": 150,
+            "win_rate": 0.5176848874598071
+          },
+          {
+            "threshold": 6.0,
+            "n": 207,
+            "wins": 113,
+            "losses": 94,
+            "win_rate": 0.5458937198067633
+          },
+          {
+            "threshold": 8.0,
+            "n": 118,
+            "wins": 68,
+            "losses": 50,
+            "win_rate": 0.576271186440678
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 35,
+            "losses": 32,
+            "win_rate": 0.5223880597014925
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 24.0,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.05519814719505922,
+        "slope": 0.013750823617039498,
+        "high": 0.5223880597014925,
+        "auc": 0.5036097420490768,
+        "corr": 0.11904803839869058,
+        "mae": 12.91212833969931,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 521,
+            "wins": 265,
+            "losses": 256,
+            "win_rate": 0.508637236084453
+          },
+          {
+            "threshold": 4.0,
+            "n": 315,
+            "wins": 165,
+            "losses": 150,
+            "win_rate": 0.5238095238095238
+          },
+          {
+            "threshold": 6.0,
+            "n": 209,
+            "wins": 113,
+            "losses": 96,
+            "win_rate": 0.5406698564593302
+          },
+          {
+            "threshold": 8.0,
+            "n": 116,
+            "wins": 67,
+            "losses": 49,
+            "win_rate": 0.5775862068965517
+          },
+          {
+            "threshold": 10.0,
+            "n": 67,
+            "wins": 35,
+            "losses": 32,
+            "win_rate": 0.5223880597014925
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 20.0,
+      "alpha": 64.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.05984848484848482,
+        "slope": 0.007517927365255583,
+        "high": 0.5151515151515151,
+        "auc": 0.5132105841708543,
+        "corr": 0.11931082469477447,
+        "mae": 12.90464395779054,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 266,
+            "losses": 258,
+            "win_rate": 0.5076335877862596
+          },
+          {
+            "threshold": 4.0,
+            "n": 315,
+            "wins": 165,
+            "losses": 150,
+            "win_rate": 0.5238095238095238
+          },
+          {
+            "threshold": 6.0,
+            "n": 205,
+            "wins": 112,
+            "losses": 93,
+            "win_rate": 0.5463414634146342
+          },
+          {
+            "threshold": 8.0,
+            "n": 120,
+            "wins": 69,
+            "losses": 51,
+            "win_rate": 0.575
+          },
+          {
+            "threshold": 10.0,
+            "n": 66,
+            "wins": 34,
+            "losses": 32,
+            "win_rate": 0.5151515151515151
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 256.0,
+      "cap": 6.0,
+      "validation": {
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.04598674318772089,
+        "slope": 0.015205317308567778,
+        "high": 0.5238095238095238,
+        "auc": 0.5362013592271113,
+        "corr": 0.11858414788503975,
+        "mae": 12.894737359893089,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 266,
+            "losses": 257,
+            "win_rate": 0.5086042065009561
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 171,
+            "losses": 150,
+            "win_rate": 0.5327102803738317
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 108,
+            "losses": 95,
+            "win_rate": 0.5320197044334976
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 70,
+            "losses": 53,
+            "win_rate": 0.5691056910569106
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 33,
+            "losses": 30,
+            "win_rate": 0.5238095238095238
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 256.0,
+      "cap": 8.0,
+      "validation": {
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.049461697292100704,
+        "slope": 0.015205317308567778,
+        "high": 0.5238095238095238,
+        "auc": 0.5349097331240188,
+        "corr": 0.11990371145002064,
+        "mae": 12.88847622897186,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 523,
+            "wins": 266,
+            "losses": 257,
+            "win_rate": 0.5086042065009561
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 171,
+            "losses": 150,
+            "win_rate": 0.5327102803738317
+          },
+          {
+            "threshold": 6.0,
+            "n": 203,
+            "wins": 108,
+            "losses": 95,
+            "win_rate": 0.5320197044334976
+          },
+          {
+            "threshold": 8.0,
+            "n": 124,
+            "wins": 71,
+            "losses": 53,
+            "win_rate": 0.5725806451612904
+          },
+          {
+            "threshold": 10.0,
+            "n": 63,
+            "wins": 33,
+            "losses": 30,
+            "win_rate": 0.5238095238095238
+          }
+        ]
+      }
+    },
+    {
+      "target_clip": 16.0,
+      "alpha": 256.0,
+      "cap": 4.0,
+      "validation": {
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.05648800113371255,
+        "slope": 0.007991412213740445,
+        "high": 0.515625,
+        "auc": 0.5365253793825222,
+        "corr": 0.11661056518060718,
+        "mae": 12.907456270971492,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 524,
+            "wins": 266,
+            "losses": 258,
+            "win_rate": 0.5076335877862596
+          },
+          {
+            "threshold": 4.0,
+            "n": 321,
+            "wins": 171,
+            "losses": 150,
+            "win_rate": 0.5327102803738317
+          },
+          {
+            "threshold": 6.0,
+            "n": 202,
+            "wins": 107,
+            "losses": 95,
+            "win_rate": 0.5297029702970297
+          },
+          {
+            "threshold": 8.0,
+            "n": 123,
+            "wins": 70,
+            "losses": 53,
+            "win_rate": 0.5691056910569106
+          },
+          {
+            "threshold": 10.0,
+            "n": 64,
+            "wins": 33,
+            "losses": 31,
+            "win_rate": 0.515625
+          }
+        ]
+      }
+    }
+  ]
+}
