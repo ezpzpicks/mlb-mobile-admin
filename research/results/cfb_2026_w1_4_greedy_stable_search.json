@@ -1,0 +1,2667 @@
+{
+  "season": 2026,
+  "usage": "candidate for Week 5+; no production change",
+  "market_predictor": false,
+  "baseline_oof": {
+    "n": 162,
+    "mae": 12.695706181010786,
+    "steps": 2,
+    "possible": 4,
+    "violation": 0.09127789046653145,
+    "slope": -0.07324439969796126,
+    "high": 0.3793103448275862,
+    "auc": 0.49118773946360156,
+    "corr": -0.04253950851601294,
+    "thresholds": [
+      {
+        "threshold": 2.0,
+        "n": 137,
+        "wins": 62,
+        "losses": 75,
+        "win_rate": 0.45255474452554745
+      },
+      {
+        "threshold": 4.0,
+        "n": 102,
+        "wins": 48,
+        "losses": 54,
+        "win_rate": 0.47058823529411764
+      },
+      {
+        "threshold": 6.0,
+        "n": 68,
+        "wins": 32,
+        "losses": 36,
+        "win_rate": 0.47058823529411764
+      },
+      {
+        "threshold": 8.0,
+        "n": 41,
+        "wins": 18,
+        "losses": 23,
+        "win_rate": 0.43902439024390244
+      },
+      {
+        "threshold": 10.0,
+        "n": 29,
+        "wins": 11,
+        "losses": 18,
+        "win_rate": 0.3793103448275862
+      }
+    ]
+  },
+  "selected": {
+    "features": [
+      "gamecontrol_diff",
+      "def_returning_diff",
+      "explosive_diff",
+      "current_power_margin",
+      "abs_baseline",
+      "baseline"
+    ],
+    "added": "baseline",
+    "alpha": 16.0,
+    "cap": 6.0,
+    "metrics": {
+      "n": 162,
+      "mae": 12.177243008826576,
+      "steps": 3,
+      "possible": 4,
+      "violation": 0.015126050420168069,
+      "slope": 0.2196333078686019,
+      "high": 0.6818181818181818,
+      "auc": 0.5508292383292384,
+      "corr": -0.015180925691533773,
+      "thresholds": [
+        {
+          "threshold": 2.0,
+          "n": 119,
+          "wins": 55,
+          "losses": 64,
+          "win_rate": 0.46218487394957986
+        },
+        {
+          "threshold": 4.0,
+          "n": 85,
+          "wins": 38,
+          "losses": 47,
+          "win_rate": 0.4470588235294118
+        },
+        {
+          "threshold": 6.0,
+          "n": 65,
+          "wins": 33,
+          "losses": 32,
+          "win_rate": 0.5076923076923077
+        },
+        {
+          "threshold": 8.0,
+          "n": 42,
+          "wins": 26,
+          "losses": 16,
+          "win_rate": 0.6190476190476191
+        },
+        {
+          "threshold": 10.0,
+          "n": 22,
+          "wins": 15,
+          "losses": 7,
+          "win_rate": 0.6818181818181818
+        }
+      ]
+    },
+    "folds": [
+      {
+        "week": 2,
+        "baseline": {
+          "n": 49,
+          "mae": 13.805637018457842,
+          "steps": 2,
+          "possible": 4,
+          "violation": 0.0714285714285714,
+          "slope": -0.038205980066445155,
+          "high": 0.35714285714285715,
+          "auc": 0.4862068965517241,
+          "corr": -0.06069329899461468,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 43,
+              "wins": 17,
+              "losses": 26,
+              "win_rate": 0.3953488372093023
+            },
+            {
+              "threshold": 4.0,
+              "n": 33,
+              "wins": 14,
+              "losses": 19,
+              "win_rate": 0.42424242424242425
+            },
+            {
+              "threshold": 6.0,
+              "n": 21,
+              "wins": 9,
+              "losses": 12,
+              "win_rate": 0.42857142857142855
+            },
+            {
+              "threshold": 8.0,
+              "n": 15,
+              "wins": 6,
+              "losses": 9,
+              "win_rate": 0.4
+            },
+            {
+              "threshold": 10.0,
+              "n": 14,
+              "wins": 5,
+              "losses": 9,
+              "win_rate": 0.35714285714285715
+            }
+          ]
+        },
+        "challenger": {
+          "n": 49,
+          "mae": 13.321668913422544,
+          "steps": 3,
+          "possible": 4,
+          "violation": 0.018518518518518545,
+          "slope": 0.27777777777777773,
+          "high": 0.6666666666666666,
+          "auc": 0.5985663082437276,
+          "corr": -0.014700108142872238,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 36,
+              "wins": 14,
+              "losses": 22,
+              "win_rate": 0.3888888888888889
+            },
+            {
+              "threshold": 4.0,
+              "n": 27,
+              "wins": 10,
+              "losses": 17,
+              "win_rate": 0.37037037037037035
+            },
+            {
+              "threshold": 6.0,
+              "n": 23,
+              "wins": 10,
+              "losses": 13,
+              "win_rate": 0.43478260869565216
+            },
+            {
+              "threshold": 8.0,
+              "n": 17,
+              "wins": 8,
+              "losses": 9,
+              "win_rate": 0.47058823529411764
+            },
+            {
+              "threshold": 10.0,
+              "n": 9,
+              "wins": 6,
+              "losses": 3,
+              "win_rate": 0.6666666666666666
+            }
+          ]
+        },
+        "mae_improved": true
+      },
+      {
+        "week": 3,
+        "baseline": {
+          "n": 56,
+          "mae": 10.683450124106182,
+          "steps": 2,
+          "possible": 4,
+          "violation": 0.12184343434343436,
+          "slope": -0.06619385342789597,
+          "high": 0.4444444444444444,
+          "auc": 0.5599489795918368,
+          "corr": 0.11581797319664089,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 47,
+              "wins": 24,
+              "losses": 23,
+              "win_rate": 0.5106382978723404
+            },
+            {
+              "threshold": 4.0,
+              "n": 33,
+              "wins": 18,
+              "losses": 15,
+              "win_rate": 0.5454545454545454
+            },
+            {
+              "threshold": 6.0,
+              "n": 24,
+              "wins": 13,
+              "losses": 11,
+              "win_rate": 0.5416666666666666
+            },
+            {
+              "threshold": 8.0,
+              "n": 16,
+              "wins": 9,
+              "losses": 7,
+              "win_rate": 0.5625
+            },
+            {
+              "threshold": 10.0,
+              "n": 9,
+              "wins": 4,
+              "losses": 5,
+              "win_rate": 0.4444444444444444
+            }
+          ]
+        },
+        "challenger": {
+          "n": 56,
+          "mae": 10.27529586085512,
+          "steps": 2,
+          "possible": 3,
+          "violation": 0.011801730920535047,
+          "slope": 0.45325203252032514,
+          "high": null,
+          "auc": 0.5951468710089399,
+          "corr": 0.15299635374103127,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 41,
+              "wins": 19,
+              "losses": 22,
+              "win_rate": 0.4634146341463415
+            },
+            {
+              "threshold": 4.0,
+              "n": 31,
+              "wins": 14,
+              "losses": 17,
+              "win_rate": 0.45161290322580644
+            },
+            {
+              "threshold": 6.0,
+              "n": 22,
+              "wins": 13,
+              "losses": 9,
+              "win_rate": 0.5909090909090909
+            },
+            {
+              "threshold": 8.0,
+              "n": 12,
+              "wins": 11,
+              "losses": 1,
+              "win_rate": 0.9166666666666666
+            },
+            {
+              "threshold": 10.0,
+              "n": 6,
+              "wins": 6,
+              "losses": 0,
+              "win_rate": 1.0
+            }
+          ]
+        },
+        "mae_improved": true
+      },
+      {
+        "week": 4,
+        "baseline": {
+          "n": 57,
+          "mae": 13.718508429287139,
+          "steps": 0,
+          "possible": 3,
+          "violation": 0.14680851063829786,
+          "slope": -0.14680851063829786,
+          "high": null,
+          "auc": 0.41728395061728396,
+          "corr": -0.12328836575232247,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 47,
+              "wins": 21,
+              "losses": 26,
+              "win_rate": 0.44680851063829785
+            },
+            {
+              "threshold": 4.0,
+              "n": 36,
+              "wins": 16,
+              "losses": 20,
+              "win_rate": 0.4444444444444444
+            },
+            {
+              "threshold": 6.0,
+              "n": 23,
+              "wins": 10,
+              "losses": 13,
+              "win_rate": 0.43478260869565216
+            },
+            {
+              "threshold": 8.0,
+              "n": 10,
+              "wins": 3,
+              "losses": 7,
+              "win_rate": 0.3
+            },
+            {
+              "threshold": 10.0,
+              "n": 6,
+              "wins": 2,
+              "losses": 4,
+              "win_rate": 0.3333333333333333
+            }
+          ]
+        },
+        "challenger": {
+          "n": 57,
+          "mae": 13.062017937970417,
+          "steps": 1,
+          "possible": 3,
+          "violation": 0.023809523809523836,
+          "slope": 0.0146520146520146,
+          "high": null,
+          "auc": 0.5,
+          "corr": -0.08056549356617677,
+          "thresholds": [
+            {
+              "threshold": 2.0,
+              "n": 42,
+              "wins": 22,
+              "losses": 20,
+              "win_rate": 0.5238095238095238
+            },
+            {
+              "threshold": 4.0,
+              "n": 27,
+              "wins": 14,
+              "losses": 13,
+              "win_rate": 0.5185185185185185
+            },
+            {
+              "threshold": 6.0,
+              "n": 20,
+              "wins": 10,
+              "losses": 10,
+              "win_rate": 0.5
+            },
+            {
+              "threshold": 8.0,
+              "n": 13,
+              "wins": 7,
+              "losses": 6,
+              "win_rate": 0.5384615384615384
+            },
+            {
+              "threshold": 10.0,
+              "n": 7,
+              "wins": 3,
+              "losses": 4,
+              "win_rate": 0.42857142857142855
+            }
+          ]
+        },
+        "mae_improved": true
+      }
+    ],
+    "score": [
+      3,
+      1,
+      1,
+      0.5184631721842106,
+      3,
+      -0.015126050420168069,
+      0.2196333078686019,
+      0.5508292383292384,
+      -6
+    ]
+  },
+  "selection_path": [
+    {
+      "features": [
+        "gamecontrol_diff"
+      ],
+      "added": "gamecontrol_diff",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.589432286930203,
+        "steps": 2,
+        "possible": 4,
+        "violation": 0.0452207315610334,
+        "slope": -0.004118217054263573,
+        "high": 0.46875,
+        "auc": 0.4718105423987777,
+        "corr": -0.03663716667975107,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 129,
+            "wins": 61,
+            "losses": 68,
+            "win_rate": 0.4728682170542636
+          },
+          {
+            "threshold": 4.0,
+            "n": 94,
+            "wins": 41,
+            "losses": 53,
+            "win_rate": 0.43617021276595747
+          },
+          {
+            "threshold": 6.0,
+            "n": 66,
+            "wins": 30,
+            "losses": 36,
+            "win_rate": 0.45454545454545453
+          },
+          {
+            "threshold": 8.0,
+            "n": 44,
+            "wins": 21,
+            "losses": 23,
+            "win_rate": 0.4772727272727273
+          },
+          {
+            "threshold": 10.0,
+            "n": 32,
+            "wins": 15,
+            "losses": 17,
+            "win_rate": 0.46875
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.82776680806144,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.051948051948051965,
+            "slope": -0.03310104529616725,
+            "high": 0.35714285714285715,
+            "auc": 0.49310344827586206,
+            "corr": -0.061138217423575975,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 41,
+                "wins": 16,
+                "losses": 25,
+                "win_rate": 0.3902439024390244
+              },
+              {
+                "threshold": 4.0,
+                "n": 32,
+                "wins": 13,
+                "losses": 19,
+                "win_rate": 0.40625
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 9,
+                "losses": 13,
+                "win_rate": 0.4090909090909091
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "mae_improved": false
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.461107053461152,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.06162790697674425,
+            "slope": 0.15503875968992242,
+            "high": 0.6666666666666666,
+            "auc": 0.4904214559386973,
+            "corr": 0.11484620206000416,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 22,
+                "losses": 21,
+                "win_rate": 0.5116279069767442
+              },
+              {
+                "threshold": 4.0,
+                "n": 30,
+                "wins": 14,
+                "losses": 16,
+                "win_rate": 0.4666666666666667
+              },
+              {
+                "threshold": 6.0,
+                "n": 20,
+                "wins": 11,
+                "losses": 9,
+                "win_rate": 0.55
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 8,
+                "losses": 7,
+                "win_rate": 0.5333333333333333
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 6,
+                "losses": 3,
+                "win_rate": 0.6666666666666666
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 13.615885296383466,
+            "steps": 1,
+            "possible": 4,
+            "violation": 0.14999999999999997,
+            "slope": -0.06666666666666665,
+            "high": 0.4444444444444444,
+            "auc": 0.4458128078817734,
+            "corr": -0.0686203400730053,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 45,
+                "wins": 23,
+                "losses": 22,
+                "win_rate": 0.5111111111111111
+              },
+              {
+                "threshold": 4.0,
+                "n": 32,
+                "wins": 14,
+                "losses": 18,
+                "win_rate": 0.4375
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 10,
+                "losses": 14,
+                "win_rate": 0.4166666666666667
+              },
+              {
+                "threshold": 8.0,
+                "n": 14,
+                "wins": 7,
+                "losses": 7,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        2,
+        1,
+        1,
+        0.10627389408058363,
+        2,
+        -0.0452207315610334,
+        -0.004118217054263573,
+        0.4718105423987777,
+        -1
+      ]
+    },
+    {
+      "features": [
+        "gamecontrol_diff",
+        "def_returning_diff"
+      ],
+      "added": "def_returning_diff",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.39105626242726,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.013194444444444453,
+        "slope": 0.04849137931034486,
+        "high": 0.5172413793103449,
+        "auc": 0.46077533577533575,
+        "corr": -0.03674955364121664,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 128,
+            "wins": 60,
+            "losses": 68,
+            "win_rate": 0.46875
+          },
+          {
+            "threshold": 4.0,
+            "n": 90,
+            "wins": 41,
+            "losses": 49,
+            "win_rate": 0.45555555555555555
+          },
+          {
+            "threshold": 6.0,
+            "n": 58,
+            "wins": 27,
+            "losses": 31,
+            "win_rate": 0.46551724137931033
+          },
+          {
+            "threshold": 8.0,
+            "n": 37,
+            "wins": 18,
+            "losses": 19,
+            "win_rate": 0.4864864864864865
+          },
+          {
+            "threshold": 10.0,
+            "n": 29,
+            "wins": 15,
+            "losses": 14,
+            "win_rate": 0.5172413793103449
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.656949724533458,
+            "steps": 3,
+            "possible": 4,
+            "violation": 0.05357142857142855,
+            "slope": -0.015384615384615385,
+            "high": 0.38461538461538464,
+            "auc": 0.5087719298245614,
+            "corr": -0.07326756413195873,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 40,
+                "wins": 16,
+                "losses": 24,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 4.0,
+                "n": 28,
+                "wins": 12,
+                "losses": 16,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 6,
+                "losses": 10,
+                "win_rate": 0.375
+              },
+              {
+                "threshold": 10.0,
+                "n": 13,
+                "wins": 5,
+                "losses": 8,
+                "win_rate": 0.38461538461538464
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.438037138543603,
+            "steps": 3,
+            "possible": 4,
+            "violation": 0.03434343434343434,
+            "slope": 0.2611111111111111,
+            "high": 0.75,
+            "auc": 0.4423076923076923,
+            "corr": 0.1204515254277411,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 45,
+                "wins": 22,
+                "losses": 23,
+                "win_rate": 0.4888888888888889
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 15,
+                "losses": 18,
+                "win_rate": 0.45454545454545453
+              },
+              {
+                "threshold": 6.0,
+                "n": 19,
+                "wins": 10,
+                "losses": 9,
+                "win_rate": 0.5263157894736842
+              },
+              {
+                "threshold": 8.0,
+                "n": 11,
+                "wins": 7,
+                "losses": 4,
+                "win_rate": 0.6363636363636364
+              },
+              {
+                "threshold": 10.0,
+                "n": 8,
+                "wins": 6,
+                "losses": 2,
+                "win_rate": 0.75
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 13.221587688642714,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.06718346253229979,
+            "slope": -0.011627906976744207,
+            "high": 0.5,
+            "auc": 0.45566502463054187,
+            "corr": -0.0654441590010453,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 22,
+                "losses": 21,
+                "win_rate": 0.5116279069767442
+              },
+              {
+                "threshold": 4.0,
+                "n": 29,
+                "wins": 14,
+                "losses": 15,
+                "win_rate": 0.4827586206896552
+              },
+              {
+                "threshold": 6.0,
+                "n": 18,
+                "wins": 8,
+                "losses": 10,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 5,
+                "losses": 5,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 10.0,
+                "n": 8,
+                "wins": 4,
+                "losses": 4,
+                "win_rate": 0.5
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        3,
+        1,
+        1,
+        0.30464991858352697,
+        3,
+        -0.013194444444444453,
+        0.04849137931034486,
+        0.46077533577533575,
+        -2
+      ]
+    },
+    {
+      "features": [
+        "gamecontrol_diff",
+        "def_returning_diff",
+        "explosive_diff"
+      ],
+      "added": "explosive_diff",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.310366881428141,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.022581732389619136,
+        "slope": 0.10263565891472876,
+        "high": 0.56,
+        "auc": 0.5164312039312039,
+        "corr": -0.02510974721659353,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 129,
+            "wins": 59,
+            "losses": 70,
+            "win_rate": 0.4573643410852713
+          },
+          {
+            "threshold": 4.0,
+            "n": 92,
+            "wins": 40,
+            "losses": 52,
+            "win_rate": 0.43478260869565216
+          },
+          {
+            "threshold": 6.0,
+            "n": 60,
+            "wins": 28,
+            "losses": 32,
+            "win_rate": 0.4666666666666667
+          },
+          {
+            "threshold": 8.0,
+            "n": 41,
+            "wins": 20,
+            "losses": 21,
+            "win_rate": 0.4878048780487805
+          },
+          {
+            "threshold": 10.0,
+            "n": 25,
+            "wins": 14,
+            "losses": 11,
+            "win_rate": 0.56
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.447345930446842,
+            "steps": 3,
+            "possible": 4,
+            "violation": 0.04278074866310161,
+            "slope": 0.125,
+            "high": 0.5,
+            "auc": 0.6139705882352942,
+            "corr": -0.0402161570281292,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 40,
+                "wins": 15,
+                "losses": 25,
+                "win_rate": 0.375
+              },
+              {
+                "threshold": 4.0,
+                "n": 26,
+                "wins": 10,
+                "losses": 16,
+                "win_rate": 0.38461538461538464
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 10,
+                "losses": 12,
+                "win_rate": 0.45454545454545453
+              },
+              {
+                "threshold": 8.0,
+                "n": 17,
+                "wins": 7,
+                "losses": 10,
+                "win_rate": 0.4117647058823529
+              },
+              {
+                "threshold": 10.0,
+                "n": 10,
+                "wins": 5,
+                "losses": 5,
+                "win_rate": 0.5
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.406991088672886,
+            "steps": 2,
+            "possible": 3,
+            "violation": 0.022727272727272763,
+            "slope": 0.15909090909090906,
+            "high": null,
+            "auc": 0.48020434227330777,
+            "corr": 0.11948556610409682,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 44,
+                "wins": 21,
+                "losses": 23,
+                "win_rate": 0.4772727272727273
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 15,
+                "losses": 18,
+                "win_rate": 0.45454545454545453
+              },
+              {
+                "threshold": 6.0,
+                "n": 19,
+                "wins": 10,
+                "losses": 9,
+                "win_rate": 0.5263157894736842
+              },
+              {
+                "threshold": 8.0,
+                "n": 11,
+                "wins": 7,
+                "losses": 4,
+                "win_rate": 0.6363636363636364
+              },
+              {
+                "threshold": 10.0,
+                "n": 7,
+                "wins": 5,
+                "losses": 2,
+                "win_rate": 0.7142857142857143
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 13.20294707427688,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.09005847953216373,
+            "slope": -0.011111111111111072,
+            "high": 0.5,
+            "auc": 0.4938423645320197,
+            "corr": -0.053971400929065064,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 45,
+                "wins": 23,
+                "losses": 22,
+                "win_rate": 0.5111111111111111
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 15,
+                "losses": 18,
+                "win_rate": 0.45454545454545453
+              },
+              {
+                "threshold": 6.0,
+                "n": 19,
+                "wins": 8,
+                "losses": 11,
+                "win_rate": 0.42105263157894735
+              },
+              {
+                "threshold": 8.0,
+                "n": 13,
+                "wins": 6,
+                "losses": 7,
+                "win_rate": 0.46153846153846156
+              },
+              {
+                "threshold": 10.0,
+                "n": 8,
+                "wins": 4,
+                "losses": 4,
+                "win_rate": 0.5
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        3,
+        1,
+        1,
+        0.385339299582645,
+        3,
+        -0.022581732389619136,
+        0.10263565891472876,
+        0.5164312039312039,
+        -3
+      ]
+    },
+    {
+      "features": [
+        "gamecontrol_diff",
+        "def_returning_diff",
+        "explosive_diff",
+        "current_power_margin"
+      ],
+      "added": "current_power_margin",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.238725862977505,
+        "steps": 4,
+        "possible": 4,
+        "violation": 0.0,
+        "slope": 0.16967126193001064,
+        "high": 0.6086956521739131,
+        "auc": 0.5233415233415234,
+        "corr": -0.03152077837963176,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 123,
+            "wins": 54,
+            "losses": 69,
+            "win_rate": 0.43902439024390244
+          },
+          {
+            "threshold": 4.0,
+            "n": 89,
+            "wins": 41,
+            "losses": 48,
+            "win_rate": 0.4606741573033708
+          },
+          {
+            "threshold": 6.0,
+            "n": 62,
+            "wins": 29,
+            "losses": 33,
+            "win_rate": 0.46774193548387094
+          },
+          {
+            "threshold": 8.0,
+            "n": 42,
+            "wins": 22,
+            "losses": 20,
+            "win_rate": 0.5238095238095238
+          },
+          {
+            "threshold": 10.0,
+            "n": 23,
+            "wins": 14,
+            "losses": 9,
+            "win_rate": 0.6086956521739131
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.518821845485947,
+            "steps": 4,
+            "possible": 4,
+            "violation": 0.0,
+            "slope": 0.31666666666666665,
+            "high": 0.6666666666666666,
+            "auc": 0.6139705882352942,
+            "corr": -0.04966347573886101,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 40,
+                "wins": 14,
+                "losses": 26,
+                "win_rate": 0.35
+              },
+              {
+                "threshold": 4.0,
+                "n": 29,
+                "wins": 11,
+                "losses": 18,
+                "win_rate": 0.3793103448275862
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 9,
+                "losses": 13,
+                "win_rate": 0.4090909090909091
+              },
+              {
+                "threshold": 8.0,
+                "n": 18,
+                "wins": 8,
+                "losses": 10,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 6,
+                "losses": 3,
+                "win_rate": 0.6666666666666666
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.344791116559902,
+            "steps": 4,
+            "possible": 4,
+            "violation": 0.0,
+            "slope": 0.3,
+            "high": 0.75,
+            "auc": 0.5459183673469388,
+            "corr": 0.13170136341800992,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 40,
+                "wins": 18,
+                "losses": 22,
+                "win_rate": 0.45
+              },
+              {
+                "threshold": 4.0,
+                "n": 31,
+                "wins": 15,
+                "losses": 16,
+                "win_rate": 0.4838709677419355
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 12,
+                "losses": 10,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 8.0,
+                "n": 12,
+                "wins": 8,
+                "losses": 4,
+                "win_rate": 0.6666666666666666
+              },
+              {
+                "threshold": 10.0,
+                "n": 8,
+                "wins": 6,
+                "losses": 2,
+                "win_rate": 0.75
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 12.999000295547186,
+            "steps": 2,
+            "possible": 3,
+            "violation": 0.07279693486590044,
+            "slope": -0.011627906976744207,
+            "high": null,
+            "auc": 0.4630541871921182,
+            "corr": -0.07911740930852218,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 22,
+                "losses": 21,
+                "win_rate": 0.5116279069767442
+              },
+              {
+                "threshold": 4.0,
+                "n": 29,
+                "wins": 15,
+                "losses": 14,
+                "win_rate": 0.5172413793103449
+              },
+              {
+                "threshold": 6.0,
+                "n": 18,
+                "wins": 8,
+                "losses": 10,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 8.0,
+                "n": 12,
+                "wins": 6,
+                "losses": 6,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        3,
+        1,
+        1,
+        0.4569803180332812,
+        4,
+        -0.0,
+        0.16967126193001064,
+        0.5233415233415234,
+        -4
+      ]
+    },
+    {
+      "features": [
+        "gamecontrol_diff",
+        "def_returning_diff",
+        "explosive_diff",
+        "current_power_margin",
+        "abs_baseline"
+      ],
+      "added": "abs_baseline",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.213308493214686,
+        "steps": 4,
+        "possible": 4,
+        "violation": 0.0,
+        "slope": 0.1855439642324888,
+        "high": 0.6363636363636364,
+        "auc": 0.5009179926560587,
+        "corr": -0.02985080532614641,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 122,
+            "wins": 55,
+            "losses": 67,
+            "win_rate": 0.45081967213114754
+          },
+          {
+            "threshold": 4.0,
+            "n": 88,
+            "wins": 40,
+            "losses": 48,
+            "win_rate": 0.45454545454545453
+          },
+          {
+            "threshold": 6.0,
+            "n": 60,
+            "wins": 28,
+            "losses": 32,
+            "win_rate": 0.4666666666666667
+          },
+          {
+            "threshold": 8.0,
+            "n": 42,
+            "wins": 23,
+            "losses": 19,
+            "win_rate": 0.5476190476190477
+          },
+          {
+            "threshold": 10.0,
+            "n": 22,
+            "wins": 14,
+            "losses": 8,
+            "win_rate": 0.6363636363636364
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.509714943147282,
+            "steps": 4,
+            "possible": 4,
+            "violation": 0.0,
+            "slope": 0.30769230769230765,
+            "high": 0.6666666666666666,
+            "auc": 0.5663082437275986,
+            "corr": -0.049865346988466834,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 39,
+                "wins": 14,
+                "losses": 25,
+                "win_rate": 0.358974358974359
+              },
+              {
+                "threshold": 4.0,
+                "n": 29,
+                "wins": 11,
+                "losses": 18,
+                "win_rate": 0.3793103448275862
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 9,
+                "losses": 13,
+                "win_rate": 0.4090909090909091
+              },
+              {
+                "threshold": 8.0,
+                "n": 18,
+                "wins": 8,
+                "losses": 10,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 6,
+                "losses": 3,
+                "win_rate": 0.6666666666666666
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.291763516698678,
+            "steps": 3,
+            "possible": 3,
+            "violation": 0.0,
+            "slope": 0.275,
+            "high": null,
+            "auc": 0.5185185185185185,
+            "corr": 0.13804173938785225,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 40,
+                "wins": 19,
+                "losses": 21,
+                "win_rate": 0.475
+              },
+              {
+                "threshold": 4.0,
+                "n": 31,
+                "wins": 15,
+                "losses": 16,
+                "win_rate": 0.4838709677419355
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 11,
+                "losses": 10,
+                "win_rate": 0.5238095238095238
+              },
+              {
+                "threshold": 8.0,
+                "n": 12,
+                "wins": 9,
+                "losses": 3,
+                "win_rate": 0.75
+              },
+              {
+                "threshold": 10.0,
+                "n": 7,
+                "wins": 6,
+                "losses": 1,
+                "win_rate": 0.8571428571428571
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 12.986687486867313,
+            "steps": 1,
+            "possible": 3,
+            "violation": 0.041039671682626566,
+            "slope": -0.011627906976744207,
+            "high": null,
+            "auc": 0.4605911330049261,
+            "corr": -0.0796887488279146,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 22,
+                "losses": 21,
+                "win_rate": 0.5116279069767442
+              },
+              {
+                "threshold": 4.0,
+                "n": 28,
+                "wins": 14,
+                "losses": 14,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 6.0,
+                "n": 17,
+                "wins": 8,
+                "losses": 9,
+                "win_rate": 0.47058823529411764
+              },
+              {
+                "threshold": 8.0,
+                "n": 12,
+                "wins": 6,
+                "losses": 6,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        3,
+        1,
+        1,
+        0.4823976877960998,
+        4,
+        -0.0,
+        0.1855439642324888,
+        0.5009179926560587,
+        -5
+      ]
+    },
+    {
+      "features": [
+        "gamecontrol_diff",
+        "def_returning_diff",
+        "explosive_diff",
+        "current_power_margin",
+        "abs_baseline",
+        "baseline"
+      ],
+      "added": "baseline",
+      "alpha": 16.0,
+      "cap": 6.0,
+      "metrics": {
+        "n": 162,
+        "mae": 12.177243008826576,
+        "steps": 3,
+        "possible": 4,
+        "violation": 0.015126050420168069,
+        "slope": 0.2196333078686019,
+        "high": 0.6818181818181818,
+        "auc": 0.5508292383292384,
+        "corr": -0.015180925691533773,
+        "thresholds": [
+          {
+            "threshold": 2.0,
+            "n": 119,
+            "wins": 55,
+            "losses": 64,
+            "win_rate": 0.46218487394957986
+          },
+          {
+            "threshold": 4.0,
+            "n": 85,
+            "wins": 38,
+            "losses": 47,
+            "win_rate": 0.4470588235294118
+          },
+          {
+            "threshold": 6.0,
+            "n": 65,
+            "wins": 33,
+            "losses": 32,
+            "win_rate": 0.5076923076923077
+          },
+          {
+            "threshold": 8.0,
+            "n": 42,
+            "wins": 26,
+            "losses": 16,
+            "win_rate": 0.6190476190476191
+          },
+          {
+            "threshold": 10.0,
+            "n": 22,
+            "wins": 15,
+            "losses": 7,
+            "win_rate": 0.6818181818181818
+          }
+        ]
+      },
+      "folds": [
+        {
+          "week": 2,
+          "baseline": {
+            "n": 49,
+            "mae": 13.805637018457842,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.0714285714285714,
+            "slope": -0.038205980066445155,
+            "high": 0.35714285714285715,
+            "auc": 0.4862068965517241,
+            "corr": -0.06069329899461468,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 43,
+                "wins": 17,
+                "losses": 26,
+                "win_rate": 0.3953488372093023
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 14,
+                "losses": 19,
+                "win_rate": 0.42424242424242425
+              },
+              {
+                "threshold": 6.0,
+                "n": 21,
+                "wins": 9,
+                "losses": 12,
+                "win_rate": 0.42857142857142855
+              },
+              {
+                "threshold": 8.0,
+                "n": 15,
+                "wins": 6,
+                "losses": 9,
+                "win_rate": 0.4
+              },
+              {
+                "threshold": 10.0,
+                "n": 14,
+                "wins": 5,
+                "losses": 9,
+                "win_rate": 0.35714285714285715
+              }
+            ]
+          },
+          "challenger": {
+            "n": 49,
+            "mae": 13.321668913422544,
+            "steps": 3,
+            "possible": 4,
+            "violation": 0.018518518518518545,
+            "slope": 0.27777777777777773,
+            "high": 0.6666666666666666,
+            "auc": 0.5985663082437276,
+            "corr": -0.014700108142872238,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 36,
+                "wins": 14,
+                "losses": 22,
+                "win_rate": 0.3888888888888889
+              },
+              {
+                "threshold": 4.0,
+                "n": 27,
+                "wins": 10,
+                "losses": 17,
+                "win_rate": 0.37037037037037035
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 17,
+                "wins": 8,
+                "losses": 9,
+                "win_rate": 0.47058823529411764
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 6,
+                "losses": 3,
+                "win_rate": 0.6666666666666666
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 3,
+          "baseline": {
+            "n": 56,
+            "mae": 10.683450124106182,
+            "steps": 2,
+            "possible": 4,
+            "violation": 0.12184343434343436,
+            "slope": -0.06619385342789597,
+            "high": 0.4444444444444444,
+            "auc": 0.5599489795918368,
+            "corr": 0.11581797319664089,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 24,
+                "losses": 23,
+                "win_rate": 0.5106382978723404
+              },
+              {
+                "threshold": 4.0,
+                "n": 33,
+                "wins": 18,
+                "losses": 15,
+                "win_rate": 0.5454545454545454
+              },
+              {
+                "threshold": 6.0,
+                "n": 24,
+                "wins": 13,
+                "losses": 11,
+                "win_rate": 0.5416666666666666
+              },
+              {
+                "threshold": 8.0,
+                "n": 16,
+                "wins": 9,
+                "losses": 7,
+                "win_rate": 0.5625
+              },
+              {
+                "threshold": 10.0,
+                "n": 9,
+                "wins": 4,
+                "losses": 5,
+                "win_rate": 0.4444444444444444
+              }
+            ]
+          },
+          "challenger": {
+            "n": 56,
+            "mae": 10.27529586085512,
+            "steps": 2,
+            "possible": 3,
+            "violation": 0.011801730920535047,
+            "slope": 0.45325203252032514,
+            "high": null,
+            "auc": 0.5951468710089399,
+            "corr": 0.15299635374103127,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 41,
+                "wins": 19,
+                "losses": 22,
+                "win_rate": 0.4634146341463415
+              },
+              {
+                "threshold": 4.0,
+                "n": 31,
+                "wins": 14,
+                "losses": 17,
+                "win_rate": 0.45161290322580644
+              },
+              {
+                "threshold": 6.0,
+                "n": 22,
+                "wins": 13,
+                "losses": 9,
+                "win_rate": 0.5909090909090909
+              },
+              {
+                "threshold": 8.0,
+                "n": 12,
+                "wins": 11,
+                "losses": 1,
+                "win_rate": 0.9166666666666666
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 6,
+                "losses": 0,
+                "win_rate": 1.0
+              }
+            ]
+          },
+          "mae_improved": true
+        },
+        {
+          "week": 4,
+          "baseline": {
+            "n": 57,
+            "mae": 13.718508429287139,
+            "steps": 0,
+            "possible": 3,
+            "violation": 0.14680851063829786,
+            "slope": -0.14680851063829786,
+            "high": null,
+            "auc": 0.41728395061728396,
+            "corr": -0.12328836575232247,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 47,
+                "wins": 21,
+                "losses": 26,
+                "win_rate": 0.44680851063829785
+              },
+              {
+                "threshold": 4.0,
+                "n": 36,
+                "wins": 16,
+                "losses": 20,
+                "win_rate": 0.4444444444444444
+              },
+              {
+                "threshold": 6.0,
+                "n": 23,
+                "wins": 10,
+                "losses": 13,
+                "win_rate": 0.43478260869565216
+              },
+              {
+                "threshold": 8.0,
+                "n": 10,
+                "wins": 3,
+                "losses": 7,
+                "win_rate": 0.3
+              },
+              {
+                "threshold": 10.0,
+                "n": 6,
+                "wins": 2,
+                "losses": 4,
+                "win_rate": 0.3333333333333333
+              }
+            ]
+          },
+          "challenger": {
+            "n": 57,
+            "mae": 13.062017937970417,
+            "steps": 1,
+            "possible": 3,
+            "violation": 0.023809523809523836,
+            "slope": 0.0146520146520146,
+            "high": null,
+            "auc": 0.5,
+            "corr": -0.08056549356617677,
+            "thresholds": [
+              {
+                "threshold": 2.0,
+                "n": 42,
+                "wins": 22,
+                "losses": 20,
+                "win_rate": 0.5238095238095238
+              },
+              {
+                "threshold": 4.0,
+                "n": 27,
+                "wins": 14,
+                "losses": 13,
+                "win_rate": 0.5185185185185185
+              },
+              {
+                "threshold": 6.0,
+                "n": 20,
+                "wins": 10,
+                "losses": 10,
+                "win_rate": 0.5
+              },
+              {
+                "threshold": 8.0,
+                "n": 13,
+                "wins": 7,
+                "losses": 6,
+                "win_rate": 0.5384615384615384
+              },
+              {
+                "threshold": 10.0,
+                "n": 7,
+                "wins": 3,
+                "losses": 4,
+                "win_rate": 0.42857142857142855
+              }
+            ]
+          },
+          "mae_improved": true
+        }
+      ],
+      "score": [
+        3,
+        1,
+        1,
+        0.5184631721842106,
+        3,
+        -0.015126050420168069,
+        0.2196333078686019,
+        0.5508292383292384,
+        -6
+      ]
+    }
+  ],
+  "final_fit_standardized_coefficients": {
+    "intercept": 0.33212597431128893,
+    "gamecontrol_diff": 2.38215799102589,
+    "def_returning_diff": 1.752122227468613,
+    "explosive_diff": 1.6818564966662708,
+    "current_power_margin": -1.691613278694596,
+    "abs_baseline": 2.0489972644589174,
+    "baseline": -2.593999808185213
+  }
+}
