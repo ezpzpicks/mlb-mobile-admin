@@ -30,14 +30,12 @@ CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 MARGIN_RESIDUAL_SD = 17.75939215594032
 MARGIN_ROBUST_SIGMA = 16.871932143212987
 
-# 2026 in-season FBS-vs-FBS validation now grades spreads from a stabilized
-# projection-vs-market edge. The denominator is floored at 3.5 points so near
-# pick'em markets cannot manufacture enormous percentage edges. A 150%+ edge is
-# the qualification threshold; independent spread confluence upgrades it to A.
-# Actual price must still have positive no-vig edge and positive EV or the play
-# is vetoed after grading.
-SPREAD_EDGE_DENOMINATOR_FLOOR = 3.5
-SPREAD_PROJECTION_EDGE_THRESHOLD_PCT = 150.0
+# CFB v2.6 point-edge progression: B at 8+ points, A at 10+ points.
+# Confluence, probability and reliability remain diagnostics. Price vetoes and
+# FBS-vs-FBS / market-spread eligibility remain in force.
+SPREAD_EDGE_DENOMINATOR_FLOOR = 3.5  # percentage diagnostic only
+SPREAD_B_POINT_EDGE = 8.0
+SPREAD_A_POINT_EDGE = 10.0
 SPREAD_NO_GRADE_THRESHOLD = 20.0
 
 # 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and
@@ -163,16 +161,14 @@ def _grade_spread(
     confluence: int,
     market_spread: float = 0.0,
 ) -> str:
-    # Grade only truly exceptional projection-vs-market disagreements. Probability
-    # and reliability remain diagnostics; confluence separates A from B.
     if abs(float(market_spread)) >= SPREAD_NO_GRADE_THRESHOLD:
         return "No Play"
-    projection_edge_pct = _stabilized_spread_projection_edge_pct(point_edge, market_spread)
-    if projection_edge_pct < SPREAD_PROJECTION_EDGE_THRESHOLD_PCT:
-        return "No Play"
-    if int(confluence) >= 1:
+    edge = float(point_edge)
+    if edge >= SPREAD_A_POINT_EDGE:
         return "A Spread"
-    return "B Spread"
+    if edge >= SPREAD_B_POINT_EDGE:
+        return "B Spread"
+    return "No Play"
 
 
 def _grade_total(pick: str, point_edge: float, probability: float, reliability: float, confluence: int) -> str:
@@ -331,7 +327,7 @@ def install_market_calibration(cfb_builder: Any) -> None:
         )
         spread["projection_edge_pct"] = stabilized_edge_pct
         spread_support = list(spread_support) + [
-            f"Stabilized projection edge: {stabilized_edge_pct:.1f}%"
+            "Spread point-edge grades: B ≥8 pts; A ≥10 pts (confluence diagnostic only)"
         ]
         if abs(market_home_spread) >= SPREAD_NO_GRADE_THRESHOLD:
             spread_support = list(spread_support) + [
@@ -358,7 +354,7 @@ def install_market_calibration(cfb_builder: Any) -> None:
             moneyline["grade"] = "No Play"
 
         if not ATS_CALIBRATION_PROVEN:
-            spread_support = list(spread_support) + ["ATS thresholds are conservative fallbacks; historical calibration unproven"]
+            spread_support = list(spread_support) + ["Point-edge grades use v2.6 validation; cover probabilities remain historically uncalibrated"]
         spread.update({"confluence": spread_conf, "support": spread_support})
         total.update({"confluence": total_conf, "support": total_support})
         moneyline.update({"confluence": ml_conf, "support": ml_support})
@@ -471,7 +467,7 @@ def install_market_calibration(cfb_builder: Any) -> None:
             st.dataframe(total_breakdown, hide_index=True, use_container_width=True)
             st.markdown(
                 f"**Calibrated margin residual SD:** {MARGIN_RESIDUAL_SD:.2f} points  \n"
-                f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'not historically validated; conservative grade gates retained'}"
+                f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'cover probabilities uncalibrated; v2.6 point-edge grades active'}"
             )
             st.caption(TEAM_RESIDUAL_STATUS)
             pricing = pd.DataFrame([
