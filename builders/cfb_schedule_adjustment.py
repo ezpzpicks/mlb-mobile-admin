@@ -325,28 +325,27 @@ def install_schedule_adjustment(cfb_builder: Any) -> None:
             old_away = _num(projection.get("away_points"), 28.0)
             old_home = _num(projection.get("home_points"), 28.0)
             old_total = _num(projection.get("total"), old_away + old_home)
+            old_margin = _num(projection.get("margin"), old_home - old_away)
 
-            new_away = max(3.0, old_away + away_correction)
-            new_home = max(3.0, old_home + home_correction)
-            final_total = float(np.clip(new_away + new_home, 14.0, 110.0))
-
-            # Preserve the schedule-adjusted team scoring changes while keeping the
-            # total inside production safety bounds.
-            if abs((new_away + new_home) - final_total) > 1e-9:
-                scale = final_total / max(1e-9, new_away + new_home)
-                new_away *= scale
-                new_home *= scale
+            # This layer is intentionally totals-only. The spread regression owns
+            # margin, so apply the two matchup corrections to total and then derive
+            # team scores algebraically around the unchanged margin.
+            final_total = float(np.clip(old_total + total_correction, 14.0, 110.0))
+            minimum_total = abs(old_margin) + 6.0
+            final_total = max(final_total, minimum_total)
+            new_home = (final_total + old_margin) / 2.0
+            new_away = (final_total - old_margin) / 2.0
 
             projection.update({
                 "away_points": float(new_away),
                 "home_points": float(new_home),
-                "margin": float(new_home - new_away),
-                "total": float(new_away + new_home),
+                "margin": float(old_margin),
+                "total": float(final_total),
                 "schedule_adjustment_applied": True,
                 "schedule_adjustment_base_total": float(old_total),
                 "schedule_adjustment_away_points": float(away_correction),
                 "schedule_adjustment_home_points": float(home_correction),
-                "schedule_adjustment_total_points": float((new_away + new_home) - old_total),
+                "schedule_adjustment_total_points": float(final_total - old_total),
                 "schedule_adjustment_league_mean": float(ctx.get("league_mean", 28.0)),
                 "schedule_adjustment_game_count": int(ctx.get("game_count", 0)),
                 "schedule_adjustment_away_profile": _profile_dict(away_profile),
