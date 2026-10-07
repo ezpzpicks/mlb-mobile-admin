@@ -38,15 +38,14 @@ SPREAD_B_POINT_EDGE = 8.0
 SPREAD_A_POINT_EDGE = 10.0
 SPREAD_NO_GRADE_THRESHOLD = 20.0
 
-# 2025 current-production FBS-vs-FBS holdout totals thresholds. Overs and
-# Unders are intentionally graded differently because the historical edge curve
-# was directionally asymmetric. Probability, Reliability, and Confluence remain
-# diagnostic only; actual entered price must still have positive no-vig edge and
-# positive EV or the play is vetoed below.
-TOTAL_UNDER_B_POINT_EDGE = 0.5
-TOTAL_UNDER_A_POINT_EDGE = 3.5
-TOTAL_OVER_B_MIN_POINT_EDGE = 2.0
-TOTAL_OVER_B_MAX_POINT_EDGE = 3.0
+# CFB v2.8 game-residual totals thresholds selected from the rolling 2026
+# no-lookahead backtest. The rebuilt model no longer shows the old directional
+# asymmetry, so Overs and Unders share one monotonic point-edge scale.
+# B-only (3.0 to <6.0): 36-25 (59.0%); A (6.0+): 24-8 (75.0%).
+# Probability, Reliability, and Confluence remain diagnostic only; actual entered
+# price must still have positive no-vig edge and positive EV or the play is vetoed.
+TOTAL_B_POINT_EDGE = 3.0
+TOTAL_A_POINT_EDGE = 6.0
 ATS_CALIBRATION_PROVEN = False
 
 # Historical roster/returning/portal candidates did not have usable 2024
@@ -172,21 +171,16 @@ def _grade_spread(
 
 
 def _grade_total(pick: str, point_edge: float, probability: float, reliability: float, confluence: int) -> str:
-    # The current-production 2025 holdout showed a strong, monotonic Under signal
-    # but only a narrow profitable Over window. Grade from directional point edge;
-    # probability/reliability/confluence are retained as context rather than gates.
+    # v2.8 uses one symmetric, monotonic point-edge ladder for Overs and Unders.
+    # Probability/reliability/confluence remain context rather than grade gates.
     edge = float(point_edge)
     direction = str(pick).strip().lower()
-    if direction.startswith("under"):
-        if edge >= TOTAL_UNDER_A_POINT_EDGE:
-            return "A Total"
-        if edge >= TOTAL_UNDER_B_POINT_EDGE:
-            return "B Total"
+    if not (direction.startswith("over") or direction.startswith("under")):
         return "No Play"
-    if direction.startswith("over"):
-        if TOTAL_OVER_B_MIN_POINT_EDGE <= edge <= TOTAL_OVER_B_MAX_POINT_EDGE + 1e-9:
-            return "B Total"
-        return "No Play"
+    if edge >= TOTAL_A_POINT_EDGE:
+        return "A Total"
+    if edge >= TOTAL_B_POINT_EDGE:
+        return "B Total"
     return "No Play"
 
 
@@ -336,6 +330,9 @@ def install_market_calibration(cfb_builder: Any) -> None:
         total["grade"] = _grade_total(
             total["pick"], total["model_edge_points"], total["probability"], reliability, total_conf
         )
+        total_support = list(total_support) + [
+            "v2.8 total point-edge grades: B ≥3 pts; A ≥6 pts (same thresholds for Overs and Unders)"
+        ]
         moneyline["grade"] = cfb_builder._grade_ml(
             moneyline["edge"], moneyline["ev"], reliability, ml_conf
         )
