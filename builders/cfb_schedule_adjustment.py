@@ -27,18 +27,19 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "cfb-v2.7-opponent-adjusted-scoring-2026-10-06"
+MODEL_VERSION = "cfb-v2.8-game-residual-totals-2026-10-06"
 ACTIVE_SEASON = 2026
 MIN_PRIOR_FBS_GAMES = 1
-RECENCY_DECAY = 0.86
-RIDGE_GAMES = 3.0
-ITERATIONS = 18
-OFFENSE_WEIGHT = 0.58
-DEFENSE_WEIGHT = 0.42
-TEAM_CORRECTION_CAP = 7.0
-TOTAL_CORRECTION_CAP = 12.0
+RECENCY_HALF_LIFE_DAYS = 28.0
+RIDGE_GAMES = 2.0
+ITERATIONS = 12
+HOME_FIELD_POINTS = 1.5
+TOTAL_CORRECTION_CAP = 6.0
+OFFENSE_RAMP_START = 3.0
+OFFENSE_RAMP_SLOPE = 0.50
+OFFENSE_RAMP_CAP = 1.50
 
-_CONTEXT_CACHE: dict[tuple[int, int], dict[str, Any]] = {}
+_CONTEXT_CACHE: dict[tuple[int, int, str], dict[str, Any]] = {}
 
 
 @dataclass
@@ -97,7 +98,7 @@ def _weighted_std(values: list[float], weights: list[float]) -> float:
     return float(math.sqrt(max(0.0, variance)))
 
 
-def _read_prior_games(cfb_builder: Any, season: int, week: int) -> pd.DataFrame:
+def _read_prior_games(cfb_builder: Any, season: int, week: int, target_date: str = "") -> pd.DataFrame:
     try:
         frame = cfb_builder.read_sheet(cfb_builder.SCHEDULE_TAB, cfb_builder.SCHEDULE_COLUMNS)
     except Exception:
@@ -120,9 +121,15 @@ def _read_prior_games(cfb_builder: Any, season: int, week: int) -> pd.DataFrame:
     completed = data["Completed"].map(_truthy)
     away_fbs = data["Away Classification"].astype(str).str.strip().str.lower().eq("fbs")
     home_fbs = data["Home Classification"].astype(str).str.strip().str.lower().eq("fbs")
+    game_dates = pd.to_datetime(data.get("Game Date", pd.Series(index=data.index, dtype=object)), errors="coerce")
+    cutoff = pd.to_datetime(target_date, errors="coerce") if target_date else pd.NaT
+    if pd.notna(cutoff):
+        prior_mask = game_dates.dt.normalize().lt(cutoff.normalize())
+    else:
+        prior_mask = data["Week"].lt(int(week))
     mask = (
         data["Season"].eq(int(season))
-        & data["Week"].lt(int(week))
+        & prior_mask
         & completed
         & away_fbs
         & home_fbs
@@ -137,10 +144,13 @@ def _read_prior_games(cfb_builder: Any, season: int, week: int) -> pd.DataFrame:
     data["Away Canon"] = data["Away Team"].map(canon)
     data["Home Canon"] = data["Home Team"].map(canon)
     data = data[(data["Away Canon"] != "") & (data["Home Canon"] != "")].copy()
-    data["Recency Weight"] = np.power(
-        RECENCY_DECAY,
-        np.maximum(0.0, float(week) - data["Week"].astype(float) - 1.0),
-    )
+    if pd.notna(cutoff):
+        age_days = (cutoff.normalize() - game_dates.loc[data.index].dt.normalize()).dt.days.clip(lower=0)
+        data["Recency Weight"] = np.power(0.5, age_days.astype(float) / RECENCY_HALF_LIFE_DAYS)
+    else:
+        # Seven days per week is only a fallback for malformed/missing dates.
+        age_days = np.maximum(0.0, (float(week) - data["Week"].astype(float)) * 7.0)
+        data["Recency Weight"] = np.power(0.5, age_days / RECENCY_HALF_LIFE_DAYS)
     return data
 
 
@@ -155,8 +165,8 @@ def _observations(games: pd.DataFrame) -> list[dict[str, Any]]:
         home_score = _num(row.get("Home Score"), np.nan)
         if not away or not home or not math.isfinite(away_score) or not math.isfinite(home_score):
             continue
-        obs.append({"team": away, "opp": home, "points": away_score, "week": week, "weight": weight})
-        obs.append({"team": home, "opp": away, "points": home_score, "week": week, "weight": weight})
+        obs.append({"team": away, "opp": home, "points": away_score, "week": week, "weight": weight, "home": False})
+        obs.append({"team": home, "opp": away, "points": home_score, "week": week, "weight": weight, "home": True})
     return obs
 
 
@@ -184,19 +194,29 @@ def _fit_network(games: pd.DataFrame) -> dict[str, Any]:
         next_offense: dict[str, float] = {}
         for team in teams:
             rows = by_offense.get(team, [])
-            vals = [float(r["points"]) - league_mean - defense_allow.get(str(r["opp"]), 0.0) for r in rows]
+            vals = [
+                float(r["points"])
+                - (league_mean + defense_allow.get(str(r["opp"]), 0.0)
+                   + (HOME_FIELD_POINTS if bool(r.get("home")) else -HOME_FIELD_POINTS))
+                for r in rows
+            ]
             weights = [float(r["weight"]) for r in rows]
             weight_sum = sum(weights)
-            shrink = weight_sum / (weight_sum + RIDGE_GAMES) if weight_sum > 0 else 0.0
+            shrink = len(rows) / (len(rows) + RIDGE_GAMES) if rows else 0.0
             next_offense[team] = float(np.clip(_weighted_mean(vals, weights, 0.0) * shrink, -18.0, 18.0))
 
         next_defense: dict[str, float] = {}
         for team in teams:
             rows = by_defense.get(team, [])
-            vals = [float(r["points"]) - league_mean - next_offense.get(str(r["team"]), 0.0) for r in rows]
+            vals = [
+                float(r["points"])
+                - (league_mean + next_offense.get(str(r["team"]), 0.0)
+                   + (HOME_FIELD_POINTS if bool(r.get("home")) else -HOME_FIELD_POINTS))
+                for r in rows
+            ]
             weights = [float(r["weight"]) for r in rows]
             weight_sum = sum(weights)
-            shrink = weight_sum / (weight_sum + RIDGE_GAMES) if weight_sum > 0 else 0.0
+            shrink = len(rows) / (len(rows) + RIDGE_GAMES) if rows else 0.0
             next_defense[team] = float(np.clip(_weighted_mean(vals, weights, 0.0) * shrink, -18.0, 18.0))
 
         offense = next_offense
@@ -213,11 +233,17 @@ def _fit_network(games: pd.DataFrame) -> dict[str, Any]:
         def_weights = [float(r["weight"]) for r in defensive_rows]
 
         offense_residuals = [
-            float(r["points"]) - (league_mean + defense_allow.get(str(r["opp"]), 0.0))
+            float(r["points"]) - (
+                league_mean + defense_allow.get(str(r["opp"]), 0.0)
+                + (HOME_FIELD_POINTS if bool(r.get("home")) else -HOME_FIELD_POINTS)
+            )
             for r in offensive_rows
         ]
         defense_residuals = [
-            (league_mean + offense.get(str(r["team"]), 0.0)) - float(r["points"])
+            float(r["points"]) - (
+                league_mean + offense.get(str(r["team"]), 0.0)
+                + (HOME_FIELD_POINTS if bool(r.get("home")) else -HOME_FIELD_POINTS)
+            )
             for r in defensive_rows
         ]
 
@@ -237,12 +263,12 @@ def _fit_network(games: pd.DataFrame) -> dict[str, Any]:
     return {"league_mean": float(league_mean), "profiles": profiles, "observations": obs}
 
 
-def _context(cfb_builder: Any, season: int, week: int) -> dict[str, Any]:
-    key = (int(season), int(week))
+def _context(cfb_builder: Any, season: int, week: int, target_date: str = "") -> dict[str, Any]:
+    key = (int(season), int(week), str(target_date or ""))
     cached = _CONTEXT_CACHE.get(key)
     if cached is not None:
         return cached
-    games = _read_prior_games(cfb_builder, season, week)
+    games = _read_prior_games(cfb_builder, season, week, target_date)
     value = _fit_network(games)
     value["game_count"] = int(len(games))
     if not games.empty:
@@ -267,14 +293,34 @@ def _profile_dict(profile: TeamScheduleProfile | None) -> dict[str, float]:
     }
 
 
-def _team_schedule_correction(
-    offense_profile: TeamScheduleProfile,
-    defense_profile: TeamScheduleProfile,
-) -> float:
-    offense_schedule_delta = offense_profile.adjusted_ppg - offense_profile.raw_ppg
-    defense_schedule_delta = defense_profile.adjusted_papg - defense_profile.raw_papg
-    correction = OFFENSE_WEIGHT * offense_schedule_delta + DEFENSE_WEIGHT * defense_schedule_delta
-    return float(np.clip(correction, -TEAM_CORRECTION_CAP, TEAM_CORRECTION_CAP))
+def _matchup_adjustments(
+    away_profile: TeamScheduleProfile,
+    home_profile: TeamScheduleProfile,
+) -> tuple[float, float, float]:
+    """Return schedule correction, offense ramp, and combined total adjustment.
+
+    The schedule component exactly mirrors the validated rolling audit:
+      away offense + home offense + away defense allowance + home defense allowance
+    Positive defense allowance means the defense permits more scoring than average.
+
+    That schedule component is capped at +/-6 points. A small smooth offensive
+    acceleration is then added when combined adjusted offensive strength exceeds
+    +3, rising 0.5 points per strength point and capped at +1.5.
+    """
+    raw_schedule = (
+        away_profile.offense_strength
+        + home_profile.offense_strength
+        + away_profile.defense_allowance
+        + home_profile.defense_allowance
+    )
+    schedule_correction = float(np.clip(raw_schedule, -TOTAL_CORRECTION_CAP, TOTAL_CORRECTION_CAP))
+    combined_offense = away_profile.offense_strength + home_profile.offense_strength
+    offense_ramp = float(np.clip(
+        (combined_offense - OFFENSE_RAMP_START) * OFFENSE_RAMP_SLOPE,
+        0.0,
+        OFFENSE_RAMP_CAP,
+    ))
+    return schedule_correction, offense_ramp, schedule_correction + offense_ramp
 
 
 def install_schedule_adjustment(cfb_builder: Any) -> None:
@@ -291,7 +337,8 @@ def install_schedule_adjustment(cfb_builder: Any) -> None:
         week = int(_num(game.get("Week"), 1.0))
 
         try:
-            ctx = _context(cfb_builder, season, week)
+            target_date = str(game.get("Game Date") or game.get("Date") or "")[:10]
+            ctx = _context(cfb_builder, season, week, target_date)
             profiles: dict[str, TeamScheduleProfile] = ctx.get("profiles", {})
             canon = _canonicalizer(cfb_builder)
             away = canon(game.get("Away Team"))
@@ -312,15 +359,9 @@ def install_schedule_adjustment(cfb_builder: Any) -> None:
                 })
                 return projection
 
-            away_correction = _team_schedule_correction(away_profile, home_profile)
-            home_correction = _team_schedule_correction(home_profile, away_profile)
-            raw_total_correction = away_correction + home_correction
-            total_correction = float(np.clip(raw_total_correction, -TOTAL_CORRECTION_CAP, TOTAL_CORRECTION_CAP))
-
-            if abs(raw_total_correction) > 1e-9 and abs(total_correction - raw_total_correction) > 1e-9:
-                scale = total_correction / raw_total_correction
-                away_correction *= scale
-                home_correction *= scale
+            schedule_correction, offense_ramp, total_correction = _matchup_adjustments(
+                away_profile, home_profile
+            )
 
             old_away = _num(projection.get("away_points"), 28.0)
             old_home = _num(projection.get("home_points"), 28.0)
@@ -343,8 +384,15 @@ def install_schedule_adjustment(cfb_builder: Any) -> None:
                 "total": float(final_total),
                 "schedule_adjustment_applied": True,
                 "schedule_adjustment_base_total": float(old_total),
-                "schedule_adjustment_away_points": float(away_correction),
-                "schedule_adjustment_home_points": float(home_correction),
+                "schedule_adjustment_raw_schedule_points": float(
+                    away_profile.offense_strength + home_profile.offense_strength
+                    + away_profile.defense_allowance + home_profile.defense_allowance
+                ),
+                "schedule_adjustment_capped_schedule_points": float(schedule_correction),
+                "schedule_adjustment_combined_offense_strength": float(
+                    away_profile.offense_strength + home_profile.offense_strength
+                ),
+                "schedule_adjustment_offense_ramp_points": float(offense_ramp),
                 "schedule_adjustment_total_points": float(final_total - old_total),
                 "schedule_adjustment_league_mean": float(ctx.get("league_mean", 28.0)),
                 "schedule_adjustment_game_count": int(ctx.get("game_count", 0)),
