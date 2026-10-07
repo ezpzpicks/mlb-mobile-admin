@@ -188,7 +188,7 @@ if selected_sport not in valid_sports:
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
-    "CFB": "cfb-v2.7-opponent-adjusted-scoring-2026-10-06",
+    "CFB": "cfb-v2.8-game-residual-totals-2026-10-06",
     "NFL": "nfl-v4.14-atd-engine-calibration-2026-09-20",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
@@ -234,7 +234,7 @@ elif selected_sport == "CFB":
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
     _install_cfb_evaluation_cache(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.7-opponent-adjusted-scoring-2026-10-06"
+    cfb_builder.MODEL_VERSION = "cfb-v2.8-game-residual-totals-2026-10-06"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
