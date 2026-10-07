@@ -183,12 +183,12 @@ if selected_sport not in valid_sports:
                     _set_sport(sport)
                     st.rerun()
 
-    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models plus TE1 receiving-yard projections. CFB now combines the validated spread-margin regression, independent pace/efficiency totals regression, and the 2026 Week-5+ five-variable regime correction while retaining live personnel/weather overlays plus calibrated market evaluation. CBB remains a foundation model for setup and shadow testing.")
+    st.caption("MLB remains the production engine. NFL includes regression game and QB/RB/WR yardage models plus TE1 receiving-yard projections. CFB now combines the validated spread-margin regression, independent pace/efficiency totals regression, game-by-game opponent-adjusted scoring/schedule correction, and the 2026 Week-5+ five-variable regime correction while retaining live personnel/weather overlays plus calibrated market evaluation. CBB remains a foundation model for setup and shadow testing.")
     st.stop()
 
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
-    "CFB": "cfb-v2.6-2026-regime-edge-2026-10-02",
+    "CFB": "cfb-v2.7-opponent-adjusted-scoring-2026-10-06",
     "NFL": "nfl-v4.14-atd-engine-calibration-2026-09-20",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
@@ -218,6 +218,7 @@ elif selected_sport == "CFB":
     from builders.cfb_save_type_guard import install_save_type_guard
     from builders.cfb_game_regression import install_regression_layer
     from builders.cfb_total_regression import install_total_regression
+    from builders.cfb_schedule_adjustment import install_schedule_adjustment
     from builders.cfb_2026_regime import install_regime_adjustment
     from builders.cfb_market_calibration import install_market_calibration
     from builders.cfb_covers import install_covers_layer
@@ -227,12 +228,13 @@ elif selected_sport == "CFB":
     install_save_type_guard(cfb_builder)
     install_regression_layer(cfb_builder)
     install_total_regression(cfb_builder)
+    install_schedule_adjustment(cfb_builder)
     install_regime_adjustment(cfb_builder)
     install_market_calibration(cfb_builder)
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
     _install_cfb_evaluation_cache(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.6-2026-regime-edge-2026-10-02"
+    cfb_builder.MODEL_VERSION = "cfb-v2.7-opponent-adjusted-scoring-2026-10-06"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
