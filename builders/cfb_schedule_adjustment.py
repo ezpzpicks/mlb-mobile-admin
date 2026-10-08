@@ -2,7 +2,8 @@
 
 This layer measures scoring ability game-by-game relative to each opponent instead
 of trusting raw season scoring averages. It fits a small recursive scoring network
-from completed FBS-vs-FBS games before the projection week:
+from each team's five most recent completed FBS-vs-FBS games before the
+projected game, including the preceding season when needed:
 
     points = league_mean + offense_strength + defense_allowance
 
@@ -14,22 +15,24 @@ baseline pace/efficiency model.
 Positive defense_allowance means a defense allows more scoring than an average
 FBS defense after opponent adjustment. Negative means it suppresses scoring.
 
-Every historical game remains an individual observation, with recency weighting
+Each selected game remains an individual observation, with recency weighting
 and empirical shrinkage toward the FBS mean. FCS/non-FBS games are intentionally
 excluded from this correction.
 """
 from __future__ import annotations
 
 import math
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-MODEL_VERSION = "cfb-v2.8-game-residual-totals-2026-10-06"
+MODEL_VERSION = "cfb-v2.8.1-five-game-residual-totals-2026-10-07"
 ACTIVE_SEASON = 2026
 MIN_PRIOR_FBS_GAMES = 1
+PRIOR_FBS_GAMES = 5
 RECENCY_HALF_LIFE_DAYS = 28.0
 RIDGE_GAMES = 2.0
 ITERATIONS = 12
@@ -124,11 +127,14 @@ def _read_prior_games(cfb_builder: Any, season: int, week: int, target_date: str
     game_dates = pd.to_datetime(data.get("Game Date", pd.Series(index=data.index, dtype=object)), errors="coerce")
     cutoff = pd.to_datetime(target_date, errors="coerce") if target_date else pd.NaT
     if pd.notna(cutoff):
+        # Exclude the entire target date, even if a result has already posted.
         prior_mask = game_dates.dt.normalize().lt(cutoff.normalize())
     else:
-        prior_mask = data["Week"].lt(int(week))
+        prior_mask = data["Season"].lt(int(season)) | (
+            data["Season"].eq(int(season)) & data["Week"].lt(int(week))
+        )
     mask = (
-        data["Season"].eq(int(season))
+        data["Season"].le(int(season))
         & prior_mask
         & completed
         & away_fbs
@@ -143,15 +149,42 @@ def _read_prior_games(cfb_builder: Any, season: int, week: int, target_date: str
     canon = _canonicalizer(cfb_builder)
     data["Away Canon"] = data["Away Team"].map(canon)
     data["Home Canon"] = data["Home Team"].map(canon)
-    data = data[(data["Away Canon"] != "") & (data["Home Canon"] != "")].copy()
+    data = data[
+        (data["Away Canon"] != "") & (data["Home Canon"] != "")
+        & (data["Away Canon"] != data["Home Canon"])
+    ].copy()
+    if data.empty:
+        return data
+
+    # A matchup can be in one team's last five without being in its opponent's.
+    # Keep the union for network fitting, but mark which team actually selected it.
+    data["_game_date"] = game_dates.loc[data.index]
+    data = data.sort_values(
+        ["_game_date", "Season", "Week"], na_position="first", kind="stable"
+    ).reset_index(drop=True)
+    data["Away History"] = False
+    data["Home History"] = False
+    selected: dict[str, int] = defaultdict(int)
+    for index in range(len(data) - 1, -1, -1):
+        for side in ("Away", "Home"):
+            team = data.at[index, f"{side} Canon"]
+            if selected[team] < PRIOR_FBS_GAMES:
+                data.at[index, f"{side} History"] = True
+                selected[team] += 1
+    data = data.loc[data["Away History"] | data["Home History"]].copy()
+
     if pd.notna(cutoff):
-        age_days = (cutoff.normalize() - game_dates.loc[data.index].dt.normalize()).dt.days.clip(lower=0)
+        age_days = (cutoff.normalize() - data["_game_date"].dt.normalize()).dt.days.clip(lower=0)
         data["Recency Weight"] = np.power(0.5, age_days.astype(float) / RECENCY_HALF_LIFE_DAYS)
     else:
-        # Seven days per week is only a fallback for malformed/missing dates.
-        age_days = np.maximum(0.0, (float(week) - data["Week"].astype(float)) * 7.0)
+        # Only used when the projected game's date is missing.
+        age_days = np.maximum(
+            0.0,
+            (float(season) - data["Season"].astype(float)) * 365.25
+            + (float(week) - data["Week"].astype(float)) * 7.0,
+        )
         data["Recency Weight"] = np.power(0.5, age_days / RECENCY_HALF_LIFE_DAYS)
-    return data
+    return data.drop(columns="_game_date")
 
 
 def _observations(games: pd.DataFrame) -> list[dict[str, Any]]:
@@ -165,8 +198,18 @@ def _observations(games: pd.DataFrame) -> list[dict[str, Any]]:
         home_score = _num(row.get("Home Score"), np.nan)
         if not away or not home or not math.isfinite(away_score) or not math.isfinite(home_score):
             continue
-        obs.append({"team": away, "opp": home, "points": away_score, "week": week, "weight": weight, "home": False})
-        obs.append({"team": home, "opp": away, "points": home_score, "week": week, "weight": weight, "home": True})
+        obs.append({
+            "team": away, "opp": home, "points": away_score, "week": week,
+            "weight": weight, "home": False,
+            "team_in_window": bool(row.get("Away History", True)),
+            "opp_in_window": bool(row.get("Home History", True)),
+        })
+        obs.append({
+            "team": home, "opp": away, "points": home_score, "week": week,
+            "weight": weight, "home": True,
+            "team_in_window": bool(row.get("Home History", True)),
+            "opp_in_window": bool(row.get("Away History", True)),
+        })
     return obs
 
 
@@ -175,9 +218,10 @@ def _fit_network(games: pd.DataFrame) -> dict[str, Any]:
     if not obs:
         return {"league_mean": 28.0, "profiles": {}, "observations": []}
 
+    selected_scores = [o for o in obs if o["team_in_window"]]
     league_mean = _weighted_mean(
-        [float(o["points"]) for o in obs],
-        [float(o["weight"]) for o in obs],
+        [float(o["points"]) for o in selected_scores],
+        [float(o["weight"]) for o in selected_scores],
         28.0,
     )
     teams = sorted({str(o["team"]) for o in obs} | {str(o["opp"]) for o in obs})
@@ -187,8 +231,10 @@ def _fit_network(games: pd.DataFrame) -> dict[str, Any]:
     by_offense: dict[str, list[dict[str, Any]]] = {team: [] for team in teams}
     by_defense: dict[str, list[dict[str, Any]]] = {team: [] for team in teams}
     for o in obs:
-        by_offense[str(o["team"])].append(o)
-        by_defense[str(o["opp"])].append(o)
+        if o["team_in_window"]:
+            by_offense[str(o["team"])].append(o)
+        if o["opp_in_window"]:
+            by_defense[str(o["opp"])].append(o)
 
     for _ in range(ITERATIONS):
         next_offense: dict[str, float] = {}
