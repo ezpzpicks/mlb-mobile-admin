@@ -26,6 +26,22 @@ def _patch_cfb_builder(module: Any) -> Any:
     original_get_cached_ratings = module._get_cached_ratings
     original_ratings_are_fresh = module._ratings_are_fresh
     original_espn_games_payload = module._espn_games_payload
+    original_schedule_for_season = module._schedule_for_season
+    final_backfill_lock = threading.Lock()
+
+    def _schedule_for_season_with_saved_finals(season: int, preferred_provider: str = "") -> Any:
+        from .cfb_result_backfill import preserve_saved_finals
+
+        schedule = original_schedule_for_season(season, preferred_provider)
+        if schedule is None or schedule.empty:
+            return schedule
+        # A season-file sync may be older than the ESPN finals already verified
+        # in Turso. Do not erase those scores when the schedule is refreshed.
+        return preserve_saved_finals(
+            module._sheet(module.SCHEDULE_TAB, module.SCHEDULE_COLUMNS), schedule
+        )
+
+    module._schedule_for_season = _schedule_for_season_with_saved_finals
 
     def _cfb_storage_active() -> bool:
         try:
@@ -344,11 +360,67 @@ def _patch_cfb_builder(module: Any) -> Any:
             return module.pd.DataFrame(columns=module.SCHEDULE_COLUMNS)
         return module.pd.DataFrame(rows, columns=module.SCHEDULE_COLUMNS).sort_values(["Week", "Game Date", "Game Time"])
 
+    def _backfill_stored_finals(season: int, schedule: Any) -> Any:
+        """Check older weeks once daily before using saved scores in projections."""
+        if not _cfb_storage_active() or not module.sheets_ready():
+            return schedule
+        today = date.today()
+        check_key = f"cfb_final_score_check_{season}_{today.isoformat()}"
+        with final_backfill_lock:
+            if module.st.session_state.get(check_key):
+                return schedule
+            module.st.session_state[check_key] = True
+
+        try:
+            from .cfb_result_backfill import missing_final_updates
+
+            stored = module._sheet(module.SCHEDULE_TAB, module.SCHEDULE_COLUMNS)
+
+            def fetch_week(year: int, season_type: int, week: int) -> list[dict[str, Any]]:
+                payload = module._public_json_get(
+                    f"{module.ESPN_SITE_BASE}/scoreboard",
+                    {"dates": year, "limit": 500, "groups": 80,
+                     "seasontype": season_type, "week": week},
+                    optional=True,
+                    max_age=3600 if year >= today.year else 86400 * 30,
+                )
+                return payload.get("events", []) if isinstance(payload, dict) else []
+
+            updates, coverage = missing_final_updates(
+                stored, {int(season), int(season) - 1}, today, fetch_week
+            )
+            if updates.empty:
+                return schedule
+
+            combined = module.pd.concat([stored, updates], ignore_index=True)
+            combined = combined.drop_duplicates(["Season", "Game ID"], keep="last")
+            combined = combined.reindex(columns=module.SCHEDULE_COLUMNS).fillna("")
+            if not module.write_sheet(module.SCHEDULE_TAB, combined, module.SCHEDULE_COLUMNS):
+                raise RuntimeError("Could not persist verified ESPN final scores")
+            module.st.session_state[f"cfb_sheet_cache::{module.SCHEDULE_TAB}"] = combined.copy()
+            for key in list(module.st.session_state):
+                if str(key).startswith("cfb_auto_schedule_"):
+                    del module.st.session_state[key]
+            try:
+                from . import cfb_schedule_adjustment
+                cfb_schedule_adjustment._CONTEXT_CACHE.clear()
+            except Exception:
+                pass
+            print(
+                f"[cfb-final-backfill] season={season} verified={coverage['updated']} "
+                f"of {coverage['candidates']} missing finals across {coverage['weeks']} weeks"
+            )
+            return combined[combined["Season"].astype(str) == str(season)].copy()
+        except Exception as exc:
+            module.st.session_state.pop(check_key, None)
+            _set_schedule_warning(f"Historical final-score backfill: {exc}")
+            return schedule
+
     def _ensure_automatic_schedule(season: int, provider: str = "", force: bool = False) -> Any:
         schedule = original_ensure_schedule(season, provider, force)
         if schedule is not None and not schedule.empty:
             _clear_schedule_warning()
-            return schedule
+            return _backfill_stored_finals(season, schedule)
 
         fallback = _trend_schedule_fallback(season)
         if fallback is not None and not fallback.empty:
