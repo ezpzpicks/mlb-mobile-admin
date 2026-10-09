@@ -1,6 +1,8 @@
 # NFL directional tier candidate — October 8, 2026
 
-Status: candidate only. The deployed v4.27 model remains unchanged.
+Status: v4.28 approved for production release on October 8, 2026.
+The comparison below and the JSON release-status field describe the evaluation
+performed while v4.27 was deployed and v4.28 was a candidate.
 
 Evaluation target: correct Over/Under calls against saved market lines. Primary
 comparisons are win/loss records, Over and Under separately, unchanged Strong and
@@ -176,8 +178,9 @@ are not committed. The script never writes production storage.
 receiver rows and directional summaries are saved in
 `research/results/nfl_directional_tier_bet_records_2026-10-08.json`.
 
-The candidate is prepared for review. Directional performance is the decision
-criterion. Week 4 all-call results decline and Strong/Regular records tie; the
-sensitivity replay adds one winning graded selection. This limited evidence does
-not establish an advantage for the full reversal. Retain current production
-weighting while gathering prospective results and evaluating other tiered markets.
+The directional tier policy is approved for release as v4.28. Directional
+performance remains the evaluation criterion. Week 4 all-call results decline
+and Strong/Regular records tie; the sensitivity replay adds one winning graded
+selection. These results do not establish an empirical advantage for the full
+reversal. They provide a baseline for prospective results and evaluation of
+other tiered markets under the unchanged grading rules.
