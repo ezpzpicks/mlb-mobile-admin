@@ -651,10 +651,22 @@ def _tier_from_ratio(ratio: float) -> str:
     return "Tier 5"
 
 
+def _directional_tier_weight(base_factor: float, tier_weight: float) -> float:
+    """Protect stronger inputs from penalties and amplify their positive boosts.
+
+    Negative adjustments keep the Tier 1-5 weights 0, 0.5, 1, 1.5, 2.
+    Positive adjustments reverse them to 2, 1.5, 1, 0.5, 0. The direction
+    belongs to the individual opportunity/efficiency adjustment, not the
+    opponent's overall reputation or a single player-wide tier.
+    """
+    negative_weight = _num(tier_weight, 1.0)
+    return 2.0 - negative_weight if base_factor > 1.0 else negative_weight
+
+
 def _scaled_matchup_factor(base_factor: float, tier_weight: float) -> float:
-    """Scale only the matchup deviation by one variable's tier weight."""
+    """Scale the matchup deviation by the input's directional tier weight."""
     base_factor = max(0.01, float(base_factor))
-    scaled = 1.0 + (base_factor - 1.0) * float(tier_weight)
+    scaled = 1.0 + (base_factor - 1.0) * _directional_tier_weight(base_factor, tier_weight)
     return float(np.clip(scaled, 0.65, 1.35))
 
 
@@ -819,9 +831,19 @@ def _variable_scaled_matchup_factor(
     scaled_deviation = 0.0
     for item in variables:
         share = max(0.0, _num(item.get("share"), 0.0)) / total_share
-        weight = _num(item.get("weight"), 1.0)
+        weight = _directional_tier_weight(base_factor, _num(item.get("weight"), 1.0))
         scaled_deviation += deviation * share * weight
     return float(np.clip(1.0 + scaled_deviation, 0.65, 1.35))
+
+
+def _variable_tier_description(base_factor: float, variables: list[dict[str, Any]]) -> str:
+    """Expose the effective boost/penalty weights rather than the stored negative weights."""
+    direction = "boost" if base_factor > 1.0 else "penalty" if base_factor < 1.0 else "neutral"
+    return ", ".join(
+        f"{item['label']} {item['tier']}@"
+        f"{_directional_tier_weight(base_factor, _num(item.get('weight'), 1.0)):.0%} {direction}"
+        for item in variables
+    )
 
 
 def _broad_matchup_factor(row: dict[str, Any] | None, market: str) -> tuple[float, float, float]:
@@ -1082,10 +1104,8 @@ def _apply_slot_overlay(
                 items = variable_tiers.get(side, [])
                 if not items:
                     continue
-                detail = ", ".join(
-                    f"{item['label']} {item['tier']}@{item['weight']:.0%}"
-                    for item in items
-                )
+                base_factor = base_opp_factor if side == "opportunity" else base_eff_factor
+                detail = _variable_tier_description(base_factor, items)
                 parts.append(f"{side}: {detail}")
             if parts:
                 row["Confluence"] = f"{current} • variable tiers: {' | '.join(parts)}".strip(" •")
