@@ -22,6 +22,7 @@ from builders import nfl_builder as builder, nfl_slot_matchups as slots
 from builders import nfl_skill_prop_regression as regression
 import shared.auth  # noqa: F401; the complete production wrapper chain
 from builders.nfl_wr_receiving_v419 import _wr_matchup_factors
+from research.nfl_prop_directional_scoring import directional_report, finite_number
 
 
 def metrics(rows: list[dict], field: str) -> dict:
@@ -43,6 +44,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     source = args.inputs_dir
+    slots.install_slot_matchup_layer(builder)
+    assert getattr(builder, "_UNIFIED_PROP_GRADING_INSTALLED", False)
     stored = json.loads((source / "positive-tier-historical-inputs.json").read_text())
     lineups = pd.DataFrame([item["row"] for item in stored if item["dataset"] == "lineup_snapshots"])
     schedule = pd.DataFrame(json.loads((source / "nfl-saved-inputs.json").read_text())["schedule"])
@@ -124,6 +127,10 @@ def main() -> None:
             factors = _wr_matchup_factors(builder, 2026, week, old["Opponent"], old["Slot"], player, profiles)
         finally:
             slots._directional_tier_weight = directional_weight
+        # Reprice both rows under the same installed production evaluator. Do not
+        # reuse saved probabilities/grades from the older historical model.
+        evaluated = builder._evaluate_prop_rows(pd.DataFrame([current, candidate]))
+        current_priced, candidate_priced = evaluated.iloc[0], evaluated.iloc[1]
         results.append({
             **identity, "actual": float(actuals[actual_key]),
             "baseline": round(float(targets * (0.2 * efficiency + 0.8 * 8.15)), 3),
@@ -131,6 +138,12 @@ def main() -> None:
             "current_factor": float(current["Matchup Index"]), "candidate_factor": float(candidate["Matchup Index"]),
             "target_adjustment": factors["target_adjustment"], "yardage_adjustment": factors["slot_adjustment"],
             "opportunity_base_factor": factors["opportunity_base_factor"], "efficiency_base_factor": factors["efficiency_base_factor"],
+            "market_line": finite_number(old.get("Market Line")),
+            "over_odds": finite_number(old.get("Over Odds")), "under_odds": finite_number(old.get("Under Odds")),
+            "line_source": str(old.get("Line Source", "")),
+            "current_grade": str(current_priced["Grade"]), "candidate_grade": str(candidate_priced["Grade"]),
+            "current_probability_edge": finite_number(current_priced["Probability Edge"]),
+            "candidate_probability_edge": finite_number(candidate_priced["Probability Edge"]),
         })
     groups = {"all": results}
     for slot in ("WR1", "WR2"):
@@ -146,6 +159,7 @@ def main() -> None:
     report = {
         "baseline_method": args.baseline, "weeks": args.weeks,
         "summary": summary, "exclusions": exclusions, "rows": results,
+        "directional": directional_report(results),
         "negative_residual_but_candidate_boost": sum(row["yardage_adjustment"] < 0 and row["candidate_factor"] > 1.0 for row in results),
         "mixed_component_signs": sum((row["opportunity_base_factor"]-1)*(row["efficiency_base_factor"]-1) < 0 for row in results),
         "limitations": [
@@ -153,12 +167,20 @@ def main() -> None:
             "Historical profiles use weekly NGS rows only for 2026; season-summary week-0 rows are excluded to prevent look-ahead.",
             "Unmatched official player/team/week stat records are excluded; absence is not silently treated as zero yards.",
             "Stored receiving regression inputs are rounded, so saved-calibration results are approximate.",
+            "Directional scoring uses saved manual market lines; projection ties are no picks and actual ties are pushes.",
+            "Both versions are repriced with the same current simulator and unchanged Strong/Regular gates; historical grades are not reused.",
+            "Saved rows have dates but no immutable intraday line history; lines are not independently verified closing prices.",
         ],
     }
     if args.baseline == "core-regression":
         report["limitations"].append("Sensitivity analysis uses saved game-score forecasts and omits historical live efficiency overlays; it is not a full production rebuild.")
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False))
-    print(json.dumps({key: report[key] for key in ("baseline_method", "weeks", "summary", "negative_residual_but_candidate_boost", "mixed_component_signs")}), flush=True)
+    print(json.dumps({
+        "baseline_method": args.baseline, "weeks": args.weeks,
+        "directional_summary": report["directional"]["summary"]["all"],
+        "changed_calls": {key: value for key, value in report["directional"]["changed_calls"].items() if key != "rows"},
+        "publishable_changes": report["directional"]["publishable_changes"],
+    }), flush=True)
     print(json.dumps({"exclusions": len(exclusions)}), flush=True)
 
 
