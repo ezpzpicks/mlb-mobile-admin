@@ -107,6 +107,8 @@ def _wr_matchup_factors(
     # Keep targets, YPT and the simulation's catch rate consistent with the cap.
     efficiency_factor *= final_factor / combined
     return {
+        "opportunity_base_factor": target_factor,
+        "efficiency_base_factor": yardage_factor / target_factor,
         "opportunity_factor": opportunity_factor,
         "efficiency_factor": efficiency_factor,
         "final_factor": final_factor,
@@ -283,9 +285,8 @@ def _install() -> None:
             f"YPT {candidate['efficiency_factor']:.3f}x => {candidate['final_factor']:.3f}x"
         )
         tier_parts = [
-            f"{side}: " + ", ".join(
-                f"{item['label']} {item['tier']}@{item['weight']:.0%}"
-                for item in candidate["tiers"].get(side, [])
+            f"{side}: " + slot_matchups._variable_tier_description(
+                candidate[f"{side}_base_factor"], candidate["tiers"].get(side, [])
             )
             for side in ("opportunity", "efficiency")
         ]

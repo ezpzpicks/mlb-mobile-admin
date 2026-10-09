@@ -8,7 +8,7 @@ import pandas as pd
 
 from builders import nfl_builder as builder
 from builders import nfl_slot_matchups as slots
-import shared.auth  # noqa: F401; install the same v4.19-v4.27 chain as production
+import shared.auth  # noqa: F401; install the same full wrapper chain as production
 
 
 def peer_profiles(slot: str, relative: float) -> tuple[pd.DataFrame, dict]:
@@ -53,6 +53,19 @@ def receiving_row() -> dict:
 def main() -> None:
     original_profile = slots.slot_matchup_profile
     try:
+        # Verify all five tiers and their direction-specific, uncapped slopes.
+        for tier_number, negative_weight in enumerate((0.0, 0.5, 1.0, 1.5, 2.0), start=1):
+            variable = [{"share": 1.0, "weight": negative_weight}]
+            for factor in (0.9, 1.0, 1.1):
+                effective_weight = 2.0 - negative_weight if factor > 1.0 else negative_weight
+                expected = 1.0 + (factor - 1.0) * effective_weight
+                actual = slots._variable_scaled_matchup_factor(factor, variable)
+                assert math.isclose(actual, expected), (tier_number, factor, actual, expected)
+                assert math.isclose(slots._scaled_matchup_factor(factor, negative_weight), expected)
+        mixed = [{"share": 0.75, "weight": 0.0}, {"share": 0.25, "weight": 2.0}]
+        assert math.isclose(slots._variable_scaled_matchup_factor(0.9, mixed), 0.95)
+        assert math.isclose(slots._variable_scaled_matchup_factor(1.1, mixed), 1.15)
+
         for slot in ("WR1", "WR2"):
             for sign in (-1, 0, 1):
                 def matchup_profile(*args, **kwargs):
@@ -78,15 +91,21 @@ def main() -> None:
                     assert result["Calibration Adjustment"] == 0.0
 
                 strong, ordinary, weak = outputs
-                # An elite receiver keeps his skill baseline even against an extreme
-                # defense. This catches the v4.19 post-tier overwrite directly.
-                assert strong["Projection"] == 81.5, (slot, sign, strong)
-                assert strong["Matchup Index"] == 1.0
-                assert abs(strong["Projection"] - 81.5) <= abs(ordinary["Projection"] - 81.5)
-                assert abs(ordinary["Projection"] - 81.5) <= abs(weak["Projection"] - 81.5)
+                # Elite inputs resist penalties and receive the largest positive
+                # boosts; weaker inputs have the reverse behavior.
+                assert strong["Projection"] >= ordinary["Projection"] >= weak["Projection"]
                 if sign:
                     assert math.isclose(ordinary["Projection"], 81.5 * (1 + 0.25 * sign), abs_tol=0.02)
-                    assert weak["Matchup Index"] == (0.62 if sign < 0 else 1.38)
+                    if sign < 0:
+                        assert strong["Projection"] == 81.5
+                        assert strong["Matchup Index"] == 1.0
+                        assert weak["Matchup Index"] == 0.62
+                        assert "Tier 1@0% penalty" in strong["Confluence"]
+                    else:
+                        assert strong["Matchup Index"] == 1.38
+                        assert weak["Projection"] == 81.5
+                        assert weak["Matchup Index"] == 1.0
+                        assert "Tier 1@200% boost" in strong["Confluence"]
                 else:
                     assert all(row["Projection"] == 81.5 for row in outputs)
 
@@ -110,9 +129,21 @@ def main() -> None:
         finally:
             slots._yardage_variable_tiers = original_tiers
 
+        # Opposing component directions are handled independently: reduced
+        # targets remain protected while a favorable YPT adjustment is boosted.
+        slots.slot_matchup_profile = lambda *args, **kwargs: {
+            "adjustment_pct": -0.20 if args[-1] == "Targets" else -0.10, "sample": 4.0,
+        }
+        profiles, player = peer_profiles("WR2", 1.30)
+        from builders.nfl_wr_receiving_v419 import _wr_matchup_factors
+        mixed_factors = _wr_matchup_factors(builder, 2026, 5, "TB", "WR2", player, profiles)
+        assert mixed_factors["opportunity_factor"] == 1.0
+        assert math.isclose(mixed_factors["efficiency_factor"], 1.25)
+        assert math.isclose(mixed_factors["final_factor"], 1.25)
+
         slots.install_slot_matchup_layer(builder)
-        assert builder.MODEL_VERSION == "nfl-v4.27-wr-receiving-tier-protection-2026-10-08"
-        print("WR tier protection passed: production wrapper chain, both slots, elite/ordinary/weak inputs, independent sides, final caps and simulation consistency")
+        assert builder.MODEL_VERSION == "nfl-v4.28-directional-variable-tiers-2026-10-08"
+        print("Directional WR tiers passed: all five tiers, exact-slot production wrapper chain, independent sides, final caps and simulation consistency")
     finally:
         slots.slot_matchup_profile = original_profile
 
