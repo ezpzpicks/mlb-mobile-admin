@@ -16,7 +16,7 @@ from typing import Any
 
 from builders import nfl_slot_matchups as slot_matchups
 
-MODEL_VERSION = "nfl-v4.26-qb-attempts-completions-opportunity-calibration-2026-10-01"
+MODEL_VERSION = "nfl-v4.27-wr-receiving-tier-protection-2026-10-08"
 ATTEMPT_CALIBRATION_INTERCEPT = 18.848437
 ATTEMPT_CALIBRATION_SLOPE = 0.405922
 

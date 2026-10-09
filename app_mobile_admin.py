@@ -189,7 +189,7 @@ if selected_sport not in valid_sports:
 versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
-    "NFL": "nfl-v4.14-atd-engine-calibration-2026-09-20",
+    "NFL": "nfl-v4.27-wr-receiving-tier-protection-2026-10-08",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
 if selected_sport == "NFL":
