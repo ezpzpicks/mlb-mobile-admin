@@ -214,27 +214,9 @@ if selected_sport == "MLB":
     runpy.run_path(str(ROOT / "builders" / "mlb_builder.py"), run_name="__main__")
 elif selected_sport == "CFB":
     set_storage_sport("CFB")
-    from builders import cfb_builder
-    from builders.cfb_save_type_guard import install_save_type_guard
-    from builders.cfb_game_regression import install_regression_layer
-    from builders.cfb_total_regression import install_total_regression
-    from builders.cfb_schedule_adjustment import install_schedule_adjustment
-    from builders.cfb_2026_regime import install_regime_adjustment
-    from builders.cfb_market_calibration import install_market_calibration
-    from builders.cfb_covers import install_covers_layer
-    from builders.cfb_interactive_recovery import install_interactive_recovery
-    from builders.cfb_runtime_guard import install_runtime_guard
-    install_runtime_guard(cfb_builder)
-    install_save_type_guard(cfb_builder)
-    install_regression_layer(cfb_builder)
-    install_total_regression(cfb_builder)
-    install_schedule_adjustment(cfb_builder)
-    install_regime_adjustment(cfb_builder)
-    install_market_calibration(cfb_builder)
-    install_covers_layer(cfb_builder)
-    install_interactive_recovery(cfb_builder)
+    from builders.cfb_production import load_production_builder
+    cfb_builder = load_production_builder()
     _install_cfb_evaluation_cache(cfb_builder)
-    cfb_builder.MODEL_VERSION = "cfb-v2.8.1-five-game-residual-totals-2026-10-07"
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")

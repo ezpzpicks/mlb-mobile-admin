@@ -1,0 +1,29 @@
+services:
+  - type: cron
+    name: ezpz-ncaaf-auto-builder
+    runtime: python
+    repo: https://github.com/ezpzpicks/mlb-mobile-admin
+    branch: main
+    region: oregon
+    # A supervised cold-start trial peaked at 506 MiB before saving. Use
+    # sufficient headroom for multiple games; cron billing covers active time.
+    plan: 1c-2g
+    schedule: "7,37 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -u scripts/run_ncaaf_builder.py --commit
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: NCAAF_AUTO_BUILDER_ENABLED
+        value: "1"
+      - key: POLARS_MAX_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
