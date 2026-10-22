@@ -1,12 +1,14 @@
 """ESPN source semantics, identity safety, dated inputs and replacement minutes."""
 from copy import deepcopy
 from datetime import datetime, timezone
+from io import BytesIO
 import json
 import unittest
 from unittest.mock import MagicMock, patch
+from urllib.error import HTTPError, URLError
 
 from builders.nba_example import example_package
-from builders.nba_injuries import apply_espn_report, fetch_espn_injuries, normalize_espn_feed
+from builders.nba_injuries import ESPN_FEED, apply_espn_report, fetch_espn_injuries, normalize_espn_feed
 from builders.nba_model import InputError, PlayerMinutes, evaluate_package, snapshot_json
 from builders.nba_ratings import add_roster_player
 
@@ -88,7 +90,7 @@ class EspnParsingTests(unittest.TestCase):
             with self.assertRaises(InputError):
                 normalize_espn_feed(payload, fetched_at=NOW)
 
-    def test_fetch_uses_one_bounded_league_request(self):
+    def test_successful_fetch_uses_one_bounded_league_request(self):
         response = MagicMock()
         response.__enter__.return_value = response
         response.read.return_value = json.dumps(source_fixture()).encode()
@@ -99,9 +101,119 @@ class EspnParsingTests(unittest.TestCase):
         self.assertEqual(request.call_args.kwargs["timeout"], 15)
 
     def test_network_failure_is_visible(self):
-        with patch("builders.nba_injuries.urlopen", side_effect=OSError("connection unavailable")):
+        with patch("builders.nba_injuries.urlopen", side_effect=OSError("connection unavailable")), \
+                patch("builders.nba_injuries.time.sleep"):
             with self.assertRaisesRegex(InputError, "could not be refreshed"):
                 fetch_espn_injuries()
+
+
+class EspnRecoveryTests(unittest.TestCase):
+    def response(self, raw=None):
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.read.return_value = json.dumps(source_fixture()).encode() if raw is None else raw
+        return response
+
+    def error(self, code, *, headers=None, body=b"<html>Access Denied</html>"):
+        return HTTPError(ESPN_FEED, code, "source error", headers or {}, BytesIO(body))
+
+    def fetch(self, outcomes):
+        events = []
+        with patch("builders.nba_injuries.urlopen", side_effect=outcomes) as request, \
+                patch("builders.nba_injuries.time.sleep") as sleep:
+            result = fetch_espn_injuries(on_event=lambda name, **details: events.append((name, details)))
+        return result, events, request, sleep
+
+    def test_http_rejections_recover_without_changing_endpoint_or_client_identity(self):
+        result, events, request, sleep = self.fetch([
+            self.error(403, headers={"Server": "example-edge", "Content-Type": "text/html"}),
+            self.error(503), self.response()])
+        self.assertEqual(result["injury_count"], 1)
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [2, 5])
+        self.assertEqual({call.args[0].full_url for call in request.call_args_list}, {ESPN_FEED})
+        self.assertEqual(len({call.args[0].get_header("User-agent") for call in request.call_args_list}), 1)
+        failures = [details for name, details in events if name == "injury_request_failed"]
+        self.assertEqual([item["http_status"] for item in failures], [403, 503])
+        self.assertEqual(failures[0]["response_hints"], ["access_denied"])
+        self.assertEqual(events[-1][0], "injury_fetch_succeeded")
+        self.assertTrue(events[-1][1]["recovered"])
+        self.assertEqual(events[-1][1]["attempt"], 3)
+
+    def test_repeated_403_is_bounded_and_never_becomes_an_empty_injury_report(self):
+        events = []
+        with patch("builders.nba_injuries.urlopen", side_effect=[self.error(403) for _ in range(3)]) as request, \
+                patch("builders.nba_injuries.time.sleep") as sleep:
+            with self.assertRaisesRegex(InputError, "after 3 attempt.*HTTP 403"):
+                fetch_espn_injuries(on_event=lambda name, **details: events.append((name, details)))
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
+        self.assertFalse(events[-1][1]["retrying"])
+        self.assertFalse(any(name == "injury_fetch_succeeded" for name, _ in events))
+
+    def test_network_timeout_can_recover_and_is_distinct_from_an_http_rejection(self):
+        result, events, _, _ = self.fetch([URLError(TimeoutError("synthetic timeout")), self.response()])
+        self.assertEqual(result["injury_count"], 1)
+        self.assertEqual(events[0][1]["failure_kind"], "transport_error")
+        self.assertEqual(events[0][1]["reason_type"], "TimeoutError")
+        self.assertNotIn("http_status", events[0][1])
+
+    def test_short_retry_after_is_honored(self):
+        _, _, _, sleep = self.fetch([self.error(429, headers={"Retry-After": "12"}), self.response()])
+        sleep.assert_called_once_with(12)
+
+    def test_long_cooldown_is_deferred_instead_of_retried_early(self):
+        events = []
+        with patch("builders.nba_injuries.urlopen", side_effect=self.error(429, headers={"Retry-After": "120"})) as request, \
+                patch("builders.nba_injuries.time.sleep") as sleep:
+            with self.assertRaisesRegex(InputError, "after 1 attempt.*HTTP 429"):
+                fetch_espn_injuries(on_event=lambda name, **details: events.append((name, details)))
+        self.assertEqual(request.call_count, 1)
+        sleep.assert_not_called()
+        self.assertFalse(events[0][1]["retrying"])
+
+    def test_authentication_and_missing_endpoint_errors_are_not_retried(self):
+        for code in (401, 404):
+            with self.subTest(code=code), \
+                    patch("builders.nba_injuries.urlopen", side_effect=self.error(code)) as request, \
+                    patch("builders.nba_injuries.time.sleep") as sleep:
+                with self.assertRaisesRegex(InputError, f"HTTP {code}"):
+                    fetch_espn_injuries()
+                self.assertEqual(request.call_count, 1)
+                sleep.assert_not_called()
+
+    def test_explicit_security_challenge_is_reported_without_repeated_attempts(self):
+        events = []
+        with patch("builders.nba_injuries.urlopen", side_effect=self.error(403, body=b"Verify you are human: CAPTCHA")) as request:
+            with self.assertRaises(InputError):
+                fetch_espn_injuries(on_event=lambda name, **details: events.append((name, details)))
+        self.assertEqual(request.call_count, 1)
+        self.assertIn("security_challenge", events[0][1]["response_hints"])
+        self.assertFalse(events[0][1]["retrying"])
+
+    def test_diagnostics_omit_response_body_cookies_and_unapproved_headers(self):
+        secret = "synthetic-value-that-must-not-appear"
+        _, events, _, _ = self.fetch([self.error(403,
+            headers={"Set-Cookie": secret, "Authorization": secret, "X-Request-Id": "trace-123", "Server": "edge\nextra"},
+            body=("Access Denied " + secret).encode()), self.response()])
+        encoded = json.dumps(events)
+        self.assertNotIn(secret, encoded)
+        headers = events[0][1]["response_headers"]
+        self.assertEqual(headers["x-request-id"], "trace-123")
+        self.assertEqual(headers["server"], "edge extra")
+        self.assertTrue(events[0][1]["response_prefix_sha256"])
+
+    def test_invalid_json_and_invalid_feed_are_validation_errors_without_retries(self):
+        for raw in (b"<html>unexpected success body</html>", b'{"status":"error","injuries":[]}'):
+            events = []
+            with self.subTest(raw=raw), \
+                    patch("builders.nba_injuries.urlopen", return_value=self.response(raw)) as request, \
+                    patch("builders.nba_injuries.time.sleep") as sleep:
+                with self.assertRaises(InputError):
+                    fetch_espn_injuries(on_event=lambda name, **details: events.append((name, details)))
+            self.assertEqual(request.call_count, 1)
+            sleep.assert_not_called()
+            self.assertEqual(events[-1][0], "injury_response_rejected")
+            self.assertEqual(events[-1][1]["failure_kind"], "validation_error")
 
     def test_oversized_response_is_rejected_before_parsing(self):
         response = MagicMock()

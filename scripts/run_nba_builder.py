@@ -102,9 +102,15 @@ def run(args):
         if pending:
             bundle = json.loads((ROOT / "research/nba_results_2025_26/nba_ratings.json").read_text())
             validate_bundle(bundle)
-            injury = fetch_espn_injuries()  # One league response, reused across this run.
+            try:
+                injury = fetch_espn_injuries(on_event=emit)  # One validated league response, shared across games.
+            except InputError as exc:
+                injury = None
+                failures += 1
+                emit("injuries_unavailable", error=str(exc),
+                     blocked_games=[game["game_id"] for game, _ in pending[:args.limit]])
             team_cache, box_cache = {}, {}
-            for game, planned_phase in pending[:args.limit]:
+            for game, planned_phase in (pending[:args.limit] if injury is not None else []):
                 try:
                     inputs = fetch_matchup_inputs(game, team_cache=team_cache, box_cache=box_cache)
                     package = prepare_live_package(bundle, inputs, injury, as_of=clock())
