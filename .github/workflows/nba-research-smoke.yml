@@ -1,0 +1,37 @@
+name: NBA research checks
+
+on:
+  pull_request:
+    paths:
+      - 'builders/nba_*.py'
+      - 'shared/nba_tracking_storage.py'
+      - 'research/test_nba_*.py'
+      - 'research/nba_fit.py'
+      - 'research/requirements-nba.txt'
+      - '.github/workflows/nba-research-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'builders/nba_*.py'
+      - 'shared/nba_tracking_storage.py'
+      - 'research/test_nba_*.py'
+      - '.github/workflows/nba-research-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  nba-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: research/requirements-nba.txt
+      - run: pip install -r research/requirements-nba.txt
+      - run: python -m unittest discover -s research -p 'test_nba_*.py' -q
+        env:
+          OPENBLAS_NUM_THREADS: '1'

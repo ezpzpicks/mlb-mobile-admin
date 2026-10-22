@@ -189,7 +189,7 @@ if selected_sport not in valid_sports:
     st.stop()
 
 versions = {
-    "NBA": "nba-v0.3-espn-injuries-2026-10-22",
+    "NBA": "nba-v0.4-live-tracking-2026-10-22",
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
     "NFL": "nfl-v4.28-directional-variable-tiers-2026-10-08",

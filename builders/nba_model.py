@@ -13,7 +13,7 @@ import math
 import re
 from typing import Any
 
-MODEL_VERSION = "nba-v0.3-espn-injuries-2026-10-22"
+MODEL_VERSION = "nba-v0.4-live-tracking-2026-10-22"
 STATUSES = {"AVAILABLE", "OUT", "PROBABLE", "QUESTIONABLE", "DOUBTFUL", "DAY_TO_DAY", "UNKNOWN"}
 UNCERTAIN = STATUSES - {"AVAILABLE", "OUT"}
 

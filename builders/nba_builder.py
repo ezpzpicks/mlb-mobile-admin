@@ -241,6 +241,8 @@ def _show_projection(package: dict, result: dict):
             st.success("NBA research snapshot saved.")
     if saved:
         st.caption("This snapshot has already been saved in this session.")
+    from builders.nba_tracking_ui import lock_controls
+    lock_controls(state, package, result, ui=st)
 
 
 def render():
@@ -256,6 +258,9 @@ def render():
                            file_name="nba-fictional-input-example.json", mime="application/json")
     uploaded = st.file_uploader("Import NBA ratings bundle or matchup JSON", type=["json"], key="nba_upload")
     state = st.session_state.setdefault(STATE_KEY, {"saved_ids": []})
+    from builders.nba_tracking_ui import live_inputs, tracker
+    tracker(state, ui=st)
+    live_inputs(state, ui=st)
     if uploaded is not None:
         raw = uploaded.getvalue()
         if raw != state.get("uploaded_bytes"):

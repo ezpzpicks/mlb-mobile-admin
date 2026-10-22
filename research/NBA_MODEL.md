@@ -5,6 +5,9 @@ full-game rotations to project NBA spreads and totals. It includes an offline
 2025–26 data fit and a manual admin builder. The first historical lineup forecast
 did not improve on the team-only control; this remains a research model.
 Automation is intentionally deferred.
+The manual prospective workflow is described in
+[`NBA_LIVE_TRACKING.md`](NBA_LIVE_TRACKING.md): current rosters, checked recent
+minutes, first pregame locks and result/error tracking.
 
 ## What is implemented
 
@@ -20,7 +23,7 @@ Automation is intentionally deferred.
 - Dated ratings bundles, prior-minute rotation seeds and manual matchup creation.
 - ESPN injury statuses, estimated return dates, identity checks and dated source snapshots.
 - Chronological tuning and a separate 335-game held-out score evaluation.
-- Explicit Save writes only an NBA research snapshot. No public pick dataset,
+- Explicit research saves and prospective locks with a separate results ledger. No public pick dataset,
   scheduled collector, paid data service or posting automation is enabled.
 
 ## Rotation mathematics
@@ -49,6 +52,8 @@ Both reference and projected rotations total 240 regulation minutes, with every
 player between zero and 48. OUT players receive zero minutes. Replacements must
 be entered explicitly and stay within their minutes caps; the model does not
 silently assign all vacated minutes to the remaining starters.
+The explicit live-prepare operation offers a proportional minute suggestion
+after removing OUT players; it requires review before comparison and locking.
 
 The initial, uncalibrated matchup combination is:
 
@@ -228,6 +233,10 @@ Saving appends one bounded research snapshot with the exact inputs and outputs;
 repeat saves of the same snapshot are disabled within the session. Cross-session
 deduplication and concurrent append behavior retain the shared storage layer's
 existing limitations and should be addressed before an automated writer is added.
+The separate prospective tracker uses append-only NBA research tables and a
+database unique constraint for its first game/version lock. This removes
+cross-session/concurrent duplication for primary tracking records without
+changing the older diagnostic snapshot API.
 
 Future ingestion should refresh shared team/player inputs once and reuse them
 across all matchups, update changed game/player IDs incrementally, and serve
@@ -246,7 +255,9 @@ identity; event scores, foul-time credit, minute checks, rookies and trades;
 future-outcome perturbation tests for date leakage; and headless manual-builder
 flows with mocked storage. These tests
 establish implementation behavior, not betting accuracy. The interactive
-Streamlit UI and a real NBA/Turso data round trip still need live validation.
+Streamlit flow has also been checked with a real AppTest and SQLite storage.
+A live authenticated NBA/Turso round trip is tracked separately from these
+implementation checks.
 
 ## Primary references checked
 
