@@ -14,7 +14,7 @@ from shared.modeling import (
 )
 from shared.storage import append_row, read_sheet, sheets_ready, write_sheet
 
-MODEL_VERSION = "cbb-v0.1-rotation-foundation-2026-07-13"
+MODEL_VERSION = "cbb-v0.1.1-shooting-defense-2026-10-22"
 RATINGS_TAB = "cbb_team_ratings"
 SLATE_TAB = "cbb_daily_slate"
 TRACKER_TAB = "cbb_bet_tracker"
@@ -75,8 +75,10 @@ def _project(away, home, settings):
     away_efficiency = _num(away["AdjOE"], 105) + (_num(home["AdjDE"], 105) - league_efficiency)
     home_efficiency = _num(home["AdjOE"], 105) + (_num(away["AdjDE"], 105) - league_efficiency)
 
-    away_shooting = 0.30 * ((_num(away["eFG Off"], 52) - 52) + (52 - _num(home["eFG Def"], 52)))
-    home_shooting = 0.30 * ((_num(home["eFG Off"], 52) - 52) + (52 - _num(away["eFG Def"], 52)))
+    # Defensive eFG is the opponent's shooting percentage allowed. A lower
+    # value is better defense and must reduce the opposing scoring projection.
+    away_shooting = 0.30 * ((_num(away["eFG Off"], 52) - 52) + (_num(home["eFG Def"], 52) - 52))
+    home_shooting = 0.30 * ((_num(home["eFG Off"], 52) - 52) + (_num(away["eFG Def"], 52) - 52))
     away_turnovers = -0.22 * ((_num(away["TO Off"], 18) - 18) + (_num(home["TO Def"], 18) - 18))
     home_turnovers = -0.22 * ((_num(home["TO Off"], 18) - 18) + (_num(away["TO Def"], 18) - 18))
     away_second_chance = 0.11 * (_num(away["ORB Rate"], 30) - 30)
@@ -108,7 +110,7 @@ def _project(away, home, settings):
 
 def _render_ratings():
     st.subheader("College Basketball Team Ratings")
-    st.caption("AdjOE and AdjDE are points per 100 possessions; lower AdjDE is better. Percentage-style fields should be entered as numbers such as 52.4, not 0.524.")
+    st.caption("AdjOE and AdjDE are points per 100 possessions; lower AdjDE is better. eFG Def is opponent shooting efficiency allowed; lower is better. TO Def is opponent turnover rate; higher is better. Percentage-style fields should be entered as numbers such as 52.4, not 0.524.")
     ratings = _load_ratings()
     uploaded = st.file_uploader("Import CBB ratings CSV", type=["csv"], key="cbb_ratings_csv")
     if uploaded is not None:
@@ -298,3 +300,4 @@ def render():
         st.write("Import adjusted-efficiency and four-factor ratings into the Team Ratings section. The model stores separate CBB slate and tracker tabs in the same Google Sheets database used by MLB.")
         st.write("The next data phase is CollegeBasketballData API schedule/team-metric synchronization plus an eight-player projected-minutes and availability engine.")
         st.metric("Google Sheets", "Connected" if sheets_ready() else "Not configured")
+

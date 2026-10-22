@@ -190,7 +190,7 @@ versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
     "NFL": "nfl-v4.28-directional-variable-tiers-2026-10-08",
-    "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
+    "CBB": "cbb-v0.1.1-shooting-defense-2026-10-22",
 }
 if selected_sport == "NFL":
     # The shared sport header includes a next-sport shortcut (shown as
@@ -236,3 +236,4 @@ elif selected_sport == "CBB":
     set_storage_sport("CBB")
     from builders.cbb_builder import render
     render()
+
