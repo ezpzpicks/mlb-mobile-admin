@@ -200,7 +200,7 @@ class PlayerMinutes:
 @dataclass(frozen=True)
 class RotationPlan:
     players: tuple[PlayerMinutes, ...]
-    injury_as_of: datetime
+    injury_as_of: datetime | None
     lineup_as_of: datetime
     injury_source: str
     lineup_source: str
@@ -210,11 +210,15 @@ class RotationPlan:
     def __post_init__(self):
         object.__setattr__(self, "players", tuple(self.players))
         for key in ("injury_as_of", "lineup_as_of"):
+            if key == "injury_as_of" and self.injury_as_of is None:
+                continue
             object.__setattr__(self, key, timestamp(getattr(self, key), key))
         for key in ("injury_source", "lineup_source"):
             object.__setattr__(self, key, _text(getattr(self, key), key))
         for key in ("report_complete", "starters_confirmed"):
             _bool(getattr(self, key), key)
+        if self.injury_as_of is None and self.report_complete:
+            raise InputError("An unavailable injury report cannot be marked complete.")
         ids = [p.player_id for p in self.players]
         if len(set(ids)) != len(ids):
             raise InputError("Projected rotation has duplicate player IDs.")
@@ -284,19 +288,22 @@ def _dated(value: datetime, context: GameContext, name: str):
 def _adjust(team: TeamProfile, plan: RotationPlan, context: GameContext) -> dict:
     _dated(team.ratings_as_of, context, f"{team.name} ratings")
     _dated(team.impacts_as_of, context, f"{team.name} player impacts")
-    _dated(plan.injury_as_of, context, f"{team.name} injury report")
+    if plan.injury_as_of is not None:
+        _dated(plan.injury_as_of, context, f"{team.name} injury report")
     _dated(plan.lineup_as_of, context, f"{team.name} lineup")
     profiles = {p.player_id: p for p in team.players}
     if set(profiles) != {p.player_id for p in plan.players}:
         raise InputError(f"{team.name}: the projected and reference rosters must contain the same player IDs; add replacements with zero reference minutes.")
     flags, changes = [], []
+    if plan.injury_as_of is None:
+        flags.append(f"{team.name}: injury feed bypassed; availability unchecked")
     if not plan.report_complete:
         flags.append(f"{team.name}: injury report incomplete")
     if not plan.starters_confirmed:
         flags.append(f"{team.name}: starting lineup unconfirmed")
     age_limit = timedelta(minutes=context.max_lineup_age_minutes)
     for label, value in (("injury report", plan.injury_as_of), ("lineup", plan.lineup_as_of)):
-        if context.as_of - value > age_limit:
+        if value is not None and context.as_of - value > age_limit:
             flags.append(f"{team.name}: {label} older than {context.max_lineup_age_minutes:g} minutes")
     offense_delta = defense_delta = 0.0
     for entry in sorted(plan.players, key=lambda p: p.player_id):
@@ -495,7 +502,12 @@ def from_package(package: dict) -> tuple[TeamProfile, TeamProfile, tuple[Scenari
 
 
 def evaluate_package(package: dict) -> dict:
-    return project_scenarios(*from_package(package))
+    result = project_scenarios(*from_package(package))
+    if package.get("availability_provenance", {}).get("mode") == "expected_rotation":
+        result.update(availability_mode="expected_rotation", injury_verified=False)
+        for scenario in result["scenarios"]:
+            scenario.update(availability_mode="expected_rotation", injury_verified=False)
+    return result
 
 
 def snapshot_json(package: dict, result: dict) -> str:

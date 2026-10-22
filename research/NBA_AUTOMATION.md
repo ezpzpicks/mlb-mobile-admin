@@ -31,6 +31,14 @@ Turso reads use indexed game/version keys and a recent pending-game time filter,
 
 ## Injury request failures and recovery
 
+### Temporary expected-rotation mode
+
+The existing Render cron can explicitly set `NBA_AVAILABILITY_MODE=expected_rotation` to bypass the blocked injury request. The default `injury_feed` mode still requires a fresh report. The service-level variable is the temporary source of truth; it is intentionally omitted from the Blueprint, whose later syncs preserve omitted service variables. Restore `injury_feed` on the same service when injury access is repaired, then deploy that configuration.
+
+Expected rotations use checked current rosters and the existing prior-game/historical minute evidence, keep every player's availability UNKNOWN, and allocate 240 minutes with individual caps. Injury timestamps are null, no injury report is fabricated, and starters remain unconfirmed. Source, roster, market and tipoff guards still apply. Selected forecasts and tracking tables explicitly record `availability_mode=expected_rotation` and `injury_verified=false`, alongside their grades and unchecked-availability flags.
+
+The separate `nba-auto-expected-rotation-v1` policy has its own early/pregame tracking versions. Returning to injury-feed mode cannot rewrite or pool these forecasts. The automatic builder skips all injury requests in expected mode; manual injury-aware locking retains its report requirement. This temporary option is for prospective testing and carries no public-posting eligibility.
+
 The injury fetch makes at most three requests to the same ESPN URL with the same client identity and a 15-second socket timeout per attempt. HTTP 403/408/429 and transient 500/502/503/504 responses, plus transport failures, receive two- and five-second backoffs. A short `Retry-After` is honored; a cooldown longer than 15 seconds defers recovery to a later scheduled run. Authentication/missing-endpoint errors, explicit security challenges, malformed JSON, oversized bodies and invalid injury data are not retried. No stale snapshot or inferred healthy roster substitutes for a failed fetch.
 
 Scheduled logs emit `injury_request_failed` with the attempt, HTTP status or transport error type, retry decision, safe response-header allowlist, known rejection hints and a SHA-256 fingerprint of at most 4096 response bytes. Response bodies, cookies and authorization headers are not logged. `injury_fetch_succeeded` records recovery and the source timestamp. The October 22 failures at 18:07 and 19:07 UTC established HTTP 403 responses but did not retain response evidence; they do not establish ESPN's internal reason for denying those requests. Future responses can distinguish reported access denial, throttling, a security challenge and gateway failures when the source provides that evidence.
