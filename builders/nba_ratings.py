@@ -269,8 +269,11 @@ def add_roster_player(package: dict, side: str, player_id: str, name: str, *, bu
     zero prior. Replacement minutes are still assigned manually.
     """
     from dataclasses import asdict
-    from builders.nba_model import from_package
-    from_package(package)
+    # This is an editor operation: an injury import may have left replacement
+    # minutes unassigned. The projection engine validates the complete rotation
+    # on Compare, while this operation validates the new profile and identity.
+    if not isinstance(package, dict) or not all(k in package for k in ("away", "home", "context", "scenarios")):
+        raise InputError("A matchup is required before adding a roster player.")
     if side not in {"away", "home"}:
         raise InputError("Choose the away or home roster.")
     player_id = str(player_id).strip()
@@ -310,7 +313,6 @@ def add_roster_player(package: dict, side: str, player_id: str, name: str, *, bu
             "status": "UNKNOWN", "assumption": "OUT", "starter": False})
         plan["report_complete"] = False
         plan["starters_confirmed"] = False
-    from_package(updated)
     return updated
 
 

@@ -18,9 +18,10 @@ Automation is intentionally deferred.
 - Opponent/venue-adjusted team ratings and offensive/defensive player RAPM.
 - Separate team-box and ten-player event quality gates, with per-game exclusions.
 - Dated ratings bundles, prior-minute rotation seeds and manual matchup creation.
+- ESPN injury statuses, estimated return dates, identity checks and dated source snapshots.
 - Chronological tuning and a separate 335-game held-out score evaluation.
 - Explicit Save writes only an NBA research snapshot. No public pick dataset,
-  collector, schedule, paid data service or posting automation is enabled.
+  scheduled collector, paid data service or posting automation is enabled.
 
 ## Rotation mathematics
 
@@ -72,7 +73,7 @@ evidence has an explicit prior-only value and zero fitted sample, which is flagg
 
 - AVAILABLE and OUT are resolved participation statuses. A zero-minute AVAILABLE
   player is allowed as a coach's rotation decision.
-- PROBABLE, QUESTIONABLE, DOUBTFUL and UNKNOWN require explicit IN/OUT assumptions
+- PROBABLE, QUESTIONABLE, DOUBTFUL, DAY_TO_DAY and UNKNOWN require explicit IN/OUT assumptions
   when they affect any entered rotation. Status labels do not supply calibrated
   participation probabilities.
 - Scenarios preserve the same observed injury report. Vary the assumptions and
@@ -104,6 +105,30 @@ impact per 100 possessions. Three reserve players split the vacated minutes.
 The example market is home -4 / total 228, so both spread and total direction
 change with the player's participation. This illustrates model behavior; it is
 not a real pick, an estimate of any real player's value, or a backtest.
+
+## ESPN injury source
+
+ESPN is the implemented injury input provider. The manual source panel fetches
+one league response, displays status, injury, last news update and estimated return,
+then applies it to the selected matchup. The verification record and detailed rules
+are in [ESPN_INJURY_SOURCE.md](ESPN_INJURY_SOURCE.md). Ordinary widget reruns and
+matchup application reuse the fetched snapshot rather than making new requests.
+
+OUT removes that player's minutes in every scenario; replacement minutes remain
+unassigned until edited. DAY_TO_DAY is unresolved and preserves explicit IN/OUT
+hypotheses. Return estimates never turn a player AVAILABLE or confirm a starter.
+Unlisted players remain unverified. The import resets report completeness and
+starter confirmation, and a refresh failure preserves the old source timestamp.
+
+ESPN athlete IDs differ from NBA Stats IDs. Matching uses previously verified
+identity or a unique normalized full name, with explicit overrides supported.
+Unmatched rookies, ambiguous names and conflicting team fields require review.
+A known traded player's fitted rating can be reused with zero new-team reference
+minutes; a new player without evidence retains the zero-prior rule. An ESPN
+snapshot cannot be applied before its observation time or across NBA seasons.
+
+This is a current-data input integration. It does not add archived injuries to the
+saved 2025–26 backtest, change its result, or validate stronger lineup adjustments.
 
 ## Offline data and fitted ratings
 
@@ -177,10 +202,10 @@ download or database operation runs on an ordinary form edit.
    samples do not establish a reliable injury adjustment.
 2. Demonstrate improvement over the team-only control using pregame information
    on a new evaluation period. Do not repeatedly tune against the saved holdout.
-3. Attach current official injury reports and separate starting-lineup evidence.
-   The official NBA report says it updates throughout the day. NBA.com's daily
-   lineup page labels its lineups projected; that label alone is not confirmation.
-   A report not yet submitted must remain incomplete, not an empty injury list.
+3. Add historical pregame injury-report snapshots to a new evaluation. Reconcile
+   current ESPN news with official report completeness and separate starting-lineup
+   evidence. NBA.com's daily lineup page labels lineups projected; that alone is
+   not confirmation. An unsubmitted or empty report does not establish availability.
 4. Bring in current ScoresAndOdds spreads and totals with default -110 pricing,
    recording the line timestamp. Historical evaluation requires lines available
    at the prediction cutoff, not a later line chosen after injury news.
@@ -226,6 +251,8 @@ Streamlit UI and a real NBA/Turso data round trip still need live validation.
 ## Primary references checked
 
 - [NBA official 2026–27 injury report](https://official.nba.com/nba-injury-report-2026-27-season/)
+- [ESPN NBA injuries](https://www.espn.com/nba/injuries)
+- [ESPN NBA injury feed](https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries?limit=1000)
 - [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)
 - [NBA explanation of possession-based ratings and on/off](https://jr.nba.com/basictraditional-stats-vs-advanced-stats/)
 - [SportsDataverse NBA Stats export schemas](https://py.sportsdataverse.org/docs/0.1.5/nba/reference/loaders/stats)

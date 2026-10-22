@@ -12,6 +12,8 @@ from unittest.mock import patch
 
 from builders.nba_example import example_package
 from builders.nba_model import evaluate_package
+from builders.nba_injuries import apply_espn_report
+from test_nba_injuries import matchup, report
 
 
 class FakeStreamlit(ModuleType):
@@ -87,6 +89,81 @@ def load_builder(st):
 
 
 class BuilderFlowTests(unittest.TestCase):
+    def test_ordinary_rerender_does_not_fetch_espn(self):
+        st = FakeStreamlit(load_demo=True, submit=True)
+        builder = load_builder(st)
+        with patch("builders.nba_injuries.fetch_espn_injuries") as fetch:
+            builder.render()
+        fetch.assert_not_called()
+
+    def test_explicit_espn_fetch_is_one_league_request_without_storage(self):
+        st = FakeStreamlit()
+        st.button = lambda label, **kwargs: label == "Fetch latest ESPN injuries"
+        builder = load_builder(st)
+        with patch("builders.nba_injuries.fetch_espn_injuries", return_value=report()) as fetch:
+            with patch.dict(sys.modules, {"shared.storage": None}):
+                builder.render()
+        fetch.assert_called_once()
+        self.assertEqual(st.session_state[builder.STATE_KEY]["espn_report"]["injury_count"], 1)
+        self.assertFalse(st.errors)
+
+    def test_espn_refresh_failure_keeps_the_old_timestamp_and_clears_result(self):
+        from builders.nba_model import InputError
+        st = FakeStreamlit()
+        st.button = lambda label, **kwargs: label == "Fetch latest ESPN injuries"
+        builder = load_builder(st)
+        old = report()
+        st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": matchup(), "espn_report": old,
+                                             "result": {"old": "projection"}}
+        with patch("builders.nba_injuries.fetch_espn_injuries", side_effect=InputError("feed unavailable")):
+            builder.render()
+        self.assertIs(st.session_state[builder.STATE_KEY]["espn_report"], old)
+        self.assertIsNone(st.session_state[builder.STATE_KEY]["result"])
+        self.assertTrue(any("original timestamp" in error for error in st.errors))
+
+    def test_applying_out_report_shows_replacement_minutes_and_invalidates_old_result(self):
+        st = FakeStreamlit()
+        st.button = lambda label, **kwargs: label == "Use ESPN injuries in this matchup and update cutoff"
+        builder = load_builder(st)
+        st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": matchup(), "espn_report": report(status="Out"),
+                                             "result": {"old": "projection"}}
+        with patch.dict(sys.modules, {"shared.storage": None}):
+            builder.render()
+        state = st.session_state[builder.STATE_KEY]
+        self.assertIsNone(state["result"])
+        self.assertEqual(state["package"]["scenarios"][0]["away"]["players"][0]["minutes"], 0)
+        self.assertTrue(any("36 minutes need assignment" in w for w in st.warnings))
+        self.assertFalse(st.errors)
+
+    def test_espn_return_date_survives_rotation_editor_and_projection(self):
+        st = FakeStreamlit(submit=True)
+        builder = load_builder(st)
+        package, _ = apply_espn_report(matchup(), report())
+        st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": package, "espn_report": report()}
+        with patch("builders.nba_injuries.fetch_espn_injuries") as fetch:
+            builder.render()
+        state = st.session_state[builder.STATE_KEY]
+        self.assertFalse(st.errors)
+        self.assertIsNotNone(state["result"])
+        self.assertEqual(state["result_package"]["scenarios"][0]["away"]["players"][0]["injury"]["estimated_return_date"], "2026-10-23")
+        self.assertFalse(state["result"]["eligible_for_posting"])
+        fetch.assert_not_called()
+
+    def test_post_tipoff_espn_import_cannot_leave_an_old_projection_displayed(self):
+        st = FakeStreamlit()
+        st.button = lambda label, **kwargs: label == "Use ESPN injuries in this matchup and update cutoff"
+        builder = load_builder(st)
+        old = matchup()
+        r = report()
+        r["fetched_at"] = "2026-10-22T16:00:00Z"  # After the fixture's 15:00 tipoff.
+        st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": old, "espn_report": r,
+                                             "result": {"old": "projection"}}
+        builder.render()
+        state = st.session_state[builder.STATE_KEY]
+        self.assertIsNone(state["result"])
+        self.assertIs(state["package"], old)
+        self.assertTrue(any("before tipoff" in error for error in st.errors))
+
     def test_empty_builder_needs_no_database_or_network(self):
         st = FakeStreamlit()
         builder = load_builder(st)

@@ -6,14 +6,15 @@ data. Player impact is an input in points per 100 possessions, not points/game.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 import hashlib
 import json
 import math
+import re
 from typing import Any
 
-MODEL_VERSION = "nba-v0.2-dated-ratings-2026-10-22"
-STATUSES = {"AVAILABLE", "OUT", "PROBABLE", "QUESTIONABLE", "DOUBTFUL", "UNKNOWN"}
+MODEL_VERSION = "nba-v0.3-espn-injuries-2026-10-22"
+STATUSES = {"AVAILABLE", "OUT", "PROBABLE", "QUESTIONABLE", "DOUBTFUL", "DAY_TO_DAY", "UNKNOWN"}
 UNCERTAIN = STATUSES - {"AVAILABLE", "OUT"}
 
 
@@ -120,6 +121,44 @@ class TeamProfile:
 
 
 @dataclass(frozen=True)
+class InjuryInfo:
+    provider: str
+    espn_athlete_id: str
+    source_status: str
+    model_status: str
+    source_url: str
+    observed_at: datetime
+    feed_as_of: datetime
+    source_sha256: str
+    reported_at: datetime | None = None
+    estimated_return_date: str | None = None
+    injury_type: str = ""
+    detail: str = ""
+
+    def __post_init__(self):
+        for key in ("provider", "espn_athlete_id", "source_status", "source_url", "source_sha256"):
+            object.__setattr__(self, key, _text(getattr(self, key), key))
+        if self.model_status not in STATUSES:
+            raise InputError("Injury information has an unsupported reported status.")
+        if not re.fullmatch(r"[0-9a-f]{64}", self.source_sha256):
+            raise InputError("Injury information needs its source response fingerprint.")
+        for key in ("observed_at", "feed_as_of"):
+            object.__setattr__(self, key, timestamp(getattr(self, key), key))
+        if self.reported_at is not None:
+            object.__setattr__(self, "reported_at", timestamp(self.reported_at, "injury report update"))
+        if self.feed_as_of > self.observed_at or (self.reported_at is not None and self.reported_at > self.observed_at):
+            raise InputError("Injury information is newer than its observation time.")
+        if self.estimated_return_date is not None:
+            try:
+                parsed = date.fromisoformat(self.estimated_return_date)
+            except (ValueError, TypeError):
+                raise InputError("Estimated return must be an ISO calendar date, or unknown.") from None
+            object.__setattr__(self, "estimated_return_date", parsed.isoformat())
+        if not all(isinstance(getattr(self, k), str) for k in ("injury_type", "detail")):
+            raise InputError("Injury description must be text.")
+
+
+@dataclass(frozen=True)
 class PlayerMinutes:
     player_id: str
     minutes: float
@@ -127,8 +166,13 @@ class PlayerMinutes:
     minutes_limit: float = 48.0
     assumption: str = ""
     starter: bool = False
+    injury: InjuryInfo | None = None
 
     def __post_init__(self):
+        if isinstance(self.injury, dict):
+            object.__setattr__(self, "injury", InjuryInfo(**self.injury))
+        elif self.injury is not None and not isinstance(self.injury, InjuryInfo):
+            raise InputError("Player injury information must use the dated injury schema.")
         object.__setattr__(self, "player_id", _text(self.player_id, "player_id"))
         _bool(self.starter, "starter")
         object.__setattr__(self, "minutes", _minutes(self.minutes, f"{self.player_id} minutes"))
@@ -264,6 +308,21 @@ def _adjust(team: TeamProfile, plan: RotationPlan, context: GameContext) -> dict
             if not entry.assumption:
                 raise InputError(f"{team.name} {profile.name}: choose an explicit IN or OUT scenario for {entry.status}.")
             flags.append(f"{team.name} {profile.name}: {entry.status}, assumed {entry.assumption}")
+        if entry.injury is not None:
+            injury = entry.injury
+            if entry.status != injury.model_status:
+                flags.append(f"{team.name} {profile.name}: edited status differs from {injury.provider} report; verify current news")
+            for label, value in (("injury feed observation", injury.observed_at), ("injury feed", injury.feed_as_of),
+                                 ("injury news", injury.reported_at)):
+                if value is not None:
+                    _dated(value, context, f"{profile.name} {label}")
+            if context.as_of - injury.feed_as_of > age_limit:
+                flags.append(f"{team.name} {profile.name}: {injury.provider} feed older than {context.max_lineup_age_minutes:g} minutes")
+            if injury.estimated_return_date is not None:
+                from zoneinfo import ZoneInfo
+                game_day = context.tipoff.astimezone(ZoneInfo("America/New_York")).date()
+                if date.fromisoformat(injury.estimated_return_date) <= game_day:
+                    flags.append(f"{team.name} {profile.name}: estimated return is on/before game day; verify availability")
         minute_change = entry.minutes - profile.reference_minutes
         off = minute_change / 48.0 * profile.offensive_impact
         defense = minute_change / 48.0 * profile.defensive_impact
@@ -274,7 +333,7 @@ def _adjust(team: TeamProfile, plan: RotationPlan, context: GameContext) -> dict
                         "minutes_change": minute_change, "offense_change_per_100": off,
                         "defense_improvement_per_100": defense, "status": entry.status,
                         "assumption": entry.assumption, "minutes_limit": entry.minutes_limit,
-                        "starter": entry.starter})
+                        "starter": entry.starter, "injury": asdict(entry.injury) if entry.injury else None})
     offense = team.offensive_rating + offense_delta
     # A positive defensive impact means fewer points allowed, hence subtraction.
     defense = team.defensive_rating - defense_delta
@@ -377,7 +436,7 @@ def project_scenarios(away: TeamProfile, home: TeamProfile, scenarios: tuple[Sce
     observed = None
     for scenario in scenarios:
         report = tuple((side, plan.injury_as_of, plan.injury_source, plan.report_complete,
-                        tuple(sorted((p.player_id, p.status) for p in plan.players)))
+                        tuple(sorted((p.player_id, p.status, p.injury) for p in plan.players)))
                        for side, plan in (("away", scenario.away), ("home", scenario.home)))
         if observed is not None and report != observed:
             raise InputError("Scenarios must use the same observed injury report; vary assumptions and replacement minutes.")

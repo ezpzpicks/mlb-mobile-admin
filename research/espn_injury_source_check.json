@@ -1,0 +1,32 @@
+{
+  "verified_at": "2026-10-22T16:26:46.697675+00:00",
+  "feed_as_of": "2026-10-22T16:24:10+00:00",
+  "source_url": "https://www.espn.com/nba/injuries",
+  "feed_url": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries?limit=1000",
+  "source_sha256": "f8e86762b6c82600b13e6e81830bf56d8a1f2195ba599a3e4faab1f4446b8ba3",
+  "season_year": 2027,
+  "teams_with_injury_entries": 26,
+  "listed_injuries": 71,
+  "entries_with_estimated_return_date": 71,
+  "source_status_counts": {
+    "Out": 36,
+    "Day-To-Day": 35
+  },
+  "conflicting_team_entries_held_for_review": 1,
+  "live_fetch_succeeded": true,
+  "headless_manual_builder_apply_succeeded": true,
+  "extra_requests_on_apply": 0,
+  "integration_check": {
+    "label": "Technical source check only; not a scheduled matchup or pick",
+    "teams": [
+      "Atlanta Hawks",
+      "Boston Celtics"
+    ],
+    "matched_reports": 2,
+    "unmatched_reports_flagged": 1,
+    "newly_added_rated_players": 1
+  },
+  "historical_injury_backtest_performed": false,
+  "deployed": false,
+  "automation_enabled": false
+}

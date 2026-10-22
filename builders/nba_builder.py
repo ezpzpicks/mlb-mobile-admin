@@ -1,4 +1,4 @@
-"""Manual NBA research builder. No collection, scheduling or public pick writes."""
+"""Manual NBA research builder. Explicit source fetches; no scheduled/public writes."""
 from __future__ import annotations
 
 from copy import deepcopy
@@ -12,7 +12,7 @@ import streamlit as st
 
 from builders.nba_example import example_package
 from builders.nba_model import (
-    InputError, MODEL_VERSION, STATUSES, evaluate_package, snapshot_json,
+    InputError, MODEL_VERSION, STATUSES, evaluate_package, snapshot_json, timestamp,
 )
 
 STATE_KEY = "_nba_research"
@@ -90,6 +90,68 @@ def _roster_addition(state: dict):
                 st.error(str(exc))
 
 
+def _espn_inputs(state: dict):
+    def news_time(value):
+        return timestamp(value, "ESPN timestamp").astimezone(ZoneInfo("America/New_York")).strftime("%b %d, %I:%M %p ET") if value else "Unknown"
+
+    with st.expander("ESPN injuries and estimated returns"):
+        st.caption("ESPN is the injury input source. Day-to-day remains unresolved; estimated return dates do not confirm availability. Unlisted players still need review.")
+        st.markdown("[ESPN NBA injuries](https://www.espn.com/nba/injuries)")
+        if st.button("Fetch latest ESPN injuries", key="nba_espn_fetch"):
+            try:
+                from builders.nba_injuries import fetch_espn_injuries
+                state["espn_report"] = fetch_espn_injuries()
+                state.pop("espn_refresh_error", None)
+            except InputError as exc:
+                state["espn_refresh_error"] = str(exc)
+                state["result"] = None
+        if state.get("espn_refresh_error"):
+            st.error(f"ESPN refresh failed: {state['espn_refresh_error']}. Any retained report below keeps its original timestamp.")
+        report = state.get("espn_report")
+        if not report:
+            return
+        st.caption(f"ESPN feed: {news_time(report['feed_as_of'])} · retrieved: {news_time(report['fetched_at'])} · {report['injury_count']} listed players")
+        from builders.nba_injuries import _team_key
+        selected = {_team_key(state["package"][s]["name"]) for s in ("away", "home")} if state.get("package") else None
+        rows = []
+        for team in report["teams"]:
+            for row in team["injuries"]:
+                if selected is not None and _team_key(team["name"]) not in selected and not (
+                    row.get("team_conflict") and _team_key(row.get("athlete_team_name", "")) in selected):
+                    continue
+                rows.append({"Team": team["name"], "Player": row["player_name"], "ESPN status": row["source_status"],
+                    "Estimated return": row["estimated_return_date"], "Injury": row["injury_type"],
+                    "News updated": news_time(row["reported_at"]),
+                    "Roster check": f"Profile lists {row['athlete_team_name']}" if row.get("team_conflict") else ""})
+        if rows:
+            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+        else:
+            st.info("ESPN lists no injuries for these teams in this response. This does not confirm that every player is available.")
+        if st.button("Use ESPN injuries in this matchup and update cutoff", key="nba_espn_apply", disabled=not bool(state.get("package"))):
+            try:
+                from builders.nba_injuries import apply_espn_report
+                cutoff = max(timestamp(state["package"]["context"]["as_of"], "projection cutoff"),
+                             timestamp(report["fetched_at"], "ESPN retrieval"))
+                package, audit = apply_espn_report(state["package"], report,
+                    projection_as_of=cutoff, bundle=state.get("ratings"))
+                state.update(package=package, result=None, revision=state.get("revision", 0) + 1)
+                st.success(f"Applied {len(audit['matched'])} ESPN player reports. Review replacement minutes and unresolved participation.")
+            except (InputError, ValueError) as exc:
+                state["result"] = None
+                st.error(str(exc))
+        if (state.get("package") or {}).get("injury_provenance"):
+            audit = state["package"]["injury_provenance"]["audit"]
+            for scenario in state["package"]["scenarios"]:
+                for side in ("away", "home"):
+                    missing = 240 - sum(float(p["minutes"]) for p in scenario[side]["players"])
+                    if abs(missing) > 0.01:
+                        st.warning(f"{state['package'][side]['name']} / {scenario['name']}: {missing:g} minutes need assignment. OUT minutes were removed; assign replacements before comparing.")
+            for entry in audit["unmatched"]:
+                st.warning(f"{entry['team']} — {entry['player']}: {entry['reason']}. Add or verify this player's NBA roster ID; ESPN IDs are separate.")
+            for entry in audit["roster_conflicts"]:
+                st.warning(f"Roster review: NBA player {entry['player_id']} is listed by ESPN with {entry['espn_team']}; removed minutes from {entry['team']}.")
+
+
 def _save_snapshot(package: dict, result: dict) -> bool:
     if package.get("is_demo"):
         return False
@@ -112,10 +174,12 @@ def _rotation_editor(plan: dict, profiles: list[dict], key: str) -> dict:
     rows = [{"player_id": p["player_id"], "Player": names.get(p["player_id"], p["player_id"]),
              "minutes": p["minutes"], "status": p["status"],
              "starter": p.get("starter", False),
-             "minutes_limit": p.get("minutes_limit", 48.0), "assumption": p.get("assumption", "")}
+             "minutes_limit": p.get("minutes_limit", 48.0), "assumption": p.get("assumption", ""),
+             "Estimated return (ESPN)": (p.get("injury") or {}).get("estimated_return_date"),
+             "Injury (ESPN)": (p.get("injury") or {}).get("injury_type", "")}
             for p in plan["players"]]
     edited = st.data_editor(pd.DataFrame(rows), key=key, hide_index=True,
-        use_container_width=True, disabled=["player_id", "Player"],
+        use_container_width=True, disabled=["player_id", "Player", "Estimated return (ESPN)", "Injury (ESPN)"],
         column_config={
             "minutes": st.column_config.NumberColumn("Projected minutes", min_value=0, max_value=48, step=1.0),
             "minutes_limit": st.column_config.NumberColumn("Minutes cap", min_value=0, max_value=48, step=1.0),
@@ -124,7 +188,9 @@ def _rotation_editor(plan: dict, profiles: list[dict], key: str) -> dict:
             "starter": st.column_config.CheckboxColumn("Starting five"),
         })
     result = deepcopy(plan)
-    result["players"] = [{k: row[k] for k in ("player_id", "minutes", "status", "minutes_limit", "assumption", "starter")}
+    original = {p["player_id"]: p for p in plan["players"]}
+    result["players"] = [{**deepcopy(original[row["player_id"]]),
+                          **{k: row[k] for k in ("player_id", "minutes", "status", "minutes_limit", "assumption", "starter")}}
                          for row in edited.to_dict("records")]
     st.caption(f"Projected team minutes: {pd.to_numeric(edited['minutes'], errors='coerce').sum():g} / 240")
     return result
@@ -184,8 +250,8 @@ def render():
     with st.expander("Inputs and sources"):
         st.write("Load the checked historical ratings to choose two teams, or import a ratings bundle or complete matchup JSON. Historical rotation seeds require current roster and injury review. The fictional example download defines the matchup fields.")
         st.write("Player impacts are points per 100 possessions: positive offense creates points; positive defense prevents points. Baseline minutes must describe the same sample as the team ratings. Use regularized estimates with a documented source.")
-        st.write("Copy current reported statuses from the NBA injury report and verify the starting lineup separately. For an unresolved player, keep the reported status and set the scenario to IN or OUT; assign all replacement minutes explicitly.")
-        st.markdown("[NBA injury reports](https://official.nba.com/nba-injury-report-2026-27-season/) · [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)")
+        st.write("Use ESPN for injury statuses and estimated return dates, and verify the starting lineup separately. Day-to-day requires an IN or OUT scenario. OUT minutes are removed; assign all replacement minutes explicitly. Estimated return dates do not establish game availability.")
+        st.markdown("[ESPN NBA injuries](https://www.espn.com/nba/injuries) · [Official NBA report](https://official.nba.com/nba-injury-report-2026-27-season/) · [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)")
         st.download_button("Download fictional input example", json.dumps(example_package(), indent=2),
                            file_name="nba-fictional-input-example.json", mime="application/json")
     uploaded = st.file_uploader("Import NBA ratings bundle or matchup JSON", type=["json"], key="nba_upload")
@@ -207,6 +273,7 @@ def render():
     if st.button("Load fictional demo", key="nba_demo"):
         state.update(package=example_package(), result=None, revision=state.get("revision", 0) + 1)
         state.pop("ratings", None)
+    _espn_inputs(state)
     if not state.get("package"):
         st.info("Import your data or load the fictional demo to compare a player's IN and OUT rotations.")
         return
