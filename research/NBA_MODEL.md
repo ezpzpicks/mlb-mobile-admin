@@ -4,7 +4,7 @@ The model combines dated team ratings, regularized player impacts and explicit
 full-game rotations to project NBA spreads and totals. It includes an offline
 2025–26 data fit and a manual admin builder. The first historical lineup forecast
 did not improve on the team-only control; this remains a research model.
-Automation is intentionally deferred.
+Scheduled research builds now use the fixed policy in [NBA_AUTOMATION.md](NBA_AUTOMATION.md).
 The manual prospective workflow is described in
 [`NBA_LIVE_TRACKING.md`](NBA_LIVE_TRACKING.md): current rosters, checked recent
 minutes, first pregame locks and result/error tracking.
@@ -23,8 +23,9 @@ minutes, first pregame locks and result/error tracking.
 - Dated ratings bundles, prior-minute rotation seeds and manual matchup creation.
 - ESPN injury statuses, estimated return dates, identity checks and dated source snapshots.
 - Chronological tuning and a separate 335-game held-out score evaluation.
-- Explicit research saves and prospective locks with a separate results ledger. No public pick dataset,
-  scheduled collector, paid data service or posting automation is enabled.
+- Explicit research saves and prospective locks with a separate results ledger.
+- Scheduled early and near-tipoff research builds and automatic final-result collection.
+  No public pick dataset, paid data service or posting automation is enabled.
 
 ## Rotation mathematics
 
@@ -230,9 +231,7 @@ NBA appears as a separate admin sport. It uses the existing storage layer's
 NBA namespace, which passes through without changing other sports. Data entry,
 form edits and scenario calculations trigger no database reads or writes.
 Saving appends one bounded research snapshot with the exact inputs and outputs;
-repeat saves of the same snapshot are disabled within the session. Cross-session
-deduplication and concurrent append behavior retain the shared storage layer's
-existing limitations and should be addressed before an automated writer is added.
+repeat saves of the same snapshot are disabled within the session. This older diagnostic snapshot API retains its shared-storage limitations. The automated writer uses the separate unique-key prospective tracker described below.
 The separate prospective tracker uses append-only NBA research tables and a
 database unique constraint for its first game/version lock. This removes
 cross-session/concurrent duplication for primary tracking records without
@@ -241,7 +240,7 @@ changing the older diagnostic snapshot API.
 Future ingestion should refresh shared team/player inputs once and reuse them
 across all matchups, update changed game/player IDs incrementally, and serve
 saved projections to the public site. Do not run season-history calculations on
-public Vercel requests. There are no automation or refresh-schedule changes here.
+public Vercel requests. Scheduled NBA research builds are documented in [NBA_AUTOMATION.md](NBA_AUTOMATION.md); the public-site collector cadence is unchanged.
 
 ## Validation
 

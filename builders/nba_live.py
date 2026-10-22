@@ -244,15 +244,20 @@ def fetch_recent_minutes(team: dict, season_year: int, *, as_of, cache=None) -> 
             "window": MINUTES_WINDOW, "games": observations, "rejected": rejected}
 
 
-def fetch_matchup_inputs(game: dict) -> dict:
+def fetch_matchup_inputs(game: dict, *, team_cache=None, box_cache=None) -> dict:
     """Explicit user operation: two rosters, two schedules, up to 20 unique boxes."""
-    rosters, recent, cache = {}, {}, {}
+    rosters, recent = {}, {}
+    cache = box_cache if box_cache is not None else {}
+    team_cache = team_cache if team_cache is not None else {}
     cutoff = datetime.now(timezone.utc)
     for side in ("away", "home"):
         t = game[side]
-        raw, source = source_get(f"teams/{_id(t['espn_team_id'])}/roster?season={game['season_year']}")
-        rosters[side] = normalize_roster(raw, source, t, game["season_year"])
-        recent[side] = fetch_recent_minutes(t, game["season_year"], as_of=cutoff, cache=cache)
+        key = (t["espn_team_id"], game["season_year"])
+        if key not in team_cache:
+            raw, source = source_get(f"teams/{_id(t['espn_team_id'])}/roster?season={game['season_year']}")
+            team_cache[key] = (normalize_roster(raw, source, t, game["season_year"]),
+                              fetch_recent_minutes(t, game["season_year"], as_of=cutoff, cache=cache))
+        rosters[side], recent[side] = deepcopy(team_cache[key])
     return {"game": deepcopy(game), "rosters": rosters, "recent": recent}
 
 

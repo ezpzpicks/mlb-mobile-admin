@@ -119,7 +119,7 @@ def tracker(state, *, ui):
     st = ui
     from builders.nba_tracking import export_ledger, result_observation, tracking_report
     with st.expander("NBA live model tracker"):
-        st.caption("One first pregame prediction per game and model version. Compare lineup and team-only errors on the same games. Market records require a line captured before tipoff; no prices or profit are inferred.")
+        st.caption("Scheduled NBA builds run every 30 minutes, 9 AM–midnight ET. Early and near-tipoff automatic forecasts have separate version records; manual forecasts remain separate. Compare lineup and team-only errors on the same games. Market records require a pregame line; no prices or profit are inferred.")
         if st.button("Load / refresh NBA tracker", key="nba_load_tracker"):
             try:
                 from shared.nba_tracking_storage import load_ledger

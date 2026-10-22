@@ -4,15 +4,17 @@ Experiment: `nba-2026-27-prospective-v1`. Initial version: `nba-v0.4-live-tracki
 
 This is a live research study. The preceding 335-game historical test did not show a lineup improvement over team-only ratings. Current ESPN injury inputs have no historical injury-aware accuracy result. The fitted ratings still use games through April 12, 2026; the new season is observed prospectively.
 
-## Daily manual workflow
+## Scheduled builds and manual workflow
+
+Scheduled NBA builds now share the existing 30-minute Render job, 9 AM–midnight ET. One early forecast and a separate near-tipoff refresh use fixed, explicitly conditional rotation assumptions and distinct tracking versions. Results are collected automatically. See [NBA_AUTOMATION.md](NBA_AUTOMATION.md) for the exact policy, skip conditions, safeguards and operation. The manual workflow remains available below.
 
 1. Open **NBA → Live NBA games and current rotations** in the admin. Enter an ET date and **Fetch NBA slate**.
 2. Select a scheduled regular-season game and **Prepare live matchup with ESPN inputs**. This explicitly fetches two current rosters, two schedules, up to ten past game boxes per team, and one league injury response. Ordinary page rerenders fetch nothing.
 3. Review the current roster / minute evidence tables, injury statuses, estimated return dates and each projected rotation. Correct the minute suggestion and any IN/OUT assumptions. All projected team minutes must total 240 and respect individual caps. Verify starters separately when known. Enter a dated market line only if available.
 4. **Compare rotations**, then open **Lock first forecast for live tracking**. Select one scenario, acknowledge roster and minute review, and record the remaining assumptions. Lock the last compared forecast while its cutoff is within 60 minutes and before scheduled tipoff. A fresh game-status request and a database clock check guard against late writes. There is no retroactive lock or post-result scenario selection.
-5. **Load / refresh NBA tracker**. After games, enter the original ET tracking date and **Fetch and save NBA results for date**. This is an explicit refresh; it is not scheduled. Download the complete ledger when needed.
+5. **Load / refresh NBA tracker**. Scheduled runs collect recent pending final results. To perform an additional manual refresh, enter the original ET tracking date and **Fetch and save NBA results for date**. Download the complete ledger when needed.
 
-No NBA scheduling or public pick publication is enabled. These research forecasts have no betting grades or calibrated probabilities. No sportsbook prices, stakes, or profits are assumed.
+NBA scheduling is enabled through the shared builder cron. Public pick publication remains disabled. These research forecasts have no betting grades or calibrated probabilities. No sportsbook prices, stakes, or profits are assumed.
 
 ## Identity, rosters and minute estimates
 

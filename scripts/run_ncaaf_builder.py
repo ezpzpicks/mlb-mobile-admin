@@ -197,4 +197,11 @@ def main():
 
 
 if __name__ == "__main__":
+    # Compatibility entry point for the already deployed Render cron command.
+    # The explicit NBA enable flag opts that service into the shared dispatcher;
+    # supervised plan/evaluate invocations and child runs retain their behavior.
+    if (sys.argv[1:] == ["--commit"] and not os.getenv("EZPZ_SCHEDULED_BUILDER_CHILD") and
+            os.getenv("NBA_AUTO_BUILDER_ENABLED", "").lower() in {"1", "true", "yes"}):
+        from scripts.run_scheduled_builders import main as scheduled_main
+        raise SystemExit(scheduled_main())
     raise SystemExit(main())

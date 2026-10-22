@@ -43,7 +43,8 @@ def _same_game(package: dict, game: dict):
 
 
 def lock_prediction(package: dict, scenario_name: str, game: dict, *, locked_at,
-                    roster_reviewed: bool, minutes_reviewed: bool, review_note: str) -> dict:
+                    roster_reviewed: bool, minutes_reviewed: bool, review_note: str,
+                    automation_policy: str | None = None) -> dict:
     """Recompute and seal the explicitly selected forecast before server tipoff.
 
     ``game`` must come from a fresh source request, not the user's editable
@@ -65,8 +66,19 @@ def lock_prediction(package: dict, scenario_name: str, game: dict, *, locked_at,
     observed = timestamp(game["source"]["observed_at"], "live verification time")
     if not timedelta(0) <= now - observed <= timedelta(minutes=2):
         raise InputError("Refresh game status immediately before locking the prediction.")
-    if roster_reviewed is not True or minutes_reviewed is not True or not isinstance(review_note, str) or not review_note.strip():
+    tracking_version, review_method = MODEL_VERSION, "manual"
+    if automation_policy is not None:
+        from builders.nba_automation import validate_automated_package
+        tracking_version = validate_automated_package(package, game, now, automation_policy)
+        if roster_reviewed is not False or minutes_reviewed is not False:
+            raise InputError("An automated forecast cannot claim human roster or minute review.")
+        if scenario_name != package["automation"]["primary_scenario"]:
+            raise InputError("Automatic tracking must use the fixed primary scenario, not a sensitivity alternative.")
+        review_method = "automated"
+    elif roster_reviewed is not True or minutes_reviewed is not True:
         raise InputError("Review both current rosters and projected minutes, and record the outstanding assumptions.")
+    if not isinstance(review_note, str) or not review_note.strip():
+        raise InputError("Record the outstanding forecast assumptions.")
     provenance = package["live_provenance"]
     if provenance.get("conflicts"):
         raise InputError("Current roster and injury sources disagree. Resolve the reported conflicts before locking.")
@@ -98,13 +110,15 @@ def lock_prediction(package: dict, scenario_name: str, game: dict, *, locked_at,
     selected = [p for p in projection["scenarios"] if p["scenario"] == scenario_name]
     if len(selected) != 1:
         raise InputError("Select exactly one scenario before locking. A scenario cannot be selected after the result.")
-    key = digest({"experiment": EXPERIMENT_ID, "version": MODEL_VERSION, "game_id": game["game_id"]})
+    key = digest({"experiment": EXPERIMENT_ID, "version": tracking_version, "game_id": game["game_id"]})
     return _seal({"schema": LOCK_SCHEMA, "experiment_id": EXPERIMENT_ID,
-        "record_id": key, "model_version": MODEL_VERSION, "game_id": game["game_id"],
+        "record_id": key, "model_version": tracking_version, "core_model_version": MODEL_VERSION,
+        "game_id": game["game_id"],
         "season_year": game["season_year"], "locked_at": now.isoformat(), "cutoff": cutoff.isoformat(),
         "tipoff": tipoff.isoformat(), "selected_scenario": scenario_name,
         "selected": selected[0], "inputs": deepcopy(package), "projection": projection,
-        "verification": deepcopy(game), "roster_reviewed": True, "minutes_reviewed": True,
+        "verification": deepcopy(game), "roster_reviewed": roster_reviewed, "minutes_reviewed": minutes_reviewed,
+        "review_method": review_method, "automation_policy": automation_policy,
         "review_note": review_note.strip()[:4000], "research_only": True, "eligible_for_posting": False})
 
 

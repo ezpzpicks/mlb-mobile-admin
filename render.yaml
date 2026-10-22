@@ -10,6 +10,8 @@ services:
     plan: 1c-2g
     schedule: "7,37 * * * *"
     buildCommand: pip install -r requirements.txt
+    # Legacy command now dispatches isolated NBA + NCAAF jobs when NBA is enabled.
+    # Reuse the existing service and secrets; no second cron minimum is added.
     startCommand: python -u scripts/run_ncaaf_builder.py --commit
     autoDeployTrigger: commit
     envVars:
@@ -18,6 +20,8 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: NCAAF_AUTO_BUILDER_ENABLED
+        value: "1"
+      - key: NBA_AUTO_BUILDER_ENABLED
         value: "1"
       - key: POLARS_MAX_THREADS
         value: "1"
