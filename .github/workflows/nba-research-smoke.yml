@@ -5,6 +5,9 @@ on:
     paths:
       - 'builders/nba_*.py'
       - 'shared/nba_tracking_storage.py'
+      - 'scripts/run_nba_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'scripts/run_ncaaf_builder.py'
       - 'research/test_nba_*.py'
       - 'research/nba_fit.py'
       - 'research/requirements-nba.txt'
@@ -14,6 +17,9 @@ on:
     paths:
       - 'builders/nba_*.py'
       - 'shared/nba_tracking_storage.py'
+      - 'scripts/run_nba_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'scripts/run_ncaaf_builder.py'
       - 'research/test_nba_*.py'
       - '.github/workflows/nba-research-smoke.yml'
 
@@ -32,6 +38,8 @@ jobs:
           cache: pip
           cache-dependency-path: research/requirements-nba.txt
       - run: pip install -r research/requirements-nba.txt
+      - run: pip install pytest requests beautifulsoup4
       - run: python -m unittest discover -s research -p 'test_nba_*.py' -q
         env:
           OPENBLAS_NUM_THREADS: '1'
+      - run: python -m pytest research/test_ncaaf_auto_builder.py -q
