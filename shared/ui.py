@@ -7,6 +7,7 @@ SPORT_META = {
     "CFB": ("🏈", "College Football", "Spread, moneyline and total beta"),
     "NFL": ("🏈", "NFL", "Spread, moneyline and total beta"),
     "CBB": ("🏀", "College Basketball", "Rotation-aware game model beta"),
+    "NBA": ("🏀", "NBA", "Lineup-aware spreads and totals research"),
 }
 
 
@@ -47,3 +48,4 @@ def render_sport_header(sport: str, version: str) -> None:
     with right:
         st.markdown(f"### {icon} {label}")
         st.caption(f"Model: {version}")
+

@@ -169,10 +169,12 @@ if selected_sport not in valid_sports:
         unsafe_allow_html=True,
     )
 
-    rows = [("MLB", "NFL"), ("CFB", "CBB")]
+    rows = [("MLB", "NFL"), ("CFB", "CBB"), ("NBA", None)]
     for left_sport, right_sport in rows:
         left, right = st.columns(2)
         for column, sport in [(left, left_sport), (right, right_sport)]:
+            if sport is None:
+                continue
             icon, label, subtitle = SPORT_META[sport]
             with column:
                 st.markdown(
@@ -187,21 +189,22 @@ if selected_sport not in valid_sports:
     st.stop()
 
 versions = {
+    "NBA": "nba-v0.1-lineup-foundation-2026-10-22",
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
     "NFL": "nfl-v4.28-directional-variable-tiers-2026-10-08",
     "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
 }
-if selected_sport == "NFL":
-    # The shared sport header includes a next-sport shortcut (shown as
-    # "Open College Basketball" on the NFL page). Use a focused NFL header instead.
+if selected_sport in {"NFL", "NBA"}:
+    # Retain NFL's focused header and use it for NBA too. _set_sport also clears
+    # the query parameter, so All Sports returns to the menu on the next rerun.
     header_left, header_right = st.columns([3, 1])
-    icon, label, subtitle = SPORT_META["NFL"]
+    icon, label, subtitle = SPORT_META[selected_sport]
     with header_left:
         st.markdown(f"## {icon} {label} Model Builder")
-        st.caption(f"{subtitle} • {versions['NFL']}")
+        st.caption(f"{subtitle} • {versions[selected_sport]}")
     with header_right:
-        if st.button("← All Sports", key="nfl_back_to_sports", use_container_width=True):
+        if st.button("← All Sports", key=f"{selected_sport.lower()}_back_to_sports", use_container_width=True):
             _set_sport("")
             st.rerun()
 else:
@@ -236,3 +239,8 @@ elif selected_sport == "CBB":
     set_storage_sport("CBB")
     from builders.cbb_builder import render
     render()
+elif selected_sport == "NBA":
+    set_storage_sport("NBA")
+    from builders.nba_builder import render
+    render()
+
