@@ -30,7 +30,7 @@ def event_fixture(*, final=False, overtime=False, now=NOW):
                        [{"displayValue": "20"}] * (period - 1) + [{"displayValue": "25"}]) if final else []}
              for side, tid, title, points in (("away", "1", "Away", period * 20), ("home", "2", "Home", period * 20 + 5))]}
     return {"id": "123456", "date": c["date"], "timeValid": True,
-            "season": {"year": 2027, "type": 2}, "competitions": [c]}
+            "season": {"year": now.year + (now.month >= 7), "type": 2}, "competitions": [c]}
 
 
 def fixture(now=NOW):
@@ -41,11 +41,11 @@ def fixture(now=NOW):
         players = [{"espn_athlete_id": str((1 if side == 'away' else 100) + i), "name": p["name"],
                     "roster_status": "Active"} for i, p in enumerate(team["players"])]
         rosters[side] = {"espn_team_id": game[side]["espn_team_id"], "name": game[side]["name"],
-                         "season_year": 2027, "players": players, "source": source(now)}
+                         "season_year": game['season_year'], "players": players, "source": source(now)}
         recent[side] = {"espn_team_id": game[side]["espn_team_id"], "source": source(now),
                         "window": 10, "games": [], "rejected": []}
     injuries = normalize_espn_feed({"status": "success", "timestamp": now.isoformat(),
-        "season": {"year": 2027}, "injuries": []}, fetched_at=now)
+        "season": {"year": game['season_year']}, "injuries": []}, fetched_at=now)
     inputs = {"game": game, "rosters": rosters, "recent": recent}
     return bundle, inputs, injuries
 

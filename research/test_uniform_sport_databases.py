@@ -1,34 +1,55 @@
 from __future__ import annotations
 
 import os
+from unittest.mock import patch
+
+import pandas as pd
 
 from shared import storage
-from builders import cfb_builder, nfl_builder
 from shared.public_contract import ALL_GAME_TRENDS_TAB, PUBLIC_SPLIT_TAB
 
 
+def check_storage_contract() -> None:
+    # Production is Turso-native. Legacy Sheets settings must not redirect any
+    # sport into another namespace or bring back the removed Sheets fallback.
+    previous = storage.get_storage_sport()
+    expected = {"NFL":"NFL", "CFB":"NCAAF", "NCAAF":"NCAAF", "CBB":"NCAAM",
+                "NCAAM":"NCAAM", "NBA":"NBA", "MLB":"MLB", "":""}
+    try:
+        with patch.dict(os.environ, {"GOOGLE_SHEET_NAME":"Legacy MLB DB",
+                                   "NFL_GOOGLE_SHEET_NAME":"Legacy custom NFL DB"}):
+            for sport, namespace in expected.items():
+                config = storage.storage_database_config(sport)
+                assert config["dataset_sport"] == namespace
+                assert config["sheet_name"] == (f"Turso {namespace}" if namespace else "Turso")
+                assert config["sheet_id"] == (f"turso:{namespace}" if namespace else "")
+                assert config["namespace"] == ""
+
+        storage.set_storage_sport("NCAAF")
+        assert storage.get_storage_sport() == "CFB"
+        assert storage.storage_database_name() == "Turso NCAAF"
+        columns = ["Game ID", "Snapshot ID"]
+        payload = {"Game ID":"synthetic-game", "Snapshot ID":"synthetic-snapshot"}
+        with patch.object(storage, "is_turso_ready", return_value=True), \
+             patch.object(storage, "append_dataset_rows", return_value=1) as append, \
+             patch.object(storage, "read_dataset", return_value=pd.DataFrame([payload])) as read:
+            with storage.sport_storage("NBA"):
+                assert storage.storage_database_identity() == "turso:NBA"
+                assert storage.append_row("nba_research_snapshots", payload, columns)
+                assert storage.read_sheet("nba_research_snapshots", columns).iloc[0]["Game ID"] == "synthetic-game"
+                with storage.sport_storage("NCAAM"):
+                    assert storage.storage_database_identity() == "turso:NCAAM"
+                assert storage.get_storage_sport() == "NBA"
+            assert storage.get_storage_sport() == "CFB"
+            append.assert_called_once_with("NBA", "nba_research_snapshots", [payload], columns)
+            read.assert_called_once_with("NBA", "nba_research_snapshots", columns)
+    finally:
+        storage.set_storage_sport(previous)
+
+
 def main() -> None:
-    # Football must never fall back into MLB's generic database merely because
-    # GOOGLE_SHEET_NAME is configured for baseball.
-    os.environ["GOOGLE_SHEET_NAME"] = "MLB Model Database - Existing"
-    for key in [
-        "NFL_GOOGLE_SHEET_NAME", "NFL_GOOGLE_SHEET_ID",
-        "CFB_GOOGLE_SHEET_NAME", "CFB_GOOGLE_SHEET_ID",
-        "NCAAF_GOOGLE_SHEET_NAME", "NCAAF_GOOGLE_SHEET_ID",
-    ]:
-        os.environ.pop(key, None)
-
-    assert storage.storage_database_config("NFL")["sheet_name"] == "NFL Model Database"
-    assert storage.storage_database_config("CFB")["sheet_name"] == "CFB Model Database"
-    assert storage.storage_database_config("")["sheet_name"] == "MLB Model Database - Existing"
-
-    os.environ["NFL_GOOGLE_SHEET_NAME"] = "Custom NFL DB"
-    assert storage.storage_database_config("NFL")["sheet_name"] == "Custom NFL DB"
-    os.environ.pop("NFL_GOOGLE_SHEET_NAME", None)
-
-    storage.set_storage_sport("NCAAF")
-    assert storage.get_storage_sport() == "CFB"
-    assert storage.storage_database_name() == "CFB Model Database"
+    from builders import cfb_builder, nfl_builder
+    check_storage_contract()
 
     for builder in [nfl_builder, cfb_builder]:
         assert builder.SLATE_TAB == "daily_slate"
@@ -44,3 +65,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
