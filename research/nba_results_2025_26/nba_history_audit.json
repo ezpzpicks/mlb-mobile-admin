@@ -1,0 +1,2636 @@
+{
+  "source_games": 1230,
+  "games_with_exact_scores": 1229,
+  "accepted_games": 471,
+  "excluded_games": 759,
+  "exclusion_reasons": {
+    "event_player_minutes_mismatch": 691,
+    "negative_score_change": 91,
+    "invalid_score_change": 56,
+    "invalid_ten_player_lineup": 84,
+    "ambiguous_event_lineup": 125,
+    "player_plus_minus_mismatch": 29,
+    "lineup_player_not_active_in_box": 1
+  },
+  "raw_regular_season_rows": 32622,
+  "accepted_observation_groups": 28716,
+  "accepted_possessions": 96302.84,
+  "plus_minus_tolerance": 0.0,
+  "median_game_max_player_plus_minus_error": 0.0,
+  "lineup_sources": {
+    "Event lineups; foul-time FT credit; shared possession exposure": 32622
+  },
+  "box_minute_rollovers": 77,
+  "availability_policy": "Game date + 1 day, noon America/New_York; inferred, not archived publication time",
+  "excluded_game_reasons": {
+    "0022500332": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501145": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500817": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501009": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500395": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500664": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501171": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500896": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500710": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500369": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500515": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500216": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500098": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500775": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500943": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500846": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500618": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500240": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500596": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500692": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500033": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501024": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500746": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500014": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500808": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500763": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500444": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500517": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500761": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500359": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500891": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501044": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501212": [
+      "negative_score_change"
+    ],
+    "0022500942": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500177": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500019": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500758": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500080": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500371": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500142": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500493": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500621": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501124": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500826": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500088": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500149": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500516": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500983": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500540": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500480": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500263": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501205": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501050": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501137": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501045": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500607": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500645": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500361": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500106": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500545": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500301": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501219": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501130": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501075": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500023": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500051": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500633": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500857": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500638": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500231": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500570": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501154": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500787": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500260": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500204": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500802": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500547": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500102": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501049": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500084": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500039": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501207": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500108": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501224": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500989": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501230": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500326": [
+      "negative_score_change"
+    ],
+    "0022501035": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500967": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500412": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501016": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500878": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500527": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500349": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500044": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500463": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500729": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501141": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500193": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500619": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500912": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022501184": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500833": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500343": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500616": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500117": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500206": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500867": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500127": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500344": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500680": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500667": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500558": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500595": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500670": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500620": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500436": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500812": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500581": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500012": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500757": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500734": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501208": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500261": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501221": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500635": [
+      "negative_score_change"
+    ],
+    "0022500026": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500877": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500087": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500472": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500459": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500192": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500886": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500884": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501127": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500253": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501229": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501129": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500706": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501106": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500509": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500637": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500488": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500704": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500697": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501147": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501048": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500040": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500112": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500384": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501151": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500938": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501067": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501023": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500606": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500722": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500232": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500784": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500209": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501036": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500535": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500864": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500331": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500848": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500259": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500424": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500186": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500546": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500883": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500696": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500786": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500851": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500148": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500923": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500906": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500055": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500477": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500426": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500367": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500184": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022501059": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500229": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500562": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501162": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500792": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500212": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501198": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500153": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500542": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500248": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500455": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501052": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500383": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500185": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500528": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500725": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501077": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500972": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500752": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500432": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500537": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500774": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500205": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500548": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500445": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500605": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500143": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501070": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500497": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500945": [
+      "negative_score_change"
+    ],
+    "0022500779": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500053": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501172": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500778": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500946": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500475": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501012": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500672": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500090": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500745": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500239": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500984": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500025": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501107": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500863": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500299": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500611": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500271": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500755": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500702": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500390": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500213": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500632": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022500410": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500362": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500594": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500075": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500267": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501040": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500593": [
+      "negative_score_change"
+    ],
+    "0022501089": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501025": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500741": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500553": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500951": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500639": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500337": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501222": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500790": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500388": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500617": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500541": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500105": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500750": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500838": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500579": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500223": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500898": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500873": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500624": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501226": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500408": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022501218": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500847": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500737": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501007": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500822": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500840": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501060": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500429": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500386": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500122": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500178": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500043": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500835": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500563": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500974": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500335": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500006": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500256": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500708": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500587": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500166": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500449": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500420": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500574": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500999": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500947": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501220": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500494": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500909": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500650": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500397": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500401": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501019": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500931": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500287": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500069": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500960": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500965": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500264": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500590": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500690": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500973": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500320": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500415": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500126": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500427": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501182": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500433": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501199": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501190": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500159": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500732": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500392": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500503": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501174": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500783": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500325": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500769": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500135": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501100": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500665": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500506": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500894": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500354": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500882": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500189": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500543": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500567": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500640": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022501114": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500313": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500793": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022500156": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500201": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501213": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500659": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500911": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500243": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500859": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501204": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500404": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500634": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501201": [
+      "negative_score_change"
+    ],
+    "0022500673": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501072": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500340": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500389": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500580": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500233": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500115": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500309": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501017": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022500522": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500584": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501022": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500173": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500357": [
+      "negative_score_change"
+    ],
+    "0022500405": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500801": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501103": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501064": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500109": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022501149": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500312": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500030": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501139": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500338": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500373": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500170": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500242": [
+      "negative_score_change"
+    ],
+    "0022500837": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500288": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500694": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500197": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501058": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500057": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500674": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500529": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500421": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022500622": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500820": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500244": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501011": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500689": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500470": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500728": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500450": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500319": [
+      "negative_score_change"
+    ],
+    "0022500452": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500132": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500031": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500217": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500986": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501210": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "invalid_ten_player_lineup",
+      "negative_score_change"
+    ],
+    "0022500396": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500302": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500162": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500823": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501068": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500158": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500966": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500740": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500500": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500180": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500869": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500054": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500957": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500950": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500647": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501185": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500235": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500813": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500379": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500210": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500327": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500901": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500237": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500612": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500089": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501209": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500693": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500789": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501018": [
+      "negative_score_change"
+    ],
+    "0022500809": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500532": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500268": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500501": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500430": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501136": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500101": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500378": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500317": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500418": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500760": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500586": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500712": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500188": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500907": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500168": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500688": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500720": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500304": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501085": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500695": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500038": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500642": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500018": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500234": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501087": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500827": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500565": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500599": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500483": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500929": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500411": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501200": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500671": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501117": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500641": [
+      "lineup_player_not_active_in_box"
+    ],
+    "0022500161": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500100": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500314": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500254": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500381": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500446": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501055": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500862": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500995": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500794": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500481": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500627": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500770": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500406": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500202": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500751": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500061": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500219": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500482": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500316": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501203": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500678": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500328": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500295": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500601": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500756": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500403": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500573": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500927": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500709": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500460": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500549": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500422": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500660": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501046": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501092": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500805": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500440": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500925": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500458": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500577": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500282": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500078": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500277": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500113": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500468": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501128": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500380": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500120": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500457": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500276": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500187": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500569": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500172": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500944": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501063": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500167": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500948": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500676": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501010": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500705": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500274": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500439": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500082": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500853": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500461": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500588": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500631": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501168": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500164": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500782": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500037": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500305": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500964": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500721": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500021": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500046": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500099": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501228": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501038": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500719": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500334": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500521": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500081": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500799": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500519": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500474": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500447": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500496": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500045": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500747": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500351": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500155": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500839": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500810": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500345": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500104": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500928": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500308": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500279": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500614": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500489": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501083": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500486": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500174": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500559": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500855": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500466": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500138": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500265": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500270": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500377": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500977": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500807": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500490": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500699": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501146": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500874": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500772": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500776": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500179": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500247": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501223": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500568": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500124": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501155": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500958": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500028": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500146": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500513": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500315": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501165": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501166": [
+      "negative_score_change"
+    ],
+    "0022500866": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500070": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500842": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500001": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500462": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501142": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500744": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500125": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501148": [
+      "negative_score_change"
+    ],
+    "0022500280": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501096": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501183": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500245": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500959": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500013": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501005": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500094": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500785": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500657": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500997": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500355": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500214": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500978": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501116": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500922": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501215": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500485": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500238": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500856": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500971": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501041": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500431": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501217": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500435": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500651": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500684": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500520": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500525": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500329": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500626": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500556": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500564": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500726": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500766": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022501021": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500398": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501214": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501132": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500077": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500652": [
+      "negative_score_change"
+    ],
+    "0022501126": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501043": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500908": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500523": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500414": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501032": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500059": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501008": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500479": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500557": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500251": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500920": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500211": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500358": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500035": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501163": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500024": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500504": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500423": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500816": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500292": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500134": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501112": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500910": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500294": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500402": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500339": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500394": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500227": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500921": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500181": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500198": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500534": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501173": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501206": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500933": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501189": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500669": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500841": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500849": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500387": [
+      "negative_score_change"
+    ],
+    "0022500655": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500597": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501225": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500071": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500150": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501073": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500182": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500536": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500165": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500682": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500716": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501090": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501227": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500095": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500285": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500818": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500128": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500224": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500871": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500514": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500654": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500091": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500656": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500991": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500296": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500628": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500049": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500683": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022501071": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500008": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500881": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500323": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500648": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500350": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500858": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500130": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500151": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500914": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500649": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500592": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500250": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500076": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500653": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500668": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500585": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500222": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500017": [
+      "event_player_minutes_mismatch",
+      "negative_score_change"
+    ],
+    "0022500661": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500777": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500603": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500767": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022500324": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500711": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500409": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501088": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500691": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500988": [
+      "ambiguous_event_lineup",
+      "event_player_minutes_mismatch"
+    ],
+    "0022500451": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500107": [
+      "player_plus_minus_mismatch"
+    ],
+    "0022500363": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500707": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500629": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501054": [
+      "event_player_minutes_mismatch",
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022500002": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500604": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500375": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022501196": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500539": [
+      "event_player_minutes_mismatch",
+      "invalid_ten_player_lineup"
+    ],
+    "0022501047": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500836": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500207": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500141": [
+      "event_player_minutes_mismatch"
+    ],
+    "0022500278": [
+      "invalid_score_change",
+      "negative_score_change"
+    ],
+    "0022501027": [
+      "event_player_minutes_mismatch"
+    ]
+  },
+  "raw_regular_season_events": 621881,
+  "raw_regular_season_possessions": 245646,
+  "minute_tolerance_seconds": 2.0,
+  "maximum_accepted_player_minute_error_seconds": 0.5000000000003979,
+  "free_throw_events_using_foul_lineup": 57721,
+  "free_throw_events_with_changed_point_lineup": 14192,
+  "possession_exposure_policy": "Each counted possession shared equally across distinct event lineups; average both sides for common exposure",
+  "point_credit_policy": "FT credited to most recent same-clock foul lineup; all player box plus/minus must match exactly",
+  "team_source_games": 1230,
+  "team_accepted_games": 1230,
+  "team_excluded_games": 0,
+  "team_excluded_game_reasons": {},
+  "possession_units": "Box estimate: mean of both teams' FGA + 0.44*FTA - player OREB + TOV; event exposures rescaled per game",
+  "player_games_removed_by_box_checks": 0
+}

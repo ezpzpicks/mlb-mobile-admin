@@ -1,0 +1,229 @@
+{
+  "start": "2026-01-01",
+  "end_exclusive": "2026-03-01",
+  "requested_games": 399,
+  "candidate_grid": [
+    {
+      "player_ridge": 150.0,
+      "minutes_window": 5,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 12.974259179837,
+          "margin_rmse": 16.67565770595936,
+          "total_mae": 15.957139773693495,
+          "total_rmse": 19.994005155634685
+        }
+      }
+    },
+    {
+      "player_ridge": 150.0,
+      "minutes_window": 10,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 12.644352349216192,
+          "margin_rmse": 16.188388345807624,
+          "total_mae": 15.961766906026225,
+          "total_rmse": 19.889444142962446
+        }
+      }
+    },
+    {
+      "player_ridge": 500.0,
+      "minutes_window": 5,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 12.189557137088876,
+          "margin_rmse": 15.71296282871746,
+          "total_mae": 15.622886821369312,
+          "total_rmse": 19.513844322832615
+        }
+      }
+    },
+    {
+      "player_ridge": 500.0,
+      "minutes_window": 10,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 12.088609587485783,
+          "margin_rmse": 15.54541928585603,
+          "total_mae": 15.662545655057935,
+          "total_rmse": 19.50103551327853
+        }
+      }
+    },
+    {
+      "player_ridge": 1500.0,
+      "minutes_window": 5,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.987348252271383,
+          "margin_rmse": 15.454704375856142,
+          "total_mae": 15.498148407138142,
+          "total_rmse": 19.345557131009954
+        }
+      }
+    },
+    {
+      "player_ridge": 1500.0,
+      "minutes_window": 10,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.96008222473267,
+          "margin_rmse": 15.396128527882427,
+          "total_mae": 15.521129252435681,
+          "total_rmse": 19.3678349175951
+        }
+      }
+    },
+    {
+      "player_ridge": 5000.0,
+      "minutes_window": 5,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.976276315141469,
+          "margin_rmse": 15.387621892284645,
+          "total_mae": 15.464555184697677,
+          "total_rmse": 19.331211665577623
+        }
+      }
+    },
+    {
+      "player_ridge": 5000.0,
+      "minutes_window": 10,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.975645518039231,
+          "margin_rmse": 15.370375219951551,
+          "total_mae": 15.48052954980006,
+          "total_rmse": 19.35175896167506
+        }
+      }
+    },
+    {
+      "player_ridge": 15000.0,
+      "minutes_window": 5,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.983551284298855,
+          "margin_rmse": 15.371525012618768,
+          "total_mae": 15.478378381703324,
+          "total_rmse": 19.35648176201804
+        }
+      }
+    },
+    {
+      "player_ridge": 15000.0,
+      "minutes_window": 10,
+      "games": 399,
+      "skipped": [],
+      "metrics": {
+        "baseline": {
+          "margin_mae": 11.989168967298673,
+          "margin_rmse": 15.36468558229047,
+          "total_mae": 15.501929975071628,
+          "total_rmse": 19.385754107407696
+        },
+        "lineup": {
+          "margin_mae": 11.984472355762685,
+          "margin_rmse": 15.366295320255823,
+          "total_mae": 15.487429341833417,
+          "total_rmse": 19.366926088529077
+        }
+      }
+    }
+  ],
+  "selected": {
+    "player_ridge": 15000.0,
+    "minutes_window": 10,
+    "games": 399,
+    "skipped": [],
+    "metrics": {
+      "baseline": {
+        "margin_mae": 11.989168967298673,
+        "margin_rmse": 15.36468558229047,
+        "total_mae": 15.501929975071628,
+        "total_rmse": 19.385754107407696
+      },
+      "lineup": {
+        "margin_mae": 11.984472355762685,
+        "margin_rmse": 15.366295320255823,
+        "total_mae": 15.487429341833417,
+        "total_rmse": 19.366926088529077
+      }
+    }
+  },
+  "selection_rule": "Lowest validation margin RMSE; ties use total RMSE, stronger shrinkage, then shorter window",
+  "team_ridge": 100.0
+}

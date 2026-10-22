@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 import json
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -18,6 +19,75 @@ STATE_KEY = "_nba_research"
 SNAPSHOT_TAB = "nba_research_snapshots"
 SNAPSHOT_COLUMNS = ["Date", "Game ID", "Game", "Snapshot ID", "Model Version",
                     "As Of UTC", "Scenario Count", "Research Only", "Payload JSON"]
+HISTORICAL_RATINGS = Path(__file__).resolve().parents[1] / "research/nba_results_2025_26/nba_ratings.json"
+
+
+def _import_json(raw: bytes, state: dict):
+    if len(raw) > 10_000_000:
+        raise InputError("NBA JSON uploads are limited to 10 MB.")
+    package = json.loads(raw)
+    if isinstance(package, dict) and package.get("schema") == "nba-ratings-v1":
+        from builders.nba_ratings import validate_bundle
+        validate_bundle(package)
+        state.update(ratings=package, package=None, result=None,
+                     ratings_revision=state.get("ratings_revision", 0) + 1)
+    else:
+        from builders.nba_model import from_package
+        from_package(package)
+        state.update(package=package, result=None, revision=state.get("revision", 0) + 1)
+        state.pop("ratings", None)
+
+
+def _matchup_from_ratings(state: dict):
+    bundle = state.get("ratings")
+    if not bundle:
+        return
+    st.warning(f"Historical ratings through {bundle['data_through']}. Verify current rosters, injury reports, starting lineups and minutes before reviewing a matchup.")
+    st.caption(f"{bundle['training_games']} team games · {bundle.get('player_training_games', bundle['training_games'])} checked player games · rating cutoff {bundle['as_of']}")
+    evaluation = bundle.get("research_evaluation") or {}
+    if evaluation.get("lineup_beats_team_margin_rmse") is False:
+        st.warning(f"The lineup forecast did not beat the team-only control on {evaluation['holdout_games']} held-out games. These ratings are for research.")
+    teams = {t["team_id"]: t["name"] for t in bundle["teams"]}
+    options = sorted(teams, key=teams.get)
+    revision = state.get("ratings_revision", 0)
+    with st.form(f"nba_matchup_from_ratings_{revision}"):
+        away = st.selectbox("Away team", options, format_func=teams.get, key=f"nba_ratings_away_{revision}")
+        home = st.selectbox("Home team", options, index=1, format_func=teams.get, key=f"nba_ratings_home_{revision}")
+        game = st.text_input("NBA game ID", value="", key=f"nba_ratings_game_{revision}")
+        cutoff = st.text_input("Projection cutoff (ISO timestamp with timezone)",
+            value=datetime.now(timezone.utc).isoformat(timespec="seconds"), key=f"nba_ratings_cutoff_{revision}")
+        tipoff = st.text_input("Scheduled tipoff (ISO timestamp with timezone)", value="", key=f"nba_ratings_tipoff_{revision}")
+        create = st.form_submit_button("Create matchup from ratings", use_container_width=True)
+    if create:
+        try:
+            from builders.nba_ratings import package_from_bundle
+            package = package_from_bundle(bundle, away, home, game_id=game, as_of=cutoff, tipoff=tipoff)
+            from builders.nba_model import from_package
+            from_package(package)
+            state.update(package=package, result=None, revision=state.get("revision", 0) + 1)
+        except (InputError, ValueError) as exc:
+            st.error(str(exc))
+
+
+def _roster_addition(state: dict):
+    if not state.get("package"):
+        return
+    with st.expander("Add a player to the matchup"):
+        st.caption("A traded player can reuse a dated rating. A newcomer starts with an explicit zero prior; assign his minutes in each scenario.")
+        with st.form(f"nba_add_roster_player_{state.get('revision', 0)}"):
+            side = st.selectbox("Add to roster", ["away", "home"],
+                format_func=lambda s: state["package"][s]["name"])
+            player_id = st.text_input("Player NBA ID", value="")
+            name = st.text_input("Player name (required for a newcomer)", value="")
+            add = st.form_submit_button("Add roster player")
+        if add:
+            try:
+                from builders.nba_ratings import add_roster_player
+                package = add_roster_player(state["package"], side, player_id, name, bundle=state.get("ratings"))
+                state.update(package=package, result=None, revision=state.get("revision", 0) + 1)
+                st.success("Player added with zero minutes. Assign his minutes and review each rotation.")
+            except (InputError, ValueError) as exc:
+                st.error(str(exc))
 
 
 def _save_snapshot(package: dict, result: dict) -> bool:
@@ -112,36 +182,49 @@ def render():
     st.caption("Spreads and totals from team efficiency and the expected full-game rotation.")
     st.info("Research model: probabilities and A/B grades will follow historical calibration. Every projection is excluded from automatic posting.")
     with st.expander("Inputs and sources"):
-        st.write("Import a JSON package containing dated team ratings, player impact estimates, baseline rotation minutes and current rotation scenarios. The example download defines the required fields.")
+        st.write("Load the checked historical ratings to choose two teams, or import a ratings bundle or complete matchup JSON. Historical rotation seeds require current roster and injury review. The fictional example download defines the matchup fields.")
         st.write("Player impacts are points per 100 possessions: positive offense creates points; positive defense prevents points. Baseline minutes must describe the same sample as the team ratings. Use regularized estimates with a documented source.")
         st.write("Copy current reported statuses from the NBA injury report and verify the starting lineup separately. For an unresolved player, keep the reported status and set the scenario to IN or OUT; assign all replacement minutes explicitly.")
         st.markdown("[NBA injury reports](https://official.nba.com/nba-injury-report-2026-27-season/) · [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)")
         st.download_button("Download fictional input example", json.dumps(example_package(), indent=2),
                            file_name="nba-fictional-input-example.json", mime="application/json")
-    uploaded = st.file_uploader("Import NBA team ratings and rotations", type=["json"], key="nba_upload")
+    uploaded = st.file_uploader("Import NBA ratings bundle or matchup JSON", type=["json"], key="nba_upload")
     state = st.session_state.setdefault(STATE_KEY, {"saved_ids": []})
     if uploaded is not None:
         raw = uploaded.getvalue()
         if raw != state.get("uploaded_bytes"):
             try:
-                package = json.loads(raw)
-                # Decode shape and units before presenting the editable forms.
-                from builders.nba_model import from_package
-                from_package(package)
-                state.update(package=package, uploaded_bytes=raw, result=None, revision=state.get("revision", 0) + 1)
+                _import_json(raw, state)
+                state["uploaded_bytes"] = raw
             except (InputError, ValueError) as exc:
                 st.error(str(exc))
+    if HISTORICAL_RATINGS.is_file() and st.button("Load checked 2025–26 ratings", key="nba_load_ratings"):
+        try:
+            _import_json(HISTORICAL_RATINGS.read_bytes(), state)
+        except (InputError, ValueError) as exc:
+            st.error(str(exc))
+    _matchup_from_ratings(state)
     if st.button("Load fictional demo", key="nba_demo"):
         state.update(package=example_package(), result=None, revision=state.get("revision", 0) + 1)
+        state.pop("ratings", None)
     if not state.get("package"):
         st.info("Import your data or load the fictional demo to compare a player's IN and OUT rotations.")
         return
+
+    _roster_addition(state)
 
     package = deepcopy(state["package"])
     revision = state.get("revision", 0)
     with st.form(f"nba_projection_form_{revision}"):
         context = package["context"]
         st.markdown(f"**{package['away']['name']} at {package['home']['name']}**")
+        provenance = package.get("rating_provenance")
+        if isinstance(provenance, dict):
+            st.caption(f"Historical rating sample through {provenance.get('data_through', 'an unspecified date')}; update the roster and rotation for this game.")
+            evidence = provenance.get("research_evaluation") or {}
+            if isinstance(evidence, dict) and evidence.get("lineup_beats_team_margin_rmse") is False and all(
+                isinstance(evidence.get(k), (int, float)) for k in ("lineup_margin_rmse", "baseline_margin_rmse", "holdout_games")):
+                st.warning(f"Historical check: lineup margin RMSE {evidence['lineup_margin_rmse']:.2f} vs team-only {evidence['baseline_margin_rmse']:.2f} on {evidence['holdout_games']} games. Lineup improvement has not been demonstrated.")
         context["as_of"] = st.text_input("Projection cutoff (ISO timestamp with timezone)", value=context["as_of"])
         context["tipoff"] = st.text_input("Tipoff (ISO timestamp with timezone)", value=context["tipoff"])
         for key, label in (("league_efficiency", "League points per 100 possessions"),

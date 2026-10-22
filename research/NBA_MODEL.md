@@ -1,8 +1,10 @@
-# NBA lineup foundation — 2026-10-22
+# NBA lineup research model — 2026-10-22
 
-This first version creates an NBA engine and a manual admin builder for spreads
-and totals. It is a research model with imported inputs, not a live NBA data
-feed or a validated betting system. Automation is intentionally deferred.
+The model combines dated team ratings, regularized player impacts and explicit
+full-game rotations to project NBA spreads and totals. It includes an offline
+2025–26 data fit and a manual admin builder. The first historical lineup forecast
+did not improve on the team-only control; this remains a research model.
+Automation is intentionally deferred.
 
 ## What is implemented
 
@@ -13,6 +15,10 @@ feed or a validated betting system. Automation is intentionally deferred.
 - Joint scenario coverage checks for multiple unresolved rotation players.
 - Dated inputs, staleness warnings, and prevention of post-cutoff information.
 - A manual admin interface, fictional example, and input/output JSON snapshots.
+- Opponent/venue-adjusted team ratings and offensive/defensive player RAPM.
+- Separate team-box and ten-player event quality gates, with per-game exclusions.
+- Dated ratings bundles, prior-minute rotation seeds and manual matchup creation.
+- Chronological tuning and a separate 335-game held-out score evaluation.
 - Explicit Save writes only an NBA research snapshot. No public pick dataset,
   collector, schedule, paid data service or posting automation is enabled.
 
@@ -56,10 +62,11 @@ two scores. Report the change in margin and total from the unchanged reference
 rotation. These choices are transparent research assumptions and must be
 compared with alternative combinations on held-out historical games.
 
-Player impacts must already be regularized estimates, with a documented source
-and cutoff date. The engine does not estimate causal impact from raw on/off
-ratings, equate points/game with player value, or infer replacement quality from
-a player's fame. Estimating and calibrating those inputs is the next data phase.
+Player impacts are regularized estimates, with a documented source and cutoff.
+The offline fitter estimates separate offense and defense effects while adjusting
+for the other nine players. The pure projection engine consumes those estimates;
+it does not equate points/game with player value. A player without accepted lineup
+evidence has an explicit prior-only value and zero fitted sample, which is flagged.
 
 ## Availability and unresolved news
 
@@ -98,15 +105,78 @@ The example market is home -4 / total 228, so both spread and total direction
 change with the player's participation. This illustrates model behavior; it is
 not a real pick, an estimate of any real player's value, or a backtest.
 
+## Offline data and fitted ratings
+
+The saved [research report](nba_results_2025_26/NBA_VALIDATION.md) and its JSON
+artifacts contain the exact results and parameters. All 1,230 regular-season
+games pass the team box-score checks. Only 471 pass the stricter event-lineup
+checks: final scores and each player's box plus/minus match exactly, and clock
+minutes agree within two seconds. The actual maximum accepted error is 0.5 seconds.
+The 759 rejected games do not supply player-fit observations. They can still
+supply independently checked team scores and prior box minutes.
+
+Possession units are explicitly estimated as the average of each team's
+`FGA + 0.44*FTA - player OREB + TOV`. Counted possessions are shared across their
+distinct event lineups, then rescaled to that game estimate. This avoids treating
+a possession's opening lineup as unchanged through mid-trip substitutions.
+Free-throw point credit uses the most recent same-clock foul lineup, validated
+against every accepted player's box plus/minus. These are documented conventions,
+not exact identification of a causal player effect.
+
+Team and player coefficients use weighted ridge regressions. Team baselines use
+all checked boxes; player coefficients use only event-verified games. The reference
+rotation describes the **same box-game sample as the team baseline**, with minutes
+normalized for overtime and weighted by game possessions. Both fitted baseline
+and player exposure use the same possession scale. Historical minutes forecasts
+use only boxes available before the cutoff, restrict players to their latest
+known box roster, and normalize to 240 with a 48-minute cap.
+
+Validation selects from five player penalties and two minutes windows. The
+selected version uses penalty 15,000 and a 10-game window. January–February
+validation chooses the settings; the refitted model is then frozen before the
+March–April test. The 335-game test gives margin RMSE **15.262 team-only versus
+15.280 with past-minute lineup forecasts**. No target-game minutes or later
+results enter a forecast. Historical injury reports are not available for this
+check. Final scores include overtime. This test does not establish the value of
+verified injury reports.
+
+Source game dates use a stated next-day-noon ET availability rule. The source
+does not provide historical publication timestamps, and later stat corrections
+cannot be removed retrospectively. The player subset may be unrepresentative.
+These limitations preclude treating this as a live-feed or betting validation.
+
+The saved final bundle covers 30 teams through **2026-04-12**. Load it with
+**Load checked 2025–26 ratings**, choose the teams, enter the game ID and scheduled
+tipoff, then review current rosters, injury statuses and replacement minutes.
+Historical seeds are always UNKNOWN, incomplete and unconfirmed; no current news
+is inferred from last season's box scores. The builder displays the failed
+team-control comparison. A separate frozen pre-test bundle preserves the model
+used for the reported test; the final future-research refit includes later games.
+The roster-addition form can reuse a traded player's dated estimate. A rookie
+without fitted evidence receives a zero prior, zero reference minutes and zero
+projected minutes; the user assigns replacement minutes in each scenario.
+
+Reproduce the fit from the five source exports listed in the saved manifest:
+
+```bash
+python -m pip install -r research/requirements-nba.txt
+python -m research.nba_fit --data-dir /path/to/local/exports \
+  --output-dir /path/to/new/results \
+  --expected-manifest research/nba_results_2025_26/nba_fit_manifest.json
+```
+
+This is an explicit offline research command. It reads local files, checks their
+SHA-256 fingerprints, fits ratings and writes local results. The Streamlit builder
+only consumes saved JSON and does not require SciPy or Arrow. No season fitting,
+download or database operation runs on an ordinary form edit.
+
 ## Data work still required
 
-1. Verify access to historical team efficiency, possessions, player minutes and
-   roster IDs. Fit opponent/venue-adjusted team baselines and a dated reference
-   rotation. Normalize historical minutes for overtime before constructing the
-   240-minute reference.
-2. Estimate regularized offensive/defensive player impacts, with sensible priors
-   for rookies, trades and small samples. Align the reference minutes with the
-   actual baseline sample. Validate the improvement over the team-only baseline.
+1. Resolve more of the rejected source lineups, quantify selection bias, and test
+   multi-season or box-informed player priors. More observed names or raw on/off
+   samples do not establish a reliable injury adjustment.
+2. Demonstrate improvement over the team-only control using pregame information
+   on a new evaluation period. Do not repeatedly tune against the saved holdout.
 3. Attach current official injury reports and separate starting-lineup evidence.
    The official NBA report says it updates throughout the day. NBA.com's daily
    lineup page labels its lineups projected; that label alone is not confirmation.
@@ -147,7 +217,9 @@ python -m unittest discover -s research -p 'test_nba_*.py' -v
 
 Behavioral tests check the effect of offense, defense, replacements, minutes
 caps and existing absences; timestamps, news flags, scenario coverage and archive
-identity; and headless manual-builder flows with mocked storage. These tests
+identity; event scores, foul-time credit, minute checks, rookies and trades;
+future-outcome perturbation tests for date leakage; and headless manual-builder
+flows with mocked storage. These tests
 establish implementation behavior, not betting accuracy. The interactive
 Streamlit UI and a real NBA/Turso data round trip still need live validation.
 
@@ -156,3 +228,5 @@ Streamlit UI and a real NBA/Turso data round trip still need live validation.
 - [NBA official 2026–27 injury report](https://official.nba.com/nba-injury-report-2026-27-season/)
 - [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)
 - [NBA explanation of possession-based ratings and on/off](https://jr.nba.com/basictraditional-stats-vs-advanced-stats/)
+- [SportsDataverse NBA Stats export schemas](https://py.sportsdataverse.org/docs/0.1.5/nba/reference/loaders/stats)
+- [Independent stint reconstruction and validation study](https://github.com/ismayc/lineup-valuation-study/tree/878bbc8bb6fa7541df39637a50aa73cca0627030)

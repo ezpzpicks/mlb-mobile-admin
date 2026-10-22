@@ -15,13 +15,14 @@ from builders.nba_model import evaluate_package
 
 
 class FakeStreamlit(ModuleType):
-    def __init__(self, *, load_demo=False, submit=False, invalid_minutes=False, uploaded=None):
+    def __init__(self, *, load_demo=False, submit=False, invalid_minutes=False, uploaded=None, values=None):
         super().__init__("streamlit")
         self.session_state = {}
         self.load_demo = load_demo
         self.submit = submit
         self.invalid_minutes = invalid_minutes
         self.uploaded = uploaded
+        self.values = values or {}
         self.errors, self.warnings = [], []
         self.column_config = SimpleNamespace(NumberColumn=lambda *a, **k: None,
             SelectboxColumn=lambda *a, **k: None, CheckboxColumn=lambda *a, **k: None)
@@ -39,7 +40,10 @@ class FakeStreamlit(ModuleType):
         return self.uploaded
 
     def text_input(self, label, *, value="", **kwargs):
-        return value
+        return self.values.get(label, value)
+
+    def selectbox(self, label, options, *, index=0, **kwargs):
+        return options[index]
 
     def number_input(self, label, *, value=0, **kwargs):
         return value
@@ -54,7 +58,7 @@ class FakeStreamlit(ModuleType):
         return output
 
     def form_submit_button(self, *args, **kwargs):
-        return self.submit
+        return self.submit and args[0] != "Add roster player"
 
     def error(self, message):
         self.errors.append(str(message))
@@ -156,6 +160,70 @@ class BuilderFlowTests(unittest.TestCase):
         package = example_package(datetime(2026, 10, 22, 13, tzinfo=timezone.utc))
         with patch.dict(sys.modules, {"shared.storage": None}):
             self.assertFalse(builder._save_snapshot(package, evaluate_package(package)))
+
+    @staticmethod
+    def ratings_fixture():
+        p = example_package(datetime(2026, 10, 22, 13, tzinfo=timezone.utc))
+        impacts = [{k: v for k, v in player.items() if k != "reference_minutes"}
+                   for side in ("away", "home") for player in p[side]["players"]]
+        return {"schema": "nba-ratings-v1", "as_of": p["context"]["as_of"],
+            "data_available_at": p["away"]["ratings_as_of"], "first_game_date": "2026-10-01",
+            "data_through": "2026-10-21", "research_only": True, "eligible_for_posting": False,
+            "player_impacts": impacts, "teams": [p["away"], p["home"]],
+            "league_efficiency": 115, "league_pace": 100, "home_court_points": 2,
+            "training_games": 20, "player_training_games": 10, "source": "Synthetic ratings tests",
+            "player_ridge": 1500, "team_ridge": 100}
+
+    def test_ratings_import_does_not_fetch_data_or_mark_historical_news_current(self):
+        bundle = self.ratings_fixture()
+        upload = SimpleNamespace(getvalue=lambda: json.dumps(bundle).encode())
+        st = FakeStreamlit(uploaded=upload)
+        builder = load_builder(st)
+        with patch.dict(sys.modules, {"shared.storage": None}):
+            builder.render()
+        self.assertEqual(st.session_state[builder.STATE_KEY]["ratings"]["schema"], "nba-ratings-v1")
+        self.assertIsNone(st.session_state[builder.STATE_KEY].get("package"))
+        self.assertTrue(any("Historical ratings" in w for w in st.warnings))
+        self.assertFalse(st.errors)
+
+    def test_ratings_matchup_can_be_created_and_projected_without_a_database(self):
+        upload = SimpleNamespace(getvalue=lambda: json.dumps(self.ratings_fixture()).encode())
+        st = FakeStreamlit(uploaded=upload, submit=True, values={"NBA game ID": "synthetic-matchup",
+            "Projection cutoff (ISO timestamp with timezone)": "2026-10-22T14:00:00Z",
+            "Scheduled tipoff (ISO timestamp with timezone)": "2026-10-22T23:00:00Z"})
+        builder = load_builder(st)
+        with patch.dict(sys.modules, {"shared.storage": None}):
+            builder.render()
+        state = st.session_state[builder.STATE_KEY]
+        self.assertFalse(st.errors, st.errors)
+        self.assertFalse(state["result"]["eligible_for_posting"])
+        self.assertFalse(state["result"]["scenarios"][0]["lineup_ready"])
+        self.assertFalse(state["package"]["scenarios"][0]["away"]["report_complete"])
+        self.assertTrue(all(p["status"] == "UNKNOWN" for p in state["package"]["scenarios"][0]["away"]["players"]))
+
+    def test_invalid_bundle_cannot_replace_a_valid_matchup(self):
+        st = FakeStreamlit()
+        builder = load_builder(st)
+        state = {"package": example_package()}
+        original = state["package"]
+        bundle = self.ratings_fixture()
+        bundle["data_available_at"] = "2027-01-01T00:00:00Z"
+        with self.assertRaises(ValueError):
+            builder._import_json(json.dumps(bundle).encode(), state)
+        self.assertIs(state["package"], original)
+
+    def test_manual_roster_addition_does_not_invent_minutes_or_current_report(self):
+        st = FakeStreamlit(load_demo=True, values={"Player NBA ID": "NEW-PLAYER",
+            "Player name (required for a newcomer)": "Synthetic newcomer"})
+        st.form_submit_button = lambda label, **kwargs: label == "Add roster player"
+        builder = load_builder(st)
+        with patch.dict(sys.modules, {"shared.storage": None}):
+            builder.render()
+        package = st.session_state[builder.STATE_KEY]["package"]
+        self.assertFalse(st.errors)
+        self.assertEqual(package["away"]["players"][-1]["impact_basis"], "prior_only")
+        self.assertEqual(package["scenarios"][0]["away"]["players"][-1]["minutes"], 0)
+        self.assertFalse(package["scenarios"][0]["away"]["report_complete"])
 
 
 if __name__ == "__main__":

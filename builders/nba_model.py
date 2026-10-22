@@ -12,7 +12,7 @@ import json
 import math
 from typing import Any
 
-MODEL_VERSION = "nba-v0.1-lineup-foundation-2026-10-22"
+MODEL_VERSION = "nba-v0.2-dated-ratings-2026-10-22"
 STATUSES = {"AVAILABLE", "OUT", "PROBABLE", "QUESTIONABLE", "DOUBTFUL", "UNKNOWN"}
 UNCERTAIN = STATUSES - {"AVAILABLE", "OUT"}
 
@@ -69,6 +69,8 @@ class PlayerProfile:
     reference_minutes: float
     offensive_impact: float
     defensive_impact: float
+    impact_sample_possessions: float | None = None
+    impact_basis: str = "supplied"
 
     def __post_init__(self):
         for key in ("player_id", "name"):
@@ -76,6 +78,13 @@ class PlayerProfile:
         object.__setattr__(self, "reference_minutes", _minutes(self.reference_minutes, f"{self.name} reference minutes"))
         for key in ("offensive_impact", "defensive_impact"):
             object.__setattr__(self, key, number(getattr(self, key), f"{self.name} {key}"))
+        if self.impact_sample_possessions is not None:
+            sample = number(self.impact_sample_possessions, f"{self.name} impact sample")
+            if sample < 0:
+                raise InputError("Impact sample cannot be negative.")
+            object.__setattr__(self, "impact_sample_possessions", sample)
+        if self.impact_basis not in {"supplied", "rapm", "prior_only"}:
+            raise InputError("Unknown player impact basis.")
 
 
 @dataclass(frozen=True)
@@ -249,6 +258,8 @@ def _adjust(team: TeamProfile, plan: RotationPlan, context: GameContext) -> dict
     for entry in sorted(plan.players, key=lambda p: p.player_id):
         profile = profiles[entry.player_id]
         relevant = profile.reference_minutes > 0 or entry.minutes > 0
+        if relevant and (profile.impact_basis == "prior_only" or profile.impact_sample_possessions == 0):
+            flags.append(f"{team.name} {profile.name}: no fitted player sample; prior-only impact")
         if entry.status in UNCERTAIN and relevant:
             if not entry.assumption:
                 raise InputError(f"{team.name} {profile.name}: choose an explicit IN or OUT scenario for {entry.status}.")

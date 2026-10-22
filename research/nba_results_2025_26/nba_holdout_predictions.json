@@ -1,0 +1,3384 @@
+{
+  "games": 335,
+  "skipped": [],
+  "minutes_window": 10,
+  "metrics": {
+    "baseline": {
+      "margin_mae": 12.12046274546249,
+      "margin_rmse": 15.26209495693608,
+      "total_mae": 14.882743177258353,
+      "total_rmse": 18.769887995480527
+    },
+    "lineup": {
+      "margin_mae": 12.133377673157856,
+      "margin_rmse": 15.279892825832484,
+      "total_mae": 14.885482201875995,
+      "total_rmse": 18.783667016215993
+    }
+  },
+  "predictions": [
+    {
+      "game_id": "0022500868",
+      "game_date": "2026-03-01",
+      "actual_margin": 25,
+      "actual_total": 203,
+      "baseline_margin": 0.04335828501375261,
+      "baseline_total": 228.313397842256,
+      "lineup_margin": -0.35513954625029953,
+      "lineup_total": 228.36692859333527
+    },
+    {
+      "game_id": "0022500869",
+      "game_date": "2026-03-01",
+      "actual_margin": -4,
+      "actual_total": 208,
+      "baseline_margin": -10.90281156193383,
+      "baseline_total": 225.34422238090218,
+      "lineup_margin": -10.397661788547182,
+      "lineup_total": 224.99416872117644
+    },
+    {
+      "game_id": "0022500870",
+      "game_date": "2026-03-01",
+      "actual_margin": 23,
+      "actual_total": 217,
+      "baseline_margin": 0.2354815758498887,
+      "baseline_total": 232.1900927013943,
+      "lineup_margin": 0.1352797397268688,
+      "lineup_total": 231.83797884063955
+    },
+    {
+      "game_id": "0022500871",
+      "game_date": "2026-03-01",
+      "actual_margin": -9,
+      "actual_total": 225,
+      "baseline_margin": 1.9068968405137952,
+      "baseline_total": 236.6749825460812,
+      "lineup_margin": 1.816675392529774,
+      "lineup_total": 236.92645717081245
+    },
+    {
+      "game_id": "0022500872",
+      "game_date": "2026-03-01",
+      "actual_margin": -19,
+      "actual_total": 231,
+      "baseline_margin": -3.6954352026687474,
+      "baseline_total": 232.6708808251962,
+      "lineup_margin": -3.3608251559659834,
+      "lineup_total": 233.26708271808587
+    },
+    {
+      "game_id": "0022500873",
+      "game_date": "2026-03-01",
+      "actual_margin": 34,
+      "actual_total": 236,
+      "baseline_margin": 2.3868301874781537,
+      "baseline_total": 237.7464903951346,
+      "lineup_margin": 1.3716319497823974,
+      "lineup_total": 238.06362213107042
+    },
+    {
+      "game_id": "0022500874",
+      "game_date": "2026-03-01",
+      "actual_margin": 16,
+      "actual_total": 212,
+      "baseline_margin": 7.446735006407195,
+      "baseline_total": 222.16666938443484,
+      "lineup_margin": 7.746689751659488,
+      "lineup_total": 222.16741871591597
+    },
+    {
+      "game_id": "0022500875",
+      "game_date": "2026-03-01",
+      "actual_margin": -14,
+      "actual_total": 198,
+      "baseline_margin": -4.994361377500596,
+      "baseline_total": 223.45203493350675,
+      "lineup_margin": -5.351782633184669,
+      "lineup_total": 223.6224447028663
+    },
+    {
+      "game_id": "0022500876",
+      "game_date": "2026-03-01",
+      "actual_margin": -13,
+      "actual_total": 187,
+      "baseline_margin": -13.181557137433941,
+      "baseline_total": 225.95248618363138,
+      "lineup_margin": -13.090627260076815,
+      "lineup_total": 226.4345725531839
+    },
+    {
+      "game_id": "0022500877",
+      "game_date": "2026-03-01",
+      "actual_margin": 20,
+      "actual_total": 254,
+      "baseline_margin": 5.824997982625078,
+      "baseline_total": 226.329124810721,
+      "lineup_margin": 6.1158700560079495,
+      "lineup_total": 226.30340810191962
+    },
+    {
+      "game_id": "0022500878",
+      "game_date": "2026-03-01",
+      "actual_margin": 24,
+      "actual_total": 232,
+      "baseline_margin": 10.276736062418479,
+      "baseline_total": 232.059290147934,
+      "lineup_margin": 10.139978425041974,
+      "lineup_total": 232.22985649406706
+    },
+    {
+      "game_id": "0022500879",
+      "game_date": "2026-03-02",
+      "actual_margin": -5,
+      "actual_total": 241,
+      "baseline_margin": -14.238137044590317,
+      "baseline_total": 225.63222770638708,
+      "lineup_margin": -12.935919465589137,
+      "lineup_total": 225.0857193354225
+    },
+    {
+      "game_id": "0022500880",
+      "game_date": "2026-03-02",
+      "actual_margin": -27,
+      "actual_total": 189,
+      "baseline_margin": -8.336711362254178,
+      "baseline_total": 219.2782873190249,
+      "lineup_margin": -8.575737274078335,
+      "lineup_total": 219.23648852123256
+    },
+    {
+      "game_id": "0022500881",
+      "game_date": "2026-03-02",
+      "actual_margin": -3,
+      "actual_total": 253,
+      "baseline_margin": -10.329439367825543,
+      "baseline_total": 246.76707314020427,
+      "lineup_margin": -10.213334082609336,
+      "lineup_total": 246.00856081052126
+    },
+    {
+      "game_id": "0022500882",
+      "game_date": "2026-03-02",
+      "actual_margin": -13,
+      "actual_total": 215,
+      "baseline_margin": 3.530347529298595,
+      "baseline_total": 221.77985901842538,
+      "lineup_margin": 3.32998469655503,
+      "lineup_total": 221.50371726098098
+    },
+    {
+      "game_id": "0022500883",
+      "game_date": "2026-03-03",
+      "actual_margin": 27,
+      "actual_total": 207,
+      "baseline_margin": 7.5337113987409765,
+      "baseline_total": 228.70572623319418,
+      "lineup_margin": 7.729307439967258,
+      "lineup_total": 229.42901352122323
+    },
+    {
+      "game_id": "0022500884",
+      "game_date": "2026-03-03",
+      "actual_margin": 4,
+      "actual_total": 222,
+      "baseline_margin": -1.6230106395348258,
+      "baseline_total": 229.46211590175767,
+      "lineup_margin": -2.3376710016542006,
+      "lineup_total": 229.26746147496877
+    },
+    {
+      "game_id": "0022500885",
+      "game_date": "2026-03-03",
+      "actual_margin": 17,
+      "actual_total": 235,
+      "baseline_margin": 12.498478056289144,
+      "baseline_total": 231.8481948923461,
+      "lineup_margin": 11.41088127331345,
+      "lineup_total": 231.41894729144235
+    },
+    {
+      "game_id": "0022500886",
+      "game_date": "2026-03-03",
+      "actual_margin": 26,
+      "actual_total": 222,
+      "baseline_margin": 12.298785845595859,
+      "baseline_total": 228.245285274057,
+      "lineup_margin": 12.134108033685067,
+      "lineup_total": 228.12915875901905
+    },
+    {
+      "game_id": "0022500887",
+      "game_date": "2026-03-03",
+      "actual_margin": -16,
+      "actual_total": 206,
+      "baseline_margin": -2.158243082022665,
+      "baseline_total": 222.20682609830163,
+      "lineup_margin": -1.9652146752959538,
+      "lineup_total": 222.37218526814385
+    },
+    {
+      "game_id": "0022500888",
+      "game_date": "2026-03-03",
+      "actual_margin": -40,
+      "actual_total": 222,
+      "baseline_margin": -4.8606678059141615,
+      "baseline_total": 230.1424416692917,
+      "lineup_margin": -5.293730848229032,
+      "lineup_total": 230.2227579692285
+    },
+    {
+      "game_id": "0022500889",
+      "game_date": "2026-03-03",
+      "actual_margin": -8,
+      "actual_total": 224,
+      "baseline_margin": -13.982523042306426,
+      "baseline_total": 231.28505566989594,
+      "lineup_margin": -13.943372873379715,
+      "lineup_total": 231.04209675840974
+    },
+    {
+      "game_id": "0022500890",
+      "game_date": "2026-03-03",
+      "actual_margin": 7,
+      "actual_total": 227,
+      "baseline_margin": 7.4716970180349165,
+      "baseline_total": 235.22887933270368,
+      "lineup_margin": 7.846035821601006,
+      "lineup_total": 236.31251186898936
+    },
+    {
+      "game_id": "0022500891",
+      "game_date": "2026-03-03",
+      "actual_margin": 9,
+      "actual_total": 211,
+      "baseline_margin": 5.653629536467065,
+      "baseline_total": 235.44095416944438,
+      "lineup_margin": 5.758263187910316,
+      "lineup_total": 235.25652464471034
+    },
+    {
+      "game_id": "0022500892",
+      "game_date": "2026-03-03",
+      "actual_margin": -11,
+      "actual_total": 217,
+      "baseline_margin": -8.842282397688649,
+      "baseline_total": 222.92601400358015,
+      "lineup_margin": -8.461952622276854,
+      "lineup_total": 222.86885669312545
+    },
+    {
+      "game_id": "0022500893",
+      "game_date": "2026-03-04",
+      "actual_margin": -3,
+      "actual_total": 203,
+      "baseline_margin": -4.034046326604823,
+      "baseline_total": 223.71399266772698,
+      "lineup_margin": -3.9373799645719316,
+      "lineup_total": 223.71413530616434
+    },
+    {
+      "game_id": "0022500894",
+      "game_date": "2026-03-04",
+      "actual_margin": -29,
+      "actual_total": 207,
+      "baseline_margin": 5.610917268818923,
+      "baseline_total": 220.80475450267892,
+      "lineup_margin": 5.738816841322347,
+      "lineup_total": 220.91115034051222
+    },
+    {
+      "game_id": "0022500895",
+      "game_date": "2026-03-04",
+      "actual_margin": 4,
+      "actual_total": 208,
+      "baseline_margin": 8.85891931468774,
+      "baseline_total": 242.1477185457715,
+      "lineup_margin": 8.495076992988572,
+      "lineup_total": 241.3460303836993
+    },
+    {
+      "game_id": "0022500896",
+      "game_date": "2026-03-04",
+      "actual_margin": -8,
+      "actual_total": 236,
+      "baseline_margin": 0.23962438506963224,
+      "baseline_total": 236.209099314245,
+      "lineup_margin": -0.4887567505844572,
+      "lineup_total": 236.93344260852203
+    },
+    {
+      "game_id": "0022500897",
+      "game_date": "2026-03-04",
+      "actual_margin": -18,
+      "actual_total": 244,
+      "baseline_margin": -1.6461536360238256,
+      "baseline_total": 230.94357018795816,
+      "lineup_margin": -1.1530823114516977,
+      "lineup_total": 231.22057394045348
+    },
+    {
+      "game_id": "0022500898",
+      "game_date": "2026-03-04",
+      "actual_margin": 23,
+      "actual_total": 237,
+      "baseline_margin": 8.40204278078103,
+      "baseline_total": 222.78311820270534,
+      "lineup_margin": 8.428003996125028,
+      "lineup_total": 222.7370633302265
+    },
+    {
+      "game_id": "0022500899",
+      "game_date": "2026-03-05",
+      "actual_margin": 1,
+      "actual_total": 229,
+      "baseline_margin": 5.86070049966618,
+      "baseline_total": 227.6315995835438,
+      "lineup_margin": 5.9886293334462835,
+      "lineup_total": 228.5271198701958
+    },
+    {
+      "game_id": "0022500900",
+      "game_date": "2026-03-05",
+      "actual_margin": -10,
+      "actual_total": 234,
+      "baseline_margin": -2.6762886978847718,
+      "baseline_total": 246.4421738925593,
+      "lineup_margin": -1.8009325163613994,
+      "lineup_total": 245.06389865095343
+    },
+    {
+      "game_id": "0022500901",
+      "game_date": "2026-03-05",
+      "actual_margin": 16,
+      "actual_total": 236,
+      "baseline_margin": 12.298785845595859,
+      "baseline_total": 228.245285274057,
+      "lineup_margin": 12.149128627379113,
+      "lineup_total": 228.11525031179895
+    },
+    {
+      "game_id": "0022500902",
+      "game_date": "2026-03-05",
+      "actual_margin": -2,
+      "actual_total": 228,
+      "baseline_margin": 4.4010469952931714,
+      "baseline_total": 220.24672781962508,
+      "lineup_margin": 4.125074554124069,
+      "lineup_total": 219.9811399549089
+    },
+    {
+      "game_id": "0022500903",
+      "game_date": "2026-03-05",
+      "actual_margin": 8,
+      "actual_total": 222,
+      "baseline_margin": 3.095151602436516,
+      "baseline_total": 226.35187130201666,
+      "lineup_margin": 3.0671898115007252,
+      "lineup_total": 226.81385399073542
+    },
+    {
+      "game_id": "0022500904",
+      "game_date": "2026-03-05",
+      "actual_margin": 15,
+      "actual_total": 227,
+      "baseline_margin": 0.7870674567302558,
+      "baseline_total": 225.91442810595004,
+      "lineup_margin": 0.570101043788867,
+      "lineup_total": 226.0464983926599
+    },
+    {
+      "game_id": "0022500905",
+      "game_date": "2026-03-05",
+      "actual_margin": -2,
+      "actual_total": 208,
+      "baseline_margin": 6.809489664884282,
+      "baseline_total": 227.84454576302699,
+      "lineup_margin": 6.827200576889567,
+      "lineup_total": 227.32972945633622
+    },
+    {
+      "game_id": "0022500906",
+      "game_date": "2026-03-05",
+      "actual_margin": 7,
+      "actual_total": 233,
+      "baseline_margin": 6.005684932556306,
+      "baseline_total": 235.93158534658298,
+      "lineup_margin": 6.01896827824622,
+      "lineup_total": 235.85575299570627
+    },
+    {
+      "game_id": "0022500907",
+      "game_date": "2026-03-05",
+      "actual_margin": -10,
+      "actual_total": 256,
+      "baseline_margin": -3.4143557401698956,
+      "baseline_total": 233.9406762356789,
+      "lineup_margin": -3.190422149881485,
+      "lineup_total": 233.95820319064222
+    },
+    {
+      "game_id": "0022500908",
+      "game_date": "2026-03-06",
+      "actual_margin": 20,
+      "actual_total": 220,
+      "baseline_margin": 11.688317277965467,
+      "baseline_total": 222.4452850106953,
+      "lineup_margin": 11.981781128159497,
+      "lineup_total": 223.14954209867003
+    },
+    {
+      "game_id": "0022500909",
+      "game_date": "2026-03-06",
+      "actual_margin": -8,
+      "actual_total": 248,
+      "baseline_margin": 0.812644174358411,
+      "baseline_total": 235.33016317579518,
+      "lineup_margin": 0.7538683610378172,
+      "lineup_total": 235.47026338810656
+    },
+    {
+      "game_id": "0022500910",
+      "game_date": "2026-03-06",
+      "actual_margin": 7,
+      "actual_total": 205,
+      "baseline_margin": 8.002230425475787,
+      "baseline_total": 224.63221558788342,
+      "lineup_margin": 7.272412527006537,
+      "lineup_total": 224.63621607449403
+    },
+    {
+      "game_id": "0022500911",
+      "game_date": "2026-03-06",
+      "actual_margin": -39,
+      "actual_total": 245,
+      "baseline_margin": 0.09674047105121986,
+      "baseline_total": 232.32220706670503,
+      "lineup_margin": 0.18322802858888565,
+      "lineup_total": 232.40863577191504
+    },
+    {
+      "game_id": "0022500912",
+      "game_date": "2026-03-06",
+      "actual_margin": 2,
+      "actual_total": 234,
+      "baseline_margin": 7.049755933154131,
+      "baseline_total": 226.14292295367022,
+      "lineup_margin": 6.925021477469031,
+      "lineup_total": 225.74942883999017
+    },
+    {
+      "game_id": "0022500913",
+      "game_date": "2026-03-06",
+      "actual_margin": 4,
+      "actual_total": 228,
+      "baseline_margin": 7.817190698352292,
+      "baseline_total": 222.93124304503328,
+      "lineup_margin": 7.7612444764365875,
+      "lineup_total": 223.20990166501906
+    },
+    {
+      "game_id": "0022500914",
+      "game_date": "2026-03-06",
+      "actual_margin": 11,
+      "actual_total": 245,
+      "baseline_margin": 8.340037715548036,
+      "baseline_total": 231.748056444104,
+      "lineup_margin": 8.086759254792412,
+      "lineup_total": 231.45078228904873
+    },
+    {
+      "game_id": "0022500915",
+      "game_date": "2026-03-07",
+      "actual_margin": -27,
+      "actual_total": 211,
+      "baseline_margin": 4.2108020483939015,
+      "baseline_total": 229.9820024946242,
+      "lineup_margin": 4.276303927914313,
+      "lineup_total": 230.43734588019137
+    },
+    {
+      "game_id": "0022500916",
+      "game_date": "2026-03-07",
+      "actual_margin": -2,
+      "actual_total": 212,
+      "baseline_margin": 15.899000823089906,
+      "baseline_total": 217.86067504830982,
+      "lineup_margin": 16.068901198538512,
+      "lineup_total": 217.83852928762587
+    },
+    {
+      "game_id": "0022500917",
+      "game_date": "2026-03-07",
+      "actual_margin": 9,
+      "actual_total": 241,
+      "baseline_margin": 0.4690239102258005,
+      "baseline_total": 234.1054912414932,
+      "lineup_margin": 0.2546745250453597,
+      "lineup_total": 234.2384769189252
+    },
+    {
+      "game_id": "0022500918",
+      "game_date": "2026-03-07",
+      "actual_margin": -3,
+      "actual_total": 243,
+      "baseline_margin": -1.0095616228339566,
+      "baseline_total": 225.299315322498,
+      "lineup_margin": -1.4049481711745528,
+      "lineup_total": 226.22793890080914
+    },
+    {
+      "game_id": "0022500919",
+      "game_date": "2026-03-07",
+      "actual_margin": 14,
+      "actual_total": 212,
+      "baseline_margin": 4.83651104543334,
+      "baseline_total": 238.76910785171629,
+      "lineup_margin": 4.611165475652911,
+      "lineup_total": 237.92696985628785
+    },
+    {
+      "game_id": "0022500920",
+      "game_date": "2026-03-07",
+      "actual_margin": 7,
+      "actual_total": 201,
+      "baseline_margin": 9.739190782207515,
+      "baseline_total": 224.6357673228686,
+      "lineup_margin": 9.454239407606195,
+      "lineup_total": 224.32468746641348
+    },
+    {
+      "game_id": "0022500921",
+      "game_date": "2026-03-08",
+      "actual_margin": -11,
+      "actual_total": 207,
+      "baseline_margin": -1.2287229836880869,
+      "baseline_total": 225.76018858096802,
+      "lineup_margin": -1.7764654826417683,
+      "lineup_total": 225.55191764727152
+    },
+    {
+      "game_id": "0022500922",
+      "game_date": "2026-03-08",
+      "actual_margin": 13,
+      "actual_total": 207,
+      "baseline_margin": -4.463874539759544,
+      "baseline_total": 229.92569888522524,
+      "lineup_margin": -4.392226759647755,
+      "lineup_total": 230.01282263492078
+    },
+    {
+      "game_id": "0022500923",
+      "game_date": "2026-03-08",
+      "actual_margin": 11,
+      "actual_total": 231,
+      "baseline_margin": -3.0774722298452986,
+      "baseline_total": 232.5110433321007,
+      "lineup_margin": -3.3819429372481125,
+      "lineup_total": 232.5813056915768
+    },
+    {
+      "game_id": "0022500924",
+      "game_date": "2026-03-08",
+      "actual_margin": 30,
+      "actual_total": 214,
+      "baseline_margin": 6.8483114824282865,
+      "baseline_total": 224.0730781612388,
+      "lineup_margin": 7.211344274862,
+      "lineup_total": 224.89122773155458
+    },
+    {
+      "game_id": "0022500925",
+      "game_date": "2026-03-08",
+      "actual_margin": 20,
+      "actual_total": 256,
+      "baseline_margin": 7.274458574177515,
+      "baseline_total": 237.9215094156611,
+      "lineup_margin": 6.105237064758214,
+      "lineup_total": 237.12817919944706
+    },
+    {
+      "game_id": "0022500926",
+      "game_date": "2026-03-08",
+      "actual_margin": -39,
+      "actual_total": 221,
+      "baseline_margin": -2.5778263826663306,
+      "baseline_total": 224.40659520073666,
+      "lineup_margin": -2.5322467528229993,
+      "lineup_total": 224.54568745650553
+    },
+    {
+      "game_id": "0022500927",
+      "game_date": "2026-03-08",
+      "actual_margin": 25,
+      "actual_total": 265,
+      "baseline_margin": 2.4546265205321447,
+      "baseline_total": 221.28814295073843,
+      "lineup_margin": 2.950778882311326,
+      "lineup_total": 221.43718791318156
+    },
+    {
+      "game_id": "0022500928",
+      "game_date": "2026-03-08",
+      "actual_margin": 12,
+      "actual_total": 210,
+      "baseline_margin": 0.1913246567459339,
+      "baseline_total": 221.11569983375603,
+      "lineup_margin": 0.0540741120653081,
+      "lineup_total": 220.98381925909547
+    },
+    {
+      "game_id": "0022500929",
+      "game_date": "2026-03-08",
+      "actual_margin": 20,
+      "actual_total": 242,
+      "baseline_margin": 7.399224703412827,
+      "baseline_total": 233.54208586246432,
+      "lineup_margin": 7.645823519052698,
+      "lineup_total": 233.18030038681013
+    },
+    {
+      "game_id": "0022500930",
+      "game_date": "2026-03-08",
+      "actual_margin": 16,
+      "actual_total": 236,
+      "baseline_margin": -3.7434722774682427,
+      "baseline_total": 235.7143453786398,
+      "lineup_margin": -3.452666254709328,
+      "lineup_total": 235.6241204166784
+    },
+    {
+      "game_id": "0022500931",
+      "game_date": "2026-03-09",
+      "actual_margin": 14,
+      "actual_total": 216,
+      "baseline_margin": 5.135578545766734,
+      "baseline_total": 233.6852041158428,
+      "lineup_margin": 4.892026945729356,
+      "lineup_total": 233.25177737364191
+    },
+    {
+      "game_id": "0022500932",
+      "game_date": "2026-03-09",
+      "actual_margin": 11,
+      "actual_total": 241,
+      "baseline_margin": -4.34049393241537,
+      "baseline_total": 224.05974843647397,
+      "lineup_margin": -4.026365042361107,
+      "lineup_total": 224.7485844642819
+    },
+    {
+      "game_id": "0022500933",
+      "game_date": "2026-03-09",
+      "actual_margin": 3,
+      "actual_total": 255,
+      "baseline_margin": 8.00074508233655,
+      "baseline_total": 229.616517948215,
+      "lineup_margin": 7.780213503476276,
+      "lineup_total": 229.6479500248882
+    },
+    {
+      "game_id": "0022500934",
+      "game_date": "2026-03-09",
+      "actual_margin": 3,
+      "actual_total": 235,
+      "baseline_margin": -8.048195058581683,
+      "baseline_total": 241.25970943220798,
+      "lineup_margin": -7.729025315820763,
+      "lineup_total": 240.23599886385932
+    },
+    {
+      "game_id": "0022500935",
+      "game_date": "2026-03-09",
+      "actual_margin": 8,
+      "actual_total": 244,
+      "baseline_margin": -3.9086310027160494,
+      "baseline_total": 221.01287388494615,
+      "lineup_margin": -3.653850594821435,
+      "lineup_total": 221.34792864044607
+    },
+    {
+      "game_id": "0022500936",
+      "game_date": "2026-03-10",
+      "actual_margin": 10,
+      "actual_total": 268,
+      "baseline_margin": 4.257994308431634,
+      "baseline_total": 232.60876157521255,
+      "lineup_margin": 4.224573327900885,
+      "lineup_total": 233.1480673920164
+    },
+    {
+      "game_id": "0022500937",
+      "game_date": "2026-03-10",
+      "actual_margin": -38,
+      "actual_total": 238,
+      "baseline_margin": -13.274086974553754,
+      "baseline_total": 217.86067504830982,
+      "lineup_margin": -13.343013927394992,
+      "lineup_total": 217.82489213774875
+    },
+    {
+      "game_id": "0022500938",
+      "game_date": "2026-03-10",
+      "actual_margin": 21,
+      "actual_total": 279,
+      "baseline_margin": 15.211050815315929,
+      "baseline_total": 241.42011403553053,
+      "lineup_margin": 14.192567079618001,
+      "lineup_total": 240.7857721988379
+    },
+    {
+      "game_id": "0022500939",
+      "game_date": "2026-03-10",
+      "actual_margin": 12,
+      "actual_total": 236,
+      "baseline_margin": 4.933224868014477,
+      "baseline_total": 234.25971467896454,
+      "lineup_margin": 4.704609630629633,
+      "lineup_total": 235.1939424944141
+    },
+    {
+      "game_id": "0022500940",
+      "game_date": "2026-03-10",
+      "actual_margin": 14,
+      "actual_total": 212,
+      "baseline_margin": 4.761900925845765,
+      "baseline_total": 215.37128315574373,
+      "lineup_margin": 4.383146873270277,
+      "lineup_total": 215.6347655903756
+    },
+    {
+      "game_id": "0022500941",
+      "game_date": "2026-03-10",
+      "actual_margin": -15,
+      "actual_total": 243,
+      "baseline_margin": -2.964737093701146,
+      "baseline_total": 219.45482435484757,
+      "lineup_margin": -2.7047475254939,
+      "lineup_total": 219.17828936704575
+    },
+    {
+      "game_id": "0022500942",
+      "game_date": "2026-03-10",
+      "actual_margin": 9,
+      "actual_total": 241,
+      "baseline_margin": 1.1371550711919554,
+      "baseline_total": 222.27331168885692,
+      "lineup_margin": 1.2631372749824692,
+      "lineup_total": 222.32091631381815
+    },
+    {
+      "game_id": "0022500943",
+      "game_date": "2026-03-10",
+      "actual_margin": -6,
+      "actual_total": 254,
+      "baseline_margin": 8.04153927341764,
+      "baseline_total": 234.55497381178373,
+      "lineup_margin": 8.207359082932598,
+      "lineup_total": 234.03228586432368
+    },
+    {
+      "game_id": "0022500944",
+      "game_date": "2026-03-10",
+      "actual_margin": -2,
+      "actual_total": 204,
+      "baseline_margin": -2.463219471499073,
+      "baseline_total": 232.08000966418638,
+      "lineup_margin": -1.9466749559406793,
+      "lineup_total": 232.1145248193692
+    },
+    {
+      "game_id": "0022500945",
+      "game_date": "2026-03-10",
+      "actual_margin": 5,
+      "actual_total": 223,
+      "baseline_margin": -0.6013173814321533,
+      "baseline_total": 230.16550879485038,
+      "lineup_margin": -0.7378736920171605,
+      "lineup_total": 230.01918486576096
+    },
+    {
+      "game_id": "0022500946",
+      "game_date": "2026-03-10",
+      "actual_margin": 14,
+      "actual_total": 226,
+      "baseline_margin": -2.7582619396852266,
+      "baseline_total": 234.1974920763517,
+      "lineup_margin": -2.7844932559367237,
+      "lineup_total": 234.4152523260905
+    },
+    {
+      "game_id": "0022500947",
+      "game_date": "2026-03-11",
+      "actual_margin": 6,
+      "actual_total": 250,
+      "baseline_margin": -2.257284722377662,
+      "baseline_total": 231.2422575848695,
+      "lineup_margin": -1.9145292492259074,
+      "lineup_total": 231.252612674719
+    },
+    {
+      "game_id": "0022500948",
+      "game_date": "2026-03-11",
+      "actual_margin": 11,
+      "actual_total": 233,
+      "baseline_margin": -5.047712620548026,
+      "baseline_total": 227.63118239044715,
+      "lineup_margin": -5.247578477842708,
+      "lineup_total": 227.62096845412634
+    },
+    {
+      "game_id": "0022500949",
+      "game_date": "2026-03-11",
+      "actual_margin": -17,
+      "actual_total": 251,
+      "baseline_margin": -11.290204117003867,
+      "baseline_total": 240.5196911652928,
+      "lineup_margin": -10.93206378181668,
+      "lineup_total": 240.06140644291847
+    },
+    {
+      "game_id": "0022500950",
+      "game_date": "2026-03-11",
+      "actual_margin": 36,
+      "actual_total": 222,
+      "baseline_margin": 0.044721382242329355,
+      "baseline_total": 225.17456522901378,
+      "lineup_margin": 0.3107374788095285,
+      "lineup_total": 225.19830606280993
+    },
+    {
+      "game_id": "0022500951",
+      "game_date": "2026-03-11",
+      "actual_margin": -8,
+      "actual_total": 226,
+      "baseline_margin": -10.280314301992718,
+      "baseline_total": 229.05765188643008,
+      "lineup_margin": -10.233652639413151,
+      "lineup_total": 229.3502898169832
+    },
+    {
+      "game_id": "0022500952",
+      "game_date": "2026-03-11",
+      "actual_margin": 25,
+      "actual_total": 281,
+      "baseline_margin": -2.2629131967881904,
+      "baseline_total": 225.1216897005872,
+      "lineup_margin": -2.0818929229480716,
+      "lineup_total": 225.6169526317391
+    },
+    {
+      "game_id": "0022500953",
+      "game_date": "2026-03-12",
+      "actual_margin": 22,
+      "actual_total": 240,
+      "baseline_margin": 7.894264217728434,
+      "baseline_total": 225.81534759570837,
+      "lineup_margin": 8.326117647395236,
+      "lineup_total": 225.4865866195757
+    },
+    {
+      "game_id": "0022500954",
+      "game_date": "2026-03-12",
+      "actual_margin": -15,
+      "actual_total": 231,
+      "baseline_margin": -6.980233053042227,
+      "baseline_total": 222.61421081855968,
+      "lineup_margin": -6.693755739240629,
+      "lineup_total": 222.0470455401715
+    },
+    {
+      "game_id": "0022500955",
+      "game_date": "2026-03-12",
+      "actual_margin": 5,
+      "actual_total": 267,
+      "baseline_margin": 12.498478056289144,
+      "baseline_total": 231.8481948923461,
+      "lineup_margin": 11.462417029688751,
+      "lineup_total": 231.44233540724065
+    },
+    {
+      "game_id": "0022500956",
+      "game_date": "2026-03-12",
+      "actual_margin": 11,
+      "actual_total": 205,
+      "baseline_margin": 9.045865244783243,
+      "baseline_total": 225.57890028633145,
+      "lineup_margin": 8.500958154357775,
+      "lineup_total": 225.74367435972283
+    },
+    {
+      "game_id": "0022500957",
+      "game_date": "2026-03-12",
+      "actual_margin": 7,
+      "actual_total": 217,
+      "baseline_margin": 7.545120778416688,
+      "baseline_total": 233.6037879745333,
+      "lineup_margin": 7.449879202228843,
+      "lineup_total": 233.59843411579413
+    },
+    {
+      "game_id": "0022500958",
+      "game_date": "2026-03-12",
+      "actual_margin": -5,
+      "actual_total": 267,
+      "baseline_margin": 3.8409846391645033,
+      "baseline_total": 234.31478784196364,
+      "lineup_margin": 4.192751702948527,
+      "lineup_total": 234.3139519436583
+    },
+    {
+      "game_id": "0022500959",
+      "game_date": "2026-03-12",
+      "actual_margin": 2,
+      "actual_total": 206,
+      "baseline_margin": 5.135253182227004,
+      "baseline_total": 217.77023045440285,
+      "lineup_margin": 4.860368415979508,
+      "lineup_total": 217.85573352112846
+    },
+    {
+      "game_id": "0022500960",
+      "game_date": "2026-03-12",
+      "actual_margin": 12,
+      "actual_total": 272,
+      "baseline_margin": 5.391152410540485,
+      "baseline_total": 237.2145872552987,
+      "lineup_margin": 5.628518932010394,
+      "lineup_total": 236.99471574846413
+    },
+    {
+      "game_id": "0022501111",
+      "game_date": "2026-03-12",
+      "actual_margin": -8,
+      "actual_total": 232,
+      "baseline_margin": 2.8010459015145415,
+      "baseline_total": 232.72180523089867,
+      "lineup_margin": 2.941170964739044,
+      "lineup_total": 234.08049082330643
+    },
+    {
+      "game_id": "0022500961",
+      "game_date": "2026-03-13",
+      "actual_margin": 16,
+      "actual_total": 236,
+      "baseline_margin": 10.866610518889303,
+      "baseline_total": 228.59843450972684,
+      "lineup_margin": 11.203425060645657,
+      "lineup_total": 229.26039021121784
+    },
+    {
+      "game_id": "0022500962",
+      "game_date": "2026-03-13",
+      "actual_margin": -9,
+      "actual_total": 193,
+      "baseline_margin": -11.346984304021575,
+      "baseline_total": 228.49071720116967,
+      "lineup_margin": -11.108087669652988,
+      "lineup_total": 228.3365638120904
+    },
+    {
+      "game_id": "0022500963",
+      "game_date": "2026-03-13",
+      "actual_margin": 7,
+      "actual_total": 237,
+      "baseline_margin": 1.869735341649445,
+      "baseline_total": 216.6487729097381,
+      "lineup_margin": 2.1314447769264575,
+      "lineup_total": 216.63640706067503
+    },
+    {
+      "game_id": "0022500964",
+      "game_date": "2026-03-13",
+      "actual_margin": 2,
+      "actual_total": 212,
+      "baseline_margin": 11.195103833107638,
+      "baseline_total": 224.92621913397625,
+      "lineup_margin": 10.918044178745475,
+      "lineup_total": 224.721742361349
+    },
+    {
+      "game_id": "0022500965",
+      "game_date": "2026-03-13",
+      "actual_margin": -33,
+      "actual_total": 243,
+      "baseline_margin": -6.970244888769187,
+      "baseline_total": 233.92812142431808,
+      "lineup_margin": -6.8500553489187155,
+      "lineup_total": 234.3539056740821
+    },
+    {
+      "game_id": "0022500966",
+      "game_date": "2026-03-13",
+      "actual_margin": -10,
+      "actual_total": 244,
+      "baseline_margin": -0.049213663118223394,
+      "baseline_total": 231.4796442045128,
+      "lineup_margin": -0.10026108347967977,
+      "lineup_total": 231.5057091152849
+    },
+    {
+      "game_id": "0022500967",
+      "game_date": "2026-03-13",
+      "actual_margin": 10,
+      "actual_total": 238,
+      "baseline_margin": 6.979229291555342,
+      "baseline_total": 245.8587480195032,
+      "lineup_margin": 7.140326744201559,
+      "lineup_total": 245.21424503098908
+    },
+    {
+      "game_id": "0022500968",
+      "game_date": "2026-03-13",
+      "actual_margin": 11,
+      "actual_total": 227,
+      "baseline_margin": 5.5752434702497595,
+      "baseline_total": 228.03369067146411,
+      "lineup_margin": 6.03423393923066,
+      "lineup_total": 228.11934421760776
+    },
+    {
+      "game_id": "0022500969",
+      "game_date": "2026-03-14",
+      "actual_margin": 7,
+      "actual_total": 201,
+      "baseline_margin": 9.703764719753963,
+      "baseline_total": 221.51986864806972,
+      "lineup_margin": 9.170400040977725,
+      "lineup_total": 221.0532040209411
+    },
+    {
+      "game_id": "0022500970",
+      "game_date": "2026-03-14",
+      "actual_margin": 23,
+      "actual_total": 221,
+      "baseline_margin": 4.271067484559978,
+      "baseline_total": 230.94357018795816,
+      "lineup_margin": 3.6147547230190327,
+      "lineup_total": 231.2209675708433
+    },
+    {
+      "game_id": "0022500971",
+      "game_date": "2026-03-14",
+      "actual_margin": 11,
+      "actual_total": 211,
+      "baseline_margin": 18.281316680887784,
+      "baseline_total": 226.7366392551759,
+      "lineup_margin": 17.530315440910215,
+      "lineup_total": 226.07951560856958
+    },
+    {
+      "game_id": "0022500972",
+      "game_date": "2026-03-14",
+      "actual_margin": -4,
+      "actual_total": 238,
+      "baseline_margin": 3.5026773267698985,
+      "baseline_total": 234.274563233636,
+      "lineup_margin": 3.658342402965374,
+      "lineup_total": 234.46928095882527
+    },
+    {
+      "game_id": "0022500973",
+      "game_date": "2026-03-14",
+      "actual_margin": 13,
+      "actual_total": 217,
+      "baseline_margin": 5.5849294345457,
+      "baseline_total": 228.73310326708105,
+      "lineup_margin": 5.902704943083876,
+      "lineup_total": 228.93503901070875
+    },
+    {
+      "game_id": "0022500974",
+      "game_date": "2026-03-14",
+      "actual_margin": 2,
+      "actual_total": 252,
+      "baseline_margin": -3.3807710840201537,
+      "baseline_total": 235.93158534658298,
+      "lineup_margin": -3.4074952988430454,
+      "lineup_total": 235.86287216565034
+    },
+    {
+      "game_id": "0022500975",
+      "game_date": "2026-03-14",
+      "actual_margin": -9,
+      "actual_total": 227,
+      "baseline_margin": 10.264186015893898,
+      "baseline_total": 223.08509114384418,
+      "lineup_margin": 10.453800369333578,
+      "lineup_total": 223.5110676018756
+    },
+    {
+      "game_id": "0022500976",
+      "game_date": "2026-03-15",
+      "actual_margin": 13,
+      "actual_total": 219,
+      "baseline_margin": 8.52441944526582,
+      "baseline_total": 227.9569045725533,
+      "lineup_margin": 8.518097791975492,
+      "lineup_total": 228.2717581487355
+    },
+    {
+      "game_id": "0022500977",
+      "game_date": "2026-03-15",
+      "actual_margin": -10,
+      "actual_total": 250,
+      "baseline_margin": 9.59515873730534,
+      "baseline_total": 233.92812142431808,
+      "lineup_margin": 9.364557466192963,
+      "lineup_total": 234.46763630613663
+    },
+    {
+      "game_id": "0022500978",
+      "game_date": "2026-03-15",
+      "actual_margin": 11,
+      "actual_total": 227,
+      "baseline_margin": -3.8554930016427846,
+      "baseline_total": 219.90873343916678,
+      "lineup_margin": -3.7188698530768534,
+      "lineup_total": 220.02760108537052
+    },
+    {
+      "game_id": "0022500979",
+      "game_date": "2026-03-15",
+      "actual_margin": 11,
+      "actual_total": 257,
+      "baseline_margin": 5.343682543731546,
+      "baseline_total": 226.80194216199354,
+      "lineup_margin": 5.469144850713519,
+      "lineup_total": 226.55102222734112
+    },
+    {
+      "game_id": "0022500980",
+      "game_date": "2026-03-15",
+      "actual_margin": 6,
+      "actual_total": 212,
+      "baseline_margin": 3.2084020383905454,
+      "baseline_total": 233.44348490060733,
+      "lineup_margin": 2.3317351593754836,
+      "lineup_total": 233.05053390784687
+    },
+    {
+      "game_id": "0022500981",
+      "game_date": "2026-03-15",
+      "actual_margin": 3,
+      "actual_total": 217,
+      "baseline_margin": 4.4088500293246256,
+      "baseline_total": 227.23718949522527,
+      "lineup_margin": 4.357584854072044,
+      "lineup_total": 227.2074815714219
+    },
+    {
+      "game_id": "0022500982",
+      "game_date": "2026-03-15",
+      "actual_margin": 5,
+      "actual_total": 227,
+      "baseline_margin": -1.4331907522964116,
+      "baseline_total": 242.3292179524362,
+      "lineup_margin": -1.7433035607617597,
+      "lineup_total": 242.0175016124271
+    },
+    {
+      "game_id": "0022500983",
+      "game_date": "2026-03-16",
+      "actual_margin": 12,
+      "actual_total": 236,
+      "baseline_margin": 0.26397445443626566,
+      "baseline_total": 231.66242018003487,
+      "lineup_margin": -0.06964454608335302,
+      "lineup_total": 232.09812109755967
+    },
+    {
+      "game_id": "0022500984",
+      "game_date": "2026-03-16",
+      "actual_margin": -8,
+      "actual_total": 242,
+      "baseline_margin": -11.515781346840583,
+      "baseline_total": 233.45342707968052,
+      "lineup_margin": -10.577191460857847,
+      "lineup_total": 232.62389163546095
+    },
+    {
+      "game_id": "0022500985",
+      "game_date": "2026-03-16",
+      "actual_margin": -19,
+      "actual_total": 209,
+      "baseline_margin": -5.382468325214148,
+      "baseline_total": 224.90249556699447,
+      "lineup_margin": -5.6491933368372,
+      "lineup_total": 224.66445106418365
+    },
+    {
+      "game_id": "0022500986",
+      "game_date": "2026-03-16",
+      "actual_margin": 8,
+      "actual_total": 232,
+      "baseline_margin": 6.5867916840791025,
+      "baseline_total": 214.970413783391,
+      "lineup_margin": 6.724850273626387,
+      "lineup_total": 214.76618980939594
+    },
+    {
+      "game_id": "0022500987",
+      "game_date": "2026-03-16",
+      "actual_margin": 25,
+      "actual_total": 239,
+      "baseline_margin": -0.6856710776755364,
+      "baseline_total": 238.18672514148267,
+      "lineup_margin": -0.8282535961127167,
+      "lineup_total": 238.65622151763537
+    },
+    {
+      "game_id": "0022500988",
+      "game_date": "2026-03-16",
+      "actual_margin": 18,
+      "actual_total": 240,
+      "baseline_margin": 0.555736304875964,
+      "baseline_total": 233.74792767880842,
+      "lineup_margin": 0.7630294956242238,
+      "lineup_total": 234.1929629623724
+    },
+    {
+      "game_id": "0022500989",
+      "game_date": "2026-03-16",
+      "actual_margin": -8,
+      "actual_total": 192,
+      "baseline_margin": 6.999563626995382,
+      "baseline_total": 222.85354846901072,
+      "lineup_margin": 6.734163707153712,
+      "lineup_total": 222.88194830542506
+    },
+    {
+      "game_id": "0022500990",
+      "game_date": "2026-03-16",
+      "actual_margin": -4,
+      "actual_total": 234,
+      "baseline_margin": -5.192276849816139,
+      "baseline_total": 222.93124304503328,
+      "lineup_margin": -5.2278012605258795,
+      "lineup_total": 223.2364549595187
+    },
+    {
+      "game_id": "0022500991",
+      "game_date": "2026-03-17",
+      "actual_margin": 30,
+      "actual_total": 242,
+      "baseline_margin": 0.812644174358411,
+      "baseline_total": 235.33016317579518,
+      "lineup_margin": 0.694055473303834,
+      "lineup_total": 235.4807701117465
+    },
+    {
+      "game_id": "0022500992",
+      "game_date": "2026-03-17",
+      "actual_margin": -5,
+      "actual_total": 221,
+      "baseline_margin": -8.559268952390283,
+      "baseline_total": 223.2298452100302,
+      "lineup_margin": -8.617135632338275,
+      "lineup_total": 223.5202464793761
+    },
+    {
+      "game_id": "0022500993",
+      "game_date": "2026-03-17",
+      "actual_margin": -13,
+      "actual_total": 247,
+      "baseline_margin": -16.288541582954764,
+      "baseline_total": 230.47709853825128,
+      "lineup_margin": -15.482085864080233,
+      "lineup_total": 229.70496894919148
+    },
+    {
+      "game_id": "0022500994",
+      "game_date": "2026-03-17",
+      "actual_margin": 26,
+      "actual_total": 246,
+      "baseline_margin": 13.971898152557728,
+      "baseline_total": 228.49071720116967,
+      "lineup_margin": 13.592159179513928,
+      "lineup_total": 228.2685757048847
+    },
+    {
+      "game_id": "0022500995",
+      "game_date": "2026-03-17",
+      "actual_margin": -7,
+      "actual_total": 239,
+      "baseline_margin": -6.2431467738914534,
+      "baseline_total": 230.6044972543072,
+      "lineup_margin": -5.487593413131009,
+      "lineup_total": 230.37359731770604
+    },
+    {
+      "game_id": "0022500996",
+      "game_date": "2026-03-17",
+      "actual_margin": 12,
+      "actual_total": 220,
+      "baseline_margin": 3.662095850946102,
+      "baseline_total": 224.8926948593312,
+      "lineup_margin": 3.6817936221713836,
+      "lineup_total": 224.84396562578894
+    },
+    {
+      "game_id": "0022500997",
+      "game_date": "2026-03-17",
+      "actual_margin": 28,
+      "actual_total": 220,
+      "baseline_margin": 5.067087307237003,
+      "baseline_total": 234.12962501504467,
+      "lineup_margin": 5.622913883858089,
+      "lineup_total": 233.6872595968153
+    },
+    {
+      "game_id": "0022500998",
+      "game_date": "2026-03-17",
+      "actual_margin": -28,
+      "actual_total": 236,
+      "baseline_margin": -14.67021968402726,
+      "baseline_total": 230.88303345014208,
+      "lineup_margin": -14.760863689425534,
+      "lineup_total": 231.10790310383635
+    },
+    {
+      "game_id": "0022500651",
+      "game_date": "2026-03-18",
+      "actual_margin": 7,
+      "actual_total": 243,
+      "baseline_margin": -5.487274254645598,
+      "baseline_total": 236.97584825677535,
+      "lineup_margin": -5.623629260111741,
+      "lineup_total": 237.57587987766203
+    },
+    {
+      "game_id": "0022500999",
+      "game_date": "2026-03-18",
+      "actual_margin": 21,
+      "actual_total": 219,
+      "baseline_margin": 5.731259870891648,
+      "baseline_total": 221.25251441936481,
+      "lineup_margin": 6.0322805294429145,
+      "lineup_total": 221.22171276300998
+    },
+    {
+      "game_id": "0022501000",
+      "game_date": "2026-03-18",
+      "actual_margin": -29,
+      "actual_total": 213,
+      "baseline_margin": -16.737592238783932,
+      "baseline_total": 217.77900015685861,
+      "lineup_margin": -16.476667853263905,
+      "lineup_total": 217.61444686327235
+    },
+    {
+      "game_id": "0022501001",
+      "game_date": "2026-03-18",
+      "actual_margin": -8,
+      "actual_total": 246,
+      "baseline_margin": -4.774310854876674,
+      "baseline_total": 233.54208586246432,
+      "lineup_margin": -5.003142718323971,
+      "lineup_total": 233.21005655274175
+    },
+    {
+      "game_id": "0022501002",
+      "game_date": "2026-03-18",
+      "actual_margin": -30,
+      "actual_total": 248,
+      "baseline_margin": -4.810286473600783,
+      "baseline_total": 229.34326985095646,
+      "lineup_margin": -5.298432246375924,
+      "lineup_total": 229.45835833978924
+    },
+    {
+      "game_id": "0022501004",
+      "game_date": "2026-03-18",
+      "actual_margin": 36,
+      "actual_total": 258,
+      "baseline_margin": 12.254100055516474,
+      "baseline_total": 244.9365515533446,
+      "lineup_margin": 11.80376695027094,
+      "lineup_total": 244.62041171324404
+    },
+    {
+      "game_id": "0022501005",
+      "game_date": "2026-03-18",
+      "actual_margin": 15,
+      "actual_total": 233,
+      "baseline_margin": -3.2000841340889252,
+      "baseline_total": 226.329124810721,
+      "lineup_margin": -3.3796955557185413,
+      "lineup_total": 226.36712465272387
+    },
+    {
+      "game_id": "0022501006",
+      "game_date": "2026-03-18",
+      "actual_margin": -15,
+      "actual_total": 255,
+      "baseline_margin": -2.3083110194783245,
+      "baseline_total": 234.25971467896454,
+      "lineup_margin": -2.1983653480797187,
+      "lineup_total": 235.14192287645653
+    },
+    {
+      "game_id": "0022501007",
+      "game_date": "2026-03-18",
+      "actual_margin": -8,
+      "actual_total": 240,
+      "baseline_margin": 6.999563626995382,
+      "baseline_total": 222.85354846901072,
+      "lineup_margin": 6.806820856499996,
+      "lineup_total": 222.83550912049793
+    },
+    {
+      "game_id": "0022501008",
+      "game_date": "2026-03-19",
+      "actual_margin": 19,
+      "actual_total": 241,
+      "baseline_margin": 2.946199413875078,
+      "baseline_total": 226.116914050349,
+      "lineup_margin": 3.046416125324825,
+      "lineup_total": 226.43794033583492
+    },
+    {
+      "game_id": "0022501009",
+      "game_date": "2026-03-19",
+      "actual_margin": -22,
+      "actual_total": 212,
+      "baseline_margin": -16.288541582954764,
+      "baseline_total": 230.47709853825128,
+      "lineup_margin": -15.371039692016467,
+      "lineup_total": 229.65232148619506
+    },
+    {
+      "game_id": "0022501010",
+      "game_date": "2026-03-19",
+      "actual_margin": -8,
+      "actual_total": 260,
+      "baseline_margin": 4.6830086505625985,
+      "baseline_total": 238.56502387498733,
+      "lineup_margin": 4.796584442376485,
+      "lineup_total": 238.55109357354675
+    },
+    {
+      "game_id": "0022501011",
+      "game_date": "2026-03-19",
+      "actual_margin": -5,
+      "actual_total": 225,
+      "baseline_margin": -7.641699028369402,
+      "baseline_total": 239.4352086855158,
+      "lineup_margin": -7.398691266451479,
+      "lineup_total": 238.98239698388392
+    },
+    {
+      "game_id": "0022501012",
+      "game_date": "2026-03-19",
+      "actual_margin": 6,
+      "actual_total": 204,
+      "baseline_margin": -3.2000841340889252,
+      "baseline_total": 226.329124810721,
+      "lineup_margin": -3.3796955557185413,
+      "lineup_total": 226.36712465272387
+    },
+    {
+      "game_id": "0022501013",
+      "game_date": "2026-03-19",
+      "actual_margin": 1,
+      "actual_total": 201,
+      "baseline_margin": 6.600626411314877,
+      "baseline_total": 222.6883810969881,
+      "lineup_margin": 6.6022921526868,
+      "lineup_total": 222.56523104248112
+    },
+    {
+      "game_id": "0022501014",
+      "game_date": "2026-03-19",
+      "actual_margin": 32,
+      "actual_total": 224,
+      "baseline_margin": -2.2115971968971877,
+      "baseline_total": 238.76910785171629,
+      "lineup_margin": -2.1650584710464216,
+      "lineup_total": 238.30727867215103
+    },
+    {
+      "game_id": "0022501015",
+      "game_date": "2026-03-19",
+      "actual_margin": -21,
+      "actual_total": 257,
+      "baseline_margin": -8.472326124281608,
+      "baseline_total": 230.33888899108888,
+      "lineup_margin": -7.554099434772382,
+      "lineup_total": 230.05403397324497
+    },
+    {
+      "game_id": "0022501016",
+      "game_date": "2026-03-20",
+      "actual_margin": -1,
+      "actual_total": 185,
+      "baseline_margin": -11.693345830590758,
+      "baseline_total": 220.0619345939868,
+      "lineup_margin": -11.35457475864419,
+      "lineup_total": 219.79235588247528
+    },
+    {
+      "game_id": "0022501017",
+      "game_date": "2026-03-20",
+      "actual_margin": 14,
+      "actual_total": 216,
+      "baseline_margin": 6.149261541354463,
+      "baseline_total": 224.88353898168472,
+      "lineup_margin": 6.299595612200946,
+      "lineup_total": 224.69913638746925
+    },
+    {
+      "game_id": "0022501018",
+      "game_date": "2026-03-20",
+      "actual_margin": 22,
+      "actual_total": 212,
+      "baseline_margin": 7.003421653474774,
+      "baseline_total": 225.2471848606474,
+      "lineup_margin": 7.214928268361135,
+      "lineup_total": 225.44357852814898
+    },
+    {
+      "game_id": "0022501019",
+      "game_date": "2026-03-20",
+      "actual_margin": -5,
+      "actual_total": 229,
+      "baseline_margin": -7.742063393577723,
+      "baseline_total": 224.90041571297147,
+      "lineup_margin": -7.933030239955329,
+      "lineup_total": 225.54644215890715
+    },
+    {
+      "game_id": "0022501020",
+      "game_date": "2026-03-20",
+      "actual_margin": -4,
+      "actual_total": 212,
+      "baseline_margin": 6.421879078441492,
+      "baseline_total": 236.05850680793094,
+      "lineup_margin": 5.7706664588170895,
+      "lineup_total": 236.1914164705589
+    },
+    {
+      "game_id": "0022501021",
+      "game_date": "2026-03-20",
+      "actual_margin": 6,
+      "actual_total": 236,
+      "baseline_margin": 3.6809695749300886,
+      "baseline_total": 228.02242847463052,
+      "lineup_margin": 3.4422067989764855,
+      "lineup_total": 228.249879596548
+    },
+    {
+      "game_id": "0022501022",
+      "game_date": "2026-03-21",
+      "actual_margin": -21,
+      "actual_total": 243,
+      "baseline_margin": -19.949483225048397,
+      "baseline_total": 230.42539794111264,
+      "lineup_margin": -19.137836058916406,
+      "lineup_total": 229.8745104283892
+    },
+    {
+      "game_id": "0022501023",
+      "game_date": "2026-03-21",
+      "actual_margin": 23,
+      "actual_total": 225,
+      "baseline_margin": 6.124764786119911,
+      "baseline_total": 231.25871849339075,
+      "lineup_margin": 6.170596452556836,
+      "lineup_total": 232.06962343529216
+    },
+    {
+      "game_id": "0022501024",
+      "game_date": "2026-03-21",
+      "actual_margin": -1,
+      "actual_total": 209,
+      "baseline_margin": 2.408058745295051,
+      "baseline_total": 229.1994024979287,
+      "lineup_margin": 2.268295272203332,
+      "lineup_total": 229.33874447941372
+    },
+    {
+      "game_id": "0022501025",
+      "game_date": "2026-03-21",
+      "actual_margin": -5,
+      "actual_total": 217,
+      "baseline_margin": -7.870362592711501,
+      "baseline_total": 237.65094827864735,
+      "lineup_margin": -7.228926406378875,
+      "lineup_total": 237.12956017474306
+    },
+    {
+      "game_id": "0022501026",
+      "game_date": "2026-03-21",
+      "actual_margin": 16,
+      "actual_total": 236,
+      "baseline_margin": -1.3101060752709088,
+      "baseline_total": 233.19784775344027,
+      "lineup_margin": -1.5196656035668497,
+      "lineup_total": 233.39094664669926
+    },
+    {
+      "game_id": "0022501027",
+      "game_date": "2026-03-21",
+      "actual_margin": 1,
+      "actual_total": 245,
+      "baseline_margin": 3.9073765265078606,
+      "baseline_total": 227.7214431976626,
+      "lineup_margin": 3.6480336608590136,
+      "lineup_total": 227.70495375308627
+    },
+    {
+      "game_id": "0022501028",
+      "game_date": "2026-03-21",
+      "actual_margin": 15,
+      "actual_total": 253,
+      "baseline_margin": 15.361044533035127,
+      "baseline_total": 230.51470304934776,
+      "lineup_margin": 15.13158907347919,
+      "lineup_total": 230.1155292335592
+    },
+    {
+      "game_id": "0022501029",
+      "game_date": "2026-03-21",
+      "actual_margin": -7,
+      "actual_total": 269,
+      "baseline_margin": -2.4086345970639798,
+      "baseline_total": 222.7971455374083,
+      "lineup_margin": -2.9828901074874494,
+      "lineup_total": 223.6189135379512
+    },
+    {
+      "game_id": "0022501030",
+      "game_date": "2026-03-21",
+      "actual_margin": -10,
+      "actual_total": 242,
+      "baseline_margin": -6.2340054661515865,
+      "baseline_total": 242.1477185457715,
+      "lineup_margin": -4.914566963075046,
+      "lineup_total": 241.1057548305161
+    },
+    {
+      "game_id": "0022501031",
+      "game_date": "2026-03-21",
+      "actual_margin": -3,
+      "actual_total": 213,
+      "baseline_margin": 5.589650942237299,
+      "baseline_total": 219.45482435484757,
+      "lineup_margin": 5.4451838406329784,
+      "lineup_total": 219.35016522856557
+    },
+    {
+      "game_id": "0022501032",
+      "game_date": "2026-03-22",
+      "actual_margin": 16,
+      "actual_total": 240,
+      "baseline_margin": 7.056742107844073,
+      "baseline_total": 237.80892598409469,
+      "lineup_margin": 6.64089977369467,
+      "lineup_total": 237.83677995093893
+    },
+    {
+      "game_id": "0022501033",
+      "game_date": "2026-03-22",
+      "actual_margin": 4,
+      "actual_total": 248,
+      "baseline_margin": 0.2914978730467084,
+      "baseline_total": 221.62257776795582,
+      "lineup_margin": 0.3108480748980895,
+      "lineup_total": 221.46422536507606
+    },
+    {
+      "game_id": "0022501034",
+      "game_date": "2026-03-22",
+      "actual_margin": 32,
+      "actual_total": 258,
+      "baseline_margin": 17.264253286185323,
+      "baseline_total": 232.78854575138848,
+      "lineup_margin": 16.23191402459399,
+      "lineup_total": 232.20763124815363
+    },
+    {
+      "game_id": "0022501035",
+      "game_date": "2026-03-22",
+      "actual_margin": -10,
+      "actual_total": 194,
+      "baseline_margin": 4.476535968673801,
+      "baseline_total": 224.5468043949543,
+      "lineup_margin": 4.87474478397823,
+      "lineup_total": 224.64206406170595
+    },
+    {
+      "game_id": "0022501036",
+      "game_date": "2026-03-22",
+      "actual_margin": 22,
+      "actual_total": 218,
+      "baseline_margin": 0.7551785068867076,
+      "baseline_total": 216.6487729097381,
+      "lineup_margin": 0.7362683520040179,
+      "lineup_total": 216.84036012750596
+    },
+    {
+      "game_id": "0022501037",
+      "game_date": "2026-03-23",
+      "actual_margin": 39,
+      "actual_total": 253,
+      "baseline_margin": 3.4588634647935805,
+      "baseline_total": 236.89250467122142,
+      "lineup_margin": 3.157514998976467,
+      "lineup_total": 237.8334295971979
+    },
+    {
+      "game_id": "0022501038",
+      "game_date": "2026-03-23",
+      "actual_margin": 3,
+      "actual_total": 223,
+      "baseline_margin": 8.822131713270437,
+      "baseline_total": 227.5648236297622,
+      "lineup_margin": 8.688807323986055,
+      "lineup_total": 227.1972661478521
+    },
+    {
+      "game_id": "0022501039",
+      "game_date": "2026-03-23",
+      "actual_margin": -2,
+      "actual_total": 254,
+      "baseline_margin": 9.302051933790835,
+      "baseline_total": 227.62855683557953,
+      "lineup_margin": 8.869699436255857,
+      "lineup_total": 227.41771968763084
+    },
+    {
+      "game_id": "0022501040",
+      "game_date": "2026-03-23",
+      "actual_margin": -20,
+      "actual_total": 226,
+      "baseline_margin": -8.871660608328668,
+      "baseline_total": 225.59413935689474,
+      "lineup_margin": -9.680663073967324,
+      "lineup_total": 225.25074333485918
+    },
+    {
+      "game_id": "0022501041",
+      "game_date": "2026-03-23",
+      "actual_margin": -25,
+      "actual_total": 247,
+      "baseline_margin": -2.610766212331029,
+      "baseline_total": 236.97209901295406,
+      "lineup_margin": -2.7067180410604124,
+      "lineup_total": 237.01265908534876
+    },
+    {
+      "game_id": "0022501042",
+      "game_date": "2026-03-23",
+      "actual_margin": 8,
+      "actual_total": 256,
+      "baseline_margin": -8.362773416163662,
+      "baseline_total": 226.61344915690228,
+      "lineup_margin": -8.483892883012771,
+      "lineup_total": 226.36287627029205
+    },
+    {
+      "game_id": "0022501043",
+      "game_date": "2026-03-23",
+      "actual_margin": -16,
+      "actual_total": 270,
+      "baseline_margin": -7.3704620228397175,
+      "baseline_total": 235.89427475699154,
+      "lineup_margin": -7.125319352367939,
+      "lineup_total": 235.6277687602066
+    },
+    {
+      "game_id": "0022501044",
+      "game_date": "2026-03-23",
+      "actual_margin": -6,
+      "actual_total": 268,
+      "baseline_margin": -4.805688047441251,
+      "baseline_total": 229.16411021632598,
+      "lineup_margin": -4.946451440181889,
+      "lineup_total": 229.642718327247
+    },
+    {
+      "game_id": "0022501045",
+      "game_date": "2026-03-23",
+      "actual_margin": 35,
+      "actual_total": 233,
+      "baseline_margin": 8.007382173750301,
+      "baseline_total": 224.90249556699447,
+      "lineup_margin": 8.194220946801153,
+      "lineup_total": 224.62183533571047
+    },
+    {
+      "game_id": "0022501046",
+      "game_date": "2026-03-23",
+      "actual_margin": 33,
+      "actual_total": 225,
+      "baseline_margin": 4.39987416567142,
+      "baseline_total": 219.6425395971408,
+      "lineup_margin": 4.303586930490084,
+      "lineup_total": 219.8521897875463
+    },
+    {
+      "game_id": "0022501047",
+      "game_date": "2026-03-24",
+      "actual_margin": 44,
+      "actual_total": 224,
+      "baseline_margin": 12.90522815052887,
+      "baseline_total": 229.05765188643008,
+      "lineup_margin": 12.649800001058495,
+      "lineup_total": 229.39869374776498
+    },
+    {
+      "game_id": "0022501048",
+      "game_date": "2026-03-24",
+      "actual_margin": 5,
+      "actual_total": 237,
+      "baseline_margin": 11.416666660834721,
+      "baseline_total": 232.06244734555375,
+      "lineup_margin": 11.127530188368908,
+      "lineup_total": 231.78667013901605
+    },
+    {
+      "game_id": "0022501049",
+      "game_date": "2026-03-24",
+      "actual_margin": 5,
+      "actual_total": 267,
+      "baseline_margin": 4.882198570913815,
+      "baseline_total": 231.2422575848695,
+      "lineup_margin": 4.533851646180423,
+      "lineup_total": 231.1472500256694
+    },
+    {
+      "game_id": "0022501050",
+      "game_date": "2026-03-24",
+      "actual_margin": -2,
+      "actual_total": 248,
+      "baseline_margin": -1.6234810412552747,
+      "baseline_total": 226.5539463031054,
+      "lineup_margin": -1.3485758298187704,
+      "lineup_total": 226.4581963162677
+    },
+    {
+      "game_id": "0022501051",
+      "game_date": "2026-03-25",
+      "actual_margin": -1,
+      "actual_total": 259,
+      "baseline_margin": 8.844367028473343,
+      "baseline_total": 230.0086256914842,
+      "lineup_margin": 9.070875039681681,
+      "lineup_total": 229.88923016743183
+    },
+    {
+      "game_id": "0022501052",
+      "game_date": "2026-03-25",
+      "actual_margin": -7,
+      "actual_total": 267,
+      "baseline_margin": -5.715123867011883,
+      "baseline_total": 231.748056444104,
+      "lineup_margin": -5.44800713427432,
+      "lineup_total": 231.3797900458371
+    },
+    {
+      "game_id": "0022501053",
+      "game_date": "2026-03-25",
+      "actual_margin": 20,
+      "actual_total": 294,
+      "baseline_margin": 6.268332318804752,
+      "baseline_total": 235.43650308539645,
+      "lineup_margin": 5.562695769354946,
+      "lineup_total": 234.66526081106792
+    },
+    {
+      "game_id": "0022501054",
+      "game_date": "2026-03-25",
+      "actual_margin": 10,
+      "actual_total": 228,
+      "baseline_margin": -2.510339333690851,
+      "baseline_total": 217.77023045440285,
+      "lineup_margin": -2.4504449443834773,
+      "lineup_total": 217.88861594124063
+    },
+    {
+      "game_id": "0022501055",
+      "game_date": "2026-03-25",
+      "actual_margin": -17,
+      "actual_total": 223,
+      "baseline_margin": 2.7777903992387394,
+      "baseline_total": 240.64586348689483,
+      "lineup_margin": 2.207185296407502,
+      "lineup_total": 240.4321708843599
+    },
+    {
+      "game_id": "0022501056",
+      "game_date": "2026-03-25",
+      "actual_margin": -25,
+      "actual_total": 221,
+      "baseline_margin": -7.883578974402667,
+      "baseline_total": 232.97200516112386,
+      "lineup_margin": -8.08755474243577,
+      "lineup_total": 233.73885218273125
+    },
+    {
+      "game_id": "0022501057",
+      "game_date": "2026-03-25",
+      "actual_margin": -23,
+      "actual_total": 243,
+      "baseline_margin": 5.3012025464209245,
+      "baseline_total": 246.4421738925593,
+      "lineup_margin": 4.975404989505137,
+      "lineup_total": 245.160387535688
+    },
+    {
+      "game_id": "0022501058",
+      "game_date": "2026-03-25",
+      "actual_margin": 2,
+      "actual_total": 218,
+      "baseline_margin": -0.5074500144943102,
+      "baseline_total": 223.5338647929522,
+      "lineup_margin": -0.7749769652585314,
+      "lineup_total": 223.49976010916245
+    },
+    {
+      "game_id": "0022501059",
+      "game_date": "2026-03-25",
+      "actual_margin": 7,
+      "actual_total": 277,
+      "baseline_margin": 9.535093581371754,
+      "baseline_total": 234.37155938332313,
+      "lineup_margin": 9.928458555348058,
+      "lineup_total": 234.7790151907654
+    },
+    {
+      "game_id": "0022501060",
+      "game_date": "2026-03-25",
+      "actual_margin": 3,
+      "actual_total": 215,
+      "baseline_margin": 11.357600100955793,
+      "baseline_total": 220.7188334510647,
+      "lineup_margin": 10.824840614404835,
+      "lineup_total": 220.17216166074252
+    },
+    {
+      "game_id": "0022501061",
+      "game_date": "2026-03-25",
+      "actual_margin": 31,
+      "actual_total": 229,
+      "baseline_margin": 3.221990236756696,
+      "baseline_total": 230.2734239781513,
+      "lineup_margin": 3.2600431540541024,
+      "lineup_total": 230.2220604217556
+    },
+    {
+      "game_id": "0022501062",
+      "game_date": "2026-03-25",
+      "actual_margin": 25,
+      "actual_total": 213,
+      "baseline_margin": -0.42398052129372843,
+      "baseline_total": 216.86009114298395,
+      "lineup_margin": -0.39329593405496155,
+      "lineup_total": 217.28780573166614
+    },
+    {
+      "game_id": "0022501063",
+      "game_date": "2026-03-26",
+      "actual_margin": 11,
+      "actual_total": 217,
+      "baseline_margin": -1.663242033157701,
+      "baseline_total": 226.7780443883278,
+      "lineup_margin": -1.5186707717652865,
+      "lineup_total": 226.9568006025309
+    },
+    {
+      "game_id": "0022501064",
+      "game_date": "2026-03-26",
+      "actual_margin": 21,
+      "actual_total": 237,
+      "baseline_margin": 13.12139316025889,
+      "baseline_total": 229.71297752510912,
+      "lineup_margin": 12.805700692415897,
+      "lineup_total": 229.0306074477611
+    },
+    {
+      "game_id": "0022501065",
+      "game_date": "2026-03-26",
+      "actual_margin": 4,
+      "actual_total": 238,
+      "baseline_margin": 11.205509358192984,
+      "baseline_total": 227.943305595828,
+      "lineup_margin": 10.8420111489731,
+      "lineup_total": 228.27363999303202
+    },
+    {
+      "game_id": "0022501066",
+      "game_date": "2026-03-27",
+      "actual_margin": -1,
+      "actual_total": 227,
+      "baseline_margin": -5.777128932244878,
+      "baseline_total": 222.78311820270534,
+      "lineup_margin": -5.814952433039693,
+      "lineup_total": 222.74928456266434
+    },
+    {
+      "game_id": "0022501067",
+      "game_date": "2026-03-27",
+      "actual_margin": 7,
+      "actual_total": 211,
+      "baseline_margin": 8.375187165324164,
+      "baseline_total": 226.2909414497028,
+      "lineup_margin": 8.88130178150351,
+      "lineup_total": 226.58722783343083
+    },
+    {
+      "game_id": "0022501068",
+      "game_date": "2026-03-27",
+      "actual_margin": 21,
+      "actual_total": 277,
+      "baseline_margin": 2.7777903992387394,
+      "baseline_total": 240.64586348689483,
+      "lineup_margin": 2.2441445931734307,
+      "lineup_total": 240.41564784713307
+    },
+    {
+      "game_id": "0022501069",
+      "game_date": "2026-03-27",
+      "actual_margin": -10,
+      "actual_total": 228,
+      "baseline_margin": -6.369716245271121,
+      "baseline_total": 223.85101687158084,
+      "lineup_margin": -6.507289457462093,
+      "lineup_total": 224.42783874104722
+    },
+    {
+      "game_id": "0022501070",
+      "game_date": "2026-03-27",
+      "actual_margin": 18,
+      "actual_total": 244,
+      "baseline_margin": 16.60743689084258,
+      "baseline_total": 231.28505566989594,
+      "lineup_margin": 16.90731091568763,
+      "lineup_total": 231.15739170776652
+    },
+    {
+      "game_id": "0022501071",
+      "game_date": "2026-03-27",
+      "actual_margin": 13,
+      "actual_total": 225,
+      "baseline_margin": 7.672626469084179,
+      "baseline_total": 227.63118239044715,
+      "lineup_margin": 7.756691012787044,
+      "lineup_total": 227.49173947166173
+    },
+    {
+      "game_id": "0022501072",
+      "game_date": "2026-03-27",
+      "actual_margin": 6,
+      "actual_total": 264,
+      "baseline_margin": 12.954353216361696,
+      "baseline_total": 246.76707314020427,
+      "lineup_margin": 12.240427507224808,
+      "lineup_total": 246.05553756097356
+    },
+    {
+      "game_id": "0022501073",
+      "game_date": "2026-03-27",
+      "actual_margin": 5,
+      "actual_total": 257,
+      "baseline_margin": 14.140695195376736,
+      "baseline_total": 233.45342707968052,
+      "lineup_margin": 13.014447804917168,
+      "lineup_total": 232.7520100738314
+    },
+    {
+      "game_id": "0022501074",
+      "game_date": "2026-03-27",
+      "actual_margin": -7,
+      "actual_total": 193,
+      "baseline_margin": 3.8673214200956068,
+      "baseline_total": 233.57715342884464,
+      "lineup_margin": 4.649997356420499,
+      "lineup_total": 234.12735142869246
+    },
+    {
+      "game_id": "0022501075",
+      "game_date": "2026-03-27",
+      "actual_margin": 17,
+      "actual_total": 215,
+      "baseline_margin": 8.906897616801643,
+      "baseline_total": 223.1783602333202,
+      "lineup_margin": 8.57370747882581,
+      "lineup_total": 222.5275388154983
+    },
+    {
+      "game_id": "0022501076",
+      "game_date": "2026-03-28",
+      "actual_margin": -32,
+      "actual_total": 222,
+      "baseline_margin": -8.504181515142989,
+      "baseline_total": 227.14742998056812,
+      "lineup_margin": -8.103987923043107,
+      "lineup_total": 226.98430790906616
+    },
+    {
+      "game_id": "0022501077",
+      "game_date": "2026-03-28",
+      "actual_margin": -4,
+      "actual_total": 232,
+      "baseline_margin": 3.1743732279972647,
+      "baseline_total": 228.5039819357898,
+      "lineup_margin": 4.017579281659053,
+      "lineup_total": 228.20361430047785
+    },
+    {
+      "game_id": "0022501078",
+      "game_date": "2026-03-28",
+      "actual_margin": 10,
+      "actual_total": 236,
+      "baseline_margin": 10.43270791220641,
+      "baseline_total": 234.55562915560708,
+      "lineup_margin": 9.748892303842766,
+      "lineup_total": 234.9868733999329
+    },
+    {
+      "game_id": "0022501079",
+      "game_date": "2026-03-28",
+      "actual_margin": 1,
+      "actual_total": 249,
+      "baseline_margin": 3.310584926211689,
+      "baseline_total": 238.18672514148267,
+      "lineup_margin": 3.3992158044992635,
+      "lineup_total": 238.60749524522925
+    },
+    {
+      "game_id": "0022501080",
+      "game_date": "2026-03-28",
+      "actual_margin": -22,
+      "actual_total": 196,
+      "baseline_margin": -2.2542174359452645,
+      "baseline_total": 228.22982949071545,
+      "lineup_margin": -2.4321019582737193,
+      "lineup_total": 227.83637195659765
+    },
+    {
+      "game_id": "0022501081",
+      "game_date": "2026-03-28",
+      "actual_margin": 25,
+      "actual_total": 243,
+      "baseline_margin": 9.336367559530146,
+      "baseline_total": 234.34664491747458,
+      "lineup_margin": 8.979826542258394,
+      "lineup_total": 233.67887698905457
+    },
+    {
+      "game_id": "0022501082",
+      "game_date": "2026-03-29",
+      "actual_margin": -14,
+      "actual_total": 240,
+      "baseline_margin": -1.7749603171352675,
+      "baseline_total": 219.6425395971408,
+      "lineup_margin": -1.5987143248036801,
+      "lineup_total": 219.74393483348814
+    },
+    {
+      "game_id": "0022501083",
+      "game_date": "2026-03-29",
+      "actual_margin": 17,
+      "actual_total": 253,
+      "baseline_margin": -9.218186783165251,
+      "baseline_total": 236.99714508387132,
+      "lineup_margin": -8.99141366281961,
+      "lineup_total": 236.74534109026666
+    },
+    {
+      "game_id": "0022501084",
+      "game_date": "2026-03-29",
+      "actual_margin": 17,
+      "actual_total": 215,
+      "baseline_margin": 2.3334159754894443,
+      "baseline_total": 221.62257776795582,
+      "lineup_margin": 2.3338347148653895,
+      "lineup_total": 221.18353295745723
+    },
+    {
+      "game_id": "0022501085",
+      "game_date": "2026-03-29",
+      "actual_margin": -15,
+      "actual_total": 213,
+      "baseline_margin": -2.9860034202827705,
+      "baseline_total": 220.80475450267892,
+      "lineup_margin": -3.128271293338301,
+      "lineup_total": 220.9838046419856
+    },
+    {
+      "game_id": "0022501086",
+      "game_date": "2026-03-29",
+      "actual_margin": 52,
+      "actual_total": 226,
+      "baseline_margin": 2.3597549586555857,
+      "baseline_total": 221.5477611485063,
+      "lineup_margin": 2.621366603401242,
+      "lineup_total": 221.84957015612574
+    },
+    {
+      "game_id": "0022501087",
+      "game_date": "2026-03-29",
+      "actual_margin": 35,
+      "actual_total": 211,
+      "baseline_margin": 10.640562427623593,
+      "baseline_total": 237.8430488646344,
+      "lineup_margin": 10.173272150172934,
+      "lineup_total": 237.2757871658422
+    },
+    {
+      "game_id": "0022501088",
+      "game_date": "2026-03-29",
+      "actual_margin": -32,
+      "actual_total": 236,
+      "baseline_margin": -8.570189984571485,
+      "baseline_total": 224.92621913397625,
+      "lineup_margin": -8.499294675147539,
+      "lineup_total": 224.49245283339434
+    },
+    {
+      "game_id": "0022501089",
+      "game_date": "2026-03-29",
+      "actual_margin": 11,
+      "actual_total": 211,
+      "baseline_margin": 6.658960175140976,
+      "baseline_total": 223.71399266772698,
+      "lineup_margin": 6.914744348533048,
+      "lineup_total": 223.8762051065505
+    },
+    {
+      "game_id": "0022501090",
+      "game_date": "2026-03-29",
+      "actual_margin": 23,
+      "actual_total": 209,
+      "baseline_margin": 3.2698204286462556,
+      "baseline_total": 233.18687874260988,
+      "lineup_margin": 3.5360569450030397,
+      "lineup_total": 233.17784857135615
+    },
+    {
+      "game_id": "0022501091",
+      "game_date": "2026-03-30",
+      "actual_margin": 10,
+      "actual_total": 228,
+      "baseline_margin": 3.744332037129624,
+      "baseline_total": 236.74821381388855,
+      "lineup_margin": 4.514821873761818,
+      "lineup_total": 236.42437135880903
+    },
+    {
+      "game_id": "0022501092",
+      "game_date": "2026-03-30",
+      "actual_margin": 10,
+      "actual_total": 214,
+      "baseline_margin": -5.750273316788011,
+      "baseline_total": 226.2909414497028,
+      "lineup_margin": -6.298948077086507,
+      "lineup_total": 226.61815870380917
+    },
+    {
+      "game_id": "0022501093",
+      "game_date": "2026-03-30",
+      "actual_margin": -26,
+      "actual_total": 236,
+      "baseline_margin": -2.2307670477089374,
+      "baseline_total": 225.10217772526556,
+      "lineup_margin": -2.65874791553793,
+      "lineup_total": 225.72333973961202
+    },
+    {
+      "game_id": "0022501094",
+      "game_date": "2026-03-30",
+      "actual_margin": 15,
+      "actual_total": 243,
+      "baseline_margin": 12.597227857185544,
+      "baseline_total": 235.85719013241635,
+      "lineup_margin": 12.882958745652985,
+      "lineup_total": 235.58128237860464
+    },
+    {
+      "game_id": "0022501095",
+      "game_date": "2026-03-30",
+      "actual_margin": -30,
+      "actual_total": 218,
+      "baseline_margin": -6.265794145666263,
+      "baseline_total": 232.6400550521677,
+      "lineup_margin": -6.11246506106869,
+      "lineup_total": 233.0555475260713
+    },
+    {
+      "game_id": "0022501096",
+      "game_date": "2026-03-30",
+      "actual_margin": -9,
+      "actual_total": 235,
+      "baseline_margin": -10.387000909972016,
+      "baseline_total": 246.30114663068832,
+      "lineup_margin": -9.137072865942557,
+      "lineup_total": 245.2421807861396
+    },
+    {
+      "game_id": "0022501097",
+      "game_date": "2026-03-30",
+      "actual_margin": 4,
+      "actual_total": 224,
+      "baseline_margin": 4.8576888423838085,
+      "baseline_total": 221.33134080130787,
+      "lineup_margin": 5.099248910875119,
+      "lineup_total": 221.0859234431395
+    },
+    {
+      "game_id": "0022501098",
+      "game_date": "2026-03-30",
+      "actual_margin": 19,
+      "actual_total": 221,
+      "baseline_margin": 11.57431825771259,
+      "baseline_total": 236.0292217040378,
+      "lineup_margin": 10.6723448143415,
+      "lineup_total": 235.33387493861792
+    },
+    {
+      "game_id": "0022500652",
+      "game_date": "2026-03-31",
+      "actual_margin": 24,
+      "actual_total": 222,
+      "baseline_margin": 1.9126878627863846,
+      "baseline_total": 226.86445406849327,
+      "lineup_margin": 2.702775199956207,
+      "lineup_total": 227.07197539779185
+    },
+    {
+      "game_id": "0022501099",
+      "game_date": "2026-03-31",
+      "actual_margin": 4,
+      "actual_total": 226,
+      "baseline_margin": 0.8381260946605664,
+      "baseline_total": 220.11241865580874,
+      "lineup_margin": 0.43433652738752926,
+      "lineup_total": 220.24056478526217
+    },
+    {
+      "game_id": "0022501100",
+      "game_date": "2026-03-31",
+      "actual_margin": -31,
+      "actual_total": 203,
+      "baseline_margin": -8.823634123741044,
+      "baseline_total": 220.27943366687546,
+      "lineup_margin": -8.489246487886362,
+      "lineup_total": 219.8057156276692
+    },
+    {
+      "game_id": "0022501101",
+      "game_date": "2026-03-31",
+      "actual_margin": 11,
+      "actual_total": 243,
+      "baseline_margin": 6.480406850178937,
+      "baseline_total": 219.90873343916678,
+      "lineup_margin": 6.156687938577207,
+      "lineup_total": 219.60110398701244
+    },
+    {
+      "game_id": "0022501102",
+      "game_date": "2026-03-31",
+      "actual_margin": 17,
+      "actual_total": 205,
+      "baseline_margin": 1.3995934343719227,
+      "baseline_total": 219.41320529942243,
+      "lineup_margin": 1.566916069267137,
+      "lineup_total": 219.37492255835832
+    },
+    {
+      "game_id": "0022501103",
+      "game_date": "2026-03-31",
+      "actual_margin": 14,
+      "actual_total": 240,
+      "baseline_margin": -3.4480579691315683,
+      "baseline_total": 235.48403788355972,
+      "lineup_margin": -2.9754732934672603,
+      "lineup_total": 235.1596620119305
+    },
+    {
+      "game_id": "0022501104",
+      "game_date": "2026-03-31",
+      "actual_margin": -10,
+      "actual_total": 218,
+      "baseline_margin": 2.615929346059602,
+      "baseline_total": 226.11022882975143,
+      "lineup_margin": 2.4443934079149443,
+      "lineup_total": 226.430601974414
+    },
+    {
+      "game_id": "0022501003",
+      "game_date": "2026-04-01",
+      "actual_margin": -11,
+      "actual_total": 249,
+      "baseline_margin": -6.521865640653118,
+      "baseline_total": 230.95401443762375,
+      "lineup_margin": -6.475400428215991,
+      "lineup_total": 231.65120722620986
+    },
+    {
+      "game_id": "0022501105",
+      "game_date": "2026-04-01",
+      "actual_margin": -22,
+      "actual_total": 284,
+      "baseline_margin": -9.775292946161045,
+      "baseline_total": 234.2837688766973,
+      "lineup_margin": -8.139690551426611,
+      "lineup_total": 233.28537403167323
+    },
+    {
+      "game_id": "0022501106",
+      "game_date": "2026-04-01",
+      "actual_margin": -18,
+      "actual_total": 276,
+      "baseline_margin": -2.6551372816556125,
+      "baseline_total": 228.75778704992126,
+      "lineup_margin": -2.662948096888883,
+      "lineup_total": 228.8127562020627
+    },
+    {
+      "game_id": "0022501107",
+      "game_date": "2026-04-01",
+      "actual_margin": -29,
+      "actual_total": 231,
+      "baseline_margin": 2.360939394099887,
+      "baseline_total": 231.66242018003487,
+      "lineup_margin": 2.6202870208107925,
+      "lineup_total": 232.06592393897702
+    },
+    {
+      "game_id": "0022501108",
+      "game_date": "2026-04-01",
+      "actual_margin": -8,
+      "actual_total": 238,
+      "baseline_margin": 12.110519391329177,
+      "baseline_total": 224.4047509472664,
+      "lineup_margin": 11.897195719551675,
+      "lineup_total": 224.6198560951065
+    },
+    {
+      "game_id": "0022501109",
+      "game_date": "2026-04-01",
+      "actual_margin": -19,
+      "actual_total": 271,
+      "baseline_margin": 4.4053155792151415,
+      "baseline_total": 235.4318462548432,
+      "lineup_margin": 3.884861292041066,
+      "lineup_total": 234.87002950907572
+    },
+    {
+      "game_id": "0022501110",
+      "game_date": "2026-04-01",
+      "actual_margin": 6,
+      "actual_total": 232,
+      "baseline_margin": 9.619949396063632,
+      "baseline_total": 218.25025827968818,
+      "lineup_margin": 9.136957193736379,
+      "lineup_total": 217.88039811455695
+    },
+    {
+      "game_id": "0022501112",
+      "game_date": "2026-04-01",
+      "actual_margin": -13,
+      "actual_total": 247,
+      "baseline_margin": -10.329439367825543,
+      "baseline_total": 246.76707314020427,
+      "lineup_margin": -9.569315455922137,
+      "lineup_total": 245.91276102564927
+    },
+    {
+      "game_id": "0022501113",
+      "game_date": "2026-04-01",
+      "actual_margin": -14,
+      "actual_total": 240,
+      "baseline_margin": -3.084315372654757,
+      "baseline_total": 229.1968495222206,
+      "lineup_margin": -3.3214320392532244,
+      "lineup_total": 229.22852280543196
+    },
+    {
+      "game_id": "0022501114",
+      "game_date": "2026-04-02",
+      "actual_margin": 20,
+      "actual_total": 234,
+      "baseline_margin": 2.433589191790219,
+      "baseline_total": 221.11569983375603,
+      "lineup_margin": 2.0560692130233917,
+      "lineup_total": 221.28761852307812
+    },
+    {
+      "game_id": "0022501115",
+      "game_date": "2026-04-02",
+      "actual_margin": 5,
+      "actual_total": 221,
+      "baseline_margin": 4.879131284481417,
+      "baseline_total": 228.22982949071545,
+      "lineup_margin": 5.135299384628013,
+      "lineup_total": 227.68319354074288
+    },
+    {
+      "game_id": "0022501116",
+      "game_date": "2026-04-02",
+      "actual_margin": 43,
+      "actual_total": 235,
+      "baseline_margin": 12.451082620006417,
+      "baseline_total": 227.35592688508174,
+      "lineup_margin": 12.626956148491729,
+      "lineup_total": 227.39083854222713
+    },
+    {
+      "game_id": "0022501117",
+      "game_date": "2026-04-02",
+      "actual_margin": -7,
+      "actual_total": 229,
+      "baseline_margin": -0.7165141088550513,
+      "baseline_total": 232.7436716094732,
+      "lineup_margin": -0.36379388548427016,
+      "lineup_total": 232.42801627073936
+    },
+    {
+      "game_id": "0022501118",
+      "game_date": "2026-04-02",
+      "actual_margin": 12,
+      "actual_total": 224,
+      "baseline_margin": 4.675796772963551,
+      "baseline_total": 237.27559982583097,
+      "lineup_margin": 4.998289258951701,
+      "lineup_total": 236.9117359568232
+    },
+    {
+      "game_id": "0022501119",
+      "game_date": "2026-04-02",
+      "actual_margin": -19,
+      "actual_total": 217,
+      "baseline_margin": -5.192276849816139,
+      "baseline_total": 222.93124304503328,
+      "lineup_margin": -4.967567767144601,
+      "lineup_total": 223.23090659366406
+    },
+    {
+      "game_id": "0022501120",
+      "game_date": "2026-04-03",
+      "actual_margin": 21,
+      "actual_total": 237,
+      "baseline_margin": 10.990780391581026,
+      "baseline_total": 228.72764778230078,
+      "lineup_margin": 10.632476325921573,
+      "lineup_total": 228.66595807291213
+    },
+    {
+      "game_id": "0022501121",
+      "game_date": "2026-04-03",
+      "actual_margin": 12,
+      "actual_total": 218,
+      "baseline_margin": -1.831009256042222,
+      "baseline_total": 232.41102695070268,
+      "lineup_margin": -1.804201429174853,
+      "lineup_total": 232.01502195948757
+    },
+    {
+      "game_id": "0022501122",
+      "game_date": "2026-04-03",
+      "actual_margin": -34,
+      "actual_total": 248,
+      "baseline_margin": -6.420951396247091,
+      "baseline_total": 225.57890028633145,
+      "lineup_margin": -5.763428608447796,
+      "lineup_total": 225.13699330132943
+    },
+    {
+      "game_id": "0022501123",
+      "game_date": "2026-04-03",
+      "actual_margin": 40,
+      "actual_total": 232,
+      "baseline_margin": 11.201974330479004,
+      "baseline_total": 233.80332343304445,
+      "lineup_margin": 11.311346559100855,
+      "lineup_total": 233.47710646337782
+    },
+    {
+      "game_id": "0022501124",
+      "game_date": "2026-04-03",
+      "actual_margin": 34,
+      "actual_total": 246,
+      "baseline_margin": 13.619937893739277,
+      "baseline_total": 233.12421143547766,
+      "lineup_margin": 13.036390505260613,
+      "lineup_total": 232.2197164710632
+    },
+    {
+      "game_id": "0022501125",
+      "game_date": "2026-04-03",
+      "actual_margin": -32,
+      "actual_total": 224,
+      "baseline_margin": -2.8366478506991086,
+      "baseline_total": 226.5779758018248,
+      "lineup_margin": -2.9893638920874963,
+      "lineup_total": 227.18164231557557
+    },
+    {
+      "game_id": "0022501126",
+      "game_date": "2026-04-03",
+      "actual_margin": -32,
+      "actual_total": 234,
+      "baseline_margin": -8.336711362254178,
+      "baseline_total": 219.2782873190249,
+      "lineup_margin": -7.814735991130206,
+      "lineup_total": 218.88519157267484
+    },
+    {
+      "game_id": "0022501127",
+      "game_date": "2026-04-03",
+      "actual_margin": -11,
+      "actual_total": 265,
+      "baseline_margin": -3.2357866511300273,
+      "baseline_total": 227.6315995835438,
+      "lineup_margin": -3.2264261619909007,
+      "lineup_total": 228.41923194719143
+    },
+    {
+      "game_id": "0022501128",
+      "game_date": "2026-04-03",
+      "actual_margin": 4,
+      "actual_total": 230,
+      "baseline_margin": -3.4143557401698956,
+      "baseline_total": 233.9406762356789,
+      "lineup_margin": -3.1188113136406344,
+      "lineup_total": 233.71853882328543
+    },
+    {
+      "game_id": "0022501129",
+      "game_date": "2026-04-04",
+      "actual_margin": 16,
+      "actual_total": 288,
+      "baseline_margin": 15.211050815315929,
+      "baseline_total": 241.42011403553053,
+      "lineup_margin": 14.24550567189128,
+      "lineup_total": 240.79057766167585
+    },
+    {
+      "game_id": "0022501130",
+      "game_date": "2026-04-04",
+      "actual_margin": 2,
+      "actual_total": 270,
+      "baseline_margin": -1.2160707906283506,
+      "baseline_total": 234.31478784196364,
+      "lineup_margin": -1.2416711863139227,
+      "lineup_total": 234.34546537220757
+    },
+    {
+      "game_id": "0022501131",
+      "game_date": "2026-04-04",
+      "actual_margin": -23,
+      "actual_total": 209,
+      "baseline_margin": -5.269350369192281,
+      "baseline_total": 225.81534759570837,
+      "lineup_margin": -5.402713512609083,
+      "lineup_total": 224.9857426212858
+    },
+    {
+      "game_id": "0022501132",
+      "game_date": "2026-04-05",
+      "actual_margin": 14,
+      "actual_total": 216,
+      "baseline_margin": 6.064591962018909,
+      "baseline_total": 216.35737075369107,
+      "lineup_margin": 6.124034644808432,
+      "lineup_total": 216.30740453036293
+    },
+    {
+      "game_id": "0022501133",
+      "game_date": "2026-04-05",
+      "actual_margin": 6,
+      "actual_total": 236,
+      "baseline_margin": 3.4450860968241415,
+      "baseline_total": 225.3767300860144,
+      "lineup_margin": 2.7319143021558574,
+      "lineup_total": 224.16613062585338
+    },
+    {
+      "game_id": "0022501134",
+      "game_date": "2026-04-05",
+      "actual_margin": -10,
+      "actual_total": 230,
+      "baseline_margin": -4.184575816348129,
+      "baseline_total": 227.84454576302699,
+      "lineup_margin": -4.714624356040616,
+      "lineup_total": 227.58024087690995
+    },
+    {
+      "game_id": "0022501135",
+      "game_date": "2026-04-05",
+      "actual_margin": 16,
+      "actual_total": 246,
+      "baseline_margin": 0.45191697689713806,
+      "baseline_total": 229.43293077035784,
+      "lineup_margin": 1.1951563866514618,
+      "lineup_total": 229.5540969292247
+    },
+    {
+      "game_id": "0022501136",
+      "game_date": "2026-04-05",
+      "actual_margin": 9,
+      "actual_total": 225,
+      "baseline_margin": 13.130562700259205,
+      "baseline_total": 233.97957309055408,
+      "lineup_margin": 12.07673815649558,
+      "lineup_total": 233.42908126905695
+    },
+    {
+      "game_id": "0022501137",
+      "game_date": "2026-04-05",
+      "actual_margin": -14,
+      "actual_total": 230,
+      "baseline_margin": 2.55478964205318,
+      "baseline_total": 231.0128298818536,
+      "lineup_margin": 1.975130081373777,
+      "lineup_total": 230.96334995371495
+    },
+    {
+      "game_id": "0022501138",
+      "game_date": "2026-04-05",
+      "actual_margin": -4,
+      "actual_total": 220,
+      "baseline_margin": -4.056201514222323,
+      "baseline_total": 231.24267348765719,
+      "lineup_margin": -3.958256435903806,
+      "lineup_total": 231.11049518800132
+    },
+    {
+      "game_id": "0022501139",
+      "game_date": "2026-04-05",
+      "actual_margin": 35,
+      "actual_total": 257,
+      "baseline_margin": 19.447271314703443,
+      "baseline_total": 237.98645044660626,
+      "lineup_margin": 18.84054176535369,
+      "lineup_total": 237.1225458861385
+    },
+    {
+      "game_id": "0022501140",
+      "game_date": "2026-04-05",
+      "actual_margin": 6,
+      "actual_total": 262,
+      "baseline_margin": -2.210889954888657,
+      "baseline_total": 231.76790538367368,
+      "lineup_margin": -2.2375466297878575,
+      "lineup_total": 232.3479551389023
+    },
+    {
+      "game_id": "0022501141",
+      "game_date": "2026-04-05",
+      "actual_margin": -29,
+      "actual_total": 247,
+      "baseline_margin": -7.6392721673577455,
+      "baseline_total": 223.08509114384418,
+      "lineup_margin": -7.511358102102292,
+      "lineup_total": 223.52405755158406
+    },
+    {
+      "game_id": "0022501142",
+      "game_date": "2026-04-05",
+      "actual_margin": -1,
+      "actual_total": 233,
+      "baseline_margin": -1.7761331467570187,
+      "baseline_total": 220.24672781962508,
+      "lineup_margin": -2.107474227749833,
+      "lineup_total": 220.30211548521953
+    },
+    {
+      "game_id": "0022501143",
+      "game_date": "2026-04-06",
+      "actual_margin": -3,
+      "actual_total": 213,
+      "baseline_margin": -4.466874267461904,
+      "baseline_total": 232.39531962706832,
+      "lineup_margin": -4.78047624290673,
+      "lineup_total": 232.56790219004967
+    },
+    {
+      "game_id": "0022501144",
+      "game_date": "2026-04-06",
+      "actual_margin": 16,
+      "actual_total": 230,
+      "baseline_margin": -4.994361377500596,
+      "baseline_total": 223.45203493350675,
+      "lineup_margin": -4.740901445856693,
+      "lineup_total": 222.99812587653486
+    },
+    {
+      "game_id": "0022501145",
+      "game_date": "2026-04-06",
+      "actual_margin": -16,
+      "actual_total": 268,
+      "baseline_margin": -5.550889056216718,
+      "baseline_total": 236.5269937061335,
+      "lineup_margin": -5.0271586468215474,
+      "lineup_total": 236.82577326574597
+    },
+    {
+      "game_id": "0022501146",
+      "game_date": "2026-04-06",
+      "actual_margin": 13,
+      "actual_total": 217,
+      "baseline_margin": 7.485581654450314,
+      "baseline_total": 230.1424416692917,
+      "lineup_margin": 7.774760926383536,
+      "lineup_total": 230.02747231619918
+    },
+    {
+      "game_id": "0022501147",
+      "game_date": "2026-04-06",
+      "actual_margin": 5,
+      "actual_total": 269,
+      "baseline_margin": 7.056742107844073,
+      "baseline_total": 237.80892598409469,
+      "lineup_margin": 6.619842697651762,
+      "lineup_total": 237.7980406943507
+    },
+    {
+      "game_id": "0022501148",
+      "game_date": "2026-04-07",
+      "actual_margin": -31,
+      "actual_total": 227,
+      "baseline_margin": -4.992987402248843,
+      "baseline_total": 239.72680830868845,
+      "lineup_margin": -3.7269144201393516,
+      "lineup_total": 238.83496112074084
+    },
+    {
+      "game_id": "0022501149",
+      "game_date": "2026-04-07",
+      "actual_margin": 11,
+      "actual_total": 215,
+      "baseline_margin": 5.610917268818923,
+      "baseline_total": 220.80475450267892,
+      "lineup_margin": 5.7527505036897395,
+      "lineup_total": 220.9853209199407
+    },
+    {
+      "game_id": "0022501150",
+      "game_date": "2026-04-07",
+      "actual_margin": 6,
+      "actual_total": 186,
+      "baseline_margin": -3.3790929392518336,
+      "baseline_total": 218.40498248077887,
+      "lineup_margin": -3.7964134907299183,
+      "lineup_total": 217.27713342630034
+    },
+    {
+      "game_id": "0022501151",
+      "game_date": "2026-04-07",
+      "actual_margin": 26,
+      "actual_total": 216,
+      "baseline_margin": 0.24672379687655166,
+      "baseline_total": 230.5802229871352,
+      "lineup_margin": 0.15605913651484116,
+      "lineup_total": 230.5430281252323
+    },
+    {
+      "game_id": "0022501152",
+      "game_date": "2026-04-07",
+      "actual_margin": -20,
+      "actual_total": 228,
+      "baseline_margin": -9.781939202612591,
+      "baseline_total": 232.68125880413137,
+      "lineup_margin": -8.492848045710872,
+      "lineup_total": 232.2070113413466
+    },
+    {
+      "game_id": "0022501153",
+      "game_date": "2026-04-07",
+      "actual_margin": 19,
+      "actual_total": 293,
+      "baseline_margin": 3.4961585450102888,
+      "baseline_total": 245.9962576927847,
+      "lineup_margin": 2.838168625098888,
+      "lineup_total": 244.7394660586166
+    },
+    {
+      "game_id": "0022501154",
+      "game_date": "2026-04-07",
+      "actual_margin": 5,
+      "actual_total": 215,
+      "baseline_margin": 12.81278043795865,
+      "baseline_total": 229.5140295050682,
+      "lineup_margin": 12.192528208929318,
+      "lineup_total": 229.8052654616505
+    },
+    {
+      "game_id": "0022501155",
+      "game_date": "2026-04-07",
+      "actual_margin": -36,
+      "actual_total": 210,
+      "baseline_margin": -9.826168771470265,
+      "baseline_total": 227.35592688508174,
+      "lineup_margin": -9.894348238739738,
+      "lineup_total": 227.4360189619914
+    },
+    {
+      "game_id": "0022501156",
+      "game_date": "2026-04-07",
+      "actual_margin": 13,
+      "actual_total": 219,
+      "baseline_margin": 5.0335484456001325,
+      "baseline_total": 222.7971455374083,
+      "lineup_margin": 5.379285373331598,
+      "lineup_total": 223.5767350135767
+    },
+    {
+      "game_id": "0022501157",
+      "game_date": "2026-04-07",
+      "actual_margin": -14,
+      "actual_total": 224,
+      "baseline_margin": -2.66509073418635,
+      "baseline_total": 213.98737364286316,
+      "lineup_margin": -2.413812562570314,
+      "lineup_total": 213.9337832013229
+    },
+    {
+      "game_id": "0022501158",
+      "game_date": "2026-04-08",
+      "actual_margin": 6,
+      "actual_total": 238,
+      "baseline_margin": 6.063625901306324,
+      "baseline_total": 238.01365737589694,
+      "lineup_margin": 5.723327751952866,
+      "lineup_total": 237.82936543754641
+    },
+    {
+      "game_id": "0022501159",
+      "game_date": "2026-04-08",
+      "actual_margin": 12,
+      "actual_total": 252,
+      "baseline_margin": -1.5858881998577488,
+      "baseline_total": 229.9820024946242,
+      "lineup_margin": -0.9188777632793972,
+      "lineup_total": 229.8385812827957
+    },
+    {
+      "game_id": "0022501160",
+      "game_date": "2026-04-08",
+      "actual_margin": 26,
+      "actual_total": 248,
+      "baseline_margin": 11.462216433334817,
+      "baseline_total": 222.88514441543438,
+      "lineup_margin": 10.326138906666685,
+      "lineup_total": 221.6745954617096
+    },
+    {
+      "game_id": "0022501161",
+      "game_date": "2026-04-08",
+      "actual_margin": 11,
+      "actual_total": 213,
+      "baseline_margin": 9.480035628172914,
+      "baseline_total": 233.7795604592169,
+      "lineup_margin": 9.182989671737573,
+      "lineup_total": 233.86822586843707
+    },
+    {
+      "game_id": "0022501162",
+      "game_date": "2026-04-08",
+      "actual_margin": 17,
+      "actual_total": 255,
+      "baseline_margin": 8.11218810318175,
+      "baseline_total": 236.97584825677535,
+      "lineup_margin": 8.177761611590924,
+      "lineup_total": 237.5233098125418
+    },
+    {
+      "game_id": "0022501163",
+      "game_date": "2026-04-08",
+      "actual_margin": -18,
+      "actual_total": 238,
+      "baseline_margin": -9.06696131795563,
+      "baseline_total": 218.5348911549998,
+      "lineup_margin": -8.877607522408297,
+      "lineup_total": 218.86089610194688
+    },
+    {
+      "game_id": "0022501164",
+      "game_date": "2026-04-08",
+      "actual_margin": 5,
+      "actual_total": 219,
+      "baseline_margin": 6.239864689087568,
+      "baseline_total": 222.60993429169343,
+      "lineup_margin": 6.638344420380108,
+      "lineup_total": 223.11263738474605
+    },
+    {
+      "game_id": "0022501165",
+      "game_date": "2026-04-09",
+      "actual_margin": 14,
+      "actual_total": 242,
+      "baseline_margin": 0.24672379687655166,
+      "baseline_total": 230.5802229871352,
+      "lineup_margin": 0.11895496802596028,
+      "lineup_total": 230.52504904785974
+    },
+    {
+      "game_id": "0022501166",
+      "game_date": "2026-04-09",
+      "actual_margin": -11,
+      "actual_total": 227,
+      "baseline_margin": -4.992987402248843,
+      "baseline_total": 239.72680830868845,
+      "lineup_margin": -3.782618417248429,
+      "lineup_total": 238.87781816698822
+    },
+    {
+      "game_id": "0022501167",
+      "game_date": "2026-04-09",
+      "actual_margin": -29,
+      "actual_total": 217,
+      "baseline_margin": 0.49151269293901123,
+      "baseline_total": 221.3879723348666,
+      "lineup_margin": 0.20094701452806873,
+      "lineup_total": 220.6178320082886
+    },
+    {
+      "game_id": "0022501168",
+      "game_date": "2026-04-09",
+      "actual_margin": 6,
+      "actual_total": 218,
+      "baseline_margin": -0.08645569628458816,
+      "baseline_total": 220.39731632472285,
+      "lineup_margin": -0.2297371383583453,
+      "lineup_total": 220.38933691093206
+    },
+    {
+      "game_id": "0022501169",
+      "game_date": "2026-04-09",
+      "actual_margin": 11,
+      "actual_total": 215,
+      "baseline_margin": 6.103511506378027,
+      "baseline_total": 221.14667322621995,
+      "lineup_margin": 6.2488308341693966,
+      "lineup_total": 221.01086749167615
+    },
+    {
+      "game_id": "0022501170",
+      "game_date": "2026-04-09",
+      "actual_margin": -16,
+      "actual_total": 222,
+      "baseline_margin": 3.965788167673992,
+      "baseline_total": 230.71889968539864,
+      "lineup_margin": 3.747879144324557,
+      "lineup_total": 230.97653181266202
+    },
+    {
+      "game_id": "0022501171",
+      "game_date": "2026-04-10",
+      "actual_margin": -18,
+      "actual_total": 218,
+      "baseline_margin": -3.4013344239607335,
+      "baseline_total": 224.42825675720354,
+      "lineup_margin": -3.0950392018440454,
+      "lineup_total": 223.98503591416113
+    },
+    {
+      "game_id": "0022501172",
+      "game_date": "2026-04-10",
+      "actual_margin": -23,
+      "actual_total": 257,
+      "baseline_margin": -12.586136966779762,
+      "baseline_total": 241.4201140355305,
+      "lineup_margin": -11.539975519218416,
+      "lineup_total": 240.8023431303958
+    },
+    {
+      "game_id": "0022501173",
+      "game_date": "2026-04-10",
+      "actual_margin": 22,
+      "actual_total": 226,
+      "baseline_margin": -3.438712052770171,
+      "baseline_total": 238.01365737589694,
+      "lineup_margin": -3.148966769277237,
+      "lineup_total": 237.80876018218765
+    },
+    {
+      "game_id": "0022501174",
+      "game_date": "2026-04-10",
+      "actual_margin": 26,
+      "actual_total": 262,
+      "baseline_margin": 12.583741564807127,
+      "baseline_total": 225.99358967298537,
+      "lineup_margin": 12.706124923287263,
+      "lineup_total": 225.7517285774922
+    },
+    {
+      "game_id": "0022501175",
+      "game_date": "2026-04-10",
+      "actual_margin": -11,
+      "actual_total": 199,
+      "baseline_margin": -6.549080756511188,
+      "baseline_total": 230.02259529590108,
+      "lineup_margin": -5.851219339264475,
+      "lineup_total": 229.80281758545445
+    },
+    {
+      "game_id": "0022501176",
+      "game_date": "2026-04-10",
+      "actual_margin": 17,
+      "actual_total": 207,
+      "baseline_margin": 4.7831569305588175,
+      "baseline_total": 222.20682609830163,
+      "lineup_margin": 4.773845451334722,
+      "lineup_total": 222.10765218086473
+    },
+    {
+      "game_id": "0022501177",
+      "game_date": "2026-04-10",
+      "actual_margin": -24,
+      "actual_total": 230,
+      "baseline_margin": -3.8067537608177275,
+      "baseline_total": 232.9832942038916,
+      "lineup_margin": -3.8677453100334986,
+      "lineup_total": 232.90003832150325
+    },
+    {
+      "game_id": "0022501178",
+      "game_date": "2026-04-10",
+      "actual_margin": -4,
+      "actual_total": 268,
+      "baseline_margin": 3.132363863030463,
+      "baseline_total": 223.5338647929522,
+      "lineup_margin": 3.964423896588144,
+      "lineup_total": 223.1279543178229
+    },
+    {
+      "game_id": "0022501179",
+      "game_date": "2026-04-10",
+      "actual_margin": 17,
+      "actual_total": 233,
+      "baseline_margin": 6.004006787787986,
+      "baseline_total": 218.40498248077887,
+      "lineup_margin": 6.547593096735028,
+      "lineup_total": 217.2122194165907
+    },
+    {
+      "game_id": "0022501180",
+      "game_date": "2026-04-10",
+      "actual_margin": 19,
+      "actual_total": 259,
+      "baseline_margin": 11.87930456939415,
+      "baseline_total": 230.42760045989635,
+      "lineup_margin": 11.893146539827882,
+      "lineup_total": 231.23108910170484
+    },
+    {
+      "game_id": "0022501181",
+      "game_date": "2026-04-10",
+      "actual_margin": 46,
+      "actual_total": 248,
+      "baseline_margin": -3.2212183298748016,
+      "baseline_total": 244.94495030857826,
+      "lineup_margin": -2.5025499609004385,
+      "lineup_total": 244.48675235388473
+    },
+    {
+      "game_id": "0022501182",
+      "game_date": "2026-04-10",
+      "actual_margin": 20,
+      "actual_total": 234,
+      "baseline_margin": -5.3758312338003975,
+      "baseline_total": 229.616517948215,
+      "lineup_margin": -5.440668945211925,
+      "lineup_total": 229.68925419293225
+    },
+    {
+      "game_id": "0022501183",
+      "game_date": "2026-04-10",
+      "actual_margin": 19,
+      "actual_total": 213,
+      "baseline_margin": 0.008984502476550915,
+      "baseline_total": 226.11022882975143,
+      "lineup_margin": 0.19124472968459827,
+      "lineup_total": 226.37846833593323
+    },
+    {
+      "game_id": "0022501184",
+      "game_date": "2026-04-10",
+      "actual_margin": 6,
+      "actual_total": 242,
+      "baseline_margin": -10.187866589422498,
+      "baseline_total": 229.5140295050682,
+      "lineup_margin": -9.550024969322607,
+      "lineup_total": 229.89743775817587
+    },
+    {
+      "game_id": "0022501185",
+      "game_date": "2026-04-10",
+      "actual_margin": 28,
+      "actual_total": 174,
+      "baseline_margin": -0.24192530066481766,
+      "baseline_total": 224.13580887299418,
+      "lineup_margin": -0.515312113782656,
+      "lineup_total": 224.1606434860779
+    },
+    {
+      "game_id": "0022501186",
+      "game_date": "2026-04-12",
+      "actual_margin": 5,
+      "actual_total": 221,
+      "baseline_margin": 7.179750847390196,
+      "baseline_total": 219.84185431263194,
+      "lineup_margin": 7.307177783480995,
+      "lineup_total": 219.9751775406644
+    },
+    {
+      "game_id": "0022501187",
+      "game_date": "2026-04-12",
+      "actual_margin": 13,
+      "actual_total": 247,
+      "baseline_margin": 16.481313076032464,
+      "baseline_total": 238.36528676610305,
+      "lineup_margin": 14.509965604578241,
+      "lineup_total": 237.40671943964927
+    },
+    {
+      "game_id": "0022501188",
+      "game_date": "2026-04-12",
+      "actual_margin": -12,
+      "actual_total": 254,
+      "baseline_margin": -12.997107704836552,
+      "baseline_total": 226.1985568003655,
+      "lineup_margin": -11.853633589135427,
+      "lineup_total": 225.460713506143
+    },
+    {
+      "game_id": "0022501189",
+      "game_date": "2026-04-12",
+      "actual_margin": 26,
+      "actual_total": 260,
+      "baseline_margin": 4.657932555937123,
+      "baseline_total": 241.12811313673137,
+      "lineup_margin": 5.050092715613658,
+      "lineup_total": 241.28716957673618
+    },
+    {
+      "game_id": "0022501190",
+      "game_date": "2026-04-12",
+      "actual_margin": -14,
+      "actual_total": 206,
+      "baseline_margin": 4.288155881693854,
+      "baseline_total": 226.7780443883278,
+      "lineup_margin": 4.321322988607136,
+      "lineup_total": 226.99767658717582
+    },
+    {
+      "game_id": "0022501191",
+      "game_date": "2026-04-12",
+      "actual_margin": 20,
+      "actual_total": 232,
+      "baseline_margin": 5.03444064830677,
+      "baseline_total": 226.7704659441966,
+      "lineup_margin": 4.197066129499888,
+      "lineup_total": 226.16506666974269
+    },
+    {
+      "game_id": "0022501192",
+      "game_date": "2026-04-12",
+      "actual_margin": 35,
+      "actual_total": 237,
+      "baseline_margin": 10.704734849584653,
+      "baseline_total": 215.8073247444092,
+      "lineup_margin": 10.259224823831175,
+      "lineup_total": 215.05638643526754
+    },
+    {
+      "game_id": "0022501193",
+      "game_date": "2026-04-12",
+      "actual_margin": 21,
+      "actual_total": 277,
+      "baseline_margin": 1.7817383187795741,
+      "baseline_total": 235.51326311581698,
+      "lineup_margin": 1.8904177166892708,
+      "lineup_total": 236.1989739004792
+    },
+    {
+      "game_id": "0022501194",
+      "game_date": "2026-04-12",
+      "actual_margin": 31,
+      "actual_total": 233,
+      "baseline_margin": 8.994630093807274,
+      "baseline_total": 223.85101687158084,
+      "lineup_margin": 9.119336414880607,
+      "lineup_total": 224.298915998982
+    },
+    {
+      "game_id": "0022501195",
+      "game_date": "2026-04-12",
+      "actual_margin": 6,
+      "actual_total": 258,
+      "baseline_margin": 9.77546102683361,
+      "baseline_total": 236.34021650123225,
+      "lineup_margin": 8.951134058423264,
+      "lineup_total": 235.65220153992254
+    },
+    {
+      "game_id": "0022501196",
+      "game_date": "2026-04-12",
+      "actual_margin": -32,
+      "actual_total": 238,
+      "baseline_margin": 10.495575710717517,
+      "baseline_total": 218.2750826657525,
+      "lineup_margin": 10.310198086078188,
+      "lineup_total": 218.3939183131182
+    },
+    {
+      "game_id": "0022501197",
+      "game_date": "2026-04-12",
+      "actual_margin": -10,
+      "actual_total": 246,
+      "baseline_margin": 3.8409846391645033,
+      "baseline_total": 234.31478784196364,
+      "lineup_margin": 3.898838094798876,
+      "lineup_total": 234.39538008896625
+    },
+    {
+      "game_id": "0022501198",
+      "game_date": "2026-04-12",
+      "actual_margin": 24,
+      "actual_total": 238,
+      "baseline_margin": 7.975433355714827,
+      "baseline_total": 243.9669685798538,
+      "lineup_margin": 7.270141943516364,
+      "lineup_total": 242.9344821975205
+    },
+    {
+      "game_id": "0022501199",
+      "game_date": "2026-04-12",
+      "actual_margin": 5,
+      "actual_total": 225,
+      "baseline_margin": -0.9054336807624423,
+      "baseline_total": 221.77985901842538,
+      "lineup_margin": -0.44333916492402636,
+      "lineup_total": 222.4410193028873
+    },
+    {
+      "game_id": "0022501200",
+      "game_date": "2026-04-12",
+      "actual_margin": 12,
+      "actual_total": 232,
+      "baseline_margin": 9.349830246887066,
+      "baseline_total": 233.8474448998429,
+      "lineup_margin": 9.342804967623977,
+      "lineup_total": 233.98467571413906
+    }
+  ],
+  "forecast_policy": "Midnight ET date cutoff; only games available by next-day-noon policy; no current injury archive",
+  "betting_records_available": false,
+  "start": "2026-03-01",
+  "end_exclusive": "2026-04-13",
+  "requested_games": 335,
+  "fitted_as_of": "2026-03-01T05:00:00+00:00",
+  "player_ridge": 15000.0,
+  "team_ridge": 100.0,
+  "player_training_games": 306,
+  "team_training_games": 890,
+  "lineup_beats_team_margin_rmse": false,
+  "live_injury_feed_validated": false,
+  "eligible_for_posting": false
+}
