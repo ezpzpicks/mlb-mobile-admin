@@ -13,7 +13,7 @@ import math
 import re
 from typing import Any
 
-MODEL_VERSION = "nba-v0.4-live-tracking-2026-10-22"
+MODEL_VERSION = "nba-v0.5-market-grades-2026-10-22"
 STATUSES = {"AVAILABLE", "OUT", "PROBABLE", "QUESTIONABLE", "DOUBTFUL", "DAY_TO_DAY", "UNKNOWN"}
 UNCERTAIN = STATUSES - {"AVAILABLE", "OUT"}
 
@@ -398,7 +398,9 @@ def project_game(away: TeamProfile, home: TeamProfile, scenario: Scenario,
                                           home.offensive_rating, home.defensive_rating, possessions, context)
     margin, total = home_score - away_score, home_score + away_score
     flags = away_adjusted["flags"] + home_adjusted["flags"]
-    return {"scenario": scenario.name, "model_version": MODEL_VERSION,
+    from builders.nba_market import market_comparison
+    return {**market_comparison(margin, total, away.name, home.name, market),
+            "scenario": scenario.name, "model_version": MODEL_VERSION,
             "game_id": context.game_id, "tipoff": context.tipoff.isoformat(),
             "as_of": context.as_of.isoformat(), "away_team": away.name, "home_team": home.name,
             "away_score": away_score, "home_score": home_score,

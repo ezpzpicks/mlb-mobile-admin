@@ -159,6 +159,8 @@ def grade_prediction(record: dict, observation: dict | None) -> dict:
            "game": f"{selected['away_team']} at {selected['home_team']}",
            "fair_home_spread": selected["fair_home_spread"], "forecast_total": selected["total"],
            "scenario": record["selected_scenario"], "conditional": not selected["lineup_ready"],
+           "spread_pick": selected.get("spread_pick", ""), "total_pick": selected.get("total_pick", ""),
+           "spread_grade": selected.get("spread_grade", "No market line"), "total_grade": selected.get("total_grade", "No market line"),
            "status": "PENDING", "spread_result": "NO LINE", "total_result": "NO LINE"}
     if observation is None:
         return row

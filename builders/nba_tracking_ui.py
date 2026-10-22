@@ -56,10 +56,12 @@ def live_inputs(state, *, ui):
                         inputs = fetch_matchup_inputs(choices[gid])
                         injury = fetch_espn_injuries()
                         package = prepare_live_package(bundle, inputs, injury, as_of=datetime.now(timezone.utc))
+                        from builders.nba_market import apply_market, read_market_rows
+                        package = apply_market(package, read_market_rows(day), choices[gid], datetime.now(timezone.utc))
                         state.update(package=package, result=None, ratings=bundle, espn_report=injury,
                             revision=state.get("revision", 0) + 1)
                         st.success("Current roster and minute suggestion loaded. Review both rotations, injury assumptions and any missing minute evidence, then compare.")
-                    except (InputError, ValueError, KeyError, TypeError, OSError, IndexError) as exc:
+                    except (InputError, ValueError, KeyError, TypeError, OSError, IndexError, RuntimeError) as exc:
                         state["result"] = None
                         st.error(f"Live matchup was not applied: {exc}")
             else:
@@ -95,6 +97,9 @@ def lock_controls(state, package, result, *, ui):
             clicked = st.form_submit_button("Lock pregame research forecast")
         if clicked:
             try:
+                market = package.get("market") or {}
+                if market.get("home_spread") is None or market.get("total") is None:
+                    raise InputError("A live NBA forecast needs both market spread and total before it can be locked.")
                 from builders.nba_live import fetch_game
                 from shared.nba_tracking_storage import save_prediction
                 game, _ = fetch_game(result["game_id"])

@@ -22,6 +22,7 @@ from builders.nba_automation import NOTE, POLICY, VERSIONS, automated_package, p
 from builders.nba_injuries import fetch_espn_injuries
 from builders.nba_live import checked_box_minutes, fetch_game, fetch_matchup_inputs, fetch_slate, prepare_live_package
 from builders.nba_model import InputError, timestamp
+from builders.nba_market import apply_market, market_for_game, read_market_rows
 from builders.nba_ratings import validate_bundle
 from builders.nba_tracking import lock_prediction, result_observation
 from shared import nba_tracking_storage as store
@@ -78,6 +79,7 @@ def run(args):
         for excluded in slate["excluded"]:
             emit("skipped", **excluded)
         keys = store.prediction_keys([g["game_id"] for g in slate["games"]], list(VERSIONS.values()))
+        market_rows = read_market_rows(str(local.date()))
         pending = []
         for game in sorted(slate["games"], key=lambda g: g["tipoff"]):
             phase = phase_for_game(game, now)
@@ -86,7 +88,11 @@ def run(args):
             elif (game["game_id"], VERSIONS[phase]) in keys:
                 emit("already_saved", game_id=game["game_id"], phase=phase)
             else:
-                pending.append((game, phase))
+                try:
+                    market_for_game(market_rows, game, now)
+                    pending.append((game, phase))
+                except InputError as exc:
+                    emit("waiting_for_market", game_id=game["game_id"], reason=str(exc))
         emit("plan", date=str(local.date()), pending=len(pending),
              mode="commit" if args.commit else "evaluate" if args.evaluate else "plan",
              games=[{"game_id": g["game_id"], "game": f"{g['away']['name']} @ {g['home']['name']}",
@@ -102,6 +108,7 @@ def run(args):
                 try:
                     inputs = fetch_matchup_inputs(game, team_cache=team_cache, box_cache=box_cache)
                     package = prepare_live_package(bundle, inputs, injury, as_of=clock())
+                    package = apply_market(package, market_rows, game, clock())
                     current, _ = fetch_game(game["game_id"])
                     phase = phase_for_game(current, clock())
                     if phase is None:
@@ -118,6 +125,9 @@ def run(args):
                         model_version=record["model_version"], locked_at=record["locked_at"],
                         projected_away=record["selected"]["away_score"], projected_home=record["selected"]["home_score"],
                         fair_home_spread=record["selected"]["fair_home_spread"], total=record["selected"]["total"],
+                        market_home_spread=record["selected"]["market"]["home_spread"], market_total=record["selected"]["market"]["total"],
+                        spread_pick=record["selected"]["spread_pick"], spread_grade=record["selected"]["spread_grade"],
+                        total_pick=record["selected"]["total_pick"], total_grade=record["selected"]["total_grade"],
                         scenarios=len(record["projection"]["scenarios"]), conditional=True,
                         public_posting=False)
                 except Exception as exc:

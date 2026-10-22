@@ -1,4 +1,5 @@
 import math
+from shared.market_grading import market_grade
 from dataclasses import dataclass
 from typing import Optional
 
@@ -42,23 +43,6 @@ def expected_value_per_unit(model_probability: float, odds: Optional[float]) -> 
         return 0.0
     profit = odds / 100.0 if odds > 0 else 100.0 / abs(odds)
     return model_probability * profit - (1.0 - model_probability)
-
-
-def market_grade(point_edge: float, probability: float, probability_edge_value: float = 0.0) -> str:
-    edge = abs(float(point_edge))
-    probability = float(probability)
-    probability_edge_value = float(probability_edge_value)
-    if edge >= 4.5 and probability >= 0.60:
-        return "A"
-    if edge >= 3.0 and probability >= 0.565:
-        return "B"
-    if edge >= 1.75 and probability >= 0.535:
-        return "Lean"
-    if probability_edge_value >= 0.075 and probability >= 0.57:
-        return "B"
-    if probability_edge_value >= 0.045 and probability >= 0.54:
-        return "Lean"
-    return "Pass"
 
 
 def reliability_score(data_confidence: float, personnel_confidence: float, edge_strength: float, volatility_penalty: float = 0.0) -> float:
