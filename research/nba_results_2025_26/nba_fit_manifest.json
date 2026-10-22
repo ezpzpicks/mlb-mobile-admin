@@ -1,0 +1,54 @@
+{
+  "model_version": "nba-v0.2-dated-ratings-2026-10-22",
+  "season_end": 2026,
+  "produced_at": "2026-10-22T15:35:28.070876+00:00",
+  "sources": [
+    {
+      "file": "nba_play_by_play_2026.parquet",
+      "bytes": 19999800,
+      "sha256": "78524677282ad105b2651d511abcc0a827c1cecdbe826acc487872d1f03836ac",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/nba_stats_pbp/nba_play_by_play_2026.parquet"
+    },
+    {
+      "file": "nba_lineups_2026.parquet",
+      "bytes": 1051800,
+      "sha256": "87450c2edfae85320b317f0c80aa35e962344cef9db52676c9def109c5a8c399",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/nba_stats_game_lineups/nba_lineups_2026.parquet"
+    },
+    {
+      "file": "nba_possessions_2026.parquet",
+      "bytes": 3804011,
+      "sha256": "e79dd79bc892290f2f91cd146e83a4224cabba178fa44048aace8a06a47a3552",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/nba_stats_possessions/nba_possessions_2026.parquet"
+    },
+    {
+      "file": "nba_schedule_2026.csv.gz",
+      "bytes": 23071,
+      "sha256": "c1ff3711ef8b8ec4310c60159d1225a400facc7ce1e29bc64f09ae4130496509",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/nba_stats_schedules/nba_schedule_2026.csv.gz"
+    },
+    {
+      "file": "player_boxscores_2026.parquet",
+      "bytes": 644419,
+      "sha256": "a0b280ebb0c955e501c0e6feab3f6d726bd9f1b7c2d13f5b5c0746049459132e",
+      "url": "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/nba_stats_player_boxscores/player_boxscores_2026.parquet"
+    }
+  ],
+  "validation_start": "2026-01-01",
+  "holdout_start": "2026-03-01",
+  "holdout_end_exclusive": "2026-04-13",
+  "ratings_cutoff": "2026-04-14T00:00:00-04:00",
+  "selected_player_ridge": 15000.0,
+  "selected_minutes_window": 10,
+  "team_ridge": 100.0,
+  "research_only": true,
+  "eligible_for_posting": false,
+  "runtime": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "pyarrow": "26.0.0"
+  },
+  "verification": "Frozen input hashes matched; selected frozen/final refits and all 335 held-out predictions reproduced exactly. Evaluation metadata added after verification."
+}

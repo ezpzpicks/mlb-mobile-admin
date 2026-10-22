@@ -1,0 +1,6 @@
+# Offline NBA fitting and its research tests. Tested with Python 3.12.
+# The deployed Streamlit builder consumes JSON and does not need SciPy/Arrow.
+numpy==2.3.5
+pandas==2.2.3
+scipy==1.17.0
+pyarrow==26.0.0
