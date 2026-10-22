@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from builders.nba_automation import NOTE, POLICY, VERSIONS, automated_package, phase_for_game
+from builders.nba_automation import EXPECTED_VERSIONS, NOTE, POLICY, VERSIONS, automated_package, phase_for_game
 from builders.nba_live import digest, prepare_live_package
 from builders.nba_model import InputError, MODEL_VERSION, evaluate_package
 from builders.nba_tracking import lock_prediction, result_observation, tracking_report
@@ -241,6 +241,30 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.assertEqual(failure["blocked_games"], ["123456"])
         self.assertIn("403", failure["error"])
         self.assertTrue(any(event == "result_pending" for event, _ in self.events))
+
+    def test_expected_mode_saves_without_injury_requests_and_deduplicates_its_own_phases(self):
+        with patch.dict(os.environ, {"NBA_AVAILABILITY_MODE": "expected_rotation"}):
+            self.assertEqual(self.run_at(self.now, bad_injuries=True)[:3], (0, 1, 0))
+            self.assertEqual(self.run_at(self.now + timedelta(minutes=30), bad_injuries=True)[:3], (0, 0, 0))
+            self.assertEqual(self.run_at(self.now + timedelta(minutes=90), bad_injuries=True)[:3], (0, 1, 0))
+        records = store.load_ledger()[0]
+        self.assertEqual(len(records), 2)
+        self.assertEqual({r["model_version"] for r in records}, set(EXPECTED_VERSIONS.values()))
+        self.assertTrue(all(r["selected"]["injury_verified"] is False for r in records))
+        self.assertTrue(any(event == "injury_feed_bypassed" for event, _ in self.events))
+
+    def test_returning_to_injury_mode_keeps_its_records_separate(self):
+        with patch.dict(os.environ, {"NBA_AVAILABILITY_MODE": "expected_rotation"}):
+            self.assertEqual(self.run_at(self.now)[:3], (0, 1, 0))
+        self.assertEqual(self.run_at(self.now)[:3], (0, 1, 1))
+        records = store.load_ledger()[0]
+        self.assertEqual({r["model_version"] for r in records}, {EXPECTED_VERSIONS["early"], VERSIONS["early"]})
+
+    def test_invalid_availability_mode_fails_before_database_work(self):
+        with patch.dict(os.environ, {"NBA_AVAILABILITY_MODE": "expected"}):
+            with self.assertRaisesRegex(InputError, "NBA_AVAILABILITY_MODE"):
+                self.run_at(self.now)
+        self.assertEqual(self.sql, [])
 
 
 class SchedulerIsolationTests(unittest.TestCase):

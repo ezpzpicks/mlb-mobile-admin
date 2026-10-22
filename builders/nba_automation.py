@@ -15,6 +15,8 @@ from builders.nba_model import InputError, MODEL_VERSION, timestamp
 POLICY = "nba-auto-market-v2"
 PHASES = ("early", "pregame")
 VERSIONS = {phase: f"{MODEL_VERSION}+{POLICY}-{phase}" for phase in PHASES}
+EXPECTED_POLICY = "nba-auto-expected-rotation-v1"
+EXPECTED_VERSIONS = {phase: f"{MODEL_VERSION}+{EXPECTED_POLICY}-{phase}" for phase in PHASES}
 FINAL_WINDOW = timedelta(minutes=45)
 MIN_LEAD = timedelta(minutes=3)
 MAX_ALTERNATIVES = 6
@@ -25,6 +27,15 @@ NOTE = ("Automatic research forecast; no human roster or minute review. "
         "to 240 minutes with individual caps. Single-player alternatives are "
         "sensitivity checks, not calibrated probabilities or full joint coverage. "
         "Starters remain unconfirmed and estimated return dates never clear an injury.")
+EXPECTED_NOTE = ("Temporary expected-rotation forecast; injury feed bypassed by user choice. "
+    "Availability unchecked and starters unconfirmed. Current-roster players with checked "
+    "minute evidence are assumed IN; prior 10 current-season games fall back to historical "
+    "minute seeds, allocated proportionally to 240 minutes with individual caps. "
+    "No human review, injury clearance or public-posting eligibility is claimed.")
+
+
+def expected_rotation(package):
+    return package.get("availability_provenance", {}).get("mode") == "expected_rotation"
 
 
 def phase_for_game(game, now):
@@ -38,7 +49,9 @@ def phase_for_game(game, now):
 def _scenarios(package):
     original = package["scenarios"][0]
     primary = deepcopy(original)
-    primary["name"] = "Automatic primary: OUT/DOUBTFUL out; other unresolved minute roles IN"
+    expected = expected_rotation(package)
+    primary["name"] = ("Expected rotation: injury feed bypassed; evidenced roles assumed IN" if expected else
+        "Automatic primary: OUT/DOUBTFUL out; other unresolved minute roles IN")
     weights, candidates = {}, []
     names = {p["player_id"]: p["name"] for side in ("away", "home") for p in package[side]["players"]}
     for side in ("away", "home"):
@@ -55,7 +68,8 @@ def _scenarios(package):
             if player["status"] in {"QUESTIONABLE", "DAY_TO_DAY", "PROBABLE", "DOUBTFUL"} and evidence.get(pid, 0) > 0:
                 candidates.append((evidence[pid], side, pid, evidence[pid]))
         plan.update(report_complete=False, starters_confirmed=False,
-                    lineup_source="ESPN inputs; fixed automatic conditional rotation policy " + POLICY)
+                    lineup_source=("Checked current rosters and minute evidence; expected rotation, injury feed bypassed"
+                        if expected else "ESPN inputs; fixed automatic conditional rotation policy " + POLICY))
     scenarios, omitted = [primary], []
     for _, side, pid, evidence in sorted(candidates, key=lambda c: (-c[0], c[1], c[2]))[:MAX_ALTERNATIVES]:
         alternative = deepcopy(primary)
@@ -79,11 +93,22 @@ def automated_package(package, phase):
     if phase not in PHASES or not package.get("live_provenance"):
         raise InputError("Automatic NBA preparation needs a live matchup and a supported phase.")
     output = deepcopy(package)
+    expected = expected_rotation(output)
+    if expected:
+        if output.get("injury_provenance") or output["availability_provenance"].get("injury_verified") is not False:
+            raise InputError("Expected rotations cannot claim injury verification.")
+        for scenario in output["scenarios"]:
+            for side in ("away", "home"):
+                plan = scenario[side]
+                if (plan["injury_as_of"] is not None or plan["report_complete"] or plan["starters_confirmed"]
+                        or any(p["status"] != "UNKNOWN" or p.get("injury") is not None for p in plan["players"])):
+                    raise InputError("Expected rotations require explicitly unchecked availability.")
     scenarios, omitted, truncated = _scenarios(output)
     output["scenarios"] = scenarios
-    output["automation"] = {"policy": POLICY, "phase": phase, "tracking_version": VERSIONS[phase],
+    policy, versions, note = (EXPECTED_POLICY, EXPECTED_VERSIONS, EXPECTED_NOTE) if expected else (POLICY, VERSIONS, NOTE)
+    output["automation"] = {"policy": policy, "phase": phase, "tracking_version": versions[phase],
         "primary_scenario": scenarios[0]["name"], "scenarios_sha256": digest(scenarios),
-        "assumptions": NOTE, "omitted_sensitivity_checks": omitted,
+        "assumptions": note, "omitted_sensitivity_checks": omitted,
         "truncated_sensitivity_checks": truncated, "human_reviewed": False}
     return output
 
@@ -91,7 +116,8 @@ def automated_package(package, phase):
 def validate_automated_package(package, game, now, policy):
     automatic = package.get("automation") or {}
     phase = automatic.get("phase")
-    if policy != POLICY or phase not in PHASES or phase_for_game(game, now) != phase:
+    required_policy = EXPECTED_POLICY if expected_rotation(package) else POLICY
+    if policy != required_policy or phase not in PHASES or phase_for_game(game, now) != phase:
         raise InputError("Automatic NBA policy or pregame build window does not match.")
     expected = automated_package(package, phase)
     if automatic != expected["automation"] or package["scenarios"] != expected["scenarios"]:
@@ -101,4 +127,4 @@ def validate_automated_package(package, game, now, policy):
     expected_market, _ = market_for_game(provenance.get("rows", []), game, now)
     if package.get("market") != expected_market:
         raise InputError("Automatic NBA tracking requires the original complete ScoresAndOdds market snapshot.")
-    return VERSIONS[phase]
+    return expected["automation"]["tracking_version"]

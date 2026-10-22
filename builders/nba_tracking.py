@@ -82,13 +82,18 @@ def lock_prediction(package: dict, scenario_name: str, game: dict, *, locked_at,
     provenance = package["live_provenance"]
     if provenance.get("conflicts"):
         raise InputError("Current roster and injury sources disagree. Resolve the reported conflicts before locking.")
-    injury = package.get("injury_provenance")
-    if not injury or now - timestamp(injury["feed_as_of"], "injury source update") > MAX_LOCK_AGE:
-        raise InputError("Refresh the ESPN injury source before locking (maximum age 60 minutes).")
-    if timestamp(injury["fetched_at"], "injury observation") > cutoff:
-        raise InputError("Injury snapshot was observed after the forecast cutoff.")
-    if injury.get("audit", {}).get("unmatched"):
-        raise InputError("Resolve the selected teams' conflicting or unmatched ESPN injury identities before locking.")
+    from builders.nba_automation import EXPECTED_POLICY, expected_rotation
+    if expected_rotation(package):
+        if automation_policy != EXPECTED_POLICY:
+            raise InputError("Expected rotations require their dedicated automatic tracking policy.")
+    else:
+        injury = package.get("injury_provenance")
+        if not injury or now - timestamp(injury["feed_as_of"], "injury source update") > MAX_LOCK_AGE:
+            raise InputError("Refresh the ESPN injury source before locking (maximum age 60 minutes).")
+        if timestamp(injury["fetched_at"], "injury observation") > cutoff:
+            raise InputError("Injury snapshot was observed after the forecast cutoff.")
+        if injury.get("audit", {}).get("unmatched"):
+            raise InputError("Resolve the selected teams' conflicting or unmatched ESPN injury identities before locking.")
     known = set()
     for side in ("away", "home"):
         roster = provenance["rosters"][side]
@@ -159,6 +164,8 @@ def grade_prediction(record: dict, observation: dict | None) -> dict:
            "game": f"{selected['away_team']} at {selected['home_team']}",
            "fair_home_spread": selected["fair_home_spread"], "forecast_total": selected["total"],
            "scenario": record["selected_scenario"], "conditional": not selected["lineup_ready"],
+           "availability_mode": selected.get("availability_mode", "injury_feed"),
+           "injury_verified": selected.get("injury_verified", bool(record["inputs"].get("injury_provenance"))),
            "spread_pick": selected.get("spread_pick", ""), "total_pick": selected.get("total_pick", ""),
            "spread_grade": selected.get("spread_grade", "No market line"), "total_grade": selected.get("total_grade", "No market line"),
            "status": "PENDING", "spread_result": "NO LINE", "total_result": "NO LINE"}

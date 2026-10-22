@@ -285,12 +285,20 @@ def allocate_minutes(weights: dict, caps: dict) -> dict:
     return result
 
 
-def prepare_live_package(bundle: dict, inputs: dict, injury_report: dict, *, as_of) -> dict:
+def prepare_live_package(bundle: dict, inputs: dict, injury_report: dict | None, *, as_of,
+                         availability_mode="injury_feed") -> dict:
     """Preserve fitted reference rotations, reconcile current rosters, suggest minutes.
 
     All unlisted players stay UNKNOWN. Recent-game starters are never copied as
     confirmed starters. New identities receive a clearly namespaced zero prior.
     """
+    if availability_mode not in {"injury_feed", "expected_rotation"}:
+        raise InputError("Unsupported NBA availability mode.")
+    expected = availability_mode == "expected_rotation"
+    if expected and injury_report is not None:
+        raise InputError("Expected-rotation mode cannot apply or claim an injury report.")
+    if not expected and injury_report is None:
+        raise InputError("A fresh ESPN injury report is required in injury-feed mode.")
     game, cutoff = inputs["game"], timestamp(as_of, "live projection cutoff")
     if game["status"] != "STATUS_SCHEDULED" or game["state"] != "pre" or not game["time_valid"]:
         raise InputError("Choose a scheduled NBA game with a confirmed start time.")
@@ -362,14 +370,25 @@ def prepare_live_package(bundle: dict, inputs: dict, injury_report: dict, *, as_
         if timestamp(source["observed_at"], "source observation") > cutoff:
             raise InputError("A live input was observed after the projection cutoff.")
     conflicts = []
-    for group in injury_report["teams"]:
+    for group in injury_report["teams"] if injury_report is not None else []:
         for side in ("away", "home"):
             if _team_key(group["name"]) == _team_key(game[side]["name"]):
                 for row in group["injuries"]:
                     if row.get("team_conflict") or row["espn_athlete_id"] not in identity[side]:
                         conflicts.append(f"{group['name']} {row['player_name']}: injury listing and current roster disagree")
     overrides = {eid: pid for identities in identity.values() for eid, pid in identities.items()}
-    package, _ = apply_espn_report(package, injury_report, bundle=bundle, player_id_overrides=overrides)
+    if injury_report is not None:
+        package, _ = apply_espn_report(package, injury_report, bundle=bundle, player_id_overrides=overrides)
+    else:
+        package["availability_provenance"] = {"mode": "expected_rotation", "injury_verified": False,
+            "prepared_at": cutoff.isoformat(), "source": "Checked current rosters and prior-game minute evidence",
+            "note": "Temporary expected rotation; injury feed bypassed by user choice. Availability unchecked."}
+        for side in ("away", "home"):
+            plan = package["scenarios"][0][side]
+            plan.update(injury_as_of=None, injury_source="Injury feed bypassed; availability unchecked",
+                        report_complete=False, starters_confirmed=False)
+            for player in plan["players"]:
+                player.update(status="UNKNOWN", injury=None, starter=False)
     # Roster membership takes precedence for rotation allocation. Historical
     # departed players remain in the reference sample, with zero current minutes.
     for side in ("away", "home"):
@@ -381,7 +400,8 @@ def prepare_live_package(bundle: dict, inputs: dict, injury_report: dict, *, as_
         for p in plan["players"]:
             p["minutes"] = allocated[p["player_id"]]
             p["assumption"] = ("IN" if p["minutes"] else "OUT") if p["status"] not in {"OUT", "AVAILABLE"} else ""
-    package["scenarios"][0]["name"] = "Pregame rotation — review minutes and unresolved IN/OUT assumptions"
+    package["scenarios"][0]["name"] = ("Expected rotation — injury feed bypassed" if expected else
+        "Pregame rotation — review minutes and unresolved IN/OUT assumptions")
     package["live_provenance"] = {"game": deepcopy(game), "rosters": deepcopy(inputs["rosters"]),
         "recent": deepcopy(inputs["recent"]), "identity": identity, "minute_audit": audit,
         "rating_bundle_sha256": digest(bundle), "prepared_at": cutoff.isoformat(), "conflicts": conflicts,

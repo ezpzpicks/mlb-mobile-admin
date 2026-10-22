@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from builders.nba_automation import NOTE, POLICY, VERSIONS, automated_package, phase_for_game
+from builders.nba_automation import EXPECTED_VERSIONS, VERSIONS, automated_package, phase_for_game
 from builders.nba_injuries import fetch_espn_injuries
 from builders.nba_live import checked_box_minutes, fetch_game, fetch_matchup_inputs, fetch_slate, prepare_live_package
 from builders.nba_model import InputError, timestamp
@@ -46,6 +46,10 @@ def seeds():
 
 def run(args):
     now = clock()
+    availability_mode = os.getenv("NBA_AVAILABILITY_MODE", "injury_feed").strip().lower()
+    if availability_mode not in {"injury_feed", "expected_rotation"}:
+        raise InputError("NBA_AVAILABILITY_MODE must be injury_feed or expected_rotation.")
+    versions = EXPECTED_VERSIONS if availability_mode == "expected_rotation" else VERSIONS
     local = now.astimezone(ET)
     if not args.ignore_window and not 9 <= local.hour <= 23:
         emit("outside_build_window", local_time=local.isoformat())
@@ -78,14 +82,14 @@ def run(args):
         slate = fetch_slate(str(local.date()))
         for excluded in slate["excluded"]:
             emit("skipped", **excluded)
-        keys = store.prediction_keys([g["game_id"] for g in slate["games"]], list(VERSIONS.values()))
+        keys = store.prediction_keys([g["game_id"] for g in slate["games"]], list(versions.values()))
         market_rows = read_market_rows(str(local.date()))
         pending = []
         for game in sorted(slate["games"], key=lambda g: g["tipoff"]):
             phase = phase_for_game(game, now)
             if phase is None:
                 emit("skipped", game_id=game["game_id"], reason="not a scheduled pregame with at least 3 minutes remaining")
-            elif (game["game_id"], VERSIONS[phase]) in keys:
+            elif (game["game_id"], versions[phase]) in keys:
                 emit("already_saved", game_id=game["game_id"], phase=phase)
             else:
                 try:
@@ -93,7 +97,7 @@ def run(args):
                     pending.append((game, phase))
                 except InputError as exc:
                     emit("waiting_for_market", game_id=game["game_id"], reason=str(exc))
-        emit("plan", date=str(local.date()), pending=len(pending),
+        emit("plan", date=str(local.date()), pending=len(pending), availability_mode=availability_mode,
              mode="commit" if args.commit else "evaluate" if args.evaluate else "plan",
              games=[{"game_id": g["game_id"], "game": f"{g['away']['name']} @ {g['home']['name']}",
                      "tipoff": g["tipoff"], "phase": phase} for g, phase in pending])
@@ -102,18 +106,22 @@ def run(args):
         if pending:
             bundle = json.loads((ROOT / "research/nba_results_2025_26/nba_ratings.json").read_text())
             validate_bundle(bundle)
-            try:
-                injury = fetch_espn_injuries(on_event=emit)  # One validated league response, shared across games.
-            except InputError as exc:
-                injury = None
-                failures += 1
-                emit("injuries_unavailable", error=str(exc),
-                     blocked_games=[game["game_id"] for game, _ in pending[:args.limit]])
+            injury = None
+            if availability_mode == "expected_rotation":
+                emit("injury_feed_bypassed", availability_mode=availability_mode,
+                     note="Temporary expected rotation; availability unchecked and starters unconfirmed.")
+            else:
+                try:
+                    injury = fetch_espn_injuries(on_event=emit)
+                except InputError as exc:
+                    failures += 1
+                    emit("injuries_unavailable", error=str(exc),
+                         blocked_games=[game["game_id"] for game, _ in pending[:args.limit]])
             team_cache, box_cache = {}, {}
-            for game, planned_phase in (pending[:args.limit] if injury is not None else []):
+            for game, planned_phase in (pending[:args.limit] if injury is not None or availability_mode == "expected_rotation" else []):
                 try:
                     inputs = fetch_matchup_inputs(game, team_cache=team_cache, box_cache=box_cache)
-                    package = prepare_live_package(bundle, inputs, injury, as_of=clock())
+                    package = prepare_live_package(bundle, inputs, injury, as_of=clock(), availability_mode=availability_mode)
                     package = apply_market(package, market_rows, game, clock())
                     current, _ = fetch_game(game["game_id"])
                     phase = phase_for_game(current, clock())
@@ -123,11 +131,12 @@ def run(args):
                     package = automated_package(package, phase)
                     record = lock_prediction(package, package["automation"]["primary_scenario"], current,
                         locked_at=clock(), roster_reviewed=False, minutes_reviewed=False,
-                        review_note=NOTE, automation_policy=POLICY)
+                        review_note=package["automation"]["assumptions"], automation_policy=package["automation"]["policy"])
                     inserted = False
                     if args.commit:
                         record, inserted = store.save_prediction(record)
                     emit("built", game_id=game["game_id"], phase=phase, saved=inserted,
+                        availability_mode=availability_mode, injury_verified=availability_mode == "injury_feed",
                         model_version=record["model_version"], locked_at=record["locked_at"],
                         projected_away=record["selected"]["away_score"], projected_home=record["selected"]["home_score"],
                         fair_home_spread=record["selected"]["fair_home_spread"], total=record["selected"]["total"],
