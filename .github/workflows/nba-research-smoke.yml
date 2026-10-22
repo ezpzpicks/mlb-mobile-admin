@@ -5,6 +5,9 @@ on:
     paths:
       - 'builders/nba_*.py'
       - 'shared/nba_tracking_storage.py'
+      - 'shared/market_grading.py'
+      - 'shared/modeling.py'
+      - 'research/nba_market_fixtures.py'
       - 'scripts/run_nba_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'scripts/run_ncaaf_builder.py'
@@ -17,6 +20,9 @@ on:
     paths:
       - 'builders/nba_*.py'
       - 'shared/nba_tracking_storage.py'
+      - 'shared/market_grading.py'
+      - 'shared/modeling.py'
+      - 'research/nba_market_fixtures.py'
       - 'scripts/run_nba_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'scripts/run_ncaaf_builder.py'

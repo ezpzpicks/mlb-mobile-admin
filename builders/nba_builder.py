@@ -206,6 +206,8 @@ def _show_projection(package: dict, result: dict):
         "Home score": round(p["home_score"], 1), "Fair home spread": round(p["fair_home_spread"], 1),
         "Total": round(p["total"], 1), "Spread edge (home)": None if p["home_spread_edge"] is None else round(p["home_spread_edge"], 1),
         "Total edge (over)": None if p["total_edge"] is None else round(p["total_edge"], 1),
+        "Spread pick": p["spread_pick"], "Spread grade": p["spread_grade"],
+        "Total pick": p["total_pick"], "Total grade": p["total_grade"],
         "Lineup margin change": round(p["lineup_margin_change"], 1),
         "Lineup status": "Ready for review" if p["lineup_ready"] else "Conditional",
     } for p in result["scenarios"]]), hide_index=True, use_container_width=True)
@@ -248,7 +250,7 @@ def _show_projection(package: dict, result: dict):
 def render():
     st.subheader("NBA lineup model")
     st.caption("Spreads and totals from team efficiency and the expected full-game rotation.")
-    st.info("Research model: probabilities and A/B grades will follow historical calibration. Every projection is excluded from automatic posting.")
+    st.info("Research model: market comparisons use the shared A/B/Lean/Pass grading rules and an NBA validation-error approximation. These estimates are not calibrated betting probabilities. Every projection is excluded from automatic posting.")
     with st.expander("Inputs and sources"):
         st.write("Load the checked historical ratings to choose two teams, or import a ratings bundle or complete matchup JSON. Historical rotation seeds require current roster and injury review. The fictional example download defines the matchup fields.")
         st.write("Player impacts are points per 100 possessions: positive offense creates points; positive defense prevents points. Baseline minutes must describe the same sample as the team ratings. Use regularized estimates with a documented source.")

@@ -16,6 +16,8 @@ from scripts import run_nba_builder as runner
 from scripts import run_scheduled_builders as dispatch
 from shared import nba_tracking_storage as store
 from test_nba_live import NOW, fixture, live_package
+from nba_market_fixtures import market_rows
+from builders.nba_market import apply_market
 
 
 def automatic_record(now=NOW, *, phase="early"):
@@ -24,6 +26,7 @@ def automatic_record(now=NOW, *, phase="early"):
         game["tipoff"] = (now + timedelta(minutes=30)).isoformat()
         package["context"]["tipoff"] = game["tipoff"]
         package["live_provenance"]["game"]["tipoff"] = game["tipoff"]
+    package = apply_market(package, market_rows(game, now), game, now)
     package = automated_package(package, phase)
     return lock_prediction(package, package["scenarios"][0]["name"], game, locked_at=now,
         roster_reviewed=False, minutes_reviewed=False, review_note=NOTE, automation_policy=POLICY)
@@ -39,7 +42,7 @@ class AutomaticPolicyTests(unittest.TestCase):
         self.assertEqual(automatic["model_version"], VERSIONS["early"])
         self.assertFalse(automatic["eligible_for_posting"])
         self.assertFalse(automatic["selected"]["lineup_ready"])
-        self.assertIsNone(automatic["selected"]["market"])
+        self.assertEqual(automatic["selected"]["market"]["source"], "ScoresAndOdds")
         other = automatic_record(phase="pregame")
         self.assertNotEqual(automatic["record_id"], other["record_id"])
         self.assertEqual(len(tracking_report([automatic, other], [])["summary"]), 2)
@@ -50,6 +53,7 @@ class AutomaticPolicyTests(unittest.TestCase):
             with self.assertRaises(InputError):
                 lock_prediction(package, package["scenarios"][0]["name"], game, locked_at=NOW,
                     roster_reviewed=False, minutes_reviewed=False, review_note=NOTE, automation_policy=policy)
+        package = apply_market(package, market_rows(game, NOW), game, NOW)
         package = automated_package(package, "early")
         with self.assertRaisesRegex(InputError, "human"):
             lock_prediction(package, package["scenarios"][0]["name"], game, locked_at=NOW,
@@ -96,6 +100,7 @@ class AutomaticPolicyTests(unittest.TestCase):
     def test_automatic_tracking_cannot_select_a_sensitivity_alternative(self):
         package, game = live_package()
         package["scenarios"][0]["away"]["players"][0]["status"] = "QUESTIONABLE"
+        package = apply_market(package, market_rows(game, NOW), game, NOW)
         package = automated_package(package, "early")
         self.assertGreater(len(package["scenarios"]), 1)
         with self.assertRaisesRegex(InputError, "primary scenario"):
@@ -127,7 +132,7 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.stack.close()
         self.conn.close()
 
-    def run_at(self, now, *, final=False, bad_roster=False):
+    def run_at(self, now, *, final=False, bad_roster=False, missing_market=False):
         bundle, inputs, injury = fixture(now)
         game = inputs["game"]
         game["tipoff"] = self.tipoff.isoformat()
@@ -141,6 +146,7 @@ class ScheduledPersistenceTests(unittest.TestCase):
                 side_effect=InputError("synthetic roster failure") if bad_roster else None))
             injuries_call = stack.enter_context(patch.object(runner, "fetch_espn_injuries", return_value=injury))
             game_call = stack.enter_context(patch.object(runner, "fetch_game", return_value=(game, {})))
+            stack.enter_context(patch.object(runner, "read_market_rows", return_value=[] if missing_market else market_rows(game, now)))
             stack.enter_context(patch.object(runner, "checked_box_minutes", return_value={}))
             # Use the small synthetic rating bundle instead of production files.
             from pathlib import Path
@@ -216,6 +222,11 @@ class ScheduledPersistenceTests(unittest.TestCase):
         store.pending_game_ids((self.now - timedelta(days=7)).isoformat())
         plans = self.conn.execute("EXPLAIN QUERY PLAN SELECT game_id FROM nba_research_predictions WHERE locked_at>='2026-01-01'").fetchall()
         self.assertTrue(any("nba_research_predictions_by_time" in str(tuple(p)) for p in plans))
+
+    def test_missing_market_waits_without_loading_rosters_or_saving_a_forecast(self):
+        self.assertEqual(self.run_at(self.now, missing_market=True)[:3], (0, 0, 0))
+        self.assertEqual(store.load_ledger()[0], [])
+        self.assertTrue(any(event == "waiting_for_market" for event, _ in self.events))
 
 
 class SchedulerIsolationTests(unittest.TestCase):

@@ -95,7 +95,7 @@ evidence has an explicit prior-only value and zero fitted sample, which is flagg
   editable operational policy, not a fitted accuracy threshold.
 
 Even a lineup marked ready for review remains research-only: this version has
-no fitted win/cover probabilities, A/B grades or posting eligibility.
+no calibrated win/cover probabilities or posting eligibility. The v0.5 market comparison supplies research A/B/Lean/Pass grades using the shared thresholds and a normal approximation from frozen pre-test validation errors; see NBA_AUTOMATION.md.
 
 ## Fictional example
 
@@ -212,8 +212,7 @@ download or database operation runs on an ordinary form edit.
    current ESPN news with official report completeness and separate starting-lineup
    evidence. NBA.com's daily lineup page labels lineups projected; that alone is
    not confirmation. An unsubmitted or empty report does not establish availability.
-4. Bring in current ScoresAndOdds spreads and totals with default -110 pricing,
-   recording the line timestamp. Historical evaluation requires lines available
+4. Current ScoresAndOdds spreads and totals are now connected with default -110 pricing and their observation timestamps. Continue collecting prospective market lines. Historical evaluation requires lines available
    at the prediction cutoff, not a later line chosen after injury news.
 5. Test rest, back-to-backs, travel, recent form, projected shot distribution and
    lineup interaction effects as additional features. This foundation does not
@@ -223,7 +222,7 @@ download or database operation runs on an ordinary form edit.
    final box-score minutes are outcomes, not usable pregame forecasts.
 7. Evaluate margin/total error, calibration, ATS/total results, pushes and -110
    profit with sample sizes. Separate games with settled lineups from games with
-   unresolved high-impact news. Choose grades only after held-out evaluation.
+   unresolved high-impact news. Treat the initial shared-rule grades as experimental until held-out market evaluation supports them.
 
 ## Cost and integration
 

@@ -2,13 +2,21 @@
 
 NBA shares the existing `ezpz-ncaaf-auto-builder` Render cron and its Turso connection. The service still runs `python -u scripts/run_ncaaf_builder.py --commit`. With `NBA_AUTO_BUILDER_ENABLED=1`, that compatibility entry point invokes `run_scheduled_builders.py`: NBA runs first in its own bounded process, followed by NCAAF in another process. Failures and timeouts are logged independently; neither skips the other. Child processes cannot recursively invoke the dispatcher. The NBA timeout is eight minutes and NCAAF timeout is fifteen minutes.
 
+## Market-first build gate and grades
+
+Every new automatic forecast requires four consistent NBA ScoresAndOdds sides (both spreads and over/under), matched to the exact ESPN game ID, teams and scheduled start. Read only the current date from the NBA `weekly_market_trends` dataset. Missing, partial, stale or mismatched lines produce `waiting_for_market` and no roster fetch or forecast save. Capture the original four rows with the prediction. Live quotes must be at most 35 minutes old outside the countdown and 10 minutes old inside 90 minutes; a frozen final quote must have been captured 10–20 minutes before tipoff. Spread/total prices are explicitly assumed -110.
+
+The collector reuses the existing TypeScript ScoresAndOdds parser and cadence policy: 30-minute collections until 90 minutes before tipoff, then five minutes, with a final snapshot in the 10–20 minute window. It retains opening lines, percentage changes, movement history and final snapshots, and keeps completed games visible for their Eastern date. Public reads use saved date-indexed data and never scrape or run the model.
+
+New core version `nba-v0.5-market-grades-2026-10-22` and automatic policy `nba-auto-market-v2` keep market-required forecasts separate from older line-free research records, which remain unchanged. Grading calls the same pure `market_grade` helper used by the college basketball builder. NBA uncertainty uses a normal approximation with the selected model’s January–February validation margin RMSE 15.366295320255823 and total RMSE 19.366926088529077 (399 games, from `nba_validation.json`). These are pre-holdout values, not coefficients tuned to the March–April test or a claim of calibrated betting probabilities. Grades remain research-only.
+
 ## Schedule and fixed tracking policy
 
 The existing UTC schedule `7,37 * * * *` is unchanged. Each script enforces **9 AM–midnight America/New_York**, including daylight-saving changes. Only the current Eastern date's regular-season NBA slate is built.
 
 - **Early:** the first eligible scheduled run more than 45 minutes before tipoff saves one automatic forecast.
 - **Pregame:** the first eligible scheduled run within 45 minutes, with at least three minutes remaining, saves a separate refresh. A normal 30-minute tick gives this a roughly 15–45 minute lead. A late or failed run can miss the window; failures remain visible in logs and can be reviewed manually.
-- The two phases use distinct `nba-auto-rotation-v1` tracking versions. Each is insert-once per experiment/game/version. Manual forecasts keep their existing version. Early, pregame and manual records are compared separately; they are not pooled into a doubled game count.
+- The two phases use distinct `nba-auto-market-v2` tracking versions. Each is insert-once per experiment/game/version. Manual forecasts keep their existing version. Early, pregame and manual records are compared separately; they are not pooled into a doubled game count.
 - No retroactive prediction, confirmed starter, human acknowledgement, sportsbook line or calibrated probability is invented. Public posting stays disabled.
 
 The automatic primary excludes OUT and DOUBTFUL players. Other unresolved roster players with minute evidence are explicitly assumed IN. Unlisted players remain UNKNOWN. Minutes use up to ten checked current-season games, falling back to dated historical player minute seeds. Vacated minutes are allocated proportionally among evidenced roles with individual caps and a 240-minute team total. Players without minute evidence receive zero suggested minutes. Identity conflicts, insufficient rotation capacity, stale sources and changed start times block saving and produce `game_failed` logs; they do not silently produce a healthy or complete roster.

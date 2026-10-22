@@ -12,7 +12,7 @@ from datetime import timedelta
 from builders.nba_live import allocate_minutes, digest
 from builders.nba_model import InputError, MODEL_VERSION, timestamp
 
-POLICY = "nba-auto-rotation-v1"
+POLICY = "nba-auto-market-v2"
 PHASES = ("early", "pregame")
 VERSIONS = {phase: f"{MODEL_VERSION}+{POLICY}-{phase}" for phase in PHASES}
 FINAL_WINDOW = timedelta(minutes=45)
@@ -96,4 +96,9 @@ def validate_automated_package(package, game, now, policy):
     expected = automated_package(package, phase)
     if automatic != expected["automation"] or package["scenarios"] != expected["scenarios"]:
         raise InputError("Automatic NBA rotations were changed after applying the fixed policy.")
+    from builders.nba_market import market_for_game
+    provenance = package.get("market_provenance") or {}
+    expected_market, _ = market_for_game(provenance.get("rows", []), game, now)
+    if package.get("market") != expected_market:
+        raise InputError("Automatic NBA tracking requires the original complete ScoresAndOdds market snapshot.")
     return VERSIONS[phase]
