@@ -132,7 +132,7 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.stack.close()
         self.conn.close()
 
-    def run_at(self, now, *, final=False, bad_roster=False, missing_market=False):
+    def run_at(self, now, *, final=False, bad_roster=False, missing_market=False, bad_injuries=False):
         bundle, inputs, injury = fixture(now)
         game = inputs["game"]
         game["tipoff"] = self.tipoff.isoformat()
@@ -144,7 +144,8 @@ class ScheduledPersistenceTests(unittest.TestCase):
             stack.enter_context(patch.object(runner, "fetch_slate", return_value={"games":[game], "excluded":[]}))
             inputs_call = stack.enter_context(patch.object(runner, "fetch_matchup_inputs", return_value=inputs,
                 side_effect=InputError("synthetic roster failure") if bad_roster else None))
-            injuries_call = stack.enter_context(patch.object(runner, "fetch_espn_injuries", return_value=injury))
+            injuries_call = stack.enter_context(patch.object(runner, "fetch_espn_injuries", return_value=injury,
+                side_effect=InputError("ESPN injuries could not be refreshed after 3 attempts: HTTP 403") if bad_injuries else None))
             game_call = stack.enter_context(patch.object(runner, "fetch_game", return_value=(game, {})))
             stack.enter_context(patch.object(runner, "read_market_rows", return_value=[] if missing_market else market_rows(game, now)))
             stack.enter_context(patch.object(runner, "checked_box_minutes", return_value={}))
@@ -227,6 +228,19 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.assertEqual(self.run_at(self.now, missing_market=True)[:3], (0, 0, 0))
         self.assertEqual(store.load_ledger()[0], [])
         self.assertTrue(any(event == "waiting_for_market" for event, _ in self.events))
+
+    def test_unavailable_injuries_block_new_forecasts_but_do_not_skip_result_checks(self):
+        self.run_at(self.now)
+        self.events.clear()
+        # The early lock exists; a failed injury refresh blocks only the new
+        # pregame forecast. The already tracked game's score is still checked.
+        result = self.run_at(self.now + timedelta(minutes=90), bad_injuries=True)
+        self.assertEqual(result, (1, 0, 1, 1))
+        self.assertEqual(len(store.load_ledger()[0]), 1)
+        failure = next(details for event, details in self.events if event == "injuries_unavailable")
+        self.assertEqual(failure["blocked_games"], ["123456"])
+        self.assertIn("403", failure["error"])
+        self.assertTrue(any(event == "result_pending" for event, _ in self.events))
 
 
 class SchedulerIsolationTests(unittest.TestCase):

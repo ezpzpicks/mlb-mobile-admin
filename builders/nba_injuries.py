@@ -8,10 +8,14 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import deepcopy
 from datetime import date, datetime, timezone
+from email.utils import parsedate_to_datetime
 import hashlib
+from http.client import responses as http_reasons
 import json
 import re
+import time
 import unicodedata
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -21,6 +25,53 @@ ESPN_PAGE = "https://www.espn.com/nba/injuries"
 ESPN_FEED = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries?limit=1000"
 INJURY_SCHEMA = "nba-espn-injuries-v1"
 MAX_RESPONSE_BYTES = 4_000_000
+FETCH_ATTEMPTS = 3
+RETRY_DELAYS = (2, 5)
+MAX_RETRY_AFTER = 15
+RETRY_HTTP = {403, 408, 429, 500, 502, 503, 504}
+
+
+def _http_diagnostic(error):
+    """Keep useful rejection evidence without logging bodies, cookies or tokens."""
+    headers = error.headers or {}
+    safe_headers = {}
+    for name in ("Content-Type", "Server", "Retry-After", "X-Cache", "X-Amz-Cf-Id", "CF-Ray", "X-Request-Id"):
+        value = headers.get(name)
+        if value is not None:
+            safe_headers[name.lower()] = re.sub(r"[\x00-\x1f\x7f]", " ", str(value))[:200]
+    try:
+        prefix = error.read(4096)
+    except OSError:
+        prefix = b""
+    finally:
+        error.close()
+    body = prefix.decode("utf-8", errors="replace").lower()
+    hints = [name for name, markers in (
+        ("access_denied", ("access denied", "accessdenied", "permission to access")),
+        ("rate_limit", ("too many requests", "rate limit")),
+        ("security_challenge", ("captcha", "verify you are human", "automated requests", "bot detection")),
+        ("upstream_error", ("bad gateway", "service unavailable", "gateway timeout")),
+    ) if any(marker in body for marker in markers)]
+    return {"http_status": error.code, "response_headers": safe_headers,
+            "response_hints": hints, "response_prefix_sha256": hashlib.sha256(prefix).hexdigest() if prefix else None}
+
+
+def _retry_delay(attempt, headers):
+    """Honor short server cooldowns; defer long ones to a later scheduled run."""
+    value = headers.get("retry-after")
+    delay = RETRY_DELAYS[attempt - 1]
+    if value:
+        try:
+            seconds = float(value)
+        except ValueError:
+            try:
+                seconds = (parsedate_to_datetime(value) - datetime.now(timezone.utc)).total_seconds()
+            except (TypeError, ValueError, OverflowError):
+                seconds = 0
+        if seconds > MAX_RETRY_AFTER:
+            return None
+        delay = max(delay, seconds)
+    return delay
 
 
 def _text(value, label):
@@ -149,21 +200,55 @@ def normalize_espn_feed(payload: dict, *, fetched_at, source_sha256=None) -> dic
         raise InputError(f"ESPN injury response changed or is incomplete: {exc}") from None
 
 
-def fetch_espn_injuries() -> dict:
-    """One bounded, timed league request; no database or background refresh."""
-    request = Request(ESPN_FEED, headers={"Accept": "application/json",
-        "User-Agent": "EZPZ-Picks-NBA-Research/0.3 (+https://ezpzpicks.com)"})
-    try:
-        with urlopen(request, timeout=15) as response:
-            raw = response.read(MAX_RESPONSE_BYTES + 1)
-        if len(raw) > MAX_RESPONSE_BYTES:
-            raise InputError("ESPN injury response exceeded the size limit.")
-        return normalize_espn_feed(json.loads(raw), fetched_at=datetime.now(timezone.utc),
-            source_sha256=hashlib.sha256(raw).hexdigest())
-    except InputError:
-        raise
-    except (OSError, ValueError) as exc:
-        raise InputError(f"ESPN injuries could not be refreshed: {exc}") from None
+def fetch_espn_injuries(*, on_event=None) -> dict:
+    """Fetch one fresh league snapshot, with at most three timed attempts.
+
+    Retry transient HTTP/transport failures, preserving the same URL and client
+    identity. Never reuse a stale report or treat an unsuccessful feed as empty.
+    The scheduler supplies an event callback for safe HTTP rejection evidence.
+    """
+    def emit(event, **details):
+        if on_event is not None:
+            on_event(event, source="ESPN injuries", url=ESPN_FEED, **details)
+
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        request = Request(ESPN_FEED, headers={"Accept": "application/json",
+            "User-Agent": "EZPZ-Picks-NBA-Research/0.3 (+https://ezpzpicks.com)"})
+        diagnostic = {}
+        try:
+            with urlopen(request, timeout=15) as response:
+                raw = response.read(MAX_RESPONSE_BYTES + 1)
+            if len(raw) > MAX_RESPONSE_BYTES:
+                raise InputError("ESPN injury response exceeded the size limit.")
+            report = normalize_espn_feed(json.loads(raw), fetched_at=datetime.now(timezone.utc),
+                source_sha256=hashlib.sha256(raw).hexdigest())
+        except HTTPError as exc:
+            diagnostic = _http_diagnostic(exc)
+            kind = "http_rejection"
+            reason = f"HTTP {exc.code} {http_reasons.get(exc.code, 'error')}"
+            retryable = exc.code in RETRY_HTTP and "security_challenge" not in diagnostic["response_hints"]
+        except OSError as exc:
+            kind, reason, retryable = "transport_error", type(exc).__name__, True
+            diagnostic = {"exception_type": type(exc).__name__,
+                          "reason_type": type(getattr(exc, "reason", exc)).__name__}
+        except (InputError, ValueError) as exc:
+            emit("injury_response_rejected", attempt=attempt, failure_kind="validation_error",
+                 error=str(exc)[:500])
+            if isinstance(exc, InputError):
+                raise
+            raise InputError("ESPN injuries could not be refreshed: invalid JSON response.") from None
+        else:
+            emit("injury_fetch_succeeded", attempt=attempt, recovered=attempt > 1,
+                 feed_as_of=report["feed_as_of"], injury_count=report["injury_count"],
+                 estimated_return_count=report["estimated_return_count"])
+            return report
+        delay = _retry_delay(attempt, diagnostic.get("response_headers", {})) if retryable and attempt < FETCH_ATTEMPTS else None
+        emit("injury_request_failed", attempt=attempt, max_attempts=FETCH_ATTEMPTS,
+             failure_kind=kind, error=reason, retrying=delay is not None,
+             retry_in_seconds=delay, **diagnostic)
+        if delay is None:
+            raise InputError(f"ESPN injuries could not be refreshed after {attempt} attempt(s): {reason}.") from None
+        time.sleep(delay)
 
 
 def _info(report, row):
