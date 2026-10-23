@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reuse the existing Render cron for isolated NBA and NCAAF build processes."""
+"""Reuse the existing Render cron for isolated NBA, NFL and NCAAF builders."""
 from __future__ import annotations
 
 import json
@@ -17,7 +17,11 @@ def main():
     failures = 0
     # The quick NBA job goes first so a cold NCAAF data build cannot delay a
     # near-tipoff NBA refresh. A failure in either process does not skip the other.
-    jobs = [("NBA", "run_nba_builder.py", 480), ("NCAAF", "run_ncaaf_builder.py", 900)]
+    jobs = [("NBA", "run_nba_builder.py", 480)]
+    if (os.getenv("NFL_AUTO_BUILDER_ENABLED", "").lower() in {"1", "true", "yes"}
+            or os.getenv("NFL_AUTO_DIAGNOSTIC_UNTIL", "").strip()):
+        jobs.append(("NFL", "run_nfl_builder.py", 900))
+    jobs.append(("NCAAF", "run_ncaaf_builder.py", 900))
     for sport, script, timeout in jobs:
         try:
             result = subprocess.run([sys.executable, "-u", str(ROOT / "scripts" / script), "--commit"],

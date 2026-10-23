@@ -1,0 +1,46 @@
+name: NFL automation checks
+on:
+  pull_request:
+    paths:
+      - 'builders/nfl_*.py'
+      - 'shared/nfl_auto_storage.py'
+      - 'scripts/run_nfl_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'scripts/run_ncaaf_builder.py'
+      - 'app_mobile_admin.py'
+      - 'research/test_nfl_*.py'
+      - '.github/workflows/nfl-automation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'builders/nfl_*.py'
+      - 'shared/nfl_auto_storage.py'
+      - 'scripts/run_nfl_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'research/test_nfl_*.py'
+      - '.github/workflows/nfl-automation.yml'
+permissions:
+  contents: read
+jobs:
+  nfl-automation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest research/test_nfl_*.py research/test_ncaaf_auto_builder.py -q
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          POLARS_MAX_THREADS: '1'
+      - name: Existing production model regressions
+        run: |
+          for test in test_nfl_regression_layer test_nfl_skill_prop_regression test_nfl_slot_matchups test_nfl_wr_tier_protection test_nfl_progressive_prop_weighting test_nfl_te1_market_surface test_nfl_matchup_amplification test_nfl_prop_directional_scoring; do
+            python -m research.$test || exit 1
+          done
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          POLARS_MAX_THREADS: '1'
