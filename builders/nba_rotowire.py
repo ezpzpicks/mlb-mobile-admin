@@ -24,6 +24,7 @@ SCHEMA = "nba-rotowire-lineups-html-v1"
 ET = ZoneInfo("America/New_York")
 MAX_BYTES = 2_000_000
 MAX_AGE = timedelta(minutes=60)
+NAME_SUFFIX = re.compile(r"\s+(jr|sr|ii|iii|iv|v)\.?$", re.I)
 TEAMS = dict(zip(
     "ATL BOS BKN CHA CHI CLE DAL DEN DET GSW HOU IND LAC LAL MEM MIA MIL MIN NOP NYK OKC ORL PHI PHX POR SAC SAS TOR UTA WAS".split(),
     ["Atlanta Hawks", "Boston Celtics", "Brooklyn Nets", "Charlotte Hornets", "Chicago Bulls", "Cleveland Cavaliers",
@@ -42,6 +43,13 @@ def _one(node, selector):
     if len(values) != 1:
         raise InputError(f"RotoWire HTML needs exactly one {selector}.")
     return values[0]
+
+
+def _roster_name(value):
+    """Allow an omitted generational suffix, keeping full names and ambiguity."""
+    text = str(value).strip()
+    suffix = NAME_SUFFIX.search(text)
+    return name_key(text[:suffix.start()] if suffix else text), suffix[1].lower() if suffix else ""
 
 
 def parse_rotowire_html(html: str, *, fetched_at, source_url=URL) -> dict:
@@ -184,12 +192,23 @@ def apply_rotowire_report(package, report, *, as_of):
     for side in ("away", "home"):
         roster = output["live_provenance"]["rosters"][side]["players"]
         identities = output["live_provenance"]["identity"][side]
-        names = {}
+        names, suffix_names = {}, {}
         for entry in roster:
-            names.setdefault(name_key(entry["name"]), []).append(identities[entry["espn_athlete_id"]])
+            pid = identities[entry["espn_athlete_id"]]
+            names.setdefault(name_key(entry["name"]), []).append(pid)
+            root, suffix = _roster_name(entry["name"])
+            suffix_names.setdefault(root, []).append((pid, suffix, entry["name"]))
         source, mapped, ignored = lineup[side], {}, []
         for row in source["players"]:
             ids = names.get(name_key(row["name"]), [])
+            if not ids:
+                root, suffix = _roster_name(row["name"])
+                variants = [(pid, full_name) for pid, roster_suffix, full_name in suffix_names.get(root, [])
+                            if not suffix or not roster_suffix]
+                ids = [pid for pid, _ in variants]
+                if len(ids) == 1:
+                    row = {**row, "roster_match": "Full name with an omitted generational suffix",
+                           "roster_name": variants[0][1]}
             if not ids and row["status"] == "OUT" and row["player_id"] not in source["starters"]:
                 ignored.append({**row, "reason": "Not on the checked current roster; already receives zero model minutes"})
                 continue

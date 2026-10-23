@@ -181,6 +181,39 @@ class RotowireRotationTests(unittest.TestCase):
                 lock_prediction(p, p['automation']['primary_scenario'], game, locked_at=NOW, roster_reviewed=False, minutes_reviewed=False,
                     review_note='Source contract test', automation_policy='nba-auto-market-v2' if change == 'policy' else ROTOWIRE_POLICY)
 
+    def test_omitted_generational_suffixes_match_only_one_checked_full_name(self):
+        cases = [('Jaime Jaquez Jr.', 'Jaime Jaquez'), ('Wendell Carter Jr.', 'Wendell Carter'),
+                 ('Jabari Smith Jr.', 'Jabari Smith'), ('Trey Murphy III', 'Trey Murphy'),
+                 ('Derrick Jones Jr.', 'Derrick Jones'), ('Darius Acuff Jr.', 'Darius Acuff'),
+                 ('Gary Payton', 'Gary Payton II')]
+        for roster_name, source_name in cases:
+            with self.subTest(player=source_name):
+                bundle, inputs, _ = inputs_fixture()
+                player = bundle['teams'][0]['players'][0]
+                player['name'] = inputs['rosters']['away']['players'][0]['name'] = roster_name
+                next(p for p in bundle['player_impacts'] if p['player_id'] == player['player_id'])['name'] = roster_name
+                report = report_fixture(inputs)
+                report['games'][0]['away']['players'][0]['name'] = source_name
+                package = prepare_rotowire_package(bundle, inputs, report, as_of=NOW)
+                audit = package['availability_provenance']['audit']['away']
+                self.assertIn(player['player_id'], audit['starter_ids'])
+                matched = next(p for p in audit['players'] if p['model_player_id'] == player['player_id'])
+                self.assertEqual(matched['roster_name'], roster_name)
+                self.assertEqual(matched['name'], source_name)
+
+    def test_ambiguous_or_conflicting_generational_suffixes_still_block_the_build(self):
+        for ambiguous in (True, False):
+            with self.subTest(ambiguous=ambiguous):
+                bundle, inputs, _ = inputs_fixture()
+                for index, name in enumerate(('Gary Payton Jr.', 'Gary Payton Sr.') if ambiguous else ('Gary Payton Jr.',)):
+                    player = bundle['teams'][0]['players'][index]
+                    player['name'] = inputs['rosters']['away']['players'][index]['name'] = name
+                    next(p for p in bundle['player_impacts'] if p['player_id'] == player['player_id'])['name'] = name
+                report = report_fixture(inputs)
+                report['games'][0]['away']['players'][0]['name'] = 'Gary Payton' if ambiguous else 'Gary Payton Sr.'
+                with self.assertRaisesRegex(InputError, 'does not uniquely match'):
+                    prepare_rotowire_package(bundle, inputs, report, as_of=NOW)
+
     def test_off_roster_out_entries_are_audited_without_inventing_or_removing_a_current_player(self):
         bundle, inputs, _ = inputs_fixture()
         report = report_fixture(inputs)

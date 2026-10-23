@@ -10,6 +10,9 @@ The parser checks the visible slate date, ET tipoff, home/away team codes,
 expected/confirmed lineup status, five full player names and RotoWire's own
 namespaced IDs. An abbreviated display name is never used for fuzzy matching.
 Starters and non-OUT entries must uniquely match the checked current roster.
+An omitted Jr./Sr./II/III/IV/V suffix may match one full roster name; multiple
+candidates or conflicting explicit suffixes still block. Variant matches retain
+both source and roster names in the audit.
 Off-roster nonstarter OUT entries are retained in an explicit ignored audit;
 they already receive zero minutes because roster membership takes precedence.
 Ambiguous identities always block. The response hash,
