@@ -170,7 +170,9 @@ def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     b, result = sample_result()
     assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
     assert not db.rows("prop_tracker") and not db.rows("prop_projections")
-    assert db.rows("daily_slate")[0]["Spread Grade"] == "Pending pregame"
+    preview = db.rows("daily_slate")[0]
+    assert preview["Spread Grade"] == "No Play (pending pregame)"
+    assert preview["Total Grade"] == "No Play (pending pregame)"
     assert not save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
     assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
     assert len(db.rows("daily_slate")) == 1 and db.rows("daily_slate")[0]["Spread Grade"] == "A Spread"

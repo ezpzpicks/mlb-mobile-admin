@@ -7,7 +7,9 @@ stored kickoff, including international games and daylight-saving changes.
 
 - **Morning:** first scheduled run at/after 8 AM ET (normally 8:07). Archive all
   player projections and show an ungraded game preview on Full Slate. Early
-  props are not published as official picks or added to betting records.
+  game grades explicitly say `No Play (pending pregame)` so the public board
+  cannot select previews. Early props are not published as official picks or
+  added to betting records.
 - **Pregame:** first run with 10–75 minutes remaining, normally 45–75 minutes
   before kickoff. The lower bound permits a retry if an input was unavailable.
   Both teams' published game-day inactive lists are required. Save the official

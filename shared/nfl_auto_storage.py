@@ -179,7 +179,9 @@ def save_run(db, builder, result, game, phase, now):
     if phase != "late":
         slate = dict(result["slate"])
         if phase == "early":
-            slate.update({"Spread Grade": "Pending pregame", "Total Grade": "Pending pregame"})
+            # Public football selectors explicitly exclude "No Play". An
+            # arbitrary nonempty status such as "Pending pregame" qualifies.
+            slate.update({"Spread Grade": "No Play (pending pregame)", "Total Grade": "No Play (pending pregame)"})
         specs = [(builder.SLATE_TAB, [slate], builder.SLATE_COLUMNS)]
         if phase == "pregame":
             specs += [(builder.PROP_SLATE_TAB, result["props"], builder.PROP_PROJECTION_COLUMNS),
