@@ -253,6 +253,15 @@ def test_schedule_shell_is_upgraded_without_duplicate_full_slate_game(database):
     assert conn.execute("SELECT row_count FROM dataset_manifest WHERE dataset='daily_slate'").fetchone()[0] == 1
 
 
+def test_public_schedule_sync_cannot_turn_our_preview_into_a_manual_lock(database):
+    db, conn = database
+    b, result = sample_result()
+    result["slate"]["Model Version"] = "model|" + POLICY
+    assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
+    conn.execute("UPDATE dataset_rows SET payload_json=json_remove(payload_json,'$.\"Build Policy\"','$.\"Build Phase\"','$.\"Build At\"') WHERE dataset='daily_slate'")
+    assert save_run(db, b, result, game(), "pregame", NOW)
+
+
 def test_targeted_core_loader_includes_replacements_beyond_wr3(monkeypatch):
     from builders import nfl_builder as b
     def entries(pos, count=1):

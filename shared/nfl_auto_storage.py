@@ -157,7 +157,8 @@ def save_run(db, builder, result, game, phase, now):
         guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND game_key={q(gid)} AND dataset IN ('bet_tracker','prop_tracker','lineup_snapshots'))"
         pair = f"date_key={q(day)} AND lower(json_extract(payload_json,'$.\"Away Team\"'))=lower({q(game['Away Team'])}) AND lower(json_extract(payload_json,'$.\"Home Team\"'))=lower({q(game['Home Team'])})"
         model_present = "(COALESCE(json_extract(payload_json,'$.\"Model Version\"'),'')<>'' OR COALESCE(json_extract(payload_json,'$.\"Projected Away\"'),'')<>'' OR COALESCE(json_extract(payload_json,'$.\"Projected Home\"'),'')<>'')"
-        guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='daily_slate' AND (game_key={q(gid)} OR ({pair})) AND {model_present} AND COALESCE(json_extract(payload_json,'$.\"Build Policy\"'),'')<>{q(POLICY)})"
+        owned = f"(COALESCE(json_extract(payload_json,'$.\"Build Policy\"'),'')={q(POLICY)} OR instr(COALESCE(json_extract(payload_json,'$.\"Model Version\"'),''),{q('|' + POLICY)})>0)"
+        guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='daily_slate' AND (game_key={q(gid)} OR ({pair})) AND {model_present} AND NOT {owned})"
         guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='builder_completed' AND date_key={q(day)} AND lower(json_extract(payload_json,'$.\"Away Team\"'))=lower({q(game['Away Team'])}) AND lower(json_extract(payload_json,'$.\"Home Team\"'))=lower({q(game['Home Team'])}))"
     payload = json.dumps(clean(result), separators=(",", ":"), allow_nan=False)
     def req(sql): return {"type": "execute", "stmt": {"sql": sql, "args": []}}

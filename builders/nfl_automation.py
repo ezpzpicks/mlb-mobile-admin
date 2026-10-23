@@ -117,7 +117,7 @@ def fetch_depth(builder, teams, season, *, on_event=None):
         charts = [x for x in data.get("items", []) if isinstance(x, dict)]
         selected = []
         for markers in ({"QB", "RB", "WR", "TE", "LT", "LG", "C", "RG", "RT"},
-                        {"DE", "LDE", "RDE", "DT", "NT", "MLB", "LB", "LCB", "RCB", "CB", "FS", "SS", "LOLB", "ROLB", "WLB", "SLB"}):
+                        {"DE", "LDE", "RDE", "LE", "RE", "EDGE", "DT", "NT", "MLB", "LB", "ILB", "LILB", "RILB", "OLB", "LCB", "RCB", "CB", "NB", "S", "FS", "SS", "LOLB", "ROLB", "WLB", "SLB"}):
             def score(c):
                 return len({str(e.get("position", {}).get("abbreviation", k)).upper() for k, e in c.get("positions", {}).items()} & markers)
             best = max(charts, key=score, default=None)
@@ -176,7 +176,7 @@ def fetch_depth(builder, teams, season, *, on_event=None):
         on_event("espn_core_depth_read", teams=sorted(set(teams)), players=len(athletes), observed_at=started.isoformat(), rejected_teams=failures)
     frame = pd.DataFrame([r for r in rows if r["team_norm"] not in failures])
     if not frame.empty:
-        frame = frame.drop_duplicates(["team_norm", "pos_norm", "name_norm"])
+        frame = frame.sort_values(["team_norm", "pos_norm", "pos_rank_num", "pos_slot_num", "player_name_display"]).drop_duplicates(["team_norm", "pos_norm", "name_norm"])
     return frame, started.isoformat()
 
 
