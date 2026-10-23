@@ -93,7 +93,7 @@ def parse_rotowire_html(html: str, *, fetched_at, source_url=URL) -> dict:
                     link = _one(row, "a[href]")
                     identity = re.fullmatch(r"/basketball/player/[^/?#]+-([1-9]\d*)", link.get("href", ""))
                     name = link.get("title", "").strip()
-                    if not identity or not name or re.search(r"\b[A-Z]\.", name):
+                    if not identity or not name:
                         raise InputError("RotoWire needs an unambiguous full player name and its own player ID.")
                     injury = row.select(".lineup__inj")
                     if len(injury) > 1:

@@ -82,7 +82,6 @@ class RotowireHtmlTests(unittest.TestCase):
         _, inputs, _ = inputs_fixture()
         original = html_fixture(inputs)
         for html in (original.replace('>Ques<', '>Out<'), original.replace('>Ques<', '>NewStatus<'),
-                     original.replace('title="Fictional A Player 1"', 'title="F. Player"'),
                      original.replace('is-expected', 'is-unknown'), original.replace('test-person-1"', 'test-person-2"')):
             self.assertEqual(parse_rotowire_html(html, fetched_at=NOW)["games"], [])
 
@@ -138,7 +137,7 @@ class RotowireRotationTests(unittest.TestCase):
     def test_matching_rejects_other_dates_tipoffs_reversed_teams_stale_reports_and_unmatched_roster_names(self):
         bundle, inputs, _ = inputs_fixture()
         original = report_fixture(inputs)
-        for change in ('date', 'time', 'teams', 'stale', 'future', 'name', 'duplicate'):
+        for change in ('date', 'time', 'teams', 'stale', 'future', 'name', 'abbreviated', 'duplicate'):
             report = deepcopy(original)
             if change == 'date': report['date'] = '2026-10-21'
             if change == 'time': report['games'][0]['tipoff'] = (NOW + timedelta(hours=3)).isoformat()
@@ -146,8 +145,18 @@ class RotowireRotationTests(unittest.TestCase):
             if change == 'stale': report['fetched_at'] = (NOW-timedelta(minutes=61)).isoformat()
             if change == 'future': report['fetched_at'] = (NOW+timedelta(seconds=1)).isoformat()
             if change == 'name': report['games'][0]['away']['players'][0]['name'] = 'Not On This Roster'
+            if change == 'abbreviated': report['games'][0]['away']['players'][0]['name'] = 'F. Player'
             if change == 'duplicate': report['games'].append(deepcopy(report['games'][0]))
             with self.subTest(change=change), self.assertRaises(InputError): prepare_rotowire_package(bundle, inputs, report, as_of=NOW)
+
+    def test_real_full_names_with_initials_match_the_current_roster_exactly(self):
+        bundle, inputs, _ = inputs_fixture()
+        player = bundle['teams'][0]['players'][0]
+        player['name'] = inputs['rosters']['away']['players'][0]['name'] = 'P.J. Washington'
+        next(p for p in bundle['player_impacts'] if p['player_id'] == player['player_id'])['name'] = player['name']
+        package = prepare_rotowire_package(bundle, inputs, report_fixture(inputs), as_of=NOW)
+        self.assertIn(player['player_id'], package['availability_provenance']['audit']['away']['starter_ids'])
+        self.assertEqual(package['scenarios'][0]['away']['players'][0]['status'], 'QUESTIONABLE')
 
     def test_locks_are_separate_source_versions_and_keep_exact_html_source_provenance(self):
         package, game = prepared(confirmed=True)
@@ -184,6 +193,27 @@ class RotowireRotationTests(unittest.TestCase):
 
 
 class RotowireRunnerTests(unittest.TestCase):
+    def test_html_failure_blocks_only_the_new_forecast_and_keeps_pending_result_checks(self):
+        harness = automatic_tests.ScheduledPersistenceTests(); harness.setUp()
+        harness.tipoff = harness.tipoff.replace(second=0, microsecond=0)
+        try:
+            def source(**kwargs):
+                now = runner.clock(); _, inputs, _ = inputs_fixture(now)
+                inputs['game']['tipoff'] = harness.tipoff.isoformat()
+                return report_fixture(inputs, now)
+            with patch.dict(os.environ, {'NBA_AVAILABILITY_MODE':'rotowire_html'}), \
+                 patch('test_nba_automation.fixture', side_effect=inputs_fixture), \
+                 patch.object(runner, 'fetch_rotowire_lineups', side_effect=source):
+                self.assertEqual(harness.run_at(harness.now)[:3], (0, 1, 0))
+                harness.events.clear()
+                with patch.object(runner, 'fetch_rotowire_lineups', side_effect=InputError('HTTP 403')):
+                    self.assertEqual(harness.run_at(harness.now + timedelta(minutes=90)), (1, 0, 0, 1))
+                from shared.nba_tracking_storage import load_ledger
+                self.assertEqual(len(load_ledger()[0]), 1)
+                self.assertTrue(any(event == 'result_pending' for event, _ in harness.events))
+                self.assertTrue(any(event == 'injuries_unavailable' for event, _ in harness.events))
+        finally: harness.tearDown()
+
     def test_timed_runtime_diagnostic_expires_and_cannot_replace_later_normal_builds(self):
         _, inputs, _ = inputs_fixture()
         with patch.object(runner, 'clock', return_value=NOW), patch.object(runner, 'emit'), \
