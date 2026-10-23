@@ -47,7 +47,9 @@ def seeds():
 
 def run(args):
     now = clock()
-    if getattr(args, "check_rotowire", False) or os.getenv("NBA_ROTOWIRE_DIAGNOSTIC") == "1":
+    diagnostic_until = os.getenv("NBA_ROTOWIRE_DIAGNOSTIC_UNTIL", "").strip()
+    timed_diagnostic = bool(diagnostic_until) and now < timestamp(diagnostic_until, "RotoWire diagnostic expiry")
+    if getattr(args, "check_rotowire", False) or os.getenv("NBA_ROTOWIRE_DIAGNOSTIC") == "1" or timed_diagnostic:
         report = fetch_rotowire_lineups(on_event=emit)
         if not report["games"]:
             raise InputError("RotoWire HTML was fetched but no valid lineups were parsed.")

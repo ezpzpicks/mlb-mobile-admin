@@ -184,6 +184,20 @@ class RotowireRotationTests(unittest.TestCase):
 
 
 class RotowireRunnerTests(unittest.TestCase):
+    def test_timed_runtime_diagnostic_expires_and_cannot_replace_later_normal_builds(self):
+        _, inputs, _ = inputs_fixture()
+        with patch.object(runner, 'clock', return_value=NOW), patch.object(runner, 'emit'), \
+             patch.object(runner, 'fetch_rotowire_lineups', return_value=report_fixture(inputs)) as fetch:
+            with patch.dict(os.environ, {'NBA_ROTOWIRE_DIAGNOSTIC_UNTIL': (NOW + timedelta(minutes=10)).isoformat()}):
+                self.assertEqual(runner.run(SimpleNamespace()), 0)
+            fetch.assert_called_once()
+            fetch.reset_mock()
+            # The expired switch passes into the ordinary outside-hours path.
+            with patch.dict(os.environ, {'NBA_ROTOWIRE_DIAGNOSTIC_UNTIL': (NOW - timedelta(minutes=1)).isoformat()}), \
+                 patch.object(runner, 'ET', timezone(timedelta(hours=-10))):
+                self.assertEqual(runner.run(SimpleNamespace(ignore_window=False)), 0)
+            fetch.assert_not_called()
+
     def test_read_only_diagnostic_needs_no_database_and_calls_no_espn_injury_feed(self):
         _, inputs, _ = inputs_fixture()
         with patch.object(runner, 'fetch_rotowire_lineups', return_value=report_fixture(inputs)), patch.object(runner, 'emit'), \
