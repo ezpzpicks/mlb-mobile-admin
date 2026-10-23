@@ -263,6 +263,19 @@ def input_identity(game, market, quotes, depth, weather, inactives):
     return hashlib.sha256(json.dumps(clean(value), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def withhold_unavailable_quotes(evaluated, threshold):
+    """Keep the public site's independent yardage grader from reviving a hold."""
+    output = evaluated.copy()
+    held = pd.to_numeric(output.get("_play_probability", pd.Series(0.0, index=output.index)), errors="coerce").fillna(0.0) < threshold
+    output.loc[held, "Grade"] = "Availability hold"
+    output.loc[held, "Track"] = False
+    output.loc[held, "Pick"] = "Availability hold"
+    for column in ("Market Line", "Over Odds", "Under Odds", "Pick Odds", "Implied Probability", "Probability Edge", "Projection Edge", "Expected Value"):
+        output.loc[held, column] = float("nan")
+    output.loc[held, "Line Source"] = "Quote withheld: availability below 90%; original quote retained in build provenance"
+    return output
+
+
 def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at, inactives=None):
     if not timedelta(0) <= now - datetime.fromisoformat(depth_at) <= timedelta(minutes=15):
         raise SourceError("Current depth/availability observation is stale.")
@@ -334,9 +347,7 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
     evaluated = builder._evaluate_prop_rows(quoted)
     # Keep availability outside the market-grade formula; an unconfirmed player
     # cannot be published merely because a mathematical yardage edge is large.
-    held = pd.to_numeric(evaluated.get("_play_probability", 0.0), errors="coerce").fillna(0.0) < builder.MIN_GRADED_PROP_PLAY_PROBABILITY
-    evaluated.loc[held, "Grade"] = "Availability hold"
-    evaluated.loc[held, "Track"] = False
+    evaluated = withhold_unavailable_quotes(evaluated, builder.MIN_GRADED_PROP_PLAY_PROBABILITY)
     p_rows = builder._prop_rows_for_storage(evaluated, game["Date"], game["Season"], game["Week"], game["Game ID"], label, note)
     p_tracker = builder._graded_prop_tracker_rows(evaluated, game["Date"], game["Season"], game["Week"], game["Game ID"], label, note)
     s, t = selections["Spread"], selections["Total"]

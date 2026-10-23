@@ -26,7 +26,7 @@ services:
       - key: NBA_AVAILABILITY_MODE
         value: rotowire_html
       - key: NFL_AUTO_BUILDER_ENABLED
-        value: "0" # Enable after the read-only Render deployment trial passes.
+        value: "1"
       - key: POLARS_MAX_THREADS
         value: "1"
       - key: OPENBLAS_NUM_THREADS

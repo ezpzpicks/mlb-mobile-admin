@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
-from builders.nfl_automation import checked_depth, fetch_depth, game_market, normalize_game, phase_for_game
+from builders.nfl_automation import checked_depth, fetch_depth, game_market, normalize_game, phase_for_game, withhold_unavailable_quotes
 from builders.nfl_rotowire_props import SourceError, apply_quotes, parse_props_html
 from shared import turso_storage as turso
 from shared.nfl_auto_storage import NflDatabase, POLICY, save_run, upsert_results
@@ -290,3 +290,14 @@ def test_nfl_failure_does_not_skip_other_scheduled_sports(monkeypatch):
     monkeypatch.setattr(runner.subprocess, "run", run)
     assert runner.main() == 1
     assert [p.split("/")[-1] for p in calls] == ["run_nba_builder.py", "run_nfl_builder.py", "run_ncaaf_builder.py"]
+
+
+def test_public_yardage_regrading_cannot_revive_an_availability_hold():
+    rows = pd.DataFrame([{"Player": name, "_play_probability": p, "Market Line": 100, "Projection": 200,
+        "Probability Edge": .5, "Projection Edge": 100, "Over Odds": -110, "Under Odds": -110,
+        "Grade": "Strong", "Track": True, "Pick": "Over 100", "Line Source": "RotoWire / draftkings"}
+        for name, p in (("Unresolved", .65), ("Eligible", .9))])
+    out = withhold_unavailable_quotes(rows, .9)
+    assert out.iloc[0]["Grade"] == "Availability hold" and not out.iloc[0]["Track"]
+    assert pd.isna(out.iloc[0]["Market Line"]) and pd.isna(out.iloc[0]["Probability Edge"])
+    assert out.iloc[1]["Grade"] == "Strong" and out.iloc[1]["Market Line"] == 100
