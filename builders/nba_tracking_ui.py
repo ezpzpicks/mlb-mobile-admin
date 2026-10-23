@@ -47,18 +47,18 @@ def live_inputs(state, *, ui):
             if choices:
                 gid = st.selectbox("Scheduled NBA game", list(choices),
                     format_func=lambda k: f"{choices[k]['away']['name']} at {choices[k]['home']['name']} · {timestamp(choices[k]['tipoff'], 'tipoff').astimezone(ET):%I:%M %p ET}")
-                if st.button("Prepare live matchup with ESPN inputs", key="nba_prepare_live"):
+                if st.button("Prepare live matchup with RotoWire lineups", key="nba_prepare_live"):
                     try:
-                        from builders.nba_injuries import fetch_espn_injuries
+                        from builders.nba_rotowire import fetch_rotowire_lineups, prepare_rotowire_package
                         from builders.nba_ratings import validate_bundle
                         bundle = state.get("ratings") or json.loads((ROOT / "research/nba_results_2025_26/nba_ratings.json").read_text())
                         validate_bundle(bundle)
                         inputs = fetch_matchup_inputs(choices[gid])
-                        injury = fetch_espn_injuries()
-                        package = prepare_live_package(bundle, inputs, injury, as_of=datetime.now(timezone.utc))
+                        report = fetch_rotowire_lineups(day=day)
+                        package = prepare_rotowire_package(bundle, inputs, report, as_of=datetime.now(timezone.utc))
                         from builders.nba_market import apply_market, read_market_rows
                         package = apply_market(package, read_market_rows(day), choices[gid], datetime.now(timezone.utc))
-                        state.update(package=package, result=None, ratings=bundle, espn_report=injury,
+                        state.update(package=package, result=None, ratings=bundle, rotowire_report=report,
                             revision=state.get("revision", 0) + 1)
                         st.success("Current roster and minute suggestion loaded. Review both rotations, injury assumptions and any missing minute evidence, then compare.")
                     except (InputError, ValueError, KeyError, TypeError, OSError, IndexError, RuntimeError) as exc:

@@ -123,7 +123,7 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.stack = ExitStack()
         self.stack.enter_context(patch("shared.nba_tracking_storage._backend", return_value=self.db))
         self.stack.enter_context(patch("shared.turso_storage.is_turso_ready", return_value=True))
-        self.stack.enter_context(patch.dict(os.environ, {"NBA_AUTO_BUILDER_ENABLED":"1"}))
+        self.stack.enter_context(patch.dict(os.environ, {"NBA_AUTO_BUILDER_ENABLED":"1", "NBA_AVAILABILITY_MODE":"injury_feed"}))
         self.stack.enter_context(patch.object(runner, "emit", side_effect=lambda event, **kw:self.events.append((event, kw))))
         self.stack.enter_context(patch.object(runner, "seeds", return_value=[]))
         self.args = SimpleNamespace(commit=True, evaluate=False, ignore_window=True, limit=16)

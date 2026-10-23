@@ -503,10 +503,17 @@ def from_package(package: dict) -> tuple[TeamProfile, TeamProfile, tuple[Scenari
 
 def evaluate_package(package: dict) -> dict:
     result = project_scenarios(*from_package(package))
-    if package.get("availability_provenance", {}).get("mode") == "expected_rotation":
-        result.update(availability_mode="expected_rotation", injury_verified=False)
+    mode = package.get("availability_provenance", {}).get("mode")
+    if mode in {"expected_rotation", "rotowire_html"}:
+        metadata = {"availability_mode": mode, "injury_verified": mode == "rotowire_html"}
+        if mode == "rotowire_html":
+            metadata.update(availability_source="RotoWire", availability_as_of=package["availability_provenance"]["fetched_at"])
+        result.update(metadata)
         for scenario in result["scenarios"]:
-            scenario.update(availability_mode="expected_rotation", injury_verified=False)
+            scenario.update(metadata)
+            if mode == "rotowire_html":
+                plan = next(p for p in package["scenarios"] if p["name"] == scenario["scenario"])
+                scenario["starters_confirmed"] = all(plan[side]["starters_confirmed"] for side in ("away", "home"))
     return result
 
 

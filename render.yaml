@@ -23,6 +23,8 @@ services:
         value: "1"
       - key: NBA_AUTO_BUILDER_ENABLED
         value: "1"
+      - key: NBA_AVAILABILITY_MODE
+        value: rotowire_html
       - key: POLARS_MAX_THREADS
         value: "1"
       - key: OPENBLAS_NUM_THREADS

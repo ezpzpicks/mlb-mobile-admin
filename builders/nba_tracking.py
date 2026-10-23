@@ -82,10 +82,17 @@ def lock_prediction(package: dict, scenario_name: str, game: dict, *, locked_at,
     provenance = package["live_provenance"]
     if provenance.get("conflicts"):
         raise InputError("Current roster and injury sources disagree. Resolve the reported conflicts before locking.")
-    from builders.nba_automation import EXPECTED_POLICY, expected_rotation
+    from builders.nba_automation import EXPECTED_POLICY, ROTOWIRE_POLICY, expected_rotation
     if expected_rotation(package):
         if automation_policy != EXPECTED_POLICY:
             raise InputError("Expected rotations require their dedicated automatic tracking policy.")
+    elif package.get("availability_provenance", {}).get("mode") == "rotowire_html":
+        from builders.nba_rotowire import validate_rotowire_package
+        validate_rotowire_package(package, as_of=now)
+        if timestamp(package["availability_provenance"]["fetched_at"], "RotoWire observation") > cutoff:
+            raise InputError("RotoWire HTML was observed after the forecast cutoff.")
+        if automation_policy is None:
+            tracking_version = f"{MODEL_VERSION}+{ROTOWIRE_POLICY}-manual"
     else:
         injury = package.get("injury_provenance")
         if not injury or now - timestamp(injury["feed_as_of"], "injury source update") > MAX_LOCK_AGE:
