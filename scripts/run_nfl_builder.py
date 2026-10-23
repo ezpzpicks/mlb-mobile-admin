@@ -108,8 +108,6 @@ def run(args):
     db = NflDatabase(turso)
     started = time.monotonic()
     try:
-        if args.commit:
-            db.initialize()
         rows = db.schedule(str(local.date()))
         if args.next_game:
             q = turso._sql_text
@@ -150,8 +148,10 @@ def run(args):
         if not ready:
             emit("no_complete_markets")
             return 1 if args.next_game else 0
+        if args.commit:
+            db.initialize()
         props = fetch_props(on_event=emit)
-        inactives = fetch_inactives(on_event=emit) if any(phase != "early" for _, phase, _ in ready) else None
+        inactives = fetch_inactives(on_event=emit) if args.next_game or any(phase != "early" for _, phase, _ in ready) else None
         teams = {g[side] for g, _, _ in ready for side in ("Away Team", "Home Team")}
         seasons = {g["Season"] for g, _, _ in ready}
         if len(seasons) != 1:

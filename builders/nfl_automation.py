@@ -209,8 +209,10 @@ def weekly_inputs(builder, db, season, week, *, now, commit, on_event):
     cached = db.cached(key)
     if cached and timedelta(0) <= now - datetime.fromisoformat(cached[0]) <= timedelta(hours=36):
         data = cached[1]
+        input_observed_at = cached[0]
         on_event("weekly_inputs_cache_hit", season=season, week=week)
     else:
+        input_observed_at = now.isoformat()
         on_event("weekly_inputs_build", season=season, week=week)
         ratings = builder._build_automated_ratings(season, week)
         if not builder._ratings_quality(ratings)["valid"]:
@@ -232,7 +234,7 @@ def weekly_inputs(builder, db, season, week, *, now, commit, on_event):
     builder._load_player_stats_season = lambda year: pd.DataFrame(data["stats"][str(year)]) if str(year) in data["stats"] else stats_loader(year)
     builder._schedule_for_season = lambda year, refresh=False: pd.DataFrame(data["schedules"][str(year)]) if str(year) in data["schedules"] else schedule_loader(year, refresh=refresh)
     slots._HISTORY_CACHE[(season, max(0, week - 1))] = pd.DataFrame(data["slot_history"], columns=["season", "week", "team", "opponent", "slot", "player", "market", "actual"])
-    return {**data, "ratings": pd.DataFrame(data["ratings"]), "profiles": pd.DataFrame(data["profiles"]), "defense_profiles": pd.DataFrame(data["defense_profiles"])}
+    return {**data, "input_cache_key": key, "input_observed_at": input_observed_at, "ratings": pd.DataFrame(data["ratings"]), "profiles": pd.DataFrame(data["profiles"]), "defense_profiles": pd.DataFrame(data["defense_profiles"])}
 
 
 def environment(builder, game):
@@ -306,7 +308,7 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         from shared.modeling import expected_value_per_unit
         if probability <= 0.5 or expected_value_per_unit(probability, -110) <= 0:
             grade = f"Non-Edge {kind}"
-        selections[kind] = {"Pick": pick, "Probability": round(probability, 4), "Edge": round(edge, 2), "Grade": grade, "Confluence": confluence}
+        selections[kind] = {"Pick": pick, "Probability": probability, "Edge": round(edge, 2), "Grade": grade, "Confluence": confluence}
     label = f"{game['Away Team']} at {game['Home Team']}"
     note = f"{POLICY}; {phase}; ScoresAndOdds game lines, assumed -110 game prices; RotoWire actual prop prices; {weather['source']}; availability observed, workload conditional."
     version = f"{builder.MODEL_VERSION}|{POLICY}"
@@ -326,7 +328,7 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         slate[f"{side} Offensive Absence"] = summaries[side]["offense_absence"]
         slate[f"{side} Defensive Absence"] = summaries[side]["defense_absence"]
     for kind, values in selections.items():
-        slate.update({f"{kind} {k}": v for k, v in values.items()})
+        slate.update({f"{kind} {k}": round(v, 4) if k == "Probability" else v for k, v in values.items()})
     base = builder._build_game_prop_rows(game["Away Team"], game["Home Team"], lineups["Away"], lineups["Home"], weekly["profiles"], weekly["defense_profiles"], ratings["Away"], ratings["Home"], projection, weather_adjustment, market_total=market.total, home_spread=market.home_spread)
     quoted, matched = apply_quotes(base, game, props, now=now)
     evaluated = builder._evaluate_prop_rows(quoted)
@@ -353,4 +355,6 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
     return clean({"slate": slate, "props": p_rows, "prop_tracker": p_tracker, "game_tracker": g_tracker, "lineups": l_rows,
         "input_hash": fingerprint, "provenance": {"props": {k: props[k] for k in ("source", "source_sha256", "observed_at", "week")},
             "quotes": matched, "depth_observed_at": depth_at, "game_market_observed_at": market.captured.isoformat(),
-            "inactives": inactives, "weather": weather, "model_version": builder.MODEL_VERSION}})
+            "inactives": inactives, "weather": weather, "model_version": builder.MODEL_VERSION,
+            "weekly_input_key": weekly.get("input_cache_key"), "weekly_input_observed_at": weekly.get("input_observed_at"),
+            "ratings": ratings, "home_field": hfa, "lineup_summaries": summaries, "game_projection": projection}})
