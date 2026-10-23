@@ -102,7 +102,7 @@ class BuilderFlowTests(unittest.TestCase):
         builder = load_builder(st)
         with patch("builders.nba_injuries.fetch_espn_injuries", return_value=report()) as fetch:
             with patch.dict(sys.modules, {"shared.storage": None}):
-                builder.render()
+                builder._espn_inputs(st.session_state.setdefault(builder.STATE_KEY, {}))
         fetch.assert_called_once()
         self.assertEqual(st.session_state[builder.STATE_KEY]["espn_report"]["injury_count"], 1)
         self.assertFalse(st.errors)
@@ -116,7 +116,7 @@ class BuilderFlowTests(unittest.TestCase):
         st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": matchup(), "espn_report": old,
                                              "result": {"old": "projection"}}
         with patch("builders.nba_injuries.fetch_espn_injuries", side_effect=InputError("feed unavailable")):
-            builder.render()
+            builder._espn_inputs(st.session_state[builder.STATE_KEY])
         self.assertIs(st.session_state[builder.STATE_KEY]["espn_report"], old)
         self.assertIsNone(st.session_state[builder.STATE_KEY]["result"])
         self.assertTrue(any("original timestamp" in error for error in st.errors))
@@ -128,7 +128,7 @@ class BuilderFlowTests(unittest.TestCase):
         st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": matchup(), "espn_report": report(status="Out"),
                                              "result": {"old": "projection"}}
         with patch.dict(sys.modules, {"shared.storage": None}):
-            builder.render()
+            builder._espn_inputs(st.session_state[builder.STATE_KEY])
         state = st.session_state[builder.STATE_KEY]
         self.assertIsNone(state["result"])
         self.assertEqual(state["package"]["scenarios"][0]["away"]["players"][0]["minutes"], 0)
@@ -158,7 +158,7 @@ class BuilderFlowTests(unittest.TestCase):
         r["fetched_at"] = "2026-10-22T16:00:00Z"  # After the fixture's 15:00 tipoff.
         st.session_state[builder.STATE_KEY] = {"saved_ids": [], "package": old, "espn_report": r,
                                              "result": {"old": "projection"}}
-        builder.render()
+        builder._espn_inputs(st.session_state[builder.STATE_KEY])
         state = st.session_state[builder.STATE_KEY]
         self.assertIsNone(state["result"])
         self.assertIs(state["package"], old)

@@ -90,7 +90,46 @@ def _roster_addition(state: dict):
                 st.error(str(exc))
 
 
+def _rotowire_inputs(state: dict):
+    with st.expander("RotoWire lineups and availability"):
+        st.caption("Public expected/confirmed starters and individual availability labels. Questionable remains uncertain; unlisted players are not cleared. Minute estimates still use checked past games.")
+        st.markdown("[RotoWire NBA daily lineups](https://www.rotowire.com/basketball/nba-lineups.php)")
+        if st.button("Fetch latest RotoWire lineups", key="nba_rotowire_fetch"):
+            try:
+                from builders.nba_rotowire import fetch_rotowire_lineups
+                state["rotowire_report"] = fetch_rotowire_lineups()
+                state.pop("rotowire_error", None)
+                state["result"] = None
+            except InputError as exc:
+                state["result"] = None
+                state["rotowire_error"] = str(exc)
+        if state.get("rotowire_error"):
+            st.error("RotoWire refresh failed: " + state["rotowire_error"] + ". Retained data keeps its original timestamp.")
+        report = state.get("rotowire_report")
+        if not report:
+            return
+        st.caption(f"Slate {report['date']} · observed {report['fetched_at']} · {len(report['games'])} matchups")
+        rows = [{"Team": game[side]["team"], "Player": player["name"], "Availability": player["source_status"] or "Unknown",
+                 "Starter": player["player_id"] in game[side]["starters"], "Lineup confirmed": game[side]["confirmed"]}
+                for game in report["games"] for side in ("away", "home") for player in game[side]["players"]]
+        if rows:
+            st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+        if st.button("Apply RotoWire to this live matchup", key="nba_rotowire_apply", disabled=not bool((state.get("package") or {}).get("live_provenance"))):
+            try:
+                from builders.nba_rotowire import apply_rotowire_report
+                package = deepcopy(state["package"])
+                package.pop("automation", None)
+                package["scenarios"] = package["scenarios"][:1]
+                package["context"]["as_of"] = datetime.now(timezone.utc).isoformat()
+                package = apply_rotowire_report(package, report, as_of=package["context"]["as_of"])
+                state.update(package=package, result=None, revision=state.get("revision", 0) + 1)
+            except (InputError, ValueError, KeyError) as exc:
+                state["result"] = None
+                st.error(str(exc))
+
+
 def _espn_inputs(state: dict):
+    """Legacy explicit controls retained for archived ESPN research inputs."""
     def news_time(value):
         return timestamp(value, "ESPN timestamp").astimezone(ZoneInfo("America/New_York")).strftime("%b %d, %I:%M %p ET") if value else "Unknown"
 
@@ -254,8 +293,8 @@ def render():
     with st.expander("Inputs and sources"):
         st.write("Load the checked historical ratings to choose two teams, or import a ratings bundle or complete matchup JSON. Historical rotation seeds require current roster and injury review. The fictional example download defines the matchup fields.")
         st.write("Player impacts are points per 100 possessions: positive offense creates points; positive defense prevents points. Baseline minutes must describe the same sample as the team ratings. Use regularized estimates with a documented source.")
-        st.write("Use ESPN for injury statuses and estimated return dates, and verify the starting lineup separately. Day-to-day requires an IN or OUT scenario. OUT minutes are removed; assign all replacement minutes explicitly. Estimated return dates do not establish game availability.")
-        st.markdown("[ESPN NBA injuries](https://www.espn.com/nba/injuries) · [Official NBA report](https://official.nba.com/nba-injury-report-2026-27-season/) · [NBA projected daily lineups](https://www.nba.com/players/todays-lineups)")
+        st.write("RotoWire's public daily lineup HTML supplies expected/confirmed starters and individual injury labels. OUT/DOUBTFUL players are excluded from the primary automated rotation; questionable players retain explicit assumptions. ESPN supplies schedules, current rosters and checked past-game minutes.")
+        st.markdown("[RotoWire NBA daily lineups](https://www.rotowire.com/basketball/nba-lineups.php) · [Official NBA report](https://official.nba.com/nba-injury-report-2026-27-season/)")
         st.download_button("Download fictional input example", json.dumps(example_package(), indent=2),
                            file_name="nba-fictional-input-example.json", mime="application/json")
     uploaded = st.file_uploader("Import NBA ratings bundle or matchup JSON", type=["json"], key="nba_upload")
@@ -280,7 +319,7 @@ def render():
     if st.button("Load fictional demo", key="nba_demo"):
         state.update(package=example_package(), result=None, revision=state.get("revision", 0) + 1)
         state.pop("ratings", None)
-    _espn_inputs(state)
+    _rotowire_inputs(state)
     if not state.get("package"):
         st.info("Import your data or load the fictional demo to compare a player's IN and OUT rotations.")
         return

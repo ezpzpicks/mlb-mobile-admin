@@ -18,13 +18,14 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from builders.nba_automation import EXPECTED_VERSIONS, VERSIONS, automated_package, phase_for_game
+from builders.nba_automation import EXPECTED_VERSIONS, ROTOWIRE_VERSIONS, VERSIONS, automated_package, phase_for_game
 from builders.nba_injuries import fetch_espn_injuries
 from builders.nba_live import checked_box_minutes, fetch_game, fetch_matchup_inputs, fetch_slate, prepare_live_package
 from builders.nba_model import InputError, timestamp
 from builders.nba_market import apply_market, market_for_game, read_market_rows
 from builders.nba_ratings import validate_bundle
 from builders.nba_tracking import lock_prediction, result_observation
+from builders.nba_rotowire import fetch_rotowire_lineups, prepare_rotowire_package
 from shared import nba_tracking_storage as store
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,10 +47,17 @@ def seeds():
 
 def run(args):
     now = clock()
-    availability_mode = os.getenv("NBA_AVAILABILITY_MODE", "injury_feed").strip().lower()
-    if availability_mode not in {"injury_feed", "expected_rotation"}:
-        raise InputError("NBA_AVAILABILITY_MODE must be injury_feed or expected_rotation.")
-    versions = EXPECTED_VERSIONS if availability_mode == "expected_rotation" else VERSIONS
+    if getattr(args, "check_rotowire", False) or os.getenv("NBA_ROTOWIRE_DIAGNOSTIC") == "1":
+        report = fetch_rotowire_lineups(on_event=emit)
+        if not report["games"]:
+            raise InputError("RotoWire HTML was fetched but no valid lineups were parsed.")
+        emit("rotowire_diagnostic_ok", date=report["date"], games=len(report["games"]),
+             teams=[g[s]["team"] for g in report["games"] for s in ("away", "home")], writes=0)
+        return 0
+    availability_mode = os.getenv("NBA_AVAILABILITY_MODE", "rotowire_html").strip().lower()
+    if availability_mode not in {"injury_feed", "expected_rotation", "rotowire_html"}:
+        raise InputError("NBA_AVAILABILITY_MODE must be rotowire_html, injury_feed or expected_rotation.")
+    versions = {"rotowire_html": ROTOWIRE_VERSIONS, "expected_rotation": EXPECTED_VERSIONS, "injury_feed": VERSIONS}[availability_mode]
     local = now.astimezone(ET)
     if not args.ignore_window and not 9 <= local.hour <= 23:
         emit("outside_build_window", local_time=local.isoformat())
@@ -106,22 +114,26 @@ def run(args):
         if pending:
             bundle = json.loads((ROOT / "research/nba_results_2025_26/nba_ratings.json").read_text())
             validate_bundle(bundle)
-            injury = None
+            injury, rotowire = None, None
             if availability_mode == "expected_rotation":
                 emit("injury_feed_bypassed", availability_mode=availability_mode,
                      note="Temporary expected rotation; availability unchecked and starters unconfirmed.")
             else:
                 try:
-                    injury = fetch_espn_injuries(on_event=emit)
+                    if availability_mode == "rotowire_html":
+                        rotowire = fetch_rotowire_lineups(day=str(local.date()), on_event=emit)
+                    else:
+                        injury = fetch_espn_injuries(on_event=emit)
                 except InputError as exc:
                     failures += 1
                     emit("injuries_unavailable", error=str(exc),
                          blocked_games=[game["game_id"] for game, _ in pending[:args.limit]])
             team_cache, box_cache = {}, {}
-            for game, planned_phase in (pending[:args.limit] if injury is not None or availability_mode == "expected_rotation" else []):
+            for game, planned_phase in (pending[:args.limit] if injury is not None or rotowire is not None or availability_mode == "expected_rotation" else []):
                 try:
                     inputs = fetch_matchup_inputs(game, team_cache=team_cache, box_cache=box_cache)
-                    package = prepare_live_package(bundle, inputs, injury, as_of=clock(), availability_mode=availability_mode)
+                    package = (prepare_rotowire_package(bundle, inputs, rotowire, as_of=clock()) if availability_mode == "rotowire_html" else
+                        prepare_live_package(bundle, inputs, injury, as_of=clock(), availability_mode=availability_mode))
                     package = apply_market(package, market_rows, game, clock())
                     current, _ = fetch_game(game["game_id"])
                     phase = phase_for_game(current, clock())
@@ -136,7 +148,7 @@ def run(args):
                     if args.commit:
                         record, inserted = store.save_prediction(record)
                     emit("built", game_id=game["game_id"], phase=phase, saved=inserted,
-                        availability_mode=availability_mode, injury_verified=availability_mode == "injury_feed",
+                        availability_mode=availability_mode, injury_verified=availability_mode in {"injury_feed", "rotowire_html"},
                         model_version=record["model_version"], locked_at=record["locked_at"],
                         projected_away=record["selected"]["away_score"], projected_home=record["selected"]["home_score"],
                         fair_home_spread=record["selected"]["fair_home_spread"], total=record["selected"]["total"],
@@ -181,6 +193,7 @@ def main(argv=None):
     mode.add_argument("--evaluate", action="store_true")
     mode.add_argument("--commit", action="store_true")
     parser.add_argument("--ignore-window", action="store_true")
+    parser.add_argument("--check-rotowire", action="store_true", help="Fetch and validate public lineup HTML only; no database reads or writes.")
     parser.add_argument("--limit", type=int, default=16)
     args = parser.parse_args(argv)
     if not 1 <= args.limit <= 100:
