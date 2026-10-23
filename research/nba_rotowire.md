@@ -42,3 +42,7 @@ prints a bounded diagnostic without any database reads or writes. The temporary
 existing Render cron, including outside the normal 9 AM–midnight build window;
 reset it to `0` after runtime verification. Normal source reads occur only when
 an eligible game still needs a forecast. The cron schedule is unchanged.
+
+For supervised deployment checks, prefer `NBA_ROTOWIRE_DIAGNOSTIC_UNTIL` with
+an ISO timestamp. Before that time the existing run checks only the HTML source;
+the setting expires automatically so it cannot replace subsequent normal builds.
