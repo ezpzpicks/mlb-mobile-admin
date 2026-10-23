@@ -223,17 +223,8 @@ elif selected_sport == "CFB":
     cfb_builder.render()
 elif selected_sport == "NFL":
     set_storage_sport("NFL")
-    from builders import nfl_builder
-    from builders.nfl_covers import install_covers_weather
-    from builders.nfl_game_regression import install_regression_layer
-    from builders.nfl_skill_prop_regression import install_skill_prop_regression
-    from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
-    from builders.nfl_slot_matchups import install_slot_matchup_layer
-    install_regression_layer(nfl_builder)
-    install_skill_prop_regression(nfl_builder)
-    install_skill_prop_consistency(nfl_builder)
-    install_slot_matchup_layer(nfl_builder)
-    install_covers_weather(nfl_builder)
+    from builders.nfl_production import load_production_builder
+    nfl_builder = load_production_builder()
     nfl_builder.render()
 elif selected_sport == "CBB":
     set_storage_sport("CBB")
