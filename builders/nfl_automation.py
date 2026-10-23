@@ -237,9 +237,10 @@ def weekly_inputs(builder, db, season, week, *, now, commit, on_event):
     return {**data, "input_cache_key": key, "input_observed_at": input_observed_at, "ratings": pd.DataFrame(data["ratings"]), "profiles": pd.DataFrame(data["profiles"]), "defense_profiles": pd.DataFrame(data["defense_profiles"])}
 
 
-def environment(builder, game):
+def environment(builder, game, *, defaults=None):
     from builders import nfl_covers
-    defaults = builder._schedule_defaults(pd.Series(game))
+    if defaults is None:
+        defaults = builder._schedule_defaults(pd.Series(game))
     roof = str(defaults.get("roof", "outdoors")).lower()
     if roof in {"dome", "closed"}:
         return {"roof": roof, "temperature": 70.0, "wind": 0.0, "precipitation": "None", "source": "Checked schedule: enclosed stadium"}
@@ -253,10 +254,19 @@ def environment(builder, game):
     return {**{k: defaults[k] for k in ("roof", "temperature", "wind", "precipitation")}, "source": "Covers.com"}
 
 
+def projection_settings(defaults, home_field, weather_adjustment):
+    # Match the scheduled admin's automatic rest/travel adjustment, including
+    # its existing cap. Manual overrides remain zero in unattended builds.
+    rest = max(-1.5, min(1.5, (defaults["home_rest"] - defaults["away_rest"]) * .18))
+    return {"home_field": home_field, "weather_total_adjustment": weather_adjustment,
+            "home_rest_edge": rest, "manual_home_margin_adjustment": 0.0, "manual_total_adjustment": 0.0}
+
+
 def input_identity(game, market, quotes, depth, weather, inactives):
     # Observation timestamps and HTML hashes change even if the model inputs do
     # not. Exclude those from the change fingerprint; keep them in provenance.
     value = {"game": {k: game[k] for k in ("Game ID", "Game Time", "Away Team", "Home Team", "Season", "Week")},
+        "schedule_context": {k: game.get(k, "") for k in ("Away Rest", "Home Rest", "Location")},
         "market": [market.home_spread, market.total], "quotes": sorted(quotes, key=lambda q: (q["team"], q["player"], q["market"], q["book"])),
         "depth": sorted(records(depth), key=lambda r: (r["team_norm"], r["pos_norm"], r["pos_rank_num"], r["name_norm"])),
         "weather": weather, "inactives": {t: inactives["teams"].get(t, []) for t in (game["Away Team"], game["Home Team"])} if inactives else {}}
@@ -294,13 +304,13 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         skill = lineups[side][lineups[side]["Slot"].isin(["QB", "RB1", "WR1", "WR2", "WR3", "TE1"])]
         if skill["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]).any():
             raise SourceError(f"The current {team} skill-position depth is incomplete.")
-    weather = environment(builder, game)
+    defaults = builder._schedule_defaults(pd.Series(game))
+    weather = environment(builder, game, defaults=defaults)
     weather_adjustment = builder._weather_adjustment(weather["roof"], weather["temperature"], weather["wind"], weather["precipitation"])
     reliability, data_confidence, personnel_confidence = builder._reliability(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], game["Week"], False)
     hfa = builder._automatic_home_field_advantage(game["Season"], game["Week"], game["Home Team"], pd.Series(game))
-    projection = builder._project_matchup(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"],
-        {"home_field": hfa["value"], "weather_total_adjustment": weather_adjustment,
-         "home_rest_edge": 0.0, "manual_home_margin_adjustment": 0.0, "manual_total_adjustment": 0.0})
+    settings = projection_settings(defaults, hfa["value"], weather_adjustment)
+    projection = builder._project_matchup(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], settings)
     seed = builder._simulation_seed(game["Game ID"], game["Away Team"], game["Home Team"], game["Season"], game["Week"])
     simulation = builder._simulate_game(projection, market.home_spread, market.total, reliability, seed)
     selections = {}
@@ -368,4 +378,5 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
             "quotes": matched, "depth_observed_at": depth_at, "game_market_observed_at": market.captured.isoformat(),
             "inactives": inactives, "weather": weather, "model_version": builder.MODEL_VERSION,
             "weekly_input_key": weekly.get("input_cache_key"), "weekly_input_observed_at": weekly.get("input_observed_at"),
-            "ratings": ratings, "home_field": hfa, "lineup_summaries": summaries, "game_projection": projection}})
+            "ratings": ratings, "home_field": hfa, "projection_settings": settings,
+            "lineup_summaries": summaries, "game_projection": projection}})

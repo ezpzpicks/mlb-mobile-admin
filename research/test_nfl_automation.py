@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
-from builders.nfl_automation import checked_depth, fetch_depth, game_market, normalize_game, phase_for_game, withhold_unavailable_quotes
+from builders.nfl_automation import checked_depth, fetch_depth, game_market, normalize_game, phase_for_game, projection_settings, withhold_unavailable_quotes
 from builders.nfl_rotowire_props import SourceError, apply_quotes, parse_props_html
 from shared import turso_storage as turso
 from shared.nfl_auto_storage import NflDatabase, POLICY, save_run, upsert_results
@@ -95,6 +95,19 @@ def test_phase_windows_cover_normal_international_and_dst_kickoffs():
         g = game(current + timedelta(hours=5))
         assert phase_for_game(g, current, {}) == "early"
         assert phase_for_game(g, current - timedelta(hours=1), {}) is None
+
+
+def test_scheduled_projection_retains_the_production_rest_advantage():
+    from builders import nfl_builder as b
+    # A long rest advantage must move the model margin while preserving the
+    # total, and stay capped when a schedule contains an unusually long break.
+    lineup = {"offense_absence": 0.0, "defense_absence": 0.0}
+    defaults = b._schedule_defaults(pd.Series({"Away Rest": 7, "Home Rest": 7}))
+    even = b._project_matchup({}, {}, lineup, lineup, projection_settings(defaults, 1.8, 0))
+    defaults = b._schedule_defaults(pd.Series({"Away Rest": 7, "Home Rest": 21}))
+    rested = b._project_matchup({}, {}, lineup, lineup, projection_settings(defaults, 1.8, 0))
+    assert rested["total"] == even["total"]
+    assert rested["margin"] - even["margin"] == pytest.approx(1.5)
 
 
 def market_rows(g=None):

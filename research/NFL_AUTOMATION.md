@@ -40,6 +40,8 @@ checked roof designation. Missing or ambiguous inputs block the affected game.
 
 `builders/nfl_production.py` loads the same complete production model used by
 the admin. Its fitted coefficients, player tiers and grades are unchanged.
+Scheduled builds include the same capped rest-day adjustment as the admin;
+the applied home-field, rest and weather settings are retained with each build.
 Historical ratings, profiles, checked statistics and prior-slot residuals are
 cached in one compressed database row per model/season/week for up to 36 hours.
 Dynamic odds, availability and weather are always rechecked. Database writes
