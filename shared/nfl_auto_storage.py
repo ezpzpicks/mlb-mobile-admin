@@ -53,7 +53,17 @@ class NflDatabase(Database):
         if not self.exists("nfl_auto_runs"):
             return {}
         q = self.turso._sql_text
-        return {(r["game_id"], r["phase"]): r for r in self.query(f"SELECT * FROM nfl_auto_runs WHERE date_key={q(day)} AND policy={q(POLICY)}")}
+        return {(r["game_id"], r["phase"]): r for r in self.query(f"SELECT game_id,phase,policy,date_key,observed_at,input_hash FROM nfl_auto_runs WHERE date_key={q(day)} AND policy={q(POLICY)}")}
+
+    def run_payload(self, game_id, phase):
+        q = self.turso._sql_text
+        rows = self.query(f"SELECT payload_json FROM nfl_auto_runs WHERE game_id={q(game_id)} AND phase={q(phase)} AND policy={q(POLICY)}")
+        if not rows:
+            return None
+        payload = json.loads(rows[0]["payload_json"])
+        if payload.get("codec") == "zlib-base64":
+            return json.loads(zlib.decompress(base64.b64decode(payload["data"])))
+        return payload
 
     def cached(self, key):
         if not self.exists("nfl_auto_cache"):
@@ -160,7 +170,9 @@ def save_run(db, builder, result, game, phase, now):
         owned = f"(COALESCE(json_extract(payload_json,'$.\"Build Policy\"'),'')={q(POLICY)} OR instr(COALESCE(json_extract(payload_json,'$.\"Model Version\"'),''),{q('|' + POLICY)})>0)"
         guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='daily_slate' AND (game_key={q(gid)} OR ({pair})) AND {model_present} AND NOT {owned})"
         guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='builder_completed' AND date_key={q(day)} AND lower(json_extract(payload_json,'$.\"Away Team\"'))=lower({q(game['Away Team'])}) AND lower(json_extract(payload_json,'$.\"Home Team\"'))=lower({q(game['Home Team'])}))"
-    payload = json.dumps(clean(result), separators=(",", ":"), allow_nan=False)
+    raw_payload = json.dumps(clean(result), separators=(",", ":"), allow_nan=False)
+    payload = (json.dumps({"codec": "zlib-base64", "data": base64.b64encode(zlib.compress(raw_payload.encode(), 6)).decode()}, separators=(",", ":"))
+               if len(raw_payload) > 2048 else raw_payload)
     def req(sql): return {"type": "execute", "stmt": {"sql": sql, "args": []}}
     requests = [req("BEGIN IMMEDIATE"), req(f"CREATE TEMP TABLE nfl_save_gate AS SELECT 1 AS allowed WHERE {guard}")]
     gate = "EXISTS(SELECT 1 FROM nfl_save_gate)"

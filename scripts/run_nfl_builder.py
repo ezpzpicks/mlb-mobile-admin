@@ -163,7 +163,7 @@ def run(args):
                 baseline = previous.get((game["Game ID"], "pregame"))
                 if phase == "late" and baseline:
                     import pandas as pd
-                    locked = json.loads(baseline["payload_json"])
+                    locked = db.run_payload(game["Game ID"], "pregame")
                     latest_depth = checked_depth(depth, game, inactives, clock())
                     latest_depth = latest_depth[latest_depth["team_norm"].isin([game["Away Team"], game["Home Team"]])]
                     _, latest_quotes = apply_quotes(pd.DataFrame(locked["props"]), game, props, now=clock())

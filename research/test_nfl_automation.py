@@ -301,3 +301,15 @@ def test_public_yardage_regrading_cannot_revive_an_availability_hold():
     assert out.iloc[0]["Grade"] == "Availability hold" and not out.iloc[0]["Track"]
     assert pd.isna(out.iloc[0]["Market Line"]) and pd.isna(out.iloc[0]["Probability Edge"])
     assert out.iloc[1]["Grade"] == "Strong" and out.iloc[1]["Market Line"] == 100
+
+
+def test_large_archives_are_compressed_and_planning_reads_only_metadata(database):
+    db, conn = database
+    b, result = sample_result()
+    result["large_evidence"] = [{"source": "checked input", "value": i % 10} for i in range(1000)]
+    assert save_run(db, b, result, game(), "early", NOW)
+    raw = conn.execute("SELECT payload_json FROM nfl_auto_runs").fetchone()[0]
+    assert json.loads(raw)["codec"] == "zlib-base64"
+    assert len(raw) < len(json.dumps(result)) / 2
+    assert db.run_payload(game()["Game ID"], "early")["large_evidence"] == result["large_evidence"]
+    assert "payload_json" not in db.runs(game()["Date"])[(game()["Game ID"], "early")]

@@ -44,6 +44,9 @@ Historical ratings, profiles, checked statistics and prior-slot residuals are
 cached in one compressed database row per model/season/week for up to 36 hours.
 Dynamic odds, availability and weather are always rechecked. Database writes
 touch only affected games; indexed manifests use per-game count differences.
+Full review archives are compressed. Planning reads their small metadata only;
+`NflDatabase.run_payload(game_id, phase)` decodes one selected forecast when
+needed, rather than rereading every player's archive on each half-hour tick.
 
 Commands:
 
