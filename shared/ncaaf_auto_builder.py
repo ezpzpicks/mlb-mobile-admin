@@ -30,6 +30,9 @@ _ALIASES = {
     "unlv": "nevada las vegas", "lsu": "louisiana state",
     "byu": "brigham young", "smu": "southern methodist", "tcu": "texas christian",
     "fiu": "florida international", "fau": "florida atlantic", "hawai i": "hawaii",
+    "pitt": "pittsburgh", "ul monroe": "louisiana monroe", "ulm": "louisiana monroe",
+    "miami fl": "miami", "miami florida": "miami", "miami ohio": "miami oh",
+    "texas a and m": "texas aandm", "texas a m": "texas aandm",
 }
 
 
@@ -37,6 +40,8 @@ def team_key(value) -> str:
     value = unicodedata.normalize("NFKD", str(value or ""))
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
     value = re.sub(r"[^a-z0-9]+", " ", value.lower().replace("&", "and")).strip()
+    # ScoresAndOdds abbreviates State even when the schedule spells it out.
+    value = re.sub(r"\bst$", "state", value)
     return _ALIASES.get(value, value)
 
 
@@ -195,6 +200,12 @@ class Database:
 
 
 def match_schedule(market: MarketGame, rows):
+    """Match identity/date, resolving date-only schedule shells with fresh markets.
+
+    Midnight is the schedule import's placeholder, not a verified kickoff. The
+    market has already passed four-side kickoff/date/freshness validation. Real
+    non-midnight schedule times retain the existing 30-minute agreement gate.
+    """
     matches = []
     for row in rows:
         kickoff = timestamp(row.get("Game Time"))
@@ -204,14 +215,19 @@ def match_schedule(market: MarketGame, rows):
             continue
         if str(row.get("Completed", "")).lower() in {"1", "true", "yes"}:
             continue
-        if abs((kickoff - market.kickoff).total_seconds()) > 30 * 60:
+        local_kickoff = kickoff.astimezone(ET)
+        placeholder = (local_kickoff.hour, local_kickoff.minute,
+                       local_kickoff.second, local_kickoff.microsecond) == (0, 0, 0, 0)
+        if not placeholder and abs((kickoff - market.kickoff).total_seconds()) > 30 * 60:
             continue
         if row.get("Game ID") and number(row.get("Season")) and number(row.get("Week")):
             matches.append(row)
     ids = {str(row["Game ID"]) for row in matches}
     if len(ids) != 1:
         raise ValueError("no unique verified schedule matchup")
-    return matches[-1]
+    # Return a copy: callers receive the real kickoff without mutating the
+    # schedule cache. compute() and the atomic save persist it on daily_slate.
+    return {**matches[-1], "Game Time": market.kickoff.isoformat()}
 
 
 def protected_matchup(market, schedule, protected_rows):

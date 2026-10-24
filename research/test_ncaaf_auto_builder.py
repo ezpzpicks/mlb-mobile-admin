@@ -10,7 +10,7 @@ import pytest
 from shared import turso_storage as turso
 from shared.ncaaf_auto_builder import (
     AUTO_TAB, Database, MarketGame, eligible_markets, match_schedule,
-    protected_matchup, save_once, timestamp,
+    protected_matchup, save_once, team_key, timestamp,
 )
 
 NOW = datetime(2026, 11, 22, 15, tzinfo=timezone.utc)
@@ -65,6 +65,62 @@ def test_schedule_identity_aliases_and_protected_games():
     assert protected_matchup(market, schedule, [{"Date": market.date, "Away Team": market.away, "Home Team": market.home}])
     with pytest.raises(ValueError):
         match_schedule(market, [schedule, {**schedule, "Game ID": "456"}])
+
+
+@pytest.mark.parametrize("market_name,schedule_name", [
+    ("Pitt", "Pittsburgh"), ("Michigan St", "Michigan State"),
+    ("Mississippi St", "Mississippi State"), ("Sacramento St", "Sacramento State"),
+    ("Kansas St", "Kansas State"), ("Arizona St", "Arizona State"),
+    ("UL Monroe", "Louisiana-Monroe"), ("Texas A&M", "Texas AandM"),
+    ("Texas A & M", "Texas AandM"), ("San Jose St.", "San José State"),
+])
+def test_scoresandodds_schedule_aliases(market_name, schedule_name):
+    assert team_key(market_name) == team_key(schedule_name)
+
+
+def test_miami_and_texas_remain_distinct():
+    assert team_key("Miami") != team_key("Miami (OH)")
+    assert team_key("Texas") != team_key("Texas A&M")
+
+
+@pytest.mark.parametrize("schedule_time", ["2026-11-22", "2026-11-22T00:00:00-05:00"])
+def test_midnight_schedule_shell_uses_verified_market_kickoff(schedule_time):
+    market = eligible_markets(market_rows(), NOW)[0][0]
+    row = {"Season": "2026", "Week": "12", "Game ID": "123",
+           "Away Team": "Away", "Home Team": "Home", "Game Time": schedule_time}
+    result = match_schedule(market, [row])
+    assert timestamp(result["Game Time"]) == market.kickoff
+    assert row["Game Time"] == schedule_time
+    with pytest.raises(ValueError, match="unique verified"):
+        match_schedule(market, [row, {**row, "Game ID": "456"}])
+
+
+@pytest.mark.parametrize("change", [
+    {"Game Time": "2026-11-21T00:00:00-05:00"},
+    {"Game Time": "2026-11-22T20:00:00Z"},
+    {"Game Time": ""}, {"Completed": "True"}, {"Game ID": ""},
+    {"Season": ""}, {"Week": ""}, {"Away Team": "Other"},
+])
+def test_placeholder_recovery_keeps_identity_and_real_time_gates(change):
+    market = eligible_markets(market_rows(), NOW)[0][0]
+    row = {"Season": "2026", "Week": "12", "Game ID": "123",
+           "Away Team": "Away", "Home Team": "Home",
+           "Game Time": "2026-11-22T00:00:00-05:00", **change}
+    with pytest.raises(ValueError, match="unique verified"):
+        match_schedule(market, [row])
+
+
+def test_scheduled_ncaaf_processes_full_slate_without_changing_polling(monkeypatch):
+    from scripts import run_scheduled_builders as runner
+    calls = []
+    def run(argv, **kwargs):
+        calls.append(argv)
+        assert kwargs["timeout"] <= 900
+        return SimpleNamespace(returncode=0)
+    monkeypatch.setattr(runner.subprocess, "run", run)
+    assert runner.main() == 0
+    ncaaf = next(argv for argv in calls if argv[2].endswith("run_ncaaf_builder.py"))
+    assert ncaaf[3:] == ["--commit", "--limit", "100"]
 
 
 @pytest.fixture

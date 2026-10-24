@@ -24,7 +24,11 @@ def main():
     jobs.append(("NCAAF", "run_ncaaf_builder.py", 900))
     for sport, script, timeout in jobs:
         try:
-            result = subprocess.run([sys.executable, "-u", str(ROOT / "scripts" / script), "--commit"],
+            # An eight-game supervised trial limit must not strand a Saturday
+            # slate across multiple half-hour checks. Inputs are shared within
+            # the process and saved games remain protected on subsequent runs.
+            args = ["--commit", "--limit", "100"] if sport == "NCAAF" else ["--commit"]
+            result = subprocess.run([sys.executable, "-u", str(ROOT / "scripts" / script), *args],
                                     env=env, timeout=timeout, check=False)
             code = result.returncode
         except subprocess.TimeoutExpired:
