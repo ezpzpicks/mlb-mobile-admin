@@ -1,0 +1,37 @@
+name: College market line fallback checks
+on:
+  pull_request:
+    paths:
+      - 'shared/college_market_lines.py'
+      - 'shared/ncaaf_auto_builder.py'
+      - 'shared/cfb_auto_persistence.py'
+      - 'scripts/run_ncaaf_builder.py'
+      - 'builders/cbb_builder.py'
+      - 'research/test_college_market_lines.py'
+      - 'research/fixtures/covers_college_*.html'
+      - '.github/workflows/college-market-lines.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'shared/college_market_lines.py'
+      - 'shared/ncaaf_auto_builder.py'
+      - 'shared/cfb_auto_persistence.py'
+      - 'scripts/run_ncaaf_builder.py'
+      - 'builders/cbb_builder.py'
+      - 'research/test_college_market_lines.py'
+      - 'research/fixtures/covers_college_*.html'
+      - '.github/workflows/college-market-lines.yml'
+permissions:
+  contents: read
+jobs:
+  college-market-lines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas requests beautifulsoup4 pytest
+      - run: python -m py_compile shared/college_market_lines.py shared/ncaaf_auto_builder.py shared/cfb_auto_persistence.py scripts/run_ncaaf_builder.py builders/cbb_builder.py
+      - run: python -m pytest research/test_college_market_lines.py research/test_ncaaf_auto_builder.py -q

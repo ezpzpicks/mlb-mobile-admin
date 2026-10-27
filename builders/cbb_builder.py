@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 
 import pandas as pd
 import streamlit as st
@@ -165,6 +165,23 @@ def _render_build():
         "Enter the market lines and prices, then tap Apply Lines & Odds once. "
         "The builder will not rerun while you edit those fields."
     )
+    if st.button("Load available spread & total", key="cbb_load_market"):
+        from shared.college_market_lines import find_college_market
+        columns = ["Date", "Away Team", "Home Team", "Source", "Snapshot Status",
+                   "Market", "Selection", "Side", "Line", "Game Time", "Updated At", "Game Key"]
+        try:
+            rows = read_sheet("weekly_market_trends", columns).to_dict("records")
+            market = find_college_market("NCAAB", rows, away_name, home_name, datetime.now(timezone.utc))
+            st.session_state["cbb_home_spread"] = market.home_spread
+            st.session_state["cbb_total"] = market.total
+            st.session_state["cbb_market_source"] = {
+                "away": away_name, "home": home_name, "spread": market.home_spread,
+                "total": market.total, "source": market.source, "url": market.source_url,
+                "captured": market.captured.isoformat(), "kickoff": market.kickoff.isoformat(),
+            }
+            st.success(f"Loaded {market.source} lines. Spread/total prices are assumed -110.")
+        except Exception as exc:
+            st.warning(f"Current lines unavailable: {exc}")
     with st.form(key="cbb_market_inputs", clear_on_submit=False):
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -189,6 +206,10 @@ def _render_build():
         matchup_margin_adjustment = st.number_input("Home matchup adjustment", value=0.0, step=0.25, key="cbb_margin_adjust")
         matchup_total_adjustment = st.number_input("Matchup total adjustment", value=0.0, step=0.25, key="cbb_total_adjust")
         notes = st.text_area("Notes", key="cbb_notes", placeholder="Projected minutes, questionable players, travel, rest, shooting matchup...")
+
+    loaded = st.session_state.get("cbb_market_source", {})
+    if (loaded.get("away"), loaded.get("home"), loaded.get("spread"), loaded.get("total")) == (away_name, home_name, home_spread, market_total):
+        notes = (notes + f"; {loaded['source']} spread/total observed {loaded['captured']}; assumed -110 prices").strip("; ")
 
     away_score, home_score, margin, projected_total, possessions = _project(away, home, {
         "home_court": home_court,
@@ -298,3 +319,4 @@ def render():
         st.write("Import adjusted-efficiency and four-factor ratings into the Team Ratings section. The model stores separate CBB slate and tracker tabs in the same Google Sheets database used by MLB.")
         st.write("The next data phase is CollegeBasketballData API schedule/team-metric synchronization plus an eight-player projected-minutes and availability engine.")
         st.metric("Google Sheets", "Connected" if sheets_ready() else "Not configured")
+

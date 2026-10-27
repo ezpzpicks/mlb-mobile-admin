@@ -1,8 +1,9 @@
 # Scheduled NCAAF builder
 
 The scheduled job uses the same `load_production_builder()` as the admin. It
-builds only spreads and totals, from the retained ScoresAndOdds market rows,
-using **-110 for all four prices**. Moneylines and player props are excluded.
+builds only spreads and totals, using retained ScoresAndOdds market rows first
+and fresh Covers scoreboard lines for missing unsaved scheduled games. Prices
+are **-110 for all four sides**. Moneylines and player props are excluded.
 
 ## Schedule and cost
 
@@ -38,6 +39,17 @@ report zero `rows_written`. Logs include actual Turso `rows_read`,
 
 ## Save behavior
 
+- The college-only Covers adapter supports NCAAF and NCAAB/NCAAM. No professional
+  sport routes through it. NCAAF uses the existing scheduled job; the current
+  manual NCAAB builder offers an explicit load-lines button. This does not enable
+  unattended runs of the unfinished NCAAB foundation model.
+- Covers is fetched once per run only if unsaved scheduled games lack eligible
+  ScoresAndOdds lines. Completed/manual games remain protected. Headers, game
+  date, ET kickoff, opposite spreads and a consistent total must validate.
+- Covers source URLs and observation times are saved with model results. Opening
+  lines are left absent. User consensus percentages are ignored. No fallback rows
+  are inserted into split history, and no public-betting signals are fabricated.
+
 - Date-filtered compact `weekly_market_trends` reads; no `odds_snapshot` scan.
 - Existing saved games, tracked bets, settled results, and personnel snapshots
   are protected before calculation and again inside the save transaction.
@@ -51,3 +63,4 @@ report zero `rows_written`. Logs include actual Turso `rows_read`,
 
 Disable scheduled saves by setting `NCAAF_AUTO_BUILDER_ENABLED=0` (runs fail
 closed) or suspend the cron service. The existing admin remains available.
+

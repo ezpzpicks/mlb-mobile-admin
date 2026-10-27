@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run today's unsaved NCAAF games with retained ScoresAndOdds lines.
+"""Run today's unsaved NCAAF games with ScoresAndOdds or fallback Covers lines.
 
 Default: read-only plan. --evaluate computes without saving. --commit explicitly
 enables atomic saves, and additionally requires NCAAF_AUTO_BUILDER_ENABLED=1.
@@ -20,8 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from shared.ncaaf_auto_builder import (
     ASSUMED_ODDS, AUTO_TAB, Database, ET, eligible_markets, match_schedule,
-    protected_matchup, save_once,
+    pair_key, protected_matchup, save_once,
 )
+from shared.college_market_lines import fetch_covers_markets, missing_schedule_games
 
 
 def emit(event, **details):
@@ -86,7 +87,7 @@ def compute(builder, schedule, market, ratings):
                  "Home Spread": market.home_spread, "Total": market.total,
                  "Opening Home Spread": market.opening_home_spread,
                  "Opening Total": market.opening_total, "Away ML": 0, "Home ML": 0,
-                 "Line Provider": "ScoresAndOdds; assumed -110 prices"})
+                 "Line Provider": f"{market.source}; assumed -110 prices"})
     for column in ("Home Spread Odds", "Away Spread Odds", "Total Over Odds", "Total Under Odds"):
         game[column] = ASSUMED_ODDS
     game = pd.Series(game, dtype=object)
@@ -124,11 +125,31 @@ def run(args):
         markets, skipped = eligible_markets(db.rows("weekly_market_trends", day, compact=True), now)
         for item in skipped:
             emit("skipped", **item)
+        schedule = db.rows("schedule")
+        protected = [row for tab in (AUTO_TAB, "builder_completed", "bet_tracker") for row in db.rows(tab, day)]
+        missing = missing_schedule_games(markets, schedule, protected, now)
+        # Legacy manual saves may have only personnel snapshots. Avoid fetching
+        # fallback lines for those protected matchups on every half-hour tick.
+        missing_unbuilt = []
+        q = turso._sql_text
+        for game in missing:
+            existing = db.query("SELECT row_index FROM dataset_rows WHERE sport='NCAAF' "
+                                f"AND dataset='personnel_snapshots' AND game_key={q(str(game['Game ID']))} LIMIT 1")
+            if not existing:
+                missing_unbuilt.append(game)
+        if missing_unbuilt:
+            try:
+                fallback, rejected = fetch_covers_markets("NCAAF", now)
+                wanted = {pair_key(game) for game in missing_unbuilt}
+                fallback = [market for market in fallback if market.pair in wanted]
+                markets.extend(fallback)
+                emit("covers_fallback", requested=len(wanted), found=len(fallback),
+                     games=[market.summary() for market in fallback], rejected=len(rejected))
+            except Exception as exc:
+                emit("covers_fallback_unavailable", error=f"{type(exc).__name__}: {exc}")
         if not markets:
             emit("no_eligible_markets", date=day)
             return 0
-        schedule = db.rows("schedule")
-        protected = [row for tab in (AUTO_TAB, "builder_completed", "bet_tracker") for row in db.rows(tab, day)]
         pending = []
         for market in markets:
             try:
@@ -169,7 +190,8 @@ def run(args):
                      spread=slate["Spread Pick"], spread_grade=slate["Spread Grade"],
                      total=slate["Total Pick"], total_grade=slate["Total Grade"],
                      projected_away=slate["Projected Away"], projected_home=slate["Projected Home"],
-                     model_version=builder.MODEL_VERSION, assumed_odds=ASSUMED_ODDS)
+                     model_version=builder.MODEL_VERSION, assumed_odds=ASSUMED_ODDS,
+                     line_source=market.source)
             except Exception as exc:
                 failures += 1
                 emit("game_failed", game=market.summary()["game"], error=f"{type(exc).__name__}: {exc}")
@@ -207,3 +229,4 @@ if __name__ == "__main__":
         from scripts.run_scheduled_builders import main as scheduled_main
         raise SystemExit(scheduled_main())
     raise SystemExit(main())
+
