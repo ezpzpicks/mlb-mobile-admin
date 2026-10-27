@@ -1,7 +1,8 @@
 """Bounded ScoresAndOdds reads and insert-once NCAAF builder persistence.
 
-No scraper or raw odds archive is used here. Model evaluation is read-only;
-only the explicit atomic save can change permanent data.
+Retained split rows are validated here; college-only Covers fallback quotes live
+in college_market_lines. Model evaluation is read-only and only the explicit
+atomic save can change permanent data. No raw odds archive is scanned.
 """
 from __future__ import annotations
 
@@ -88,6 +89,12 @@ class MarketGame:
     opening_home_spread: float | None
     opening_total: float | None
     source_key: str
+    source: str = "ScoresAndOdds"
+    source_url: str = ""
+
+    @property
+    def price_note(self):
+        return f"Automated NCAAF: {self.source} lines; all spread/total prices assumed -110."
 
     @property
     def pair(self):
@@ -97,7 +104,8 @@ class MarketGame:
         return {"game": f"{self.away} @ {self.home}", "date": self.date,
                 "kickoff": self.kickoff.astimezone(ET).isoformat(),
                 "home_spread": self.home_spread, "total": self.total,
-                "assumed_odds": ASSUMED_ODDS, "captured": self.captured.isoformat()}
+                "assumed_odds": ASSUMED_ODDS, "captured": self.captured.isoformat(),
+                "source": self.source, "source_url": self.source_url}
 
 
 def eligible_markets(rows, now: datetime, max_age_minutes: int = 90):
@@ -244,3 +252,4 @@ def save_once(db: Database, builder, result, market: MarketGame, now=None):
     """Atomically protect saved/manual games, then save only this matchup's rows."""
     from shared.cfb_auto_persistence import save_once_transaction
     return save_once_transaction(db, builder, result, market, now=now)
+

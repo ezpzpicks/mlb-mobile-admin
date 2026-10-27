@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 
-from shared.ncaaf_auto_builder import ASSUMED_ODDS, AUTO_TAB, PRICE_NOTE
+from shared.ncaaf_auto_builder import ASSUMED_ODDS, AUTO_TAB
 
 
 def save_once_transaction(db, builder, result, market, now=None):
@@ -44,7 +44,8 @@ def save_once_transaction(db, builder, result, market, now=None):
                               int(float(game["Season"])), int(float(game["Week"])), game_id)
         for side in ("away", "home")
     ]
-    extension = ["Build Source", "Build Captured At", "Odds Assumption"]
+    build_source = f"Scheduled {market.source} builder"
+    extension = ["Build Source", "Build Captured At", "Odds Assumption", "Market Source URL"]
     specs = []
     for dataset, frame, columns, keys in [
         (builder.SLATE_TAB, slate, list(builder.SLATE_COLUMNS), ["Date", "Game ID"]),
@@ -53,11 +54,12 @@ def save_once_transaction(db, builder, result, market, now=None):
     ]:
         if frame.empty:
             continue
-        frame["Build Source"] = "Scheduled ScoresAndOdds builder"
+        frame["Build Source"] = build_source
         frame["Build Captured At"] = market.captured.isoformat()
         frame["Odds Assumption"] = str(ASSUMED_ODDS)
+        frame["Market Source URL"] = market.source_url
         if "Notes" in frame.columns:
-            frame["Notes"] = frame["Notes"].fillna("").astype(str) + "; " + PRICE_NOTE
+            frame["Notes"] = frame["Notes"].fillna("").astype(str) + "; " + market.price_note
         columns = list(dict.fromkeys([*columns, *extension]))
         specs.append((dataset, _normalized_records(frame, columns), columns, keys))
 
@@ -78,7 +80,7 @@ def save_once_transaction(db, builder, result, market, now=None):
     completion = {"Sport": "CFB", "Date": day, "Game ID": game_id,
                   "Away Team": str(game["Away Team"]), "Home Team": str(game["Home Team"]),
                   "Game Label": str(slate.iloc[0]["Game"]), "Saved At": stamp,
-                  "Build Source": "Scheduled ScoresAndOdds builder"}
+                  "Build Source": build_source, "Market Source URL": market.source_url}
     audit = {**completion, "Model Version": str(builder.MODEL_VERSION),
              "Market Home Spread": str(market.home_spread), "Market Total": str(market.total),
              "Odds Assumption": str(ASSUMED_ODDS), "Market Captured At": market.captured.isoformat(),
@@ -140,3 +142,4 @@ def save_once_transaction(db, builder, result, market, now=None):
     # Address this SELECT by its request index, not relative to the response tail.
     rows = turso._result_rows(results[len(requests) - 3])
     return bool(rows and int(rows[0]["saved"]))
+
