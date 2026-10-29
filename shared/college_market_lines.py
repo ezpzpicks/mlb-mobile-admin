@@ -57,6 +57,13 @@ def parse_covers_markets(html, sport, now, *, captured_at=None):
             heading = card.select_one(".gamebox-header strong")
             label = heading.get_text(" ", strip=True) if heading else label
             away, home = label.split(" @ ")
+            # Headlines use ambiguous display abbreviations such as JSU. The
+            # linked team logos carry full names (Jacksonville State), even when
+            # unquoted data-team attributes are truncated by the HTML parser.
+            names = [logo.get("alt", "").strip()
+                     for logo in card.select(".gamebox-team-anchor img[alt]")]
+            if len(names) == 2 and all(names):
+                away, home = names
             # The neutral-site marker and rankings are not part of team identity.
             clean = lambda name: re.sub(r"\s*\((?:N|\d+)\)\s*", " ", name).strip()
             away, home = clean(away), clean(home)

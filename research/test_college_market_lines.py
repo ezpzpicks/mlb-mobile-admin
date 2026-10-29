@@ -36,6 +36,22 @@ def test_college_basketball_uses_same_verified_card_format(sport):
     assert "/basketball/ncaab/" in markets[0].source_url
 
 
+def test_covers_display_abbreviation_uses_linked_full_team_identity():
+    # Real Covers cards label Jacksonville State as JSU in the headline; JSU
+    # must not be guessed as Jackson State or left unmatched to the schedule.
+    html = HTML.replace("Delaware @ Western Kentucky", "JSU @ New Mexico State")
+    html = html.replace('alt="Delaware"', 'alt="Jacksonville State"')
+    html = html.replace('alt="Western Kentucky"', 'alt="New Mexico State"')
+    markets, rejected = parse_covers_markets(html, "NCAAF", NOW)
+    assert not rejected
+    market = next(m for m in markets if m.home == "New Mexico State")
+    assert market.away == "Jacksonville State"
+    row = {"Game ID": "401871057", "Season": "2026", "Week": "9",
+           "Away Team": "Jacksonville State", "Home Team": "New Mexico State",
+           "Game Time": market.kickoff.isoformat()}
+    assert match_schedule(market, [row])["Game ID"] == "401871057"
+
+
 @pytest.mark.parametrize("sport", ["NBA", "NFL", "MLB", "NHL", "WNBA", ""])
 def test_professional_sports_are_rejected_before_network(sport, monkeypatch):
     import requests
