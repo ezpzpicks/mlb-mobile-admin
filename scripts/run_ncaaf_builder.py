@@ -144,7 +144,10 @@ def run(args):
                 fallback = [market for market in fallback if market.pair in wanted]
                 markets.extend(fallback)
                 emit("covers_fallback", requested=len(wanted), found=len(fallback),
-                     games=[market.summary() for market in fallback], rejected=len(rejected))
+                     games=[market.summary() for market in fallback], rejected=len(rejected),
+                     unmatched_games=[f"{game['Away Team']} @ {game['Home Team']}"
+                                      for game in missing_unbuilt
+                                      if pair_key(game) not in {market.pair for market in fallback}])
             except Exception as exc:
                 emit("covers_fallback_unavailable", error=f"{type(exc).__name__}: {exc}")
         if not markets:
