@@ -108,6 +108,8 @@ def run(args):
     db = NflDatabase(turso)
     started = time.monotonic()
     try:
+        if args.commit:
+            db.initialize()
         rows = db.schedule(str(local.date()))
         if args.next_game:
             q = turso._sql_text
@@ -134,6 +136,11 @@ def run(args):
         builder = prepare_builder(db)
         if args.commit:
             settle_recent(db, builder, now)
+            from shared.nfl_research_storage import settle_recent as settle_research
+            try:
+                emit("research_settled", updates=settle_research(db, builder, now))
+            except Exception as exc:
+                emit("research_settlement_waiting", reason=f"{type(exc).__name__}: {exc}")
         if not plan:
             emit("no_due_games")
             return 0
@@ -148,8 +155,6 @@ def run(args):
         if not ready:
             emit("no_complete_markets")
             return 1 if args.next_game else 0
-        if args.commit:
-            db.initialize()
         props = fetch_props(on_event=emit)
         inactives = fetch_inactives(on_event=emit) if args.next_game or any(phase != "early" for _, phase, _ in ready) else None
         teams = {g[side] for g, _, _ in ready for side in ("Away Team", "Home Team")}

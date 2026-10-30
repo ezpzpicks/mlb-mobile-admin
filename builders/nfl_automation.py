@@ -363,9 +363,11 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
     for row in [*p_rows, *p_tracker, *g_tracker, *l_rows]:
         row.update({"Model Version": version, "Game Time": game["Game Time"]})
     fingerprint = input_identity(game, market, matched, depth, weather, inactives)
-    return clean({"slate": slate, "props": p_rows, "prop_tracker": p_tracker, "game_tracker": g_tracker, "lineups": l_rows,
+    result = clean({"slate": slate, "props": p_rows, "prop_tracker": p_tracker, "game_tracker": g_tracker, "lineups": l_rows,
         "input_hash": fingerprint, "provenance": {"props": {k: props[k] for k in ("source", "source_sha256", "observed_at", "week")},
             "quotes": matched, "depth_observed_at": depth_at, "game_market_observed_at": market.captured.isoformat(),
             "inactives": inactives, "weather": weather, "model_version": builder.MODEL_VERSION,
             "weekly_input_key": weekly.get("input_cache_key"), "weekly_input_observed_at": weekly.get("input_observed_at"),
             "ratings": ratings, "home_field": hfa, "lineup_summaries": summaries, "game_projection": projection}})
+    from builders.nfl_research import attach
+    return attach(result, weekly["ratings"])
