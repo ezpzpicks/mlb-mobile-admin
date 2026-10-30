@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - 'builders/nfl_*.py'
-      - 'shared/nfl_auto_storage.py'
+      - 'shared/nfl_*.py'
       - 'scripts/run_nfl_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'scripts/run_ncaaf_builder.py'
@@ -14,7 +14,7 @@ on:
     branches: [main]
     paths:
       - 'builders/nfl_*.py'
-      - 'shared/nfl_auto_storage.py'
+      - 'shared/nfl_*.py'
       - 'scripts/run_nfl_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'research/test_nfl_*.py'

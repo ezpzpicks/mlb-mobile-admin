@@ -34,6 +34,8 @@ class NflDatabase(Database):
             self.query("CREATE TABLE IF NOT EXISTS nfl_auto_cache (cache_key TEXT PRIMARY KEY, observed_at TEXT NOT NULL, payload TEXT NOT NULL)")
             self.query("CREATE TABLE IF NOT EXISTS nfl_auto_runs (game_id TEXT NOT NULL, phase TEXT NOT NULL, policy TEXT NOT NULL, date_key TEXT NOT NULL, observed_at TEXT NOT NULL, input_hash TEXT NOT NULL, payload_json TEXT NOT NULL, PRIMARY KEY(game_id,phase,policy))")
             self.query("CREATE INDEX IF NOT EXISTS nfl_auto_runs_date ON nfl_auto_runs(date_key,policy)")
+        from shared.nfl_research_storage import initialize
+        initialize(self)
 
     def rows(self, dataset, day=None, *, where="", columns=None):
         q = self.turso._sql_text
@@ -195,6 +197,9 @@ def save_run(db, builder, result, game, phase, now):
                 row.update({"Build Policy": POLICY, "Build Phase": phase, "Build At": now.isoformat()})
             extra = ["Build Policy", "Build Phase", "Build At", "Game Time"]
             requests += _dataset_requests(db, dataset, rows, [*columns, *extra], now, gate=gate, update=dataset == "daily_slate")
+    if phase == "pregame":
+        from shared.nfl_research_storage import capture_requests
+        requests += capture_requests(db, result, game, now, gate=gate)
     requests += [req(f"INSERT INTO nfl_auto_runs SELECT {q(gid)},{q(phase)},{q(POLICY)},{q(day)},{q(now.isoformat())},{q(result['input_hash'])},{q(payload)} WHERE {gate}"),
         req("SELECT COUNT(*) AS saved FROM nfl_save_gate"), req("DROP TABLE nfl_save_gate"), req("COMMIT")]
     with db.writes():

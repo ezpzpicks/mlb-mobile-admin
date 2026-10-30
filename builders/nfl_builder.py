@@ -5764,6 +5764,12 @@ def _render_build() -> None:
                 f"Saved the game and {len(prop_projection_rows)} prop projections. "
                 f"Tracker additions: {len(game_tracker_rows)} game bet(s) and {len(prop_tracker_rows)} prop bet(s)."
             )
+            if not manual_mode:
+                try:
+                    from shared.nfl_research_storage import capture_manual
+                    capture_manual(slate_row, prop_projection_rows, ratings, away_rating, home_rating, selected_schedule_row, prop_tracker_rows)
+                except Exception as exc:
+                    st.warning(f"Game saved; prospective research capture needs attention: {exc}")
         else:
             st.error("One or more Google Sheets updates did not finish. Check the Sheets connection and try the single save button again.")
 
@@ -5910,7 +5916,7 @@ def render() -> None:
     st.caption("NFL v4.5 regression slate • active-game player projections • yardage + Anytime TD entry")
     page = st.radio(
         "NFL section",
-        ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Team Ratings", "Schedule", "Lineups", "Setup"],
+        ["Build", "Prop Slate", "Prop Tracker", "Slate", "Tracker", "Research", "Team Ratings", "Schedule", "Lineups", "Setup"],
         horizontal=True,
         key="nfl_nav",
     )
@@ -5924,6 +5930,9 @@ def render() -> None:
         _table(SLATE_TAB, SLATE_COLUMNS, "NFL Daily Slate")
     elif page == "Tracker":
         _render_game_tracker()
+    elif page == "Research":
+        from builders.nfl_research_dashboard import render_research
+        render_research()
     elif page == "Team Ratings":
         _render_ratings()
     elif page == "Schedule":
