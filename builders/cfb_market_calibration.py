@@ -23,6 +23,8 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from builders.cfb_research_snapshot import research_snapshot
+
 MODEL_VERSION = "cfb-v2.5-stabilized-spread-edge-2026-09-25"
 CALIBRATION_RESEARCH_VERSION = "cfb-v2-calibration-team-residual-2026-08-21"
 
@@ -58,6 +60,7 @@ SLATE_EXTRA_COLUMNS = [
     "Spread Odds", "Spread Implied Probability", "Spread Price Edge", "Spread Expected Value",
     "Total Odds", "Total Implied Probability", "Total Price Edge", "Total Expected Value",
     "Margin Residual SD", "ATS Calibration Proven",
+    "Research Snapshot JSON",
 ]
 
 
@@ -394,6 +397,7 @@ def install_market_calibration(cfb_builder: Any) -> None:
             "Total Expected Value": round(_num(total.get("ev")), 4),
             "Margin Residual SD": round(MARGIN_RESIDUAL_SD, 4),
             "ATS Calibration Proven": bool(ATS_CALIBRATION_PROVEN),
+            "Research Snapshot JSON": research_snapshot(result, str(cfb_builder.MODEL_VERSION)),
         }
         for key, value in values.items():
             frame.at[idx, key] = value
