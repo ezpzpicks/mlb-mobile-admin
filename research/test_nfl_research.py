@@ -71,6 +71,8 @@ def test_receiving_rule_uses_projection_gap_not_skewed_distribution_pick():
     rows = predictions(slate(), [prop()], context())
     assert entry(rows, "rb_receiving_v1")["direction"] == "Over"
     assert entry(rows, "rb_receiving_v1")["odds"] == -115
+    assert entry(rows, "rb_receiving_v1")["matchup_confidence"] == 85
+    assert entry(rows, "rb_receiving_v1")["relative_gap"] == .5
     assert entry(rows, "rb_current")["direction"] == "Under"
     p = prop(); p["Under Odds"] = ""
     assert not entry(predictions(slate(), [p], context()), "rb_receiving_v1")["selected"]
@@ -100,6 +102,9 @@ def test_capture_is_atomic_append_once_and_never_backfills_an_early_preview(data
     assert save_run(db, b, result, game(), "pregame", NOW)
     captured = read_rows(db)
     assert captured and all(r["captured_at"] == NOW.isoformat() for r in captured)
+    snapshot = json.loads(conn.execute("SELECT payload_json FROM nfl_research_games").fetchone()[0])
+    assert len(snapshot["prop_inputs"]) == 1
+    assert all(snapshot["prop_inputs"][0][k] == v for k, v in prop().items())
     assert entry(captured, "totals_weights_v1")["probability"] is None
     original_payloads = conn.execute("SELECT prediction_key,payload_json FROM nfl_research_predictions ORDER BY prediction_key").fetchall()
     result["research"]["predictions"][0]["line"] = 999

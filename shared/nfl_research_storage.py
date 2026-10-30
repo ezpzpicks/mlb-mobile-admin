@@ -1,6 +1,7 @@
 """Append-once NFL forecasts with indexed, result-only settlement updates."""
 from __future__ import annotations
 
+from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
@@ -12,6 +13,24 @@ from shared.ncaaf_auto_builder import timestamp
 
 def request(sql):
     return {"type": "execute", "stmt": {"sql": sql, "args": []}}
+
+
+class AdminResearchDatabase:
+    """Use the admin's connection without replacing its global pipeline."""
+    def __init__(self, turso):
+        self.turso = turso
+
+    def pipeline(self, requests, **kwargs):
+        return self.turso._pipeline(requests, **kwargs)
+
+    def query(self, sql):
+        return self.turso._result_rows(self.pipeline([request(sql)])[0])
+
+    def exists(self, table):
+        return bool(self.query(f"SELECT 1 FROM sqlite_master WHERE type='table' AND name={self.turso._sql_text(table)}"))
+
+    def writes(self):
+        return nullcontext()
 
 
 def initialize(db):
@@ -50,6 +69,8 @@ def capture_requests(db, result, game, now, *, gate="1"):
     sql = [f"CREATE TEMP TABLE nfl_research_capture_gate AS SELECT 1 WHERE {valid} AND NOT EXISTS(SELECT 1 FROM nfl_research_games WHERE {unique})"]
     allowed = "EXISTS(SELECT 1 FROM nfl_research_capture_gate)"
     context = {"slate": result.get("slate", {}), "context": research.get("context", {}),
+        "prop_inputs": [p for p in result.get("props", []) if p.get("Position") == "RB" and p.get("Market") == "Receiving Yards"],
+        "quote_provenance": result.get("provenance", {}).get("props", {}),
         "input_hash": result.get("input_hash", ""), "captured_at": now.isoformat(),
         "source_commit": os.getenv("RENDER_GIT_COMMIT", ""), "policy": POLICY, "parameter_hash": PARAMETER_HASH}
     payload = json.dumps(context, separators=(",", ":"), allow_nan=False)
@@ -73,7 +94,6 @@ def capture_manual(slate, props, league_ratings, away, home, schedule_row, track
     if schedule_row is None:
         return False
     from builders.nfl_research import attach
-    from shared.nfl_auto_storage import NflDatabase
     from shared import turso_storage as turso
     now = datetime.now(timezone.utc)
     value = dict(slate)
@@ -88,15 +108,12 @@ def capture_manual(slate, props, league_ratings, away, home, schedule_row, track
         result["prop_tracker"] = tracked_props
     from shared.nfl_auto_storage import clean
     result = clean(attach(result, league_ratings, price_source="manual_input"))
-    db = NflDatabase(turso)
-    try:
-        initialize(db)
-        requests = [request("BEGIN IMMEDIATE"), *capture_requests(db, result, game, now), request("COMMIT")]
-        with db.writes():
-            responses = db.pipeline(requests, max_attempts=1)
-        return bool(int(db.turso._result_rows(responses[len(requests) - 3])[0]["captured"]))
-    finally:
-        turso._pipeline = db.original_pipeline
+    db = AdminResearchDatabase(turso)
+    initialize(db)
+    requests = [request("BEGIN IMMEDIATE"), *capture_requests(db, result, game, now), request("COMMIT")]
+    with db.writes():
+        responses = db.pipeline(requests, max_attempts=1)
+    return bool(int(db.turso._result_rows(responses[len(requests) - 3])[0]["captured"]))
 
 
 def pending(db, now):

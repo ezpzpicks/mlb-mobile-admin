@@ -55,8 +55,7 @@ def render_research():
     import pandas as pd
     import streamlit as st
     from shared import turso_storage as turso
-    from shared.nfl_auto_storage import NflDatabase
-    from shared.nfl_research_storage import read_rows
+    from shared.nfl_research_storage import AdminResearchDatabase, read_rows
 
     st.subheader("NFL Forward Research")
     st.caption(f"New forecasts from {START_DATE}. Each first pregame save is frozen with its line, price and inputs. Historical backtests are excluded from these records.")
@@ -64,9 +63,7 @@ def render_research():
 
     @st.cache_data(ttl=60, show_spinner=False)
     def load_rows():
-        db = NflDatabase(turso)
-        try:return read_rows(db)
-        finally:turso._pipeline = db.original_pipeline
+        return read_rows(AdminResearchDatabase(turso))
 
     if st.button("Refresh research", key="nfl_research_refresh"):
         load_rows.clear()
@@ -104,6 +101,6 @@ def render_research():
         st.caption("Pregame forecasts cannot be replaced by later inputs. An unconfirmed zero-yard participation result remains pending for review.")
         if rows:
             strategy = st.selectbox("Strategy", list(LABELS), format_func=lambda x: LABELS[x], key="nfl_research_strategy")
-            details = [{k: r.get(k) for k in ("date", "game", "player", "direction", "line", "odds", "projection", "selected", "reason", "result", "units", "captured_at", "price_source")} for r in grouped[strategy]]
+            details = [{k: r.get(k) for k in ("date", "game", "player", "direction", "line", "odds", "projection", "matchup_confidence", "relative_gap", "line_source", "selected", "reason", "result", "units", "captured_at", "price_source")} for r in grouped[strategy]]
             st.dataframe(pd.DataFrame(details), hide_index=True, use_container_width=True)
             st.download_button("Download frozen records", json.dumps(rows, indent=2), "nfl-forward-records.json", "application/json")

@@ -158,6 +158,9 @@ def predictions(slate, props, context, *, price_source="assumed_-110"):
             rows.append(_entry(slate, strategy, "Receiving Yards", "Over" if positive else "Under", line,
                 prop.get("Over Odds" if positive else "Under Odds"), selected=selected,
                 reason="" if selected else "Availability, quote, confidence or gap requirement not met", **kwargs))
+            rows[-1].update(matchup_confidence=confidence, relative_gap=gap,
+                original_pick=str(prop.get("Pick", "")), original_grade=str(prop.get("Grade", "")),
+                line_source=str(prop.get("Line Source", "")))
     unique = {}
     for row in rows:
         key = row["strategy"], row["market"], row.get("team", ""), row.get("player", "")
