@@ -1,7 +1,7 @@
 """Exercise audit accounting and the production's strict prior-game boundary."""
 from pathlib import Path
 import tempfile
-from research.ncaaf_edge_audit import PriorSchedule, record, profit, result_value, canon
+from research.ncaaf_edge_audit import PriorSchedule, record, profit, result_value, canon, play
 from builders.cfb_schedule_adjustment import _read_prior_games
 
 
@@ -20,6 +20,12 @@ def main():
     before=_read_prior_games(PriorSchedule(games),2026,7,"2026-10-17")
     assert list(before["Away Score"])==[20]
     assert canon("San José State")==canon("San Jose State")
+    # The simulation's selected side can differ from the mean direction near zero.
+    game={"id":"1","game":"A @ B","date":"2026-10-17","week":7,"version":"test","current":False,
+        "market_total":50.,"saved_total":50.2,"actual_total":48.,"weather":0.,"total_personnel":0.,
+        "slate":{"Total Pick":"Under 50","Total Under Odds":"-110"}}
+    assert play(game,"Total")["side"]==-1 and play(game,"Total")["result"]==1
+    assert play(game,"Total",50.2)["side"]==1 and play(game,"Total",50.2)["result"]==-1
     print("NCAAF audit: unit-risk accounting, pushes, identity, and no future/same-day scores passed")
 
 

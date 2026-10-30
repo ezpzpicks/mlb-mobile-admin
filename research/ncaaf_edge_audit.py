@@ -163,6 +163,10 @@ def play(g, market, prediction=None, enforce_eligibility=True):
         line=g["market_total"]
         if not math.isfinite(line) or line<=0:return None
         pred=g["saved_total"] if prediction is None else prediction;edge=pred-line;side=1 if edge>=0 else -1
+        if prediction is None:
+            saved_pick=str(r.get("Total Pick","")).lower()
+            if saved_pick.startswith("over"):side=1
+            elif saved_pick.startswith("under"):side=-1
         odds=number(r.get("Total Over Odds" if side==1 else "Total Under Odds"),-110)
         outcome=result_value(g["actual_total"],line,side);direction="Over" if side==1 else "Under"
     else:

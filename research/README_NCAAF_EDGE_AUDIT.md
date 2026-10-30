@@ -19,6 +19,9 @@ The input directory contains JSON arrays named `daily_slate.json`,
 The script preserves the public model record's existing 20-point spread exclusion,
 keeps the current model version separate, and checks saved results against scores.
 Fixed edge bands include forecasts marked No Play. Unit risk is one per selection.
+Saved total forecast bands use the exact saved selection. Sensitivity replays
+choose direction from the changed projection; near-zero mean gaps can disagree
+with the saved simulation's selected side, so these are kept distinct.
 
 Nine additive total-model sensitivity candidates use the same 3-point gate.
 Selection uses weeks 6–7 only; weeks 8–9 are reported separately. Add-one total
