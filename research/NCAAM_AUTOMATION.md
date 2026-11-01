@@ -40,7 +40,7 @@ Automated Slate and public Full Slate show the same saved calculations. Manual
 draft results retain their own version and storage; they are not overwritten.
 
 The automatic forecasts have Research grades and no claimed calibrated
-probabilities. Roster availability is unchecked. A/B grades require NCAAM
+probabilities. A/B grades require NCAAM
 chronological validation, and official EZPZ picks require a separate dated NCAAM
 combo-score threshold. Launching collection is not evidence of betting accuracy.
 
@@ -56,3 +56,64 @@ The first live read-only trial produced a neutral-site Notre Dame–Villanova
 forecast using actual current-season ratings and Covers lines. The public SAO
 adapter also matched its quartet after correcting neutral-site source order.
 Liberty–High Point was explicitly waiting for lines at the time of that check.
+
+## v0.3: completed-season prior and college player rotations
+
+The opening 2026–27 slate uses the completed 2025–26 season (Torvik ending year
+2026) as its team efficiency/tempo prior, with actual current-season W–L game
+count determining the weight: current results receive `n / (n + 10)`. At 0–0,
+the prior receives 100%; after ten games, each season receives 50%. The ten-game
+setting is provisional research, not a tuned or calibrated parameter. A school
+without a preceding-season rating retains its actual current rating and the
+missing prior is visible. Offensive and defensive adjusted efficiencies already
+account for schedule strength and competition. SOS and opponent OE/DE are saved
+for inspection; they are not applied again as an arbitrary multiplier. Each
+offense is matched multiplicatively against the opposing defense, scaled by the
+league efficiency and the teams' tempos. Neutral court verification remains
+required. Market lines do not determine projected scores.
+
+`builders/ncaam_lineups.py` reads public RotoWire college depth charts from
+`https://www.rotowire.com/daily/ncaab/lineups.php`, following at most two additional
+advertised, date-matching slate links. College cards are projected depth charts,
+never NBA-style confirmed fives. Every card must match both ESPN schools and the
+explicit Eastern game date/time, including the November DST transition. Repeated
+position slots are deduplicated and incomplete fives stay incomplete. GTD becomes
+Questionable, OUT/OFS becomes Out. Blank status remains Unknown. Missing source
+coverage does not mean healthy. No subscription minutes are scraped.
+
+`builders/ncaam_player_impact.py` applies the NBA minute-delta mechanics scaled
+to 40 minutes per player and 200 regulation team minutes. College player
+coefficients are Torvik college OBPM/DBPM, not NBA RAPM. The publicly documented
+67-column export at `getadvstats.php?year=2027&csv=1` is validated for season,
+unique identities, finite fields and reconciled offensive/defensive BPM. Players
+with under 1% minute share or no games are excluded as insufficient exposure.
+Current-year preseason player profiles can carry earlier statistics and are
+not counted as newly played games. Source roster minute shares are model weights,
+not RotoWire projected minutes. Missing/new player ratings are explicit gaps.
+
+The reference rotation blends prior-school and current-school exposure using
+the same season weight. Current-school player IDs determine the active roster;
+departures lose minutes and transfers carry their prior college coefficients
+where available. OUT/Doubtful players receive zero minutes and evidenced
+replacements fill the remaining allocation with a 40-minute cap. Questionable
+players remain IN in the base forecast, with separate one-player OUT scenarios.
+For each player, `minute_delta / 40 * OBPM` changes offense and the analogous
+DBPM value improves (lowers) defensive points allowed. No unverified rookie or
+missing replacement receives an invented coefficient. Insufficient rotation
+coverage preserves the team baseline with a flag.
+
+Player inputs cache for six hours; completed-season inputs for at most 30 days.
+RotoWire observations must be within 35 minutes, tightened to ten minutes inside
+90 minutes to tipoff. Both the existing public collector and Python builder save
+one date-indexed `lineup_snapshots` row; public page visits only read saved data.
+The builder reuses a fresh saved observation before fetching. A material lineup,
+roster or ratings revision adds an immutable forecast keyed by the input digest;
+an observation timestamp alone does not create another forecast. Latest per-game
+selection keeps one active forecast for records and signals; earlier versions
+remain intact. Official NCAAM EZPZ picks and X posting remain on hold.
+
+Behavioral validation includes the actual RotoWire Rome card, repeated Villanova
+slots, injury deduplication, ambiguous matchups, stale availability, replacement
+minutes, both sides of player impact, prior transitions and departures. These
+checks establish input/math behavior; predictive accuracy still requires a
+chronological held-out evaluation.

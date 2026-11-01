@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timedelta, timezone
 import json
+import hashlib
 import os
 from pathlib import Path
 import sys
@@ -17,7 +18,9 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from builders.ncaam_model import MODEL_VERSION, parse_ratings, project, team_key, timestamp
+from builders.ncaam_model import MODEL_VERSION, blend_season_ratings, find_rating, parse_ratings, project, team_key, timestamp
+from builders.ncaam_lineups import fetch_lineups, fingerprint
+from builders.ncaam_player_impact import parse_player_bundle, lineup_adjustments, valid_lineup
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 
@@ -88,6 +91,55 @@ def bind_market(game, markets):
             "source": m.source, "source_url": m.source_url, "odds": -110}
 
 
+def cached_input(db, dataset, key, url, parser, season, now, commit, max_hours=6):
+    rows = store.rows(db, dataset, key)
+    bundle = json.loads(rows[0]['Details JSON']) if rows else None
+    if not bundle or bundle['season'] != season or not timedelta(0) <= now-timestamp(bundle['observed_at']) < timedelta(hours=max_hours):
+        raw, observed = get(url, with_observation=True)
+        bundle = parser(raw, season, observed.isoformat())
+        if commit:
+            store.upsert(db, dataset, {'Date': key, 'Game Key': f'{dataset}|{key}', 'Market': 'Inputs', 'Selection': str(season),
+                                      'Updated At': observed.isoformat(), 'Details JSON': json.dumps(bundle)})
+    return bundle
+
+
+def load_model_inputs(db, day, season, now, commit):
+    current = cached_input(db, store.RATINGS, day, f'https://barttorvik.com/{season}_team_results.csv', parse_ratings, season, now, commit)
+    prior = cached_input(db, 'ncaam_prior_rating_inputs', f'season-{season-1}', f'https://barttorvik.com/{season-1}_team_results.csv',
+                         parse_ratings, season-1, now, commit, 720)
+    teams = blend_season_ratings(current, prior, datetime.now(timezone.utc).isoformat())
+    try:
+        players = cached_input(db, 'ncaam_player_profiles', day, f'https://barttorvik.com/getadvstats.php?year={season}&csv=1',
+                               parse_player_bundle, season, now, commit)
+        prior_players = cached_input(db, 'ncaam_player_profiles', f'season-{season-1}', f'https://barttorvik.com/getadvstats.php?year={season-1}&csv=1',
+                                     parse_player_bundle, season-1, now, commit, 720)
+        players = {**players, 'prior_players': prior_players['players'], 'prior_observed_at': prior_players['observed_at']}
+    except Exception as exc:
+        players = None
+        emit('player_inputs_unavailable', error=str(exc))
+    return teams, players
+
+
+def load_lineups(db, slate, day, now, commit):
+    saved = store.rows(db, 'lineup_snapshots', day)
+    previous = json.loads(saved[0]['Details JSON']) if saved else []
+    latest = {lineup['gameId']: lineup for lineup in previous if lineup.get('sport') == 'NCAAM'}
+    needed = [g for g in slate if g['status']=='STATUS_SCHEDULED' and timestamp(g['tipoff']) > now]
+    fresh = lambda g: g['game_id'] in latest and timedelta(0) <= now-timestamp(latest[g['game_id']]['observedAt']) <= timedelta(minutes=10 if timestamp(g['tipoff'])-now<=timedelta(minutes=90) else 35)
+    if any(not fresh(g) for g in needed):
+        try:
+            incoming, rejected = fetch_lineups(needed, now)
+            for error in rejected: emit('lineup_rejected', reason=error)
+            for lineup in incoming:
+                old = latest.get(lineup['gameId'])
+                if old is None or timestamp(lineup['observedAt']) > timestamp(old['observedAt']): latest[lineup['gameId']] = lineup
+            if commit and incoming:
+                store.upsert(db, 'lineup_snapshots', {'Date': day, 'Game Key': f'ncaam-lineups|{day}', 'Market':'Lineups', 'Selection':'NCAAM',
+                    'Updated At': datetime.now(timezone.utc).isoformat(), 'Details JSON': json.dumps(list(latest.values()))})
+        except Exception as exc: emit('lineups_unavailable', error=str(exc))
+    return latest
+
+
 def run(args):
     now = datetime.now(timezone.utc)
     if args.commit and os.getenv("NCAAM_AUTO_BUILDER_ENABLED", "").lower() not in {"1", "true", "yes"}:
@@ -100,7 +152,8 @@ def run(args):
     payload = json.loads(source)
     slate = parse_slate(payload, day)
     existing = store.rows(db, store.FORECASTS, day)
-    keys = {json.loads(row["Details JSON"])["recordId"] for row in existing}
+    history = [json.loads(row['Details JSON']) for row in existing]
+    keys = {row['recordId'] for row in history}
     pending = []
     for game in slate:
         lead = (timestamp(game["tipoff"]) - now).total_seconds() / 60
@@ -140,13 +193,8 @@ def run(args):
     if len(seasons) != 1:
         raise ValueError("Ambiguous NCAAM ratings season.")
     season = seasons.pop()
-    cached = store.rows(db, store.RATINGS, day)
-    bundle = json.loads(cached[0]["Details JSON"]) if cached else None
-    if not bundle or bundle["season"] != season or not timedelta(0) <= now - timestamp(bundle["observed_at"]) < timedelta(hours=6):
-        bundle = parse_ratings(get(f"https://barttorvik.com/{season}_team_results.csv"), season, datetime.now(timezone.utc).isoformat())
-        if args.commit:
-            store.upsert(db, store.RATINGS, {"Date": day, "Game Key": f"ratings|{day}", "Market": "Ratings", "Selection": str(season),
-                "Updated At": bundle["observed_at"], "Details JSON": json.dumps(bundle)})
+    bundle, player_inputs = load_model_inputs(db, day, season, datetime.now(timezone.utc), args.commit)
+    lineups = load_lineups(db, slate, day, datetime.now(timezone.utc), args.commit)
     failures = 0
     for game, phase, record_id in pending[:args.limit]:
         try:
@@ -157,9 +205,43 @@ def run(args):
                 continue
             if timestamp(game["tipoff"]) - current < timedelta(minutes=10):
                 continue
-            forecast = project(game, bundle, market, current.isoformat())
+            lineup = lineups.get(game['game_id'])
+            adjustment = None
+            if player_inputs:
+                weights = {side: find_rating(bundle, game[side+'_aliases']).get('current_weight', 1) for side in ('away','home')}
+                adjustment = lineup_adjustments(game, lineup, {**player_inputs, 'team_current_weights':weights}, current)
+            inputs = {'lineup': fingerprint(lineup) if lineup else 'unavailable',
+                      'ratings': [find_rating(bundle, game[side+'_aliases']) for side in ('away','home')],
+                      'league_efficiency': bundle['league_efficiency'],
+                      'rotation': [{side: adjustment[side] for side in ('away','home')}] if adjustment else []}
+            # Capture material revisions, preserving earlier forecasts. Observation
+            # timestamps alone cannot create another projection or another record.
+            digest = hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest()[:16]
+            previous = max((f for f in history if f['gameId'] == game['game_id'] and f['modelVersion'] == MODEL_VERSION and f['phase'] == phase),
+                           key=lambda f: (timestamp(f['lockedAt']), f['recordId']), default=None)
+            if previous and previous.get('inputDigest') == digest:
+                emit('already_saved', game_id=game['game_id'], phase=phase)
+                continue
+            record_id += '|' + digest
+            if record_id in keys:
+                # A -> B -> A must restore A as the newest forecast. Reusing A's
+                # original key would leave B active after an availability reversal.
+                record_id += '|r' + hashlib.sha256(previous['recordId'].encode()).hexdigest()[:12]
+            forecast = project(game, bundle, market, current.isoformat(), lineup_adjustment=adjustment)
+            if adjustment:
+                scenarios = []
+                for scenario in adjustment['scenarios']:
+                    alternative = project(game, bundle, market, current.isoformat(), lineup_adjustment=scenario)
+                    scenarios.append({'player':scenario['player'], 'team':scenario['team'], 'homeMarginChange':round(forecast['fair_home_spread']-alternative['fair_home_spread'],2),
+                                      'totalChange':round(alternative['total']-forecast['total'],2)})
+                forecast['availability_scenarios'] = scenarios
+                forecast['lineup_adjustment']['scenarios'] = []
+            fresh_lineup = valid_lineup(game, lineup, current)
+            forecast.update(lineup=lineup, availability_mode='rotowire_html' if fresh_lineup else 'expected_rotation',
+                            injury_verified=fresh_lineup, starters_confirmed=False,
+                            availability_as_of=lineup['observedAt'] if lineup else '', availability_source=lineup['sourceUrl'] if lineup else '')
             forecast.update(recordId=record_id, gameId=game["game_id"], modelVersion=MODEL_VERSION,
-                            lockedAt=current.isoformat(), tipoff=game["tipoff"], phase=phase)
+                            lockedAt=current.isoformat(), tipoff=game["tipoff"], phase=phase, inputDigest=digest)
             if args.commit:
                 row = {"Date": day, "Game Key": f"{day}|ncaam|{game['game_id']}", "Game": f"{game['away']} @ {game['home']}",
                        "Market": "Forecast", "Selection": record_id, "Updated At": current.isoformat(), "Details JSON": json.dumps(forecast)}

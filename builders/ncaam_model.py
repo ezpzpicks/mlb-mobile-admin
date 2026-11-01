@@ -12,8 +12,9 @@ import io
 import math
 import re
 import unicodedata
+from copy import deepcopy
 
-MODEL_VERSION = "ncaam-v0.2-efficiency-baseline-2026-11-01"
+MODEL_VERSION = "ncaam-v0.3-prior-rotation-2026-11-01"
 GRADE_POLICY = "ncaam-research-unvalidated-v1"
 
 
@@ -52,6 +53,10 @@ def parse_ratings(text, season, observed_at):
             raise ValueError(f"Ambiguous rating identity: {name}.")
         teams[key] = {"team": name, "offense": values[0], "defense": values[1], "tempo": values[2],
                       "record": row["record"], "conference": row.get("conf", "")}
+        for field, source in [('strength_of_schedule', 'sos'), ('opponent_offense', 'Opp OE'), ('opponent_defense', 'Opp DE')]:
+            try: value = float(row.get(source, ''))
+            except (ValueError, TypeError): value = None
+            teams[key][field] = value if value is not None and math.isfinite(value) else None
     if len(teams) < 300:
         raise ValueError("Incomplete Division I ratings export.")
     return {"season": int(season), "observed_at": stamp.isoformat(), "teams": teams,
@@ -67,7 +72,38 @@ def find_rating(bundle, aliases):
     return next(iter(matches.values()))
 
 
-def project(game, bundle, market, now):
+def blend_season_ratings(current, previous, now, *, prior_games=10):
+    """Completed previous season is the opening prior, never a generic team.
+
+    Current opponent-adjusted results gain n/(n+10) weight. The ten-game prior
+    is an explicit research setting, not a claim of calibrated optimal weight.
+    """
+    cutoff = timestamp(now)
+    if int(previous['season']) != int(current['season']) - 1 or timestamp(previous['observed_at']) > cutoff or timestamp(current['observed_at']) > cutoff:
+        raise ValueError('Prior ratings must come from the completed preceding season.')
+    if prior_games <= 0: raise ValueError('Prior sample weight must be positive.')
+    output = deepcopy(current)
+    for key, team in output['teams'].items():
+        record = re.fullmatch(r'(\d+)-(\d+)', str(team['record']).strip())
+        if not record: raise ValueError('Current season game count is unverified.')
+        games = int(record[1]) + int(record[2]); prior = previous['teams'].get(key)
+        weight = games / (games + prior_games) if prior else 1.0
+        team.update(games_played=games, current_weight=weight, prior_weight=1-weight, opponent_adjusted=True,
+                    prior_season=previous['season'], prior_available=bool(prior))
+        team['prior_record'] = prior['record'] if prior else ''
+        team['prior_competition'] = {field: prior.get(field) for field in ('strength_of_schedule', 'opponent_offense', 'opponent_defense')} if prior else None
+        for field in ('offense', 'defense', 'tempo'):
+            value = team[field]; team['current_'+field] = value
+            team['prior_'+field] = prior[field] if prior else None
+            team[field] = (1-weight) * prior[field] + weight * value if prior else value
+    output['league_efficiency'] = sum((t['offense']+t['defense'])/2 for t in output['teams'].values()) / len(output['teams'])
+    output['prior_source_url'] = previous['source_url']
+    output['prior_observed_at'] = previous['observed_at']
+    output['prior_policy'] = f'completed-season-{prior_games}-game-prior-v1'
+    return output
+
+
+def project(game, bundle, market, now, *, lineup_adjustment=None):
     now = timestamp(now)
     tipoff = timestamp(game["tipoff"])
     observed = timestamp(bundle["observed_at"])
@@ -88,11 +124,23 @@ def project(game, bundle, market, now):
     # four-factor strength a second time. Source preseason priors are retained.
     efficiency = float(bundle["league_efficiency"])
     possessions = (away["tempo"] + home["tempo"]) / 2
-    away_score = possessions * (away["offense"] + home["defense"] - efficiency) / 100
-    home_score = possessions * (home["offense"] + away["defense"] - efficiency) / 100
+    away_score = possessions * away["offense"] * home["defense"] / efficiency / 100
+    home_score = possessions * home["offense"] * away["defense"] / efficiency / 100
     court = 0.0 if game["neutral_site"] else 3.2  # provisional baseline, versioned
     away_score -= court / 2
     home_score += court / 2
+    baseline_away, baseline_home = away_score, home_score
+    if lineup_adjustment:
+        a, h = lineup_adjustment['away'], lineup_adjustment['home']
+        values = [p[k] for p in (a,h) for k in ('offense_change_per_100','defense_improvement_per_100')]
+        if not all(math.isfinite(float(v)) for v in values): raise ValueError('Player impact adjustments must be finite.')
+        away_off = away['offense'] + a['offense_change_per_100']
+        home_off = home['offense'] + h['offense_change_per_100']
+        away_def = away['defense'] - a['defense_improvement_per_100']
+        home_def = home['defense'] - h['defense_improvement_per_100']
+        if min(away_off, home_off, away_def, home_def) <= 0: raise ValueError('Invalid player-adjusted efficiency.')
+        away_score = possessions * away_off * home_def / efficiency / 100 - court / 2
+        home_score = possessions * home_off * away_def / efficiency / 100 + court / 2
     home_spread = float(market["home_spread"])
     total_line = float(market["total"])
     if not math.isfinite(home_spread) or abs(home_spread) > 100 or not 50 < total_line < 300:
@@ -110,8 +158,13 @@ def project(game, bundle, market, now):
             "total_pick": f"{'Over' if total_edge >= 0 else 'Under'} {total_line:g}",
             "spread_grade": "Research", "total_grade": "Research", "grade_policy": GRADE_POLICY,
             "neutral_site": game["neutral_site"], "home_court_points": court,
+            "baseline_away_score": round(baseline_away, 2), "baseline_home_score": round(baseline_home, 2),
+            "lineup_margin_change": round((home_score-away_score)-(baseline_home-baseline_away), 2),
+            "lineup_total_change": round((home_score+away_score)-(baseline_home+baseline_away), 2),
             "market": dict(market, odds=-110), "ratings_observed_at": bundle["observed_at"],
             "ratings_source": bundle["source"], "ratings_source_url": bundle["source_url"],
             "away_rating": away, "home_rating": home, "league_efficiency": efficiency,
+            "prior_policy": bundle.get('prior_policy', ''), "prior_source_url": bundle.get('prior_source_url', ''),
+            "lineup_adjustment": lineup_adjustment,
             "availability_mode": "team_ratings", "injury_verified": False,
             "model_status": "Research baseline; NCAAM grades and uncertainty await chronological validation"}

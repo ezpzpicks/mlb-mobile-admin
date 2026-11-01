@@ -134,14 +134,17 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
                                                  for game in games for side in ['away', 'home']}}
     saved, requests, covers = [], [], []
     class Clock(datetime):
+        offset = timedelta()
         @classmethod
-        def now(cls, tz=None): return NOW.astimezone(tz) if tz else NOW.replace(tzinfo=None)
+        def now(cls, tz=None): return (NOW+cls.offset).astimezone(tz) if tz else (NOW+cls.offset).replace(tzinfo=None)
     monkeypatch.setattr(runner, 'datetime', Clock)
     def get(url, *, with_observation=False):
         requests.append(url)
         assert with_observation and '/scoreboard?' in url
         return json.dumps(payload), NOW
     monkeypatch.setattr(runner, 'get', get)
+    monkeypatch.setattr(runner, 'load_model_inputs', lambda *_a: (bundle, None))
+    monkeypatch.setattr(runner, 'load_lineups', lambda *_a: {})
     monkeypatch.setenv('NCAAM_AUTO_BUILDER_ENABLED', '1')
     from shared import turso_storage, ncaaf_auto_builder, college_market_lines
     monkeypatch.setattr(turso_storage, 'is_turso_ready', lambda: True)
@@ -169,3 +172,17 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     assert all(f['spread_grade'] == 'Research' and f['modelVersion'] == MODEL_VERSION for f in forecasts.values())
     assert bool(covers) == (mode == 'covers')
     assert runner.run(args) == 0 and len(saved) == 2
+    # Material A -> B -> A revisions must restore A as the newest calculation,
+    # while identical observations do not add a forecast or duplicate records.
+    target = bundle['teams'][team_key(games[0]['home'])]
+    target['offense'] = 115
+    Clock.offset = timedelta(seconds=1)
+    assert runner.run(args) == 0 and len(saved) == 3
+    target['offense'] = 110
+    Clock.offset = timedelta(seconds=2)
+    assert runner.run(args) == 0 and len(saved) == 4
+    restored = json.loads(saved[-1]['Details JSON'])
+    assert restored['home_score'] == forecasts[games[0]['game_id']]['home_score']
+    assert restored['inputDigest'] == forecasts[games[0]['game_id']]['inputDigest']
+    assert restored['recordId'] != forecasts[games[0]['game_id']]['recordId']
+    assert runner.run(args) == 0 and len(saved) == 4
