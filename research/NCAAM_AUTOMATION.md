@@ -18,10 +18,14 @@ It only projects scheduled games at least ten minutes before verified tipoff.
 One immutable early forecast and one forecast inside 90 minutes are saved per
 model version/game. An ordinary repeat does not rewrite either forecast.
 
-Spread/total inputs prefer saved ScoresAndOdds quartets. Missing college lines
-use the existing Covers adapter once per slate; prices are assumed -110. Team
+Spread/total inputs prefer saved ScoresAndOdds quartets, then current bookmaker
+lines from the same ESPN schedule response, then the existing Covers adapter
+once per slate only for still-uncovered games. ESPN quotes preserve bookmaker,
+source URL and HTTP observation time. Current spread/total sides must agree;
+opening quotes and moneyline-only entries cannot fill missing current sides.
+No extra ESPN request is needed, and prices remain assumed -110. Team
 orientation is reversed when necessary at a verified neutral site, including
-Rome. Covers percentages never enter public split history. Missing lines or
+Rome. ESPN lines and Covers percentages never enter public split history. Missing lines or
 ratings leave an explicit waiting/skipped result rather than a default projection.
 
 Torvik's current ending-year headered public ratings export supplies adjusted

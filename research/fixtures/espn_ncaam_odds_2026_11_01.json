@@ -1,0 +1,626 @@
+{
+  "events": [
+    {
+      "id": "401920982",
+      "season": {
+        "year": 2027,
+        "type": 2,
+        "slug": "regular-season"
+      },
+      "competitions": [
+        {
+          "date": "2026-11-01T14:30Z",
+          "timeValid": true,
+          "neutralSite": true,
+          "status": {
+            "clock": 0.0,
+            "displayClock": "0:00",
+            "period": 0,
+            "type": {
+              "id": "1",
+              "name": "STATUS_SCHEDULED",
+              "state": "pre",
+              "completed": false,
+              "description": "Scheduled",
+              "detail": "Sun, November 1st at 9:30 AM EST",
+              "shortDetail": "11/1 - 9:30 AM EST"
+            }
+          },
+          "competitors": [
+            {
+              "homeAway": "home",
+              "team": {
+                "id": "222",
+                "uid": "s:40~l:41~t:222",
+                "location": "Villanova",
+                "name": "Wildcats",
+                "abbreviation": "VILL",
+                "displayName": "Villanova Wildcats",
+                "shortDisplayName": "Villanova",
+                "color": "00205b",
+                "alternateColor": "13b5ea",
+                "isActive": true,
+                "venue": {
+                  "id": "1969"
+                },
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/_/id/222/villanova-wildcats",
+                    "text": "Clubhouse",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/roster/_/id/222",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:222&section=roster",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/stats/_/id/222",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:222&section=stats",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/schedule/_/id/222",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:222&section=scores",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  }
+                ],
+                "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/222.png",
+                "logoDark": "https://a.espncdn.com/i/teamlogos/ncaa/500-dark/222.png",
+                "conferenceId": "4"
+              }
+            },
+            {
+              "homeAway": "away",
+              "team": {
+                "id": "87",
+                "uid": "s:40~l:41~t:87",
+                "location": "Notre Dame",
+                "name": "Fighting Irish",
+                "abbreviation": "ND",
+                "displayName": "Notre Dame Fighting Irish",
+                "shortDisplayName": "Notre Dame",
+                "color": "062340",
+                "alternateColor": "c99700",
+                "isActive": true,
+                "venue": {
+                  "id": "282"
+                },
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/_/id/87/notre-dame-fighting-irish",
+                    "text": "Clubhouse",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/roster/_/id/87",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:87&section=roster",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/stats/_/id/87",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:87&section=stats",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/schedule/_/id/87",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:87&section=scores",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  }
+                ],
+                "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/87.png",
+                "logoDark": "https://a.espncdn.com/i/teamlogos/ncaa/500-dark/87.png",
+                "conferenceId": "2"
+              }
+            }
+          ],
+          "odds": [
+            {
+              "provider": {
+                "id": "100",
+                "name": "DraftKings",
+                "priority": 1
+              },
+              "details": "VILL -7.5",
+              "spread": -7.5,
+              "overUnder": 147.5,
+              "homeTeamOdds": {
+                "favorite": true,
+                "underdog": false,
+                "team": {
+                  "id": "222",
+                  "abbreviation": "VILL",
+                  "displayName": "Villanova Wildcats"
+                }
+              },
+              "awayTeamOdds": {
+                "favorite": false,
+                "underdog": true,
+                "team": {
+                  "id": "87",
+                  "abbreviation": "ND",
+                  "displayName": "Notre Dame Fighting Irish"
+                }
+              },
+              "pointSpread": {
+                "home": {
+                  "close": {
+                    "line": "-7.5",
+                    "odds": "-105"
+                  },
+                  "open": {
+                    "line": "-7.5",
+                    "odds": "-110"
+                  }
+                },
+                "away": {
+                  "close": {
+                    "line": "+7.5",
+                    "odds": "-115"
+                  },
+                  "open": {
+                    "line": "+7.5",
+                    "odds": "-110"
+                  }
+                }
+              },
+              "total": {
+                "over": {
+                  "close": {
+                    "line": "o147.5",
+                    "odds": "-108"
+                  },
+                  "open": {
+                    "line": "o149.5",
+                    "odds": "-110"
+                  }
+                },
+                "under": {
+                  "close": {
+                    "line": "u147.5",
+                    "odds": "-112"
+                  },
+                  "open": {
+                    "line": "u149.5",
+                    "odds": "-110"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401920409",
+      "season": {
+        "year": 2027,
+        "type": 2,
+        "slug": "regular-season"
+      },
+      "competitions": [
+        {
+          "date": "2026-11-02T04:59Z",
+          "timeValid": true,
+          "neutralSite": true,
+          "status": {
+            "clock": 0.0,
+            "displayClock": "0:00",
+            "period": 0,
+            "type": {
+              "id": "1",
+              "name": "STATUS_SCHEDULED",
+              "state": "pre",
+              "completed": false,
+              "description": "Scheduled",
+              "detail": "Sun, November 1st at 11:59 PM EST",
+              "shortDetail": "11/1 - 11:59 PM EST"
+            }
+          },
+          "competitors": [
+            {
+              "homeAway": "home",
+              "team": {
+                "id": "2272",
+                "uid": "s:40~l:41~t:2272",
+                "location": "High Point",
+                "name": "Panthers",
+                "abbreviation": "HPU",
+                "displayName": "High Point Panthers",
+                "shortDisplayName": "High Point",
+                "color": "330072",
+                "alternateColor": "ffffff",
+                "isActive": true,
+                "venue": {
+                  "id": "7116"
+                },
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/_/id/2272/high-point-panthers",
+                    "text": "Clubhouse",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/roster/_/id/2272",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2272&section=roster",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/stats/_/id/2272",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2272&section=stats",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/schedule/_/id/2272",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2272&section=scores",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  }
+                ],
+                "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2272.png",
+                "logoDark": "https://a.espncdn.com/i/teamlogos/ncaa/500-dark/2272.png",
+                "conferenceId": "6"
+              }
+            },
+            {
+              "homeAway": "away",
+              "team": {
+                "id": "2335",
+                "uid": "s:40~l:41~t:2335",
+                "location": "Liberty",
+                "name": "Flames",
+                "abbreviation": "LIB",
+                "displayName": "Liberty Flames",
+                "shortDisplayName": "Liberty",
+                "color": "0a254e",
+                "alternateColor": "b72025",
+                "isActive": true,
+                "venue": {
+                  "id": "7117"
+                },
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/_/id/2335/liberty-flames",
+                    "text": "Clubhouse",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/roster/_/id/2335",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "roster",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2335&section=roster",
+                    "text": "Roster",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/stats/_/id/2335",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "stats",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2335&section=stats",
+                    "text": "Statistics",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/mens-college-basketball/team/schedule/_/id/2335",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  },
+                  {
+                    "rel": [
+                      "schedule",
+                      "sportscenter",
+                      "app",
+                      "team"
+                    ],
+                    "href": "sportscenter://x-callback-url/showClubhouse?uid=s:40~l:41~t:2335&section=scores",
+                    "text": "Schedule",
+                    "isExternal": false,
+                    "isPremium": false
+                  }
+                ],
+                "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2335.png",
+                "logoDark": "https://a.espncdn.com/i/teamlogos/ncaa/500-dark/2335.png",
+                "conferenceId": "11"
+              }
+            }
+          ],
+          "odds": [
+            {
+              "provider": {
+                "id": "100",
+                "name": "DraftKings",
+                "priority": 1
+              },
+              "details": "HPU -6.5",
+              "spread": -6.5,
+              "overUnder": 155.5,
+              "homeTeamOdds": {
+                "favorite": true,
+                "underdog": false,
+                "team": {
+                  "id": "2272",
+                  "abbreviation": "HPU",
+                  "displayName": "High Point Panthers"
+                }
+              },
+              "awayTeamOdds": {
+                "favorite": false,
+                "underdog": true,
+                "team": {
+                  "id": "2335",
+                  "abbreviation": "LIB",
+                  "displayName": "Liberty Flames"
+                }
+              },
+              "pointSpread": {
+                "home": {
+                  "close": {
+                    "line": "-6.5",
+                    "odds": "-115"
+                  },
+                  "open": {
+                    "line": "-7.5",
+                    "odds": "-110"
+                  }
+                },
+                "away": {
+                  "close": {
+                    "line": "+6.5",
+                    "odds": "-105"
+                  },
+                  "open": {
+                    "line": "+7.5",
+                    "odds": "-110"
+                  }
+                }
+              },
+              "total": {
+                "over": {
+                  "close": {
+                    "line": "o155.5",
+                    "odds": "-105"
+                  },
+                  "open": {
+                    "line": "o154.5",
+                    "odds": "-105"
+                  }
+                },
+                "under": {
+                  "close": {
+                    "line": "u155.5",
+                    "odds": "-115"
+                  },
+                  "open": {
+                    "line": "u154.5",
+                    "odds": "-115"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

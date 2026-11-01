@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """NCAAM scheduled efficiency forecasts. --evaluate never writes; --commit saves.
 
-Reuses the existing Render job and ScoresAndOdds snapshots. Covers supplies
-model-only lines when splits are absent. Research forecasts never imply A/B
+Reuses the existing Render job and ScoresAndOdds snapshots. ESPN supplies
+model-only backup lines, followed by Covers. Research forecasts never imply A/B
 eligibility or create an official EZPZ pick.
 """
 from __future__ import annotations
@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from builders.ncaam_model import MODEL_VERSION, parse_ratings, project, team_key, timestamp
 from shared import ncaam_auto_storage as store
+from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 
 ET = ZoneInfo("America/New_York")
 
@@ -27,12 +28,13 @@ def emit(event, **details):
     print(json.dumps({"sport": "NCAAM", "event": event, **details}, default=str), flush=True)
 
 
-def get(url):
+def get(url, *, with_observation=False):
     with urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; EZPZPicks/1.0)", "Accept": "application/json,text/csv"}), timeout=20) as response:
         data = response.read(5_000_001)
         if len(data) > 5_000_000:
             raise ValueError("NCAAM provider response exceeds the size limit.")
-        return data.decode("utf-8-sig")
+        text = data.decode("utf-8-sig")
+        return (text, response_observed_at(response.headers, datetime.now(timezone.utc))) if with_observation else text
 
 
 def parse_slate(payload, day):
@@ -94,7 +96,9 @@ def run(args):
     if not db.is_turso_ready():
         raise ValueError("The existing Turso connection is required.")
     day = str(now.astimezone(ET).date())
-    slate = parse_slate(json.loads(get(f"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates={day.replace('-', '')}&groups=50&limit=1000")), day)
+    source, observed_at = get(f"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates={day.replace('-', '')}&groups=50&limit=1000", with_observation=True)
+    payload = json.loads(source)
+    slate = parse_slate(payload, day)
     existing = store.rows(db, store.FORECASTS, day)
     keys = {json.loads(row["Details JSON"])["recordId"] for row in existing}
     pending = []
@@ -113,8 +117,17 @@ def run(args):
     markets, rejected = eligible_markets(store.rows(db, "weekly_market_trends", day), now)
     for row in rejected:
         emit("market_rejected", detail=row)
+    # The schedule request already contains current bookmaker lines. Reuse it
+    # without extra source calls, and never turn these quotes into split rows.
+    try:
+        espn, rejected = parse_espn_ncaam_lines(payload, slate, datetime.now(timezone.utc), observed_at)
+        for row in rejected:
+            emit("espn_market_rejected", detail=row)
+    except ValueError as exc:
+        espn = {}
+        emit("espn_unavailable", error=str(exc))
     fallback = []
-    if any(bind_market(game, markets) is None for game, _, _ in pending):
+    if any(bind_market(game, markets) is None and game["game_id"] not in espn for game, _, _ in pending):
         try:
             from shared.college_market_lines import fetch_covers_markets
             fallback, rejected = fetch_covers_markets("NCAAM", now)
@@ -138,7 +151,7 @@ def run(args):
     for game, phase, record_id in pending[:args.limit]:
         try:
             current = datetime.now(timezone.utc)
-            market = bind_market(game, markets) or bind_market(game, fallback)
+            market = bind_market(game, markets) or espn.get(game["game_id"]) or bind_market(game, fallback)
             if not market:
                 emit("waiting_for_market", game_id=game["game_id"], game=f"{game['away']} @ {game['home']}")
                 continue
