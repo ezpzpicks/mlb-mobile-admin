@@ -93,12 +93,20 @@ def bind_market(game, markets):
 
 def cached_input(db, dataset, key, url, parser, season, now, commit, max_hours=6):
     rows = store.rows(db, dataset, key)
-    bundle = json.loads(rows[0]['Details JSON']) if rows else None
+    candidates = []
+    for row in rows:
+        try:
+            candidate = json.loads(row['Details JSON'])
+            if candidate['season'] == season and timestamp(candidate['observed_at']) <= now: candidates.append(candidate)
+        except (KeyError, ValueError, TypeError): continue
+    bundle = max(candidates, key=lambda value: timestamp(value['observed_at']), default=None)
     if not bundle or bundle['season'] != season or not timedelta(0) <= now-timestamp(bundle['observed_at']) < timedelta(hours=max_hours):
         raw, observed = get(url, with_observation=True)
         bundle = parser(raw, season, observed.isoformat())
         if commit:
-            store.upsert(db, dataset, {'Date': key, 'Game Key': f'{dataset}|{key}', 'Market': 'Inputs', 'Selection': str(season),
+            # Preserve the existing current-team cache identity across versions.
+            game_key = f'ratings|{key}' if dataset == store.RATINGS else f'{dataset}|{key}'
+            store.upsert(db, dataset, {'Date': key, 'Game Key': game_key, 'Market': 'Ratings' if dataset == store.RATINGS else 'Inputs', 'Selection': str(season),
                                       'Updated At': observed.isoformat(), 'Details JSON': json.dumps(bundle)})
     return bundle
 

@@ -8,6 +8,7 @@ from builders.ncaam_lineups import parse_lineups, fingerprint, URL
 from builders.ncaam_player_impact import parse_player_bundle, allocate_minutes, lineup_adjustments, POLICY
 from builders.ncaam_model import blend_season_ratings, project
 from scripts.run_ncaam_builder import parse_slate
+from scripts import run_ncaam_builder as runner
 
 NOW = datetime(2026, 11, 1, 6, tzinfo=timezone.utc)
 FIXTURE = Path(__file__).parent / 'fixtures'
@@ -120,3 +121,18 @@ def test_departure_changes_prior_rotation_even_without_injury_report():
     assert result['away']['offense_change_per_100'] == -8
     assert sum(p['referenceMinutes'] for p in result['away']['players']) == pytest.approx(200)
     assert sum(p['minutes'] for p in result['away']['players']) == pytest.approx(200)
+
+
+def test_input_cache_reuses_newest_observation_and_preserves_existing_team_cache_key(monkeypatch):
+    cached = [{'Details JSON':json.dumps({'season':2027,'observed_at':(NOW-timedelta(hours=h)).isoformat()})} for h in (8,1)]
+    monkeypatch.setattr(runner.store,'rows',lambda *_a: cached)
+    def no_request(*_a, **_kw): raise AssertionError('Fresh cached input should avoid a provider request')
+    monkeypatch.setattr(runner,'get',no_request)
+    result = runner.cached_input(None,runner.store.RATINGS,'2026-11-01',URL,None,2027,NOW,True)
+    assert result['observed_at'] == (NOW-timedelta(hours=1)).isoformat()
+    cached.pop()
+    monkeypatch.setattr(runner,'get',lambda *_a, **_kw: ('source',NOW))
+    writes = []
+    monkeypatch.setattr(runner.store,'upsert',lambda _db,_dataset,row: writes.append(row))
+    runner.cached_input(None,runner.store.RATINGS,'2026-11-01',URL,lambda *_a: {'season':2027,'observed_at':NOW.isoformat()},2027,NOW,True)
+    assert writes[0]['Game Key'] == 'ratings|2026-11-01' and writes[0]['Market'] == 'Ratings'
