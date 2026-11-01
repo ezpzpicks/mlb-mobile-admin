@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import streamlit as st
@@ -14,7 +15,7 @@ from shared.modeling import (
 )
 from shared.storage import append_row, read_sheet, sheets_ready, write_sheet
 
-MODEL_VERSION = "cbb-v0.1-rotation-foundation-2026-07-13"
+MODEL_VERSION = "cbb-v0.1.1-shooting-defense-2026-10-22"
 RATINGS_TAB = "cbb_team_ratings"
 SLATE_TAB = "cbb_daily_slate"
 TRACKER_TAB = "cbb_bet_tracker"
@@ -75,8 +76,8 @@ def _project(away, home, settings):
     away_efficiency = _num(away["AdjOE"], 105) + (_num(home["AdjDE"], 105) - league_efficiency)
     home_efficiency = _num(home["AdjOE"], 105) + (_num(away["AdjDE"], 105) - league_efficiency)
 
-    away_shooting = 0.30 * ((_num(away["eFG Off"], 52) - 52) + (52 - _num(home["eFG Def"], 52)))
-    home_shooting = 0.30 * ((_num(home["eFG Off"], 52) - 52) + (52 - _num(away["eFG Def"], 52)))
+    away_shooting = 0.30 * ((_num(away["eFG Off"], 52) - 52) + (_num(home["eFG Def"], 52) - 52))
+    home_shooting = 0.30 * ((_num(home["eFG Off"], 52) - 52) + (_num(away["eFG Def"], 52) - 52))
     away_turnovers = -0.22 * ((_num(away["TO Off"], 18) - 18) + (_num(home["TO Def"], 18) - 18))
     home_turnovers = -0.22 * ((_num(home["TO Off"], 18) - 18) + (_num(away["TO Def"], 18) - 18))
     away_second_chance = 0.11 * (_num(away["ORB Rate"], 30) - 30)
@@ -108,7 +109,7 @@ def _project(away, home, settings):
 
 def _render_ratings():
     st.subheader("College Basketball Team Ratings")
-    st.caption("AdjOE and AdjDE are points per 100 possessions; lower AdjDE is better. Percentage-style fields should be entered as numbers such as 52.4, not 0.524.")
+    st.caption("AdjOE and AdjDE are points per 100 possessions; lower AdjDE and lower eFG Def (opponent eFG allowed) are better. Percentage-style fields should be entered as numbers such as 52.4, not 0.524.")
     ratings = _load_ratings()
     uploaded = st.file_uploader("Import CBB ratings CSV", type=["csv"], key="cbb_ratings_csv")
     if uploaded is not None:
@@ -121,7 +122,7 @@ def _render_ratings():
         ratings = pd.DataFrame([_defaults(ratings, "Example Team")], columns=RATING_COLUMNS)
     edited = st.data_editor(ratings, use_container_width=True, hide_index=True, num_rows="dynamic", key="cbb_ratings_editor")
     if st.button("Save CBB Ratings", type="primary", use_container_width=True):
-        edited["Updated"] = str(date.today())
+        edited["Updated"] = str(datetime.now(ZoneInfo("America/New_York")).date())
         if write_sheet(RATINGS_TAB, edited, RATING_COLUMNS):
             st.success("College basketball ratings saved.")
 
@@ -261,7 +262,7 @@ def _render_build():
 
     game = f"{away_name} at {home_name}"
     slate_row = {
-        "Date": str(date.today()), "Game": game, "Away Team": away_name, "Home Team": home_name,
+        "Date": str(datetime.now(ZoneInfo("America/New_York")).date()), "Game": game, "Away Team": away_name, "Home Team": home_name,
         "Projected Away": away_score, "Projected Home": home_score, "Projected Margin": margin,
         "Projected Total": projected_total, "Projected Possessions": possessions,
         "Market Home Spread": home_spread, "Market Total": market_total,
@@ -289,7 +290,7 @@ def _render_build():
         for bet_type, selection, odds, probability, grade in plays:
             implied = american_implied_probability(odds)
             sent += int(append_row(TRACKER_TAB, {
-                "Date": str(date.today()), "Game": game, "Bet Type": bet_type, "Selection": selection,
+                "Date": str(datetime.now(ZoneInfo("America/New_York")).date()), "Game": game, "Bet Type": bet_type, "Selection": selection,
                 "Odds/Line": odds, "Model Probability": round(probability, 4), "Implied Probability": round(implied, 4),
                 "Edge": round(probability - implied, 4), "Expected Value": round(expected_value_per_unit(probability, odds), 4),
                 "Grade": grade, "Result": "Pending", "Reliability": reliability, "Model Version": MODEL_VERSION, "Notes": notes,
@@ -305,8 +306,28 @@ def _table(tab, columns, title):
 
 def render():
     st.caption("College basketball foundation model • use projected rotation adjustments before trusting a matchup")
-    page = st.radio("CBB section", ["Build", "Team Ratings", "Slate", "Tracker", "Setup"], horizontal=True, key="cbb_nav")
-    if page == "Build":
+    page = st.radio("CBB section", ["Automated Slate", "Build", "Team Ratings", "Slate", "Tracker", "Setup"], horizontal=True, key="cbb_nav")
+    if page == "Automated Slate":
+        st.subheader("Automated NCAAM forecasts")
+        st.caption("Dated adjusted-efficiency research forecasts. Warren Nolan ELO and current RPI SOS are collected on the public board. A/B grades and an EZPZ threshold await NCAAM validation.")
+        import json
+        from shared import ncaam_auto_storage, turso_storage
+        selected_day = st.date_input("NCAAM slate date", value=datetime.now(ZoneInfo("America/New_York")).date(), key="ncaam_auto_date")
+        rows = ncaam_auto_storage.rows(turso_storage, ncaam_auto_storage.FORECASTS, str(selected_day))
+        records = []
+        for row in rows:
+            try:
+                forecast = json.loads(row["Details JSON"])
+                records.append({"Date": row["Date"], "Game": row["Game"], "Phase": forecast["phase"],
+                    "Projected Away": forecast["away_score"], "Projected Home": forecast["home_score"],
+                    "Model Home Spread": forecast["fair_home_spread"], "Model Total": forecast["total"],
+                    "Spread Pick": forecast["spread_pick"], "Total Pick": forecast["total_pick"],
+                    "Grade": forecast["spread_grade"], "Line Source": forecast["market"]["source"],
+                    "Saved": forecast["lockedAt"], "Model Version": forecast["modelVersion"]})
+            except (ValueError, TypeError, KeyError):
+                continue
+        st.dataframe(pd.DataFrame(records).iloc[::-1], use_container_width=True, hide_index=True) if records else st.info("No automated forecasts saved yet.")
+    elif page == "Build":
         _render_build()
     elif page == "Team Ratings":
         _render_ratings()

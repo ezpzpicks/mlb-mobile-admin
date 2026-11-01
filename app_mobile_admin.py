@@ -193,7 +193,7 @@ versions = {
     "MLB": "v15.2-public-betting-splits-2026-07-27",
     "CFB": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
     "NFL": "nfl-v4.28-directional-variable-tiers-2026-10-08",
-    "CBB": "cbb-v0.1-rotation-foundation-2026-07-13",
+    "CBB": "ncaam-v0.2-efficiency-baseline-2026-11-01 (research)",
 }
 if selected_sport in {"NFL", "NBA"}:
     # Retain NFL's focused header and use it for NBA too. _set_sport also clears

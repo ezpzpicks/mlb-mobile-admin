@@ -10,7 +10,7 @@ services:
     plan: 1c-2g
     schedule: "7,37 * * * *"
     buildCommand: pip install -r requirements.txt
-    # Legacy command dispatches isolated NBA, NFL and NCAAF jobs.
+    # Legacy command dispatches isolated NBA, NCAAM, NFL and NCAAF jobs.
     # Reuse the existing service and secrets; no second cron minimum is added.
     startCommand: python -u scripts/run_ncaaf_builder.py --commit
     autoDeployTrigger: commit
@@ -22,6 +22,8 @@ services:
       - key: NCAAF_AUTO_BUILDER_ENABLED
         value: "1"
       - key: NBA_AUTO_BUILDER_ENABLED
+        value: "1"
+      - key: NCAAM_AUTO_BUILDER_ENABLED
         value: "1"
       - key: NBA_AVAILABILITY_MODE
         value: rotowire_html
