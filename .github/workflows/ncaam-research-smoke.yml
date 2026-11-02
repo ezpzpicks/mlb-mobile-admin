@@ -1,0 +1,43 @@
+name: NCAAM research checks
+
+on:
+  pull_request:
+    paths:
+      - 'builders/ncaam_*.py'
+      - 'scripts/run_ncaam_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'shared/ncaam_*.py'
+      - 'shared/data/ncaam-division-one-*.json'
+      - 'shared/espn_ncaam_lines.py'
+      - 'research/test_ncaam_*.py'
+      - 'research/test_espn_ncaam_lines.py'
+      - 'research/fixtures/**'
+      - '.github/workflows/ncaam-research-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'builders/ncaam_*.py'
+      - 'scripts/run_ncaam_builder.py'
+      - 'scripts/run_scheduled_builders.py'
+      - 'shared/ncaam_*.py'
+      - 'shared/data/ncaam-division-one-*.json'
+      - 'shared/espn_ncaam_lines.py'
+      - 'research/test_ncaam_*.py'
+      - 'research/test_espn_ncaam_lines.py'
+      - 'research/fixtures/**'
+      - '.github/workflows/ncaam-research-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ncaam-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest requests beautifulsoup4 pandas
+      - run: python -m pytest research/test_ncaam_*.py research/test_espn_ncaam_lines.py -q

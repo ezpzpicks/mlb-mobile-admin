@@ -3,6 +3,7 @@ from contextlib import ExitStack
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 import os
+from pathlib import Path
 import sqlite3
 from types import SimpleNamespace
 import unittest
@@ -110,12 +111,17 @@ class AutomaticPolicyTests(unittest.TestCase):
 
 class ScheduledPersistenceTests(unittest.TestCase):
     def setUp(self):
-        self.now = datetime.now(timezone.utc)
+        # Keep mocked same-day markets on the same Eastern date as tipoff.
+        self.now = NOW
+        self.database_now = NOW
         self.tipoff = self.now + timedelta(hours=2)
         self.conn = sqlite3.connect(":memory:")
         self.conn.row_factory = sqlite3.Row
         self.sql, self.events = [], []
         def execute(sql):
+            # The production insert also checks the database clock. Advance it
+            # with the mocked runner clock rather than the machine's wall time.
+            sql = sql.replace("julianday('now')", "julianday(" + self.db._sql_text(self.database_now.isoformat()) + ")")
             self.sql.append(sql)
             return [dict(r) for r in self.conn.execute(sql).fetchall()]
         self.db = SimpleNamespace(_execute=execute, _result_rows=lambda r:r,
@@ -133,6 +139,7 @@ class ScheduledPersistenceTests(unittest.TestCase):
         self.conn.close()
 
     def run_at(self, now, *, final=False, bad_roster=False, missing_market=False, bad_injuries=False):
+        self.database_now = now
         bundle, inputs, injury = fixture(now)
         game = inputs["game"]
         game["tipoff"] = self.tipoff.isoformat()
@@ -268,15 +275,16 @@ class ScheduledPersistenceTests(unittest.TestCase):
 
 
 class SchedulerIsolationTests(unittest.TestCase):
-    def test_nba_failure_or_timeout_does_not_skip_ncaaf_and_children_cannot_recurse(self):
+    def test_nba_failure_or_timeout_does_not_skip_other_sports_and_children_cannot_recurse(self):
         import subprocess
-        for first in (SimpleNamespace(returncode=1), subprocess.TimeoutExpired("NBA", 480), OSError("synthetic process failure")):
-            with patch.object(dispatch.subprocess, "run", side_effect=[first, SimpleNamespace(returncode=0)]) as run:
-                self.assertEqual(dispatch.main(), 1)
-                self.assertEqual(run.call_count, 2)
-                self.assertTrue(run.call_args_list[0].args[0][2].endswith("run_nba_builder.py"))
-                self.assertTrue(run.call_args_list[1].args[0][2].endswith("run_ncaaf_builder.py"))
-                self.assertEqual(run.call_args_list[1].kwargs["env"][dispatch.CHILD_FLAG], "1")
+        with patch.dict(os.environ, {"NCAAM_AUTO_BUILDER_ENABLED":"1", "NFL_AUTO_BUILDER_ENABLED":"0", "NFL_AUTO_DIAGNOSTIC_UNTIL":""}):
+            for first in (SimpleNamespace(returncode=1), subprocess.TimeoutExpired("NBA", 480), OSError("synthetic process failure")):
+                with patch.object(dispatch.subprocess, "run", side_effect=[first, SimpleNamespace(returncode=0), SimpleNamespace(returncode=0)]) as run:
+                    self.assertEqual(dispatch.main(), 1)
+                    self.assertEqual(run.call_count, 3)
+                    self.assertEqual([Path(call.args[0][2]).name for call in run.call_args_list],
+                                     ["run_nba_builder.py", "run_ncaam_builder.py", "run_ncaaf_builder.py"])
+                    self.assertTrue(all(call.kwargs["env"][dispatch.CHILD_FLAG] == "1" for call in run.call_args_list))
 
     def test_healthy_children_finish_successfully(self):
         with patch.object(dispatch.subprocess, "run", return_value=SimpleNamespace(returncode=0)):

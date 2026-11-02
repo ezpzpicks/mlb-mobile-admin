@@ -285,13 +285,14 @@ def test_targeted_core_loader_includes_replacements_beyond_wr3(monkeypatch):
 def test_nfl_failure_does_not_skip_other_scheduled_sports(monkeypatch):
     from scripts import run_scheduled_builders as runner
     monkeypatch.setenv("NFL_AUTO_BUILDER_ENABLED", "1")
+    monkeypatch.setenv("NCAAM_AUTO_BUILDER_ENABLED", "1")
     calls = []
     def run(argv, **kwargs):
         calls.append(argv[2])
         return SimpleNamespace(returncode=1 if argv[2].endswith("run_nfl_builder.py") else 0)
     monkeypatch.setattr(runner.subprocess, "run", run)
     assert runner.main() == 1
-    assert [p.split("/")[-1] for p in calls] == ["run_nba_builder.py", "run_nfl_builder.py", "run_ncaaf_builder.py"]
+    assert [p.split("/")[-1] for p in calls] == ["run_nba_builder.py", "run_ncaam_builder.py", "run_nfl_builder.py", "run_ncaaf_builder.py"]
 
 
 def test_public_yardage_regrading_cannot_revive_an_availability_hold():
