@@ -6,7 +6,8 @@ import re
 import pytest
 from builders.ncaam_lineups import parse_lineups, fingerprint, URL
 from builders.ncaam_player_impact import parse_player_bundle, allocate_minutes, lineup_adjustments, POLICY
-from builders.ncaam_model import blend_season_ratings, project
+from builders.ncaam_model import prepare_season_ratings, project
+from builders.ncaam_rosters import ROSTER_POLICY
 from scripts.run_ncaam_builder import parse_slate
 from scripts import run_ncaam_builder as runner
 
@@ -63,7 +64,10 @@ def rotation_inputs():
     lineup = {'sport':'NCAAM','gameId':game['game_id'],'date':game['date'],'tipoff':game['tipoff'],'observedAt':NOW.isoformat(),'sourceUrl':URL}
     for side in ['away','home']:
         lineup[side] = {'team':game[side], 'confirmed':False, 'complete':True, 'starters':[{'id':game[side]+str(i), 'name':game[side]+' Player '+str(i), 'status':'QUESTIONABLE' if i==0 else 'UNKNOWN'} for i in range(5)],'injuries':[]}
-    bundle = {'season':2027,'observed_at':NOW.isoformat(),'policy':POLICY,'source':'Test','source_url':URL,'players':players}
+    rosters = {game[side+'_id']:{'season':2027,'team_id':game[side+'_id'],'observed_at':NOW.isoformat(), 'policy':ROSTER_POLICY,
+        'source_url':'https://example.test/roster','players':[{'id':'espn:'+str(i),'name':game[side]+' Player '+str(i)} for i in range(6)]} for side in ('away','home')}
+    bundle = {'season':2027,'observed_at':NOW.isoformat(),'policy':POLICY,'source':'Test','source_url':URL,'players':players,
+              'rosters':rosters,'team_d1_games':{'away':30,'home':30}}
     return game, lineup, bundle
 
 
@@ -98,27 +102,32 @@ def test_questionable_in_base_case_out_scenario_and_stale_reports_unknown():
     with pytest.raises(ValueError): allocate_minutes({'one':100,'two':10})
 
 
-def test_completed_season_prior_opponent_adjustment_and_season_transition():
+def test_source_preseason_prior_is_retained_without_a_second_team_blend():
     current = {'season':2027,'observed_at':NOW.isoformat(),'source_url':URL,'teams':{'away':{'team':'Away','offense':100,'defense':110,'tempo':65,'record':'0-0'}}}
     prior = {**deepcopy(current),'season':2026}
     prior['teams']['away'].update(offense=120,defense=95,tempo=73,record='25-8')
-    blended = blend_season_ratings(current, prior, NOW.isoformat())['teams']['away']
-    assert (blended['offense'],blended['defense'],blended['tempo']) == (120,95,73)
-    assert blended['prior_weight'] == 1 and blended['games_played'] == 0 and blended['opponent_adjusted']
+    counts = {'season':2027,'observed_at':NOW.isoformat(),'counts':{'away':0}}
+    blended = prepare_season_ratings(current, prior, NOW.isoformat(), d1_games=counts)['teams']['away']
+    assert (blended['offense'],blended['defense'],blended['tempo']) == (100,110,65)
+    assert blended['prior_weight'] == 0 and blended['games_played'] == 0 and blended['opponent_adjusted']
+    assert blended['prior_offense'] == 120 and blended['source_preseason_prior']
     current['teams']['away']['record'] = '7-3'
-    blended = blend_season_ratings(current, prior, NOW.isoformat())['teams']['away']
-    assert blended['current_weight'] == .5 and blended['offense'] == 110
+    blended = prepare_season_ratings(current, prior, NOW.isoformat(), d1_games=counts)['teams']['away']
+    assert blended['current_weight'] == 1 and blended['offense'] == 100 and blended['games_played'] == 0
     assert current['teams']['away']['offense'] == 100
-    with pytest.raises(ValueError): blend_season_ratings(current, {**prior,'season':2025}, NOW.isoformat())
+    with pytest.raises(ValueError): prepare_season_ratings(current, {**prior,'season':2025}, NOW.isoformat())
 
 
-def test_departure_changes_prior_rotation_even_without_injury_report():
-    game, _, inputs = rotation_inputs()
+def test_departures_do_not_create_a_second_roster_adjustment_on_top_of_source_ratings():
+    game, lineup, inputs = rotation_inputs()
     old = deepcopy(inputs['players'])
     inputs['players'] = [p for p in inputs['players'] if p['id'] != 'Away0']
-    inputs.update(prior_players=old, prior_observed_at=NOW.isoformat(), team_current_weights={'away':0,'home':0})
-    result = lineup_adjustments(game, None, inputs, NOW)
-    assert result['away']['offense_change_per_100'] == -8
+    inputs['rosters'][game['away_id']]['players'] = inputs['rosters'][game['away_id']]['players'][1:]
+    lineup['away']['starters'] = lineup['away']['starters'][1:]+[{'id':'Away5','name':'Away Player 5','status':'UNKNOWN'}]
+    inputs.update(prior_players=old, prior_observed_at=NOW.isoformat())
+    result = lineup_adjustments(game, lineup, inputs, NOW)
+    assert result['away']['offense_change_per_100'] == 0
+    assert all(p['ratingId'] != 'Away0' for p in result['away']['players'])
     assert sum(p['referenceMinutes'] for p in result['away']['players']) == pytest.approx(200)
     assert sum(p['minutes'] for p in result['away']['players']) == pytest.approx(200)
 

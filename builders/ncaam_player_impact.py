@@ -15,8 +15,9 @@ import unicodedata
 
 from builders.ncaam_model import team_key, timestamp
 from builders.ncaam_lineups import valid_source
+from builders.ncaam_rosters import valid_roster
 
-POLICY = 'ncaam-torvik-bpm-minute-deltas-v1'
+POLICY = 'ncaam-torvik-roster-verified-minute-deltas-v2'
 
 
 def name_key(value):
@@ -25,7 +26,7 @@ def name_key(value):
     return re.sub(r'\s+(jr|sr|ii|iii|iv|v)$', '', value)
 
 
-def parse_player_bundle(text, season, observed_at, *, minimum_players=2000):
+def parse_player_bundle(text, season, observed_at, *, minimum_players=2000, allow_partial=False):
     timestamp(observed_at)
     players, seen, excluded = [], set(), 0
     for row in csv.reader(io.StringIO(text)):
@@ -36,25 +37,31 @@ def parse_player_bundle(text, season, observed_at, *, minimum_players=2000):
             raise ValueError('Torvik player profile season does not match the game.')
         try:
             games, minutes = float(row[3]), float(row[4])
-            bpm, offense, defense = float(row[53]), float(row[55]), float(row[56])
             pid = 'torvik:' + str(int(row[32]))
         except (ValueError, TypeError):
             continue
-        if not all(math.isfinite(v) for v in (games, minutes, bpm, offense, defense)) or not 0 <= minutes <= 100 or games < 0:
+        if not row[0].strip() or not row[1].strip() or not all(math.isfinite(v) for v in (games, minutes)) or not 0 <= minutes <= 100 or games < 0:
             raise ValueError('Invalid Torvik player minute or impact profile.')
         # Tiny walk-on samples can have hundreds of BPM points. They are not
         # evidence for replacement minutes or a usable injury coefficient.
-        if games == 0 or minutes < 1:
+        if games == 0 or (minutes < 1 and not allow_partial):
             excluded += 1
             continue
-        if abs(bpm - offense - defense) > .05 or max(abs(offense), abs(defense)) > 50:
-            raise ValueError('Torvik offensive/defensive BPM fields do not reconcile.')
+        impact = all(str(row[i]).strip() for i in (53, 55, 56))
+        if impact:
+            bpm, offense, defense = (float(row[i]) for i in (53, 55, 56))
+            if not all(math.isfinite(v) for v in (bpm, offense, defense)) or abs(bpm-offense-defense) > .05 or max(abs(offense),abs(defense)) > 50:
+                raise ValueError('Torvik offensive/defensive BPM fields do not reconcile.')
+        else:
+            if not allow_partial: continue
+            offense, defense = None, None
         key = (team_key(row[1]), pid)
         if key in seen: raise ValueError('Duplicate Torvik college player identity.')
         seen.add(key)
         players.append({'id': pid, 'name': row[0], 'team': row[1], 'weight': minutes * .4,
-                        'offense': offense, 'defense': defense, 'games': games, 'position': row[64]})
-    if len(players) < minimum_players:
+                        'offense': offense, 'defense': defense, 'games': games, 'position': row[64],
+                        'impact_available': bool(impact), 'profile_season': int(season)})
+    if (not players if allow_partial else len(players) < minimum_players):
         raise ValueError('Torvik college player profiles are incomplete.')
     if len({p['id'] for p in players}) != len(players):
         raise ValueError('College player IDs are ambiguous across schools.')
@@ -84,13 +91,15 @@ def allocate_minutes(weights):
 
 def _match(name, profiles):
     key = name_key(name)
-    exact = [p for p in profiles if name_key(p['name']) == key]
+    indexed = isinstance(profiles, dict)
+    exact = profiles['names'].get(key, []) if indexed else [p for p in profiles if name_key(p['name']) == key]
     if len(exact) == 1: return exact[0]
     if exact: return None
     # Source full names can use Matt/ Matthew while keeping a unique family
     # name on this exact team. Initial-only and surname-only matches are rejected.
     words = key.split()
     if len(words) < 2: return None
+    if indexed: profiles = profiles['families'].get(tuple(words[1:]), [])
     matches = []
     for p in profiles:
         other = name_key(p['name']).split()
@@ -99,45 +108,88 @@ def _match(name, profiles):
     return matches[0] if len(matches) == 1 else None
 
 
-def team_adjustment(game, side, lineup, bundle, *, forced_out=()):
-    empty = {'applied': False, 'offense_change_per_100': 0.0, 'defense_improvement_per_100': 0.0, 'players': [], 'flags': []}
+def indexed_player_bundle(bundle):
+    """Index each bulk file once, rather than scan 4,500 names per roster slot."""
+    if bundle.get('_indexes'): return bundle
+    def index(players):
+        names, families, teams = {}, {}, {}
+        for player in players:
+            key = name_key(player['name'])
+            names.setdefault(key, []).append(player)
+            families.setdefault(tuple(key.split()[1:]), []).append(player)
+            teams.setdefault(team_key(player['team']), []).append(player)
+        return {'names':names, 'families':families, 'teams':teams}
+    prior = bundle.get('prior_players', [])
+    return {**bundle, '_indexes':{'current':index(bundle['players']), 'prior':index(prior),
+                                 'prior_ids':{p['id']:p for p in prior}}}
+
+
+def roster_profiles(game, side, bundle, roster):
+    """Join current membership first; prior profiles may follow a transfer."""
     aliases = {team_key(a) for a in game[side + '_aliases']}
-    current_profiles = [p for p in bundle['players'] if team_key(p['team']) in aliases]
-    old_profiles = [p for p in bundle.get('prior_players', []) if team_key(p['team']) in aliases]
-    prior_by_id = {p['id']:p for p in bundle.get('prior_players', [])}
-    all_profiles = {p['id']: p for p in old_profiles + current_profiles}
-    weight = float(bundle.get('team_current_weights', {}).get(side, 1.0))
+    indexes = bundle['_indexes']
+    current = list({p['id']:p for alias in aliases for p in indexes['current']['teams'].get(alias, [])}.values())
+    prior_by_id = indexes['prior_ids']
+    prior_team = list({p['id']:p for alias in aliases for p in indexes['prior']['teams'].get(alias, [])}.values())
+    game_count = bundle.get('team_d1_games', {}).get(side)
     profiles = []
-    for pid, player in all_profiles.items():
-        old = prior_by_id.get(pid)
-        current = next((p for p in bundle['players'] if p['id']==pid), player)
-        profiles.append({**player, 'offense': (1-weight)*old['offense']+weight*current['offense'] if old else current['offense'],
-                         'defense': (1-weight)*old['defense']+weight*current['defense'] if old else current['defense']})
+    for member in roster['players']:
+        player = _match(member['name'], current)
+        old = prior_by_id.get(player['id']) if player else (_match(member['name'], prior_team) or _match(member['name'], indexes['prior']))
+        rating = player or old
+        offense = defense = None
+        if player and player.get('offense') is not None and player.get('defense') is not None:
+            samples = min(player['games'], game_count) if game_count is not None else 0
+            if old:
+                weight = samples / (samples + 10)
+                offense = weight*player['offense']+(1-weight)*old['offense']
+                defense = weight*player['defense']+(1-weight)*old['defense']
+            elif samples >= 5:
+                offense, defense = player['offense'], player['defense']
+        elif old:
+            offense, defense = old['offense'], old['defense']
+        profiles.append({'id': rating['id'] if rating else member['id'], 'name': member['name'], 'team': game[side],
+                         'offense': offense, 'defense': defense,
+                         'current_weight': player['weight'] if player else 0.0,
+                         'prior_weight': old['weight'] if old else 0.0,
+                         'profile_season': bundle['season'] if player and not old else bundle['season']-1 if old else None})
     if len({p['id'] for p in profiles}) != len(profiles):
-        return {**empty, 'flags': ['College player identity is ambiguous; team baseline retained.']}
+        raise ValueError('Current roster names resolve to the same college player profile.')
+    return profiles
+
+
+def team_adjustment(game, side, lineup, bundle, now, *, forced_out=()):
+    empty = {'applied': False, 'offense_change_per_100': 0.0, 'defense_improvement_per_100': 0.0, 'players': [], 'flags': []}
+    if not lineup:
+        return {**empty, 'flags': ['RotoWire unavailable; availability unchecked. Team baseline retained.']}
+    roster = bundle.get('rosters', {}).get(game[side+'_id'])
+    if not valid_roster(roster, game[side+'_id'], game['season'], now):
+        return {**empty, 'flags': ['Current roster membership is unavailable; team baseline retained.']}
+    try: profiles = roster_profiles(game, side, bundle, roster)
+    except ValueError as exc: return {**empty, 'flags': [str(exc)+' Team baseline retained.']}
     listed = lineup[side]['starters'] + lineup[side]['injuries'] if lineup else []
     statuses, mapping, flags = {}, {}, []
-    if not lineup: flags.append('RotoWire unavailable; expected rotation with availability unchecked.')
     if lineup and not lineup[side].get('complete'):
         flags.append('Source projected starting five is incomplete; no missing starter was invented.')
     for player in listed:
-        profile = _match(player['name'], current_profiles)
+        profile = _match(player['name'], profiles)
         if profile is None:
-            flags.append(player['name'] + ': no unique dated player profile; impact unavailable.')
-            continue
+            return {**empty, 'flags': flags + [player['name'] + ': not uniquely matched to the current roster; team baseline retained.']}
         if profile['id'] in statuses:
             return {**empty, 'flags': ['Two source players match the same college profile; team baseline retained.']}
         statuses[profile['id']] = 'OUT' if player['id'] in forced_out else player['status']
         mapping[profile['id']] = player
     try:
-        current_ids = {p['id'] for p in current_profiles}
-        weights = {p['id']: p['weight'] if p['id'] in current_ids and p['games'] > 0 else 0 for p in profiles}
-        current_reference = allocate_minutes(weights)
-        if old_profiles and weight < 1:
-            old_weights = {p['id']: p['weight'] if p['games'] > 0 else 0 for p in old_profiles}
-            old_reference = allocate_minutes(old_weights)
-            reference = {pid: (1-weight)*old_reference.get(pid,0)+weight*current_reference[pid] for pid in weights}
-        else: reference = current_reference
+        # The team baseline already reflects its current roster. Change only
+        # availability relative to this roster, never last year's departures.
+        observed_minutes = sum(p['current_weight'] for p in profiles)
+        minute_basis = 'current_weight' if observed_minutes >= 190 else 'prior_weight'
+        if minute_basis == 'prior_weight':
+            flags.append('Prior-season minute shares projected onto verified current roster.')
+        weights = {p['id']: p[minute_basis] for p in profiles}
+        if any(weights[mapping_id] <= 0 for mapping_id, player in mapping.items() if player in lineup[side]['starters']):
+            raise ValueError('A projected starter has no evidenced minutes.')
+        reference = allocate_minutes(weights)
         current = allocate_minutes({pid: weight if statuses.get(pid) not in {'OUT', 'DOUBTFUL'} else 0 for pid, weight in weights.items()})
     except ValueError as exc:
         return {**empty, 'flags': flags + [str(exc) + ' Team baseline retained.']}
@@ -145,15 +197,21 @@ def team_adjustment(game, side, lineup, bundle, *, forced_out=()):
     for profile in profiles:
         pid = profile['id']; change = current[pid] - reference[pid]
         status = statuses.get(pid, 'UNKNOWN')
+        if profile['offense'] is None or profile['defense'] is None:
+            flags.append(profile['name'] + ': impact rating unavailable.')
+            if abs(change) > 1e-9:
+                return {**empty, 'flags': flags + ['Availability changes unrated player minutes; team baseline retained.']}
         changes.append({'id': mapping.get(pid, {}).get('id', pid), 'ratingId': pid, 'name': profile['name'],
                         'referenceMinutes': reference[pid], 'minutes': current[pid], 'status': status,
                         'assumption': 'OUT' if status in {'OUT', 'DOUBTFUL'} else 'IN',
                         'offensiveImpact': profile['offense'], 'defensiveImpact': profile['defense'],
-                        'offenseChangePer100': change / 40 * profile['offense'],
-                        'defenseImprovementPer100': change / 40 * profile['defense']})
+                        'profileSeason': profile['profile_season'],
+                        'offenseChangePer100': change / 40 * profile['offense'] if profile['offense'] is not None else 0.0,
+                        'defenseImprovementPer100': change / 40 * profile['defense'] if profile['defense'] is not None else 0.0})
     return {'applied': True, 'offense_change_per_100': sum(p['offenseChangePer100'] for p in changes),
             'defense_improvement_per_100': sum(p['defenseImprovementPer100'] for p in changes),
-            'players': changes, 'flags': flags, 'complete': not flags}
+            'players': changes, 'flags': flags, 'complete': not flags,
+            'rosterSourceUrl': roster['source_url'], 'minuteBasis': minute_basis}
 
 
 def valid_lineup(game, lineup, now):
@@ -170,19 +228,22 @@ def lineup_adjustments(game, lineup, bundle, now):
     if int(bundle['season']) != int(game['season']) or bundle.get('policy') != POLICY:
         raise ValueError('College impact profile season or policy is invalid.')
     age = now - timestamp(bundle['observed_at'])
-    if not timedelta(0) <= age <= timedelta(hours=30):
+    max_age = timedelta(days=30) if bundle.get('profile_mode') == 'prior_fallback' else timedelta(hours=30)
+    if not timedelta(0) <= age <= max_age:
         raise ValueError('College player profiles are stale or future-dated.')
     if bundle.get('prior_players') and not timedelta(0) <= now - timestamp(bundle['prior_observed_at']) <= timedelta(days=30):
         raise ValueError('Completed-season player profiles are stale or future-dated.')
+    bundle = indexed_player_bundle(bundle)
     if not valid_lineup(game, lineup, now): lineup = None
     result = {'policy': POLICY, 'as_of': now.isoformat(), 'ratingsSource': bundle['source'], 'ratingsSourceUrl': bundle['source_url'],
-              'reference': 'Prior-season exposure blended with current college rotation; 200 regulation minutes', 'scenarios': []}
-    for side in ('away', 'home'): result[side] = team_adjustment(game, side, lineup, bundle)
+              'reference': 'Availability deltas from the verified current roster; 200 regulation minutes', 'scenarios': []}
+    for side in ('away', 'home'): result[side] = team_adjustment(game, side, lineup, bundle, now)
     if lineup:
         for side in ('away', 'home'):
             for player in lineup[side]['starters'] + lineup[side]['injuries']:
                 if player['status'] != 'QUESTIONABLE' or len(result['scenarios']) >= 4: continue
                 alternative = {s: deepcopy(result[s]) for s in ('away', 'home')}
-                alternative[side] = team_adjustment(game, side, lineup, bundle, forced_out=[player['id']])
+                alternative[side] = team_adjustment(game, side, lineup, bundle, now, forced_out=[player['id']])
+                if not result[side]['applied'] or not alternative[side]['applied']: continue
                 result['scenarios'].append({'player': player['name'], 'team': game[side], **alternative})
     return result

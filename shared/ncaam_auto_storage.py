@@ -15,6 +15,16 @@ def rows(db, dataset, day):
     return [json.loads(row["payload_json"]) for row in data]
 
 
+def rows_for_keys(db, dataset, keys):
+    """One bounded indexed read for requested team rosters."""
+    if not keys: return []
+    if len(set(keys)) > 400: raise ValueError('Too many NCAAM input keys.')
+    q = db._sql_text
+    data = db._result_rows(db._execute(
+        f"SELECT payload_json FROM dataset_rows WHERE sport='NCAAM' AND dataset={q(dataset)} AND date_key IN ({','.join(q(key) for key in sorted(set(keys)))})"))
+    return [json.loads(row['payload_json']) for row in data]
+
+
 def upsert(db, dataset, row, *, immutable=False):
     """The transaction protects stable positions and the first saved forecast."""
     q = db._sql_text

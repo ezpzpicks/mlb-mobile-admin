@@ -12,18 +12,23 @@ from datetime import datetime, timedelta, timezone
 import json
 import hashlib
 import os
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
+from time import monotonic
 from pathlib import Path
 import sys
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from builders.ncaam_model import MODEL_VERSION, blend_season_ratings, find_rating, parse_ratings, project, team_key, timestamp
+from builders.ncaam_model import MODEL_VERSION, prepare_season_ratings, find_rating, parse_ratings, project, team_key, timestamp
 from builders.ncaam_lineups import fetch_lineups, fingerprint
-from builders.ncaam_player_impact import parse_player_bundle, lineup_adjustments, valid_lineup
+from builders.ncaam_player_impact import POLICY as PLAYER_POLICY, parse_player_bundle, lineup_adjustments, valid_lineup, indexed_player_bundle
+from builders.ncaam_rosters import parse_roster, roster_url, valid_roster
+from builders.ncaam_game_counts import POLICY as GAME_COUNT_POLICY, parse_game_counts
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
-from shared.ncaam_division_one import division_one_matchup
+from shared.ncaam_division_one import division_one_matchup, division_one_aliases
 
 ET = ZoneInfo("America/New_York")
 
@@ -32,8 +37,8 @@ def emit(event, **details):
     print(json.dumps({"sport": "NCAAM", "event": event, **details}, default=str), flush=True)
 
 
-def get(url, *, with_observation=False):
-    with urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; EZPZPicks/1.0)", "Accept": "application/json,text/csv"}), timeout=20) as response:
+def get(url, *, with_observation=False, timeout=20):
+    with urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; EZPZPicks/1.0)", "Accept": "application/json,text/csv"}), timeout=timeout) as response:
         data = response.read(5_000_001)
         if len(data) > 5_000_000:
             raise ValueError("NCAAM provider response exceeds the size limit.")
@@ -67,7 +72,8 @@ def parse_slate(payload, day):
         for side, team in sides.items():
             game[side] = team["displayName"]
             game[side + "_id"] = str(team["id"])
-            game[side + "_aliases"] = list(dict.fromkeys(str(team[k]) for k in ("displayName", "shortDisplayName", "location", "abbreviation") if team.get(k)))
+            game[side + "_aliases"] = list(dict.fromkeys([*(str(team[k]) for k in ("displayName", "shortDisplayName", "location", "abbreviation") if team.get(k)),
+                                                        *division_one_aliases(team['id'], game['season'])]))
         if not game["game_id"].isdigit() or game["away_id"] == game["home_id"]:
             raise ValueError("Invalid college basketball game identity.")
         if not division_one_matchup(game["away_id"], game["home_id"], game["season"]):
@@ -94,13 +100,14 @@ def bind_market(game, markets):
             "source": m.source, "source_url": m.source_url, "odds": -110}
 
 
-def cached_input(db, dataset, key, url, parser, season, now, commit, max_hours=6):
+def cached_input(db, dataset, key, url, parser, season, now, commit, max_hours=6, expected_policy=None):
     rows = store.rows(db, dataset, key)
     candidates = []
     for row in rows:
         try:
             candidate = json.loads(row['Details JSON'])
-            if candidate['season'] == season and timestamp(candidate['observed_at']) <= now: candidates.append(candidate)
+            if candidate['season'] == season and timestamp(candidate['observed_at']) <= now and (expected_policy is None or candidate.get('policy') == expected_policy):
+                candidates.append(candidate)
         except (KeyError, ValueError, TypeError): continue
     bundle = max(candidates, key=lambda value: timestamp(value['observed_at']), default=None)
     if not bundle or bundle['season'] != season or not timedelta(0) <= now-timestamp(bundle['observed_at']) < timedelta(hours=max_hours):
@@ -118,17 +125,82 @@ def load_model_inputs(db, day, season, now, commit):
     current = cached_input(db, store.RATINGS, day, f'https://barttorvik.com/{season}_team_results.csv', parse_ratings, season, now, commit)
     prior = cached_input(db, 'ncaam_prior_rating_inputs', f'season-{season-1}', f'https://barttorvik.com/{season-1}_team_results.csv',
                          parse_ratings, season-1, now, commit, 720)
-    teams = blend_season_ratings(current, prior, datetime.now(timezone.utc).isoformat())
+    counts = None
+    try:
+        counts = cached_input(db, 'ncaam_d1_game_counts', day, f'https://barttorvik.com/getgamestats.php?year={season}&csv=1',
+                              lambda text, year, observed: parse_game_counts(text, year, observed, current['teams']), season, now, commit,
+                              expected_policy=GAME_COUNT_POLICY)
+    except Exception as exc:
+        emit('d1_game_counts_unavailable', error=str(exc))
+    teams = prepare_season_ratings(current, prior, now.isoformat(), d1_games=counts)
+    # A sparse current-season export must never block the completed-season
+    # profiles. Load and validate the two independent sources independently.
+    prior_players = None
+    try:
+        prior_players = cached_input(db, 'ncaam_player_profiles', f'season-{season-1}', f'https://barttorvik.com/getadvstats.php?year={season-1}&csv=1',
+                                     parse_player_bundle, season-1, now, commit, 720, expected_policy=PLAYER_POLICY)
+    except Exception as exc:
+        emit('prior_player_inputs_unavailable', error=str(exc))
+    players = None
     try:
         players = cached_input(db, 'ncaam_player_profiles', day, f'https://barttorvik.com/getadvstats.php?year={season}&csv=1',
-                               parse_player_bundle, season, now, commit)
-        prior_players = cached_input(db, 'ncaam_player_profiles', f'season-{season-1}', f'https://barttorvik.com/getadvstats.php?year={season-1}&csv=1',
-                                     parse_player_bundle, season-1, now, commit, 720)
-        players = {**players, 'prior_players': prior_players['players'], 'prior_observed_at': prior_players['observed_at']}
+                               partial(parse_player_bundle, allow_partial=True), season, now, commit, expected_policy=PLAYER_POLICY)
     except Exception as exc:
-        players = None
-        emit('player_inputs_unavailable', error=str(exc))
+        emit('current_player_inputs_unavailable', error=str(exc))
+    if players or prior_players:
+        players = {**(players or {'players': [], 'observed_at': prior_players['observed_at']}),
+                   'season': season, 'policy': PLAYER_POLICY,
+                   'source': 'Bart Torvik player profiles with completed-season fallback',
+                   'source_url': f'https://barttorvik.com/getadvstats.php?year={season if players else season-1}&csv=1',
+                   'profile_mode': 'current_with_prior_fallback' if players else 'prior_fallback',
+                   'prior_players': prior_players['players'] if prior_players else [],
+                   'prior_observed_at': prior_players['observed_at'] if prior_players else '',
+                   'prior_source_url': prior_players['source_url'] if prior_players else ''}
     return teams, players
+
+
+def load_rosters(db, slate, lineups, season, now, commit):
+    """One indexed cache read; refresh current membership at most daily/team.
+
+    Roster requests are bounded to four in flight and a one-minute budget.
+    Missing membership keeps that team's forecast at the source baseline.
+    """
+    requested = {game[side+'_id'] for game in slate if valid_lineup(game, lineups.get(game['game_id']), now) for side in ('away', 'home')}
+    if not requested: return {}
+    key = lambda tid: f'season-{season}|team-{tid}'
+    saved = store.rows_for_keys(db, 'ncaam_roster_inputs', [key(tid) for tid in requested])
+    rosters = {}
+    for row in saved:
+        try:
+            roster = json.loads(row['Details JSON'])
+            if roster['team_id'] in requested and valid_roster(roster, roster['team_id'], season, now): rosters[roster['team_id']] = roster
+        except (KeyError, TypeError, ValueError): continue
+    pending = [tid for tid in sorted(requested) if tid not in rosters or now-timestamp(rosters[tid]['observed_at']) >= timedelta(days=1)]
+    def fetch_one(tid):
+        try:
+            remaining = deadline-monotonic()
+            if remaining < 1: return tid, None, 'Roster refresh budget exhausted.'
+            raw, observed = get(roster_url(tid, season), with_observation=True, timeout=min(15, remaining))
+            return tid, parse_roster(json.loads(raw), tid, season, observed.isoformat()), None
+        except Exception as exc: return tid, None, str(exc)
+    deadline = monotonic()+60
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for offset in range(0, len(pending), 4):
+            if monotonic() >= deadline:
+                emit('roster_refresh_deferred', remaining=len(pending)-offset)
+                break
+            for tid, roster, error in pool.map(fetch_one, pending[offset:offset+4]):
+                if error:
+                    emit('roster_unavailable', team_id=tid, error=error)
+                    continue
+                if not valid_roster(roster, tid, season, datetime.now(timezone.utc)):
+                    emit('roster_rejected', team_id=tid)
+                    continue
+                rosters[tid] = roster
+                if commit:
+                    store.upsert(db, 'ncaam_roster_inputs', {'Date':key(tid), 'Game Key':'roster|'+key(tid), 'Market':'Roster',
+                        'Selection':tid, 'Updated At':roster['observed_at'], 'Details JSON':json.dumps(roster)})
+    return rosters
 
 
 def load_lineups(db, slate, day, now, commit):
@@ -204,13 +276,20 @@ def run(args):
     if len(seasons) != 1:
         raise ValueError("Ambiguous NCAAM ratings season.")
     season = seasons.pop()
+    game_markets = {game['game_id']: bind_market(game, markets) or espn.get(game['game_id']) or bind_market(game, fallback) for game, _, _ in pending}
+    modeled_slate = [game for game, _, _ in pending if game_markets[game['game_id']]]
+    if not modeled_slate:
+        for game, _, _ in pending: emit('waiting_for_market', game_id=game['game_id'], game=f"{game['away']} @ {game['home']}")
+        return 0
     bundle, player_inputs = load_model_inputs(db, day, season, datetime.now(timezone.utc), args.commit)
-    lineups = load_lineups(db, slate, day, datetime.now(timezone.utc), args.commit)
+    if player_inputs: player_inputs = indexed_player_bundle(player_inputs)
+    lineups = load_lineups(db, modeled_slate, day, datetime.now(timezone.utc), args.commit)
+    rosters = load_rosters(db, modeled_slate, lineups, season, datetime.now(timezone.utc), args.commit) if player_inputs else {}
     failures = 0
     for game, phase, record_id in pending[:args.limit]:
         try:
             current = datetime.now(timezone.utc)
-            market = bind_market(game, markets) or espn.get(game["game_id"]) or bind_market(game, fallback)
+            market = game_markets[game['game_id']]
             if not market:
                 emit("waiting_for_market", game_id=game["game_id"], game=f"{game['away']} @ {game['home']}")
                 continue
@@ -219,8 +298,8 @@ def run(args):
             lineup = lineups.get(game['game_id'])
             adjustment = None
             if player_inputs:
-                weights = {side: find_rating(bundle, game[side+'_aliases']).get('current_weight', 1) for side in ('away','home')}
-                adjustment = lineup_adjustments(game, lineup, {**player_inputs, 'team_current_weights':weights}, current)
+                counts = {side: find_rating(bundle, game[side+'_aliases']).get('d1_games_played') for side in ('away','home')}
+                adjustment = lineup_adjustments(game, lineup, {**player_inputs, 'team_d1_games':counts, 'rosters':rosters}, current)
             inputs = {'lineup': fingerprint(lineup) if lineup else 'unavailable',
                       'ratings': [find_rating(bundle, game[side+'_aliases']) for side in ('away','home')],
                       'league_efficiency': bundle['league_efficiency'],
@@ -250,6 +329,7 @@ def run(args):
             fresh_lineup = valid_lineup(game, lineup, current)
             forecast.update(lineup=lineup, availability_mode='rotowire_html' if fresh_lineup else 'expected_rotation',
                             injury_verified=fresh_lineup, starters_confirmed=False,
+                            player_profile_mode=player_inputs.get('profile_mode', 'unavailable') if player_inputs else 'unavailable',
                             availability_as_of=lineup['observedAt'] if lineup else '', availability_source=lineup['sourceUrl'] if lineup else '')
             forecast.update(recordId=record_id, gameId=game["game_id"], modelVersion=MODEL_VERSION,
                             lockedAt=current.isoformat(), tipoff=game["tipoff"], phase=phase, inputDigest=digest)
@@ -259,7 +339,9 @@ def run(args):
                 store.upsert(db, store.FORECASTS, row, immutable=True)
             emit("built", game_id=game["game_id"], phase=phase, saved=args.commit, model_version=MODEL_VERSION,
                  projected_away=forecast["away_score"], projected_home=forecast["home_score"],
-                 line_source=market["source"], neutral_site=game["neutral_site"], grade_policy=forecast["grade_policy"])
+                 line_source=market["source"], neutral_site=game["neutral_site"], grade_policy=forecast["grade_policy"],
+                 player_profile_mode=forecast['player_profile_mode'],
+                 adjusted_teams=[side for side in ('away','home') if adjustment and adjustment[side]['applied']])
         except Exception as exc:
             failures += 1
             emit("game_failed", game_id=game["game_id"], error=str(exc))
