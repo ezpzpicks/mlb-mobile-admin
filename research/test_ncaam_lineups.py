@@ -45,6 +45,26 @@ def test_duplicate_games_conflicting_statuses_and_cross_team_ids_are_rejected():
     with pytest.raises(ValueError): parse_lineups(HTML, GAMES, NOW.isoformat(), 'https://other.test/lineups')
 
 
+def test_neutral_site_reversed_listing_preserves_team_players_and_game_identity():
+    game = deepcopy(GAMES[0])
+    for suffix in ('', '_aliases', '_id'):
+        game['away'+suffix], game['home'+suffix] = game['home'+suffix], game['away'+suffix]
+    game['neutral_site'] = True
+    lineups, _, rejected = parse_lineups(HTML, [game], NOW.isoformat())
+    assert not rejected and len(lineups) == 1
+    lineup = lineups[0]
+    assert lineup['away']['team'] == game['away']
+    assert lineup['away']['starters'][0]['name'] == 'Elijah Crawford'
+    assert len(lineup['away']['starters']) == 4 and len(lineup['away']['injuries']) == 2
+    assert lineup['home']['team'] == game['home']
+    assert lineup['home']['starters'][0]['name'] == 'Braeden Smith'
+    assert lineup['home']['starters'][-1]['status'] == 'QUESTIONABLE'
+    for neutral in (False, None):
+        assert parse_lineups(HTML, [{**game, 'neutral_site': neutral}], NOW.isoformat())[0] == []
+    assert parse_lineups(HTML.replace('9:30 AM ET', '9:31 AM ET'), [game], NOW.isoformat())[0] == []
+    assert parse_lineups(HTML, [GAMES[0], game], NOW.isoformat())[0] == []
+
+
 def test_profile_schema_and_tiny_sample_extremes():
     def row(pid=1, minutes=50, obpm=4, dbpm=2):
         values = ['']*67

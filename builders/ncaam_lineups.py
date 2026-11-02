@@ -44,13 +44,17 @@ def parse_lineups(html, games, observed_at, source_url=URL):
             if any(n is None for n in names):
                 continue
             names = [n.get_text(' ', strip=True) for n in names]
-            matches = [g for g in games if all(team_key(names[i]) in {team_key(a) for a in g[side+'_aliases']}
-                                                   for i, side in enumerate(('away', 'home')))]
+            # Neutral-site sources may reverse ESPN's team order. Keep each
+            # player list attached to its verified team when mapping it back.
+            matches = [(g, reverse) for g in games
+                       for reverse in ((False, True) if g.get('neutral_site') is True else (False,))
+                       if all(team_key(names[1-i if reverse else i]) in {team_key(a) for a in g[side+'_aliases']}
+                              for i, side in enumerate(('away', 'home')))]
             if not matches:
                 continue
             if len(matches) != 1:
                 raise ValueError('Ambiguous college team identity.')
-            game = matches[0]
+            game, reverse = matches[0]
             clock = box.parent.select_one('.lineup__time')
             if clock is None:
                 raise ValueError('College lineup tipoff is missing.')
@@ -69,6 +73,8 @@ def parse_lineups(html, games, observed_at, source_url=URL):
                       'observedAt': observed.isoformat(), 'source': 'RotoWire', 'sourceUrl': source_url, 'basis': 'Depth chart projections'}
             used = set()
             for side, css in (('away', 'is-visit'), ('home', 'is-home')):
+                if reverse:
+                    css = 'is-home' if css == 'is-visit' else 'is-visit'
                 listing = box.select_one(f'.lineup__list.{css}')
                 if listing is None:
                     raise ValueError('College lineup team section is missing.')
