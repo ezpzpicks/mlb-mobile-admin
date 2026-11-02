@@ -31,6 +31,7 @@ from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaam_division_one import division_one_matchup, division_one_aliases
 
 ET = ZoneInfo("America/New_York")
+MAX_SLATE_GAMES = 200
 
 
 def emit(event, **details):
@@ -132,7 +133,9 @@ def load_model_inputs(db, day, season, now, commit):
                               expected_policy=GAME_COUNT_POLICY)
     except Exception as exc:
         emit('d1_game_counts_unavailable', error=str(exc))
-    teams = prepare_season_ratings(current, prior, now.isoformat(), d1_games=counts)
+    # Fresh downloads are observed after this function starts. Validate the
+    # combined input snapshot at completion, before any forecast is locked.
+    teams = prepare_season_ratings(current, prior, datetime.now(timezone.utc).isoformat(), d1_games=counts)
     # A sparse current-season export must never block the completed-season
     # profiles. Load and validate the two independent sources independently.
     prior_players = None
@@ -258,7 +261,8 @@ def run(args):
         record_id = f"{game['game_id']}|{MODEL_VERSION}|{phase}"
         if record_id not in keys:
             pending.append((game, phase, record_id))
-    emit("plan", date=day, pending=len(pending), existing=len(existing), mode="commit" if args.commit else "evaluate" if args.evaluate else "plan")
+    emit("plan", date=day, pending=len(pending), existing=len(existing), limit=args.limit, model_version=MODEL_VERSION,
+         mode="commit" if args.commit else "evaluate" if args.evaluate else "plan")
     if not pending or not (args.commit or args.evaluate):
         return 0
     from shared.ncaaf_auto_builder import eligible_markets
@@ -365,9 +369,9 @@ def main(argv=None):
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--evaluate", action="store_true")
     mode.add_argument("--commit", action="store_true")
-    parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--limit", type=int, default=MAX_SLATE_GAMES)
     args = parser.parse_args(argv)
-    if not 1 <= args.limit <= 200:
+    if not 1 <= args.limit <= MAX_SLATE_GAMES:
         parser.error("--limit must be 1–200")
     try:
         return run(args)
