@@ -154,3 +154,30 @@ def test_legacy_player_policy_cannot_mask_new_sparse_input_handling(monkeypatch)
     monkeypatch.setattr(runner,'get',lambda *_a,**_kw:(calls.append(True) or ('source',NOW)))
     result=runner.cached_input(None,'players','day',URL,lambda *_a:{'season':2027,'policy':POLICY,'observed_at':NOW.isoformat()},2027,NOW,False,expected_policy=POLICY)
     assert result['policy']==POLICY and len(calls)==1
+
+
+def test_roster_outage_cooldown_survives_cold_runs_without_claiming_freshness(monkeypatch):
+    game,lineup,_=rotation_inputs()
+    saved,requests=[],[]
+    class Clock(datetime):
+        tick=NOW
+        @classmethod
+        def now(cls,tz=None): return cls.tick.astimezone(tz) if tz else cls.tick.replace(tzinfo=None)
+    monkeypatch.setattr(runner,'datetime',Clock)
+    monkeypatch.setattr(runner.store,'rows_for_keys',lambda *_a:saved)
+    def fail(*_a,**_kw):
+        requests.append(True)
+        raise ValueError('Roster provider unavailable')
+    monkeypatch.setattr(runner,'get',fail)
+    monkeypatch.setattr(runner.store,'upsert',lambda _db,_dataset,row:saved.append(row))
+    assert runner.load_rosters(None,[game],{game['game_id']:lineup},2027,NOW,True)=={}
+    assert len(requests)==2 and len(saved)==2
+    assert all(not row['Updated At'] and json.loads(row['Details JSON']) is None for row in saved)
+    Clock.tick=NOW+timedelta(minutes=5)
+    fresh={**lineup,'observedAt':Clock.tick.isoformat()}
+    assert runner.load_rosters(None,[game],{game['game_id']:fresh},2027,Clock.tick,True)=={}
+    assert len(requests)==2
+    Clock.tick=NOW+timedelta(minutes=65)
+    fresh={**lineup,'observedAt':Clock.tick.isoformat()}
+    assert runner.load_rosters(None,[game],{game['game_id']:fresh},2027,Clock.tick,True)=={}
+    assert len(requests)==4

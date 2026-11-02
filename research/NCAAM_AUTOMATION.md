@@ -87,8 +87,10 @@ player-policy caches are revalidated under the v2 contract.
 Current team membership comes from season- and team-ID-verified ESPN rosters.
 The roster cache is read once for the required teams and refreshed at most daily,
 with at most four concurrent requests and a 60-second request budget. A verified
-cache remains usable for at most two days during a source outage. Only market-
-covered games with fresh RotoWire reports need roster requests. Missing membership
+cache remains usable for at most two days during a source outage. Failed refresh
+attempts have a persisted one-hour cooldown across runs; an attempt never advances
+source freshness, and an older provider response cannot replace newer membership.
+Only market-covered games with fresh RotoWire reports need roster requests. Missing membership
 retains the source team baseline. RotoWire remains the injury source; rosters
 are not health reports. Member names must uniquely resolve to dated player
 profiles; transfers can carry a uniquely matched prior college profile.
