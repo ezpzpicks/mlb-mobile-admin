@@ -64,63 +64,59 @@ forecast using actual current-season ratings and Covers lines. The public SAO
 adapter also matched its quartet after correcting neutral-site source order.
 Liberty–High Point was explicitly waiting for lines at the time of that check.
 
-## v0.3: completed-season prior and college player rotations
+## v0.4: source preseason weighting and independent player fallback
 
-The opening 2026–27 slate uses the completed 2025–26 season (Torvik ending year
-2026) as its team efficiency/tempo prior, with actual current-season W–L game
-count determining the weight: current results receive `n / (n + 10)`. At 0–0,
-the prior receives 100%; after ten games, each season receives 50%. The ten-game
-setting is provisional research, not a tuned or calibrated parameter. A school
-without a preceding-season rating retains its actual current rating and the
-missing prior is visible. Offensive and defensive adjusted efficiencies already
-account for schedule strength and competition. SOS and opponent OE/DE are saved
-for inspection; they are not applied again as an arbitrary multiplier. Each
-offense is matched multiplicatively against the opposing defense, scaled by the
-league efficiency and the teams' tempos. Neutral court verification remains
-required. Market lines do not determine projected scores.
+Current Torvik adjusted offense, defense and tempo are used unchanged. Torvik
+already applies its own preseason prior and recency adjustments. Completed-season
+team ratings remain context; they receive no second external team weight.
+Displayed W-L never drives confidence or season weighting.
 
-`builders/ncaam_lineups.py` reads public RotoWire college depth charts from
-`https://www.rotowire.com/daily/ncaab/lineups.php`, following at most two additional
-advertised, date-matching slate links. College cards are projected depth charts,
-never NBA-style confirmed fives. Every card must match both ESPN schools and the
-explicit Eastern game date/time, including the November DST transition. Repeated
-position slots are deduplicated and incomplete fives stay incomplete. GTD becomes
-Questionable, OUT/OFS becomes Out. Blank status remains Unknown. Missing source
-coverage does not mean healthy. No subscription minutes are scraped.
+`ncaam_game_counts.py` counts unique completed games from the bulk current-season
+team game log, requiring both schools to exist in the Division I ratings group.
+Date-only same-day and future rows are excluded. Counts therefore run through
+the previous Eastern day. A missing count is unavailable, not an all-opponent
+record or an invented zero. These counts support player-profile sample weighting,
+not a second blend of team ratings. The bulk count input is cached for six hours.
 
-`builders/ncaam_player_impact.py` applies the NBA minute-delta mechanics scaled
-to 40 minutes per player and 200 regulation team minutes. College player
-coefficients are Torvik college OBPM/DBPM, not NBA RAPM. The publicly documented
-67-column export at `getadvstats.php?year=2027&csv=1` is validated for season,
-unique identities, finite fields and reconciled offensive/defensive BPM. Players
-with under 1% minute share or no games are excluded as insufficient exposure.
-Current-year preseason player profiles can carry earlier statistics and are
-not counted as newly played games. Source roster minute shares are model weights,
-not RotoWire projected minutes. Missing/new player ratings are explicit gaps.
+Player sources load independently. The completed season's full export is cached
+for up to 30 days. A sparse current export is accepted if its schema and player
+identities are valid, even when BPM fields are blank. Missing BPM remains null.
+A current-source failure cannot suppress the completed-season fallback. Older
+player-policy caches are revalidated under the v2 contract.
 
-The reference rotation blends prior-school and current-school exposure using
-the same season weight. Current-school player IDs determine the active roster;
-departures lose minutes and transfers carry their prior college coefficients
-where available. OUT/Doubtful players receive zero minutes and evidenced
-replacements fill the remaining allocation with a 40-minute cap. Questionable
-players remain IN in the base forecast, with separate one-player OUT scenarios.
-For each player, `minute_delta / 40 * OBPM` changes offense and the analogous
-DBPM value improves (lowers) defensive points allowed. No unverified rookie or
-missing replacement receives an invented coefficient. Insufficient rotation
-coverage preserves the team baseline with a flag.
+Current team membership comes from season- and team-ID-verified ESPN rosters.
+The roster cache is read once for the required teams and refreshed at most daily,
+with at most four concurrent requests and a 60-second request budget. A verified
+cache remains usable for at most two days during a source outage. Only market-
+covered games with fresh RotoWire reports need roster requests. Missing membership
+retains the source team baseline. RotoWire remains the injury source; rosters
+are not health reports. Member names must uniquely resolve to dated player
+profiles; transfers can carry a uniquely matched prior college profile.
 
-Player inputs cache for six hours; completed-season inputs for at most 30 days.
-RotoWire observations must be within 35 minutes, tightened to ten minutes inside
-90 minutes to tipoff. Both the existing public collector and Python builder save
-one date-indexed `lineup_snapshots` row; public page visits only read saved data.
-The builder reuses a fresh saved observation before fetching. A material lineup,
-roster or ratings revision adds an immutable forecast keyed by the input digest;
-an observation timestamp alone does not create another forecast. Latest per-game
-selection keeps one active forecast for records and signals; earlier versions
-remain intact. Official NCAAM EZPZ picks and X posting remain on hold.
+Minute deltas start from the verified current roster, never last year's roster.
+Current minute shares covering at least 190 of 200 regulation minutes are used;
+otherwise evidenced prior shares are projected onto current members with an
+explicit flag. A projected starter without evidenced minutes prevents an impact
+estimate. Missing/new impact ratings stay unavailable. If an injury would change
+an unrated player's minutes, the team baseline is retained instead of assigning
+that player a zero-impact coefficient. Departures alone do not create another
+roster adjustment on top of Torvik's current-season ratings.
 
-Behavioral validation includes the actual RotoWire Rome card, repeated Villanova
-slots, injury deduplication, ambiguous matchups, stale availability, replacement
-minutes, both sides of player impact, prior transitions and departures. These
-checks establish input/math behavior; predictive accuracy still requires a
-chronological held-out evaluation.
+Current player impact metrics are shrunk toward a matching completed-season
+profile by `n / (n + 10)`, where n is bounded by verified D1 games. A player with
+no historical metric needs at least five verified games before a standalone
+current metric is used. These are research sample controls, not optimized betting
+thresholds. OUT/Doubtful players receive zero minutes; evidenced replacements
+share the rest with a 40-minute cap. Questionable players are assumed IN, and
+an OUT scenario is emitted only when the alternative can be calculated.
+
+The bulk player files are indexed once per run, including unique name and family
+keys. Matching does not repeatedly scan thousands of players for every roster slot.
+Exact source aliases are tied to verified ESPN IDs; they do not use fuzzy school
+matching. Forecast digests and immutable prior versions remain intact.
+
+Validation uses the actual 19-row sparse 2027 export, verified roster metadata,
+4,509 usable completed-season player profiles, all 119 eligible November 2
+matchups, and the completed-season 11,504 team-game rows. This validates input
+handling and timing, not predictive ROI. New matchup coefficients and betting
+thresholds still require a chronological evaluation with actual historical lines.

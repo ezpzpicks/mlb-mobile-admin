@@ -1,0 +1,78 @@
+{
+  "season": {
+    "year": 2027,
+    "displayName": "2026-27",
+    "type": 2,
+    "name": "Regular Season"
+  },
+  "team": {
+    "id": "87",
+    "displayName": "Notre Dame Fighting Irish"
+  },
+  "athletes": [
+    {
+      "id": "5312259",
+      "displayName": "Tommy Ahneman"
+    },
+    {
+      "id": "5311849",
+      "displayName": "Devin Brown"
+    },
+    {
+      "id": "5454662",
+      "displayName": "Jake Burow"
+    },
+    {
+      "id": "5312260",
+      "displayName": "Luke Devine"
+    },
+    {
+      "id": "5107470",
+      "displayName": "Yoro Diallo"
+    },
+    {
+      "id": "4682856",
+      "displayName": "Logan Duncomb"
+    },
+    {
+      "id": "4872727",
+      "displayName": "Logan Imes"
+    },
+    {
+      "id": "5312256",
+      "displayName": "Brady Koehler"
+    },
+    {
+      "id": "5108811",
+      "displayName": "Ethan Roberts"
+    },
+    {
+      "id": "5144387",
+      "displayName": "Bryce Ruglass Dortch"
+    },
+    {
+      "id": "5210410",
+      "displayName": "Jonathan Sanderson"
+    },
+    {
+      "id": "4912455",
+      "displayName": "Braeden Shrewsberry"
+    },
+    {
+      "id": "5326290",
+      "displayName": "Nick Shrewsberry"
+    },
+    {
+      "id": "5105672",
+      "displayName": "Braeden Smith"
+    },
+    {
+      "id": "5290627",
+      "displayName": "Gan-Erdene Solongo"
+    },
+    {
+      "id": "5238175",
+      "displayName": "Brady Stevens"
+    }
+  ]
+}
