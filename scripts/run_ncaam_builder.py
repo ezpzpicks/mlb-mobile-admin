@@ -23,6 +23,7 @@ from builders.ncaam_lineups import fetch_lineups, fingerprint
 from builders.ncaam_player_impact import parse_player_bundle, lineup_adjustments, valid_lineup
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
+from shared.ncaam_division_one import division_one_matchup
 
 ET = ZoneInfo("America/New_York")
 
@@ -69,6 +70,8 @@ def parse_slate(payload, day):
             game[side + "_aliases"] = list(dict.fromkeys(str(team[k]) for k in ("displayName", "shortDisplayName", "location", "abbreviation") if team.get(k)))
         if not game["game_id"].isdigit() or game["away_id"] == game["home_id"]:
             raise ValueError("Invalid college basketball game identity.")
+        if not division_one_matchup(game["away_id"], game["home_id"], game["season"]):
+            continue
         games.append(game)
     if len({g["game_id"] for g in games}) != len(games):
         raise ValueError("Duplicate college basketball games.")

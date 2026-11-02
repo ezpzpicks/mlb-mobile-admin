@@ -12,6 +12,13 @@ No new service, cron minimum, schedule or paid data account is added. Set
 receives the existing explicit save opt-in. An individual manual `--commit`
 also requires `NCAAM_AUTO_BUILDER_ENABLED=1`.
 
+The runner filters the ESPN scoreboard to matchups where both team IDs belong
+to the verified season-specific Division I membership snapshot. The 2026–27
+snapshot matches the 365 Warren Nolan teams to ESPN IDs, including Lindenwood,
+Queens and Southern Indiana. Nonmembers are excluded before market, ratings
+and lineup work. The public site uses an identical snapshot. Each new season
+requires its own verified membership file; unknown-season games are excluded.
+
 The runner reads the complete ESPN Division I scoreboard for the current
 Eastern date, including the Rome opener, neutral courts and postseason games.
 It only projects scheduled games at least ten minutes before verified tipoff.

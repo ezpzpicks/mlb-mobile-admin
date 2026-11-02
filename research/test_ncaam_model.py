@@ -66,7 +66,7 @@ class NcaamModelTests(unittest.TestCase):
             "date": "2026-11-01T14:30:00Z", "timeValid": True, "neutralSite": True,
             "status": {"type": {"name": "STATUS_SCHEDULED"}}, "competitors": [
                 {"homeAway": side, "team": {"id": str(i), "displayName": name, "location": name}}
-                for i, (side, name) in enumerate([("away", "Notre Dame"), ("home", "Villanova")], 1)]}]}
+                for i, side, name in [(87, "away", "Notre Dame"), (222, "home", "Villanova")]]}]}
         game = parse_slate({"events": [event]}, "2026-11-01")[0]
         self.assertEqual(datetime.fromisoformat(game["tipoff"]).astimezone(__import__('zoneinfo').ZoneInfo('America/New_York')).hour, 9)
         self.assertTrue(game["neutral_site"])
