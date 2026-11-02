@@ -169,13 +169,19 @@ def load_rosters(db, slate, lineups, season, now, commit):
     if not requested: return {}
     key = lambda tid: f'season-{season}|team-{tid}'
     saved = store.rows_for_keys(db, 'ncaam_roster_inputs', [key(tid) for tid in requested])
-    rosters = {}
+    rosters, retained, attempts = {}, {}, {}
     for row in saved:
         try:
+            tid = row.get('Selection', '')
+            attempt = timestamp(row['Last Attempt At']) if row.get('Last Attempt At') else None
+            if tid in requested and attempt and attempt <= now: attempts[tid] = attempt
             roster = json.loads(row['Details JSON'])
+            if isinstance(roster, dict) and roster.get('team_id') in requested: retained[roster['team_id']] = roster
             if roster['team_id'] in requested and valid_roster(roster, roster['team_id'], season, now): rosters[roster['team_id']] = roster
         except (KeyError, TypeError, ValueError): continue
-    pending = [tid for tid in sorted(requested) if tid not in rosters or now-timestamp(rosters[tid]['observed_at']) >= timedelta(days=1)]
+    pending = [tid for tid in sorted(requested)
+               if (tid not in rosters or now-timestamp(rosters[tid]['observed_at']) >= timedelta(days=1))
+               and (tid not in attempts or now-attempts[tid] >= timedelta(hours=1))]
     def fetch_one(tid):
         try:
             remaining = deadline-monotonic()
@@ -192,14 +198,20 @@ def load_rosters(db, slate, lineups, season, now, commit):
             for tid, roster, error in pool.map(fetch_one, pending[offset:offset+4]):
                 if error:
                     emit('roster_unavailable', team_id=tid, error=error)
-                    continue
-                if not valid_roster(roster, tid, season, datetime.now(timezone.utc)):
+                elif not valid_roster(roster, tid, season, datetime.now(timezone.utc)):
                     emit('roster_rejected', team_id=tid)
-                    continue
-                rosters[tid] = roster
+                    roster = None
+                if roster:
+                    previous = retained.get(tid)
+                    if not previous or timestamp(roster['observed_at']) >= timestamp(previous['observed_at']): retained[tid] = roster
+                    if valid_roster(retained[tid], tid, season, datetime.now(timezone.utc)): rosters[tid] = retained[tid]
                 if commit:
+                    # Attempt time is a retry clock, never evidence that old
+                    # membership became fresh. Preserve the last source row.
+                    checked_at = datetime.now(timezone.utc).isoformat()
                     store.upsert(db, 'ncaam_roster_inputs', {'Date':key(tid), 'Game Key':'roster|'+key(tid), 'Market':'Roster',
-                        'Selection':tid, 'Updated At':roster['observed_at'], 'Details JSON':json.dumps(roster)})
+                        'Selection':tid, 'Updated At':retained.get(tid, {}).get('observed_at', ''),
+                        'Last Attempt At':checked_at, 'Details JSON':json.dumps(retained.get(tid))})
     return rosters
 
 
