@@ -117,6 +117,12 @@ keys. Matching does not repeatedly scan thousands of players for every roster sl
 Exact source aliases are tied to verified ESPN IDs; they do not use fuzzy school
 matching. Forecast digests and immutable prior versions remain intact.
 
+The default and scheduled NCAAM limit is 200 games, covering the 119 eligible
+opening-day matchups without truncating them at the former 100-game limit.
+Input timestamps are validated after team and D1-count downloads finish, so
+freshly observed data is not rejected against the request's earlier start time.
+The pure model still rejects inputs observed after the forecast cutoff.
+
 Validation uses the actual 19-row sparse 2027 export, verified roster metadata,
 4,509 usable completed-season player profiles, all 119 eligible November 2
 matchups, and the completed-season 11,504 team-game rows. This validates input

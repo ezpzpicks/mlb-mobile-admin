@@ -29,7 +29,9 @@ def main():
             # An eight-game supervised trial limit must not strand a Saturday
             # slate across multiple half-hour checks. Inputs are shared within
             # the process and saved games remain protected on subsequent runs.
-            args = ["--commit", "--limit", "100"] if sport == "NCAAF" else ["--commit"]
+            args = ["--commit"]
+            if sport in {"NCAAF", "NCAAM"}:
+                args += ["--limit", "200" if sport == "NCAAM" else "100"]
             result = subprocess.run([sys.executable, "-u", str(ROOT / "scripts" / script), *args],
                                     env=dict(env, NCAAM_AUTO_BUILDER_ENABLED="1") if sport == "NCAAM" else env, timeout=timeout, check=False)
             code = result.returncode
