@@ -123,6 +123,15 @@ Input timestamps are validated after team and D1-count downloads finish, so
 freshly observed data is not rejected against the request's earlier start time.
 The pure model still rejects inputs observed after the forecast cutoff.
 
+## v0.5: opening-season margin calibration
+
+New research forecasts apply the frozen, training-only neutral-margin and home
+court fit described in [NCAAM_MARGIN_CALIBRATION.md](NCAAM_MARGIN_CALIBRATION.md).
+The adjustment is restricted to the evaluated opening fortnight, preserves totals
+and player-impact deltas, and saves provenance with each immutable forecast.
+Historical and current-season checks improve point calibration, but do not
+establish a betting edge; A/B grades and official NCAAM EZPZ selection stay on hold.
+
 Validation uses the actual 19-row sparse 2027 export, verified roster metadata,
 4,509 usable completed-season player profiles, all 119 eligible November 2
 matchups, and the completed-season 11,504 team-game rows. This validates input

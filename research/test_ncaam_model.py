@@ -5,6 +5,7 @@ import sqlite3
 import unittest
 
 from builders.ncaam_model import parse_ratings, project, team_key
+from builders.ncaam_margin_calibration import HOME_COURT_POINTS
 from scripts.run_ncaam_builder import parse_slate
 from shared.ncaam_auto_storage import upsert, rows
 
@@ -27,7 +28,7 @@ class NcaamModelTests(unittest.TestCase):
         neutral = self.calculate()
         home = self.calculate({**self.game, "neutral_site": False})
         self.assertAlmostEqual(neutral["total"], home["total"])
-        self.assertAlmostEqual(neutral["fair_home_spread"] - home["fair_home_spread"], 3.2)
+        self.assertAlmostEqual(neutral["fair_home_spread"] - home["fair_home_spread"], HOME_COURT_POINTS, places=2)
         self.assertEqual(neutral["spread_grade"], "Research")
         self.assertNotIn("spread_probability_estimate", neutral)
 
@@ -37,7 +38,8 @@ class NcaamModelTests(unittest.TestCase):
         changed["teams"]["home"]["defense"] -= 5
         better = self.calculate(bundle=changed)
         self.assertLess(better["away_score"], baseline["away_score"])
-        self.assertEqual(better["home_score"], baseline["home_score"])
+        self.assertLess(better["fair_home_spread"], baseline["fair_home_spread"])
+        self.assertLess(better["total"], baseline["total"])
 
     def test_market_does_not_change_projected_scores(self):
         baseline = self.calculate()

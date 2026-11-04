@@ -1,0 +1,2001 @@
+{
+  "policy": "ncaam-opening-margin-2026-11-03-v1",
+  "new_model_version": "ncaam-v0.5-opening-margin-calibration-2026-11-03",
+  "baseline_model_version": "ncaam-v0.4-source-prior-player-fallback-2026-11-02",
+  "historical_sha256": "d5eee52cd17f4de52fb2601a3478c9a6729781ef775b6c3c3893574478eb5524",
+  "training_games": 600,
+  "training_season": 2024,
+  "frozen_coefficients": {
+    "neutral_margin_scale": 1.1220985846903615,
+    "home_court_points": 3.8819923880100435
+  },
+  "historical": {
+    "2025": {
+      "baseline": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.731089108910892,
+          "margin_rmse": 12.3312112258703,
+          "favorite_underprediction": 1.581914191419142,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 309,
+              "losses": 297,
+              "pushes": 0,
+              "bets": 606,
+              "units": -16.090909090909065,
+              "roi_pct": -2.655265526552651
+            },
+            "3": {
+              "wins": 104,
+              "losses": 92,
+              "pushes": 0,
+              "bets": 196,
+              "units": 2.5454545454545467,
+              "roi_pct": 1.2987012987012994
+            },
+            "5": {
+              "wins": 41,
+              "losses": 35,
+              "pushes": 0,
+              "bets": 76,
+              "units": 2.2727272727272734,
+              "roi_pct": 2.9904306220095704
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.569020979020978,
+          "margin_rmse": 14.781747746243218,
+          "favorite_underprediction": 5.155174825174825,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 74,
+              "losses": 69,
+              "pushes": 0,
+              "bets": 143,
+              "units": -1.7272727272727337,
+              "roi_pct": -1.2078830260648488
+            },
+            "3": {
+              "wins": 51,
+              "losses": 41,
+              "pushes": 0,
+              "bets": 92,
+              "units": 5.363636363636367,
+              "roi_pct": 5.830039525691704
+            },
+            "5": {
+              "wins": 30,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 55,
+              "units": 2.2727272727272734,
+              "roi_pct": 4.132231404958679
+            }
+          }
+        }
+      },
+      "calibrated": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.660310267874006,
+          "margin_rmse": 12.157943947944936,
+          "favorite_underprediction": 0.02848776436384507,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 302,
+              "losses": 304,
+              "pushes": 0,
+              "bets": 606,
+              "units": -29.45454545454544,
+              "roi_pct": -4.860486048604859
+            },
+            "3": {
+              "wins": 93,
+              "losses": 76,
+              "pushes": 0,
+              "bets": 169,
+              "units": 8.545454545454547,
+              "roi_pct": 5.056481979558904
+            },
+            "5": {
+              "wins": 22,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 47,
+              "units": -5.0,
+              "roi_pct": -10.638297872340425
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.059153754766415,
+          "margin_rmse": 14.010725917027127,
+          "favorite_underprediction": 2.1121883335784495,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 75,
+              "losses": 68,
+              "pushes": 0,
+              "bets": 143,
+              "units": 0.18181818181818699,
+              "roi_pct": 0.12714558169103984
+            },
+            "3": {
+              "wins": 25,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 47,
+              "units": 0.7272727272727266,
+              "roi_pct": 1.5473887814313332
+            },
+            "5": {
+              "wins": 8,
+              "losses": 11,
+              "pushes": 0,
+              "bets": 19,
+              "units": -3.7272727272727275,
+              "roi_pct": -19.617224880382775
+            }
+          }
+        }
+      }
+    },
+    "2026": {
+      "baseline": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.590904605263159,
+          "margin_rmse": 12.19123163519153,
+          "favorite_underprediction": 2.919424342105263,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 297,
+              "losses": 311,
+              "pushes": 0,
+              "bets": 608,
+              "units": -41.0,
+              "roi_pct": -6.743421052631579
+            },
+            "3": {
+              "wins": 147,
+              "losses": 140,
+              "pushes": 0,
+              "bets": 287,
+              "units": -6.363636363636374,
+              "roi_pct": -2.217294900221733
+            },
+            "5": {
+              "wins": 74,
+              "losses": 70,
+              "pushes": 0,
+              "bets": 144,
+              "units": -2.7272727272727337,
+              "roi_pct": -1.8939393939393985
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 11.39,
+          "margin_rmse": 13.957478181073444,
+          "favorite_underprediction": 5.443785310734463,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 93,
+              "losses": 84,
+              "pushes": 0,
+              "bets": 177,
+              "units": 0.5454545454545467,
+              "roi_pct": 0.3081664098613258
+            },
+            "3": {
+              "wins": 73,
+              "losses": 67,
+              "pushes": 0,
+              "bets": 140,
+              "units": -0.6363636363636402,
+              "roi_pct": -0.4545454545454573
+            },
+            "5": {
+              "wins": 53,
+              "losses": 50,
+              "pushes": 0,
+              "bets": 103,
+              "units": -1.8181818181818201,
+              "roi_pct": -1.7652250661959419
+            }
+          }
+        }
+      },
+      "calibrated": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.424271972129615,
+          "margin_rmse": 11.89057123727775,
+          "favorite_underprediction": 1.3081297000776897,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 298,
+              "losses": 310,
+              "pushes": 0,
+              "bets": 608,
+              "units": -39.090909090909065,
+              "roi_pct": -6.4294258373205695
+            },
+            "3": {
+              "wins": 114,
+              "losses": 110,
+              "pushes": 0,
+              "bets": 224,
+              "units": -6.36363636363636,
+              "roi_pct": -2.8409090909090895
+            },
+            "5": {
+              "wins": 45,
+              "losses": 39,
+              "pushes": 0,
+              "bets": 84,
+              "units": 1.9090909090909065,
+              "roi_pct": 2.27272727272727
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 10.766936648994315,
+          "margin_rmse": 13.081054174651248,
+          "favorite_underprediction": 2.432561078921181,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 88,
+              "losses": 89,
+              "pushes": 0,
+              "bets": 177,
+              "units": -9.0,
+              "roi_pct": -5.084745762711864
+            },
+            "3": {
+              "wins": 49,
+              "losses": 38,
+              "pushes": 0,
+              "bets": 87,
+              "units": 6.545454545454547,
+              "roi_pct": 7.523510971786836
+            },
+            "5": {
+              "wins": 27,
+              "losses": 17,
+              "pushes": 0,
+              "bets": 44,
+              "units": 7.545454545454547,
+              "roi_pct": 17.148760330578515
+            }
+          }
+        }
+      }
+    }
+  },
+  "live": {
+    "2026-11-02": {
+      "baseline": {
+        "all": {
+          "games": 115,
+          "margin_mae": 10.643304347826087,
+          "margin_rmse": 13.268897926124575,
+          "favorite_underprediction": 2.5128695652173914,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 57,
+              "losses": 58,
+              "pushes": 0,
+              "bets": 115,
+              "units": -6.18181818181818,
+              "roi_pct": -5.375494071146243
+            },
+            "3": {
+              "wins": 23,
+              "losses": 24,
+              "pushes": 0,
+              "bets": 47,
+              "units": -3.09090909090909,
+              "roi_pct": -6.576402321083171
+            },
+            "5": {
+              "wins": 13,
+              "losses": 16,
+              "pushes": 0,
+              "bets": 29,
+              "units": -4.181818181818182,
+              "roi_pct": -14.420062695924765
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 46,
+          "margin_mae": 11.753260869565217,
+          "margin_rmse": 14.299433327172824,
+          "favorite_underprediction": 4.439782608695652,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 25,
+              "losses": 21,
+              "pushes": 0,
+              "bets": 46,
+              "units": 1.7272727272727266,
+              "roi_pct": 3.7549407114624493
+            },
+            "3": {
+              "wins": 17,
+              "losses": 18,
+              "pushes": 0,
+              "bets": 35,
+              "units": -2.545454545454545,
+              "roi_pct": -7.272727272727272
+            },
+            "5": {
+              "wins": 10,
+              "losses": 14,
+              "pushes": 0,
+              "bets": 24,
+              "units": -4.909090909090908,
+              "roi_pct": -20.45454545454545
+            }
+          }
+        }
+      },
+      "calibrated": {
+        "all": {
+          "games": 115,
+          "margin_mae": 10.41408695652174,
+          "margin_rmse": 12.878645216353142,
+          "favorite_underprediction": 0.512695652173913,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 53,
+              "losses": 61,
+              "pushes": 0,
+              "bets": 114,
+              "units": -12.81818181818182,
+              "roi_pct": -11.244019138755982
+            },
+            "3": {
+              "wins": 15,
+              "losses": 17,
+              "pushes": 0,
+              "bets": 32,
+              "units": -3.3636363636363633,
+              "roi_pct": -10.511363636363635
+            },
+            "5": {
+              "wins": 7,
+              "losses": 7,
+              "pushes": 0,
+              "bets": 14,
+              "units": -0.6363636363636367,
+              "roi_pct": -4.545454545454548
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 46,
+          "margin_mae": 11.404565217391305,
+          "margin_rmse": 13.652205348205294,
+          "favorite_underprediction": 1.2115217391304347,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 20,
+              "losses": 26,
+              "pushes": 0,
+              "bets": 46,
+              "units": -7.818181818181817,
+              "roi_pct": -16.996047430830036
+            },
+            "3": {
+              "wins": 7,
+              "losses": 8,
+              "pushes": 0,
+              "bets": 15,
+              "units": -1.6363636363636367,
+              "roi_pct": -10.909090909090912
+            },
+            "5": {
+              "wins": 5,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 10,
+              "units": -0.45454545454545414,
+              "roi_pct": -4.545454545454541
+            }
+          }
+        }
+      }
+    },
+    "2026-11-03": {
+      "baseline": {
+        "all": {
+          "games": 14,
+          "margin_mae": 11.957857142857144,
+          "margin_rmse": 16.160126192930196,
+          "favorite_underprediction": 8.250714285714286,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 5,
+              "losses": 9,
+              "pushes": 0,
+              "bets": 14,
+              "units": -4.454545454545454,
+              "roi_pct": -31.818181818181817
+            },
+            "3": {
+              "wins": 4,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 9,
+              "units": -1.3636363636363638,
+              "roi_pct": -15.151515151515152
+            },
+            "5": {
+              "wins": 2,
+              "losses": 4,
+              "pushes": 0,
+              "bets": 6,
+              "units": -2.1818181818181817,
+              "roi_pct": -36.36363636363636
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 10,
+          "margin_mae": 12.081,
+          "margin_rmse": 17.397013824217076,
+          "favorite_underprediction": 11.653,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 5,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 10,
+              "units": -0.45454545454545414,
+              "roi_pct": -4.545454545454541
+            },
+            "3": {
+              "wins": 4,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 6,
+              "units": 1.6363636363636362,
+              "roi_pct": 27.27272727272727
+            },
+            "5": {
+              "wins": 2,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 4,
+              "units": -0.18181818181818188,
+              "roi_pct": -4.545454545454547
+            }
+          }
+        }
+      },
+      "calibrated": {
+        "all": {
+          "games": 14,
+          "margin_mae": 10.494285714285715,
+          "margin_rmse": 15.02725286176514,
+          "favorite_underprediction": 5.555714285714286,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 7,
+              "losses": 7,
+              "pushes": 0,
+              "bets": 14,
+              "units": -0.6363636363636367,
+              "roi_pct": -4.545454545454548
+            },
+            "3": {
+              "wins": 2,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 7,
+              "units": -3.1818181818181817,
+              "roi_pct": -45.45454545454545
+            },
+            "5": {
+              "wins": 1,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 3,
+              "units": -1.0909090909090908,
+              "roi_pct": -36.36363636363636
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 10,
+          "margin_mae": 9.965,
+          "margin_rmse": 15.781860156521473,
+          "favorite_underprediction": 8.633000000000001,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 7,
+              "losses": 3,
+              "pushes": 0,
+              "bets": 10,
+              "units": 3.3636363636363633,
+              "roi_pct": 33.63636363636363
+            },
+            "3": {
+              "wins": 2,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 4,
+              "units": -0.18181818181818188,
+              "roi_pct": -4.545454545454547
+            },
+            "5": {
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "bets": 2,
+              "units": -0.09090909090909094,
+              "roi_pct": -4.545454545454547
+            }
+          }
+        }
+      }
+    },
+    "combined": {
+      "baseline": {
+        "all": {
+          "games": 129,
+          "margin_mae": 10.785968992248062,
+          "margin_rmse": 13.612413253117296,
+          "favorite_underprediction": 3.1355813953488374,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 62,
+              "losses": 67,
+              "pushes": 0,
+              "bets": 129,
+              "units": -10.636363636363633,
+              "roi_pct": -8.245243128964056
+            },
+            "3": {
+              "wins": 27,
+              "losses": 29,
+              "pushes": 0,
+              "bets": 56,
+              "units": -4.454545454545453,
+              "roi_pct": -7.954545454545452
+            },
+            "5": {
+              "wins": 15,
+              "losses": 20,
+              "pushes": 0,
+              "bets": 35,
+              "units": -6.363636363636363,
+              "roi_pct": -18.181818181818183
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 56,
+          "margin_mae": 11.811785714285714,
+          "margin_rmse": 14.899877396427511,
+          "favorite_underprediction": 5.727857142857143,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 30,
+              "losses": 26,
+              "pushes": 0,
+              "bets": 56,
+              "units": 1.2727272727272734,
+              "roi_pct": 2.272727272727274
+            },
+            "3": {
+              "wins": 21,
+              "losses": 20,
+              "pushes": 0,
+              "bets": 41,
+              "units": -0.9090909090909101,
+              "roi_pct": -2.2172949002217317
+            },
+            "5": {
+              "wins": 12,
+              "losses": 16,
+              "pushes": 0,
+              "bets": 28,
+              "units": -5.090909090909092,
+              "roi_pct": -18.181818181818183
+            }
+          }
+        }
+      },
+      "calibrated": {
+        "all": {
+          "games": 129,
+          "margin_mae": 10.422790697674419,
+          "margin_rmse": 13.128848464945579,
+          "favorite_underprediction": 1.06,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 60,
+              "losses": 68,
+              "pushes": 0,
+              "bets": 128,
+              "units": -13.454545454545453,
+              "roi_pct": -10.511363636363635
+            },
+            "3": {
+              "wins": 17,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 39,
+              "units": -6.545454545454545,
+              "roi_pct": -16.783216783216783
+            },
+            "5": {
+              "wins": 8,
+              "losses": 9,
+              "pushes": 0,
+              "bets": 17,
+              "units": -1.7272727272727275,
+              "roi_pct": -10.160427807486633
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 56,
+          "margin_mae": 11.1475,
+          "margin_rmse": 14.056185598213641,
+          "favorite_underprediction": 2.536785714285714,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 27,
+              "losses": 29,
+              "pushes": 0,
+              "bets": 56,
+              "units": -4.454545454545453,
+              "roi_pct": -7.954545454545452
+            },
+            "3": {
+              "wins": 9,
+              "losses": 10,
+              "pushes": 0,
+              "bets": 19,
+              "units": -1.8181818181818183,
+              "roi_pct": -9.569377990430624
+            },
+            "5": {
+              "wins": 6,
+              "losses": 6,
+              "pushes": 0,
+              "bets": 12,
+              "units": -0.5454545454545459,
+              "roi_pct": -4.545454545454549
+            }
+          }
+        }
+      }
+    }
+  },
+  "live_exclusions": {
+    "changed_game_identity_or_unverified_result": 4,
+    "unfinished": 5
+  },
+  "live_inputs": [
+    {
+      "filename": "ncaam_yesterday.json",
+      "sha256": "e1de905ba5767d19303d911fae399e2fba3bf8bc504725d053e80ec09de10c85",
+      "as_of": "2026-11-04T03:34:06.494000+00:00"
+    },
+    {
+      "filename": "ncaam_today.json",
+      "sha256": "9c1bacce72e7f4c4f80f7cf5cf052d425ec0b4480fa36ffbaa36f4ed1458bf71",
+      "as_of": "2026-11-04T03:34:06.227000+00:00"
+    }
+  ],
+  "live_game_comparisons": [
+    {
+      "game_id": "401920912",
+      "date": "2026-11-02",
+      "away": "Northern Illinois Huskies",
+      "home": "Grambling Tigers",
+      "actual": 2.0,
+      "line": 7.5,
+      "baseline": -6.69,
+      "calibrated": -7.51
+    },
+    {
+      "game_id": "401921422",
+      "date": "2026-11-02",
+      "away": "Merrimack Warriors",
+      "home": "App State Mountaineers",
+      "actual": 14.0,
+      "line": 3.5,
+      "baseline": -5.6,
+      "calibrated": -6.28
+    },
+    {
+      "game_id": "401921423",
+      "date": "2026-11-02",
+      "away": "Winthrop Eagles",
+      "home": "Queens University Royals",
+      "actual": 5.0,
+      "line": -2.5,
+      "baseline": 2.54,
+      "calibrated": 2.85
+    },
+    {
+      "game_id": "401911707",
+      "date": "2026-11-02",
+      "away": "Murray State Racers",
+      "home": "Tennessee State Tigers",
+      "actual": -30.0,
+      "line": 10.5,
+      "baseline": -5.94,
+      "calibrated": -6.67
+    },
+    {
+      "game_id": "401911469",
+      "date": "2026-11-02",
+      "away": "UTSA Roadrunners",
+      "home": "San Jos\u00e9 State Spartans",
+      "actual": 21.0,
+      "line": -8.5,
+      "baseline": 5.62,
+      "calibrated": 6.6
+    },
+    {
+      "game_id": "401920071",
+      "date": "2026-11-02",
+      "away": "UMBC Retrievers",
+      "home": "George Mason Patriots",
+      "actual": 28.0,
+      "line": -19.5,
+      "baseline": 16.66,
+      "calibrated": 18.99
+    },
+    {
+      "game_id": "401919014",
+      "date": "2026-11-02",
+      "away": "UAB Blazers",
+      "home": "McNeese Cowboys",
+      "actual": 21.0,
+      "line": -3.5,
+      "baseline": 5.08,
+      "calibrated": 5.7
+    },
+    {
+      "game_id": "401906769",
+      "date": "2026-11-02",
+      "away": "Miami Hurricanes",
+      "home": "Florida Gators",
+      "actual": 10.0,
+      "line": -5.5,
+      "baseline": 3.17,
+      "calibrated": 3.51
+    },
+    {
+      "game_id": "401925733",
+      "date": "2026-11-02",
+      "away": "Oakland Golden Grizzlies",
+      "home": "Michigan Wolverines",
+      "actual": 16.0,
+      "line": -27.5,
+      "baseline": 23.69,
+      "calibrated": 26.87
+    },
+    {
+      "game_id": "401924717",
+      "date": "2026-11-02",
+      "away": "Pepperdine Waves",
+      "home": "Cornell Big Red",
+      "actual": 1.0,
+      "line": 3.5,
+      "baseline": -2.17,
+      "calibrated": -2.14
+    },
+    {
+      "game_id": "401910994",
+      "date": "2026-11-02",
+      "away": "Bowling Green Falcons",
+      "home": "Georgia State Panthers",
+      "actual": -3.0,
+      "line": -3.5,
+      "baseline": 0.57,
+      "calibrated": 0.93
+    },
+    {
+      "game_id": "401909562",
+      "date": "2026-11-02",
+      "away": "Army Black Knights",
+      "home": "Duke Blue Devils",
+      "actual": 34.0,
+      "line": -44.5,
+      "baseline": 37.18,
+      "calibrated": 42.01
+    },
+    {
+      "game_id": "401920679",
+      "date": "2026-11-02",
+      "away": "Monmouth Hawks",
+      "home": "St. John's Red Storm",
+      "actual": 15.0,
+      "line": -28.5,
+      "baseline": 18.15,
+      "calibrated": 20.66
+    },
+    {
+      "game_id": "401925857",
+      "date": "2026-11-02",
+      "away": "Central Connecticut Blue Devils",
+      "home": "Temple Owls",
+      "actual": 12.0,
+      "line": -14.5,
+      "baseline": 16.65,
+      "calibrated": 18.98
+    },
+    {
+      "game_id": "401921264",
+      "date": "2026-11-02",
+      "away": "Loyola Maryland Greyhounds",
+      "home": "Georgetown Hoyas",
+      "actual": 22.0,
+      "line": -27.5,
+      "baseline": 24.75,
+      "calibrated": 28.06
+    },
+    {
+      "game_id": "401924856",
+      "date": "2026-11-02",
+      "away": "Quinnipiac Bobcats",
+      "home": "Michigan State Spartans",
+      "actual": 37.0,
+      "line": -30.5,
+      "baseline": 24.79,
+      "calibrated": 28.11
+    },
+    {
+      "game_id": "401909771",
+      "date": "2026-11-02",
+      "away": "Memphis Tigers",
+      "home": "Iowa State Cyclones",
+      "actual": -4.0,
+      "line": -15.5,
+      "baseline": 13.84,
+      "calibrated": 15.5
+    },
+    {
+      "game_id": "401921036",
+      "date": "2026-11-02",
+      "away": "Jackson State Tigers",
+      "home": "Texas Tech Red Raiders",
+      "actual": 34.0,
+      "line": -38.5,
+      "baseline": 26.13,
+      "calibrated": 29.62
+    },
+    {
+      "game_id": "401921104",
+      "date": "2026-11-02",
+      "away": "Bellarmine Knights",
+      "home": "Vanderbilt Commodores",
+      "actual": 46.0,
+      "line": -35.5,
+      "baseline": 27.05,
+      "calibrated": 30.64
+    },
+    {
+      "game_id": "401925818",
+      "date": "2026-11-02",
+      "away": "Charlotte 49ers",
+      "home": "Indiana State Sycamores",
+      "actual": -8.0,
+      "line": 5.5,
+      "baseline": -7.26,
+      "calibrated": -7.85
+    },
+    {
+      "game_id": "401924743",
+      "date": "2026-11-02",
+      "away": "Howard Bison",
+      "home": "Yale Bulldogs",
+      "actual": 10.0,
+      "line": -7.5,
+      "baseline": 0.78,
+      "calibrated": 1.17
+    },
+    {
+      "game_id": "401921766",
+      "date": "2026-11-02",
+      "away": "Niagara Purple Eagles",
+      "home": "West Virginia Mountaineers",
+      "actual": 45.0,
+      "line": -28.5,
+      "baseline": 23.47,
+      "calibrated": 26.63
+    },
+    {
+      "game_id": "401921753",
+      "date": "2026-11-02",
+      "away": "Florida Gulf Coast Eagles",
+      "home": "UCF Knights",
+      "actual": 1.0,
+      "line": -22.5,
+      "baseline": 20.69,
+      "calibrated": 23.51
+    },
+    {
+      "game_id": "401921139",
+      "date": "2026-11-02",
+      "away": "Elon Phoenix",
+      "home": "Columbia Lions",
+      "actual": -13.0,
+      "line": -4.5,
+      "baseline": 5.36,
+      "calibrated": 6.31
+    },
+    {
+      "game_id": "401920842",
+      "date": "2026-11-02",
+      "away": "St. Thomas Tommies",
+      "home": "Presbyterian Blue Hose",
+      "actual": -9.0,
+      "line": 3.5,
+      "baseline": -1.7,
+      "calibrated": -1.61
+    },
+    {
+      "game_id": "401920746",
+      "date": "2026-11-02",
+      "away": "Northeastern Huskies",
+      "home": "Boston University Terriers",
+      "actual": 8.0,
+      "line": -2.5,
+      "baseline": -0.07,
+      "calibrated": 0.21
+    },
+    {
+      "game_id": "401920690",
+      "date": "2026-11-02",
+      "away": "Vermont Catamounts",
+      "home": "Iona Gaels",
+      "actual": 1.0,
+      "line": 1.5,
+      "baseline": 0.62,
+      "calibrated": 0.98
+    },
+    {
+      "game_id": "401920231",
+      "date": "2026-11-02",
+      "away": "Dartmouth Big Green",
+      "home": "Marist Red Foxes",
+      "actual": -7.0,
+      "line": -7.5,
+      "baseline": 8.45,
+      "calibrated": 9.77
+    },
+    {
+      "game_id": "401920201",
+      "date": "2026-11-02",
+      "away": "Little Rock Trojans",
+      "home": "VCU Rams",
+      "actual": 10.0,
+      "line": -19.5,
+      "baseline": 20.04,
+      "calibrated": 22.77
+    },
+    {
+      "game_id": "401919803",
+      "date": "2026-11-02",
+      "away": "Long Island University Sharks",
+      "home": "Florida Atlantic Owls",
+      "actual": 14.0,
+      "line": -11.5,
+      "baseline": 11.12,
+      "calibrated": 12.77
+    },
+    {
+      "game_id": "401918976",
+      "date": "2026-11-02",
+      "away": "South Carolina Upstate Spartans",
+      "home": "East Carolina Pirates",
+      "actual": 13.0,
+      "line": -14.5,
+      "baseline": 12.72,
+      "calibrated": 14.56
+    },
+    {
+      "game_id": "401918073",
+      "date": "2026-11-02",
+      "away": "Stetson Hatters",
+      "home": "Clemson Tigers",
+      "actual": 13.0,
+      "line": -22.5,
+      "baseline": 21.44,
+      "calibrated": 24.34
+    },
+    {
+      "game_id": "401916296",
+      "date": "2026-11-02",
+      "away": "Bucknell Bison",
+      "home": "Maryland Terrapins",
+      "actual": 29.0,
+      "line": -31.5,
+      "baseline": 28.21,
+      "calibrated": 31.95
+    },
+    {
+      "game_id": "401916286",
+      "date": "2026-11-02",
+      "away": "Eastern Illinois Panthers",
+      "home": "Indiana Hoosiers",
+      "actual": 34.0,
+      "line": -34.5,
+      "baseline": 28.48,
+      "calibrated": 32.25
+    },
+    {
+      "game_id": "401913099",
+      "date": "2026-11-02",
+      "away": "Western Carolina Catamounts",
+      "home": "North Carolina Tar Heels",
+      "actual": 8.0,
+      "line": -22.5,
+      "baseline": 16.26,
+      "calibrated": 18.53
+    },
+    {
+      "game_id": "401912207",
+      "date": "2026-11-02",
+      "away": "American University Eagles",
+      "home": "Cincinnati Bearcats",
+      "actual": 26.0,
+      "line": -25.5,
+      "baseline": 17.9,
+      "calibrated": 20.38
+    },
+    {
+      "game_id": "401911333",
+      "date": "2026-11-02",
+      "away": "Air Force Falcons",
+      "home": "Wright State Raiders",
+      "actual": 31.0,
+      "line": -12.5,
+      "baseline": 9.61,
+      "calibrated": 11.08
+    },
+    {
+      "game_id": "401911304",
+      "date": "2026-11-02",
+      "away": "New Hampshire Wildcats",
+      "home": "Brown Bears",
+      "actual": -4.0,
+      "line": -8.5,
+      "baseline": 7.06,
+      "calibrated": 8.21
+    },
+    {
+      "game_id": "401911261",
+      "date": "2026-11-02",
+      "away": "Youngstown State Penguins",
+      "home": "St. Bonaventure Bonnies",
+      "actual": -8.0,
+      "line": -10.5,
+      "baseline": 12.68,
+      "calibrated": 14.52
+    },
+    {
+      "game_id": "401911237",
+      "date": "2026-11-02",
+      "away": "UNC Asheville Bulldogs",
+      "home": "Richmond Spiders",
+      "actual": 23.0,
+      "line": -15.5,
+      "baseline": 13.19,
+      "calibrated": 15.09
+    },
+    {
+      "game_id": "401911185",
+      "date": "2026-11-02",
+      "away": "NJIT Highlanders",
+      "home": "Dayton Flyers",
+      "actual": 31.0,
+      "line": -23.5,
+      "baseline": 18.8,
+      "calibrated": 21.38
+    },
+    {
+      "game_id": "401911004",
+      "date": "2026-11-02",
+      "away": "Ball State Cardinals",
+      "home": "Georgia Southern Eagles",
+      "actual": 12.0,
+      "line": 1.5,
+      "baseline": -1.61,
+      "calibrated": -1.51
+    },
+    {
+      "game_id": "401911002",
+      "date": "2026-11-02",
+      "away": "Miami (OH) RedHawks",
+      "home": "James Madison Dukes",
+      "actual": -9.0,
+      "line": -1.5,
+      "baseline": -2.98,
+      "calibrated": -3.05
+    },
+    {
+      "game_id": "401911001",
+      "date": "2026-11-02",
+      "away": "Massachusetts Minutemen",
+      "home": "Troy Trojans",
+      "actual": -11.0,
+      "line": -2.5,
+      "baseline": 6.25,
+      "calibrated": 7.31
+    },
+    {
+      "game_id": "401910998",
+      "date": "2026-11-02",
+      "away": "Eastern Michigan Eagles",
+      "home": "Coastal Carolina Chanticleers",
+      "actual": -1.0,
+      "line": -1.5,
+      "baseline": -0.06,
+      "calibrated": 0.23
+    },
+    {
+      "game_id": "401910997",
+      "date": "2026-11-02",
+      "away": "Western Michigan Broncos",
+      "home": "Old Dominion Monarchs",
+      "actual": 12.0,
+      "line": 1.5,
+      "baseline": 0.92,
+      "calibrated": 1.32
+    },
+    {
+      "game_id": "401910995",
+      "date": "2026-11-02",
+      "away": "Buffalo Bulls",
+      "home": "Marshall Thundering Herd",
+      "actual": 27.0,
+      "line": -2.5,
+      "baseline": -1.88,
+      "calibrated": -1.81
+    },
+    {
+      "game_id": "401909716",
+      "date": "2026-11-02",
+      "away": "New Haven Chargers",
+      "home": "Syracuse Orange",
+      "actual": 16.0,
+      "line": -26.5,
+      "baseline": 21.78,
+      "calibrated": 24.73
+    },
+    {
+      "game_id": "401909705",
+      "date": "2026-11-02",
+      "away": "Rider Broncs",
+      "home": "Pittsburgh Panthers",
+      "actual": 38.0,
+      "line": -27.5,
+      "baseline": 25.91,
+      "calibrated": 29.36
+    },
+    {
+      "game_id": "401909541",
+      "date": "2026-11-02",
+      "away": "Mount St. Mary's Mountaineers",
+      "home": "Xavier Musketeers",
+      "actual": 45.0,
+      "line": -26.5,
+      "baseline": 23.06,
+      "calibrated": 26.16
+    },
+    {
+      "game_id": "401909531",
+      "date": "2026-11-02",
+      "away": "Maine Black Bears",
+      "home": "Providence Friars",
+      "actual": 27.0,
+      "line": -31.5,
+      "baseline": 25.53,
+      "calibrated": 28.94
+    },
+    {
+      "game_id": "401902275",
+      "date": "2026-11-02",
+      "away": "Lafayette Leopards",
+      "home": "Butler Bulldogs",
+      "actual": 36.0,
+      "line": -19.5,
+      "baseline": 20.55,
+      "calibrated": 23.35
+    },
+    {
+      "game_id": "401920959",
+      "date": "2026-11-02",
+      "away": "Morehead State Eagles",
+      "home": "Western Kentucky Hilltoppers",
+      "actual": 25.0,
+      "line": -17.5,
+      "baseline": 16.12,
+      "calibrated": 18.38
+    },
+    {
+      "game_id": "401920893",
+      "date": "2026-11-02",
+      "away": "Denver Pioneers",
+      "home": "Wisconsin Badgers",
+      "actual": 7.0,
+      "line": -25.5,
+      "baseline": 21.72,
+      "calibrated": 24.67
+    },
+    {
+      "game_id": "401920886",
+      "date": "2026-11-02",
+      "away": "Saint Peter's Peacocks",
+      "home": "Seton Hall Pirates",
+      "actual": 24.0,
+      "line": -19.5,
+      "baseline": 17.99,
+      "calibrated": 20.47
+    },
+    {
+      "game_id": "401920758",
+      "date": "2026-11-02",
+      "away": "Southern Indiana Screaming Eagles",
+      "home": "Belmont Bruins",
+      "actual": 18.0,
+      "line": -17.5,
+      "baseline": 16.44,
+      "calibrated": 18.73
+    },
+    {
+      "game_id": "401920701",
+      "date": "2026-11-02",
+      "away": "Lipscomb Bisons",
+      "home": "Southeast Missouri State Redhawks",
+      "actual": 7.0,
+      "line": 1.5,
+      "baseline": 2.35,
+      "calibrated": 2.93
+    },
+    {
+      "game_id": "401919780",
+      "date": "2026-11-02",
+      "away": "Le Moyne Dolphins",
+      "home": "Nebraska Cornhuskers",
+      "actual": 42.0,
+      "line": -35.5,
+      "baseline": 29.56,
+      "calibrated": 33.46
+    },
+    {
+      "game_id": "401918955",
+      "date": "2026-11-02",
+      "away": "Campbell Fighting Camels",
+      "home": "NC State Wolfpack",
+      "actual": 19.0,
+      "line": -23.5,
+      "baseline": 21.31,
+      "calibrated": 24.2
+    },
+    {
+      "game_id": "401917173",
+      "date": "2026-11-02",
+      "away": "Canisius Golden Griffins",
+      "home": "Penn State Nittany Lions",
+      "actual": 40.0,
+      "line": -24.5,
+      "baseline": 16.91,
+      "calibrated": 19.27
+    },
+    {
+      "game_id": "401911208",
+      "date": "2026-11-02",
+      "away": "Navy Midshipmen",
+      "home": "George Washington Revolutionaries",
+      "actual": 52.0,
+      "line": -18.5,
+      "baseline": 18.57,
+      "calibrated": 21.12
+    },
+    {
+      "game_id": "401911000",
+      "date": "2026-11-02",
+      "away": "Kent State Golden Flashes",
+      "home": "Louisiana Tech Bulldogs",
+      "actual": 10.0,
+      "line": 5.5,
+      "baseline": -3.92,
+      "calibrated": -4.1
+    },
+    {
+      "game_id": "401910996",
+      "date": "2026-11-02",
+      "away": "Central Michigan Chippewas",
+      "home": "UL Monroe Warhawks",
+      "actual": -5.0,
+      "line": 2.5,
+      "baseline": -3.93,
+      "calibrated": -4.11
+    },
+    {
+      "game_id": "401909522",
+      "date": "2026-11-02",
+      "away": "Mercyhurst Lakers",
+      "home": "Marquette Golden Eagles",
+      "actual": 35.0,
+      "line": -31.5,
+      "baseline": 23.45,
+      "calibrated": 26.6
+    },
+    {
+      "game_id": "401906791",
+      "date": "2026-11-02",
+      "away": "Tennessee Tech Golden Eagles",
+      "home": "Mississippi State Bulldogs",
+      "actual": 18.0,
+      "line": -18.5,
+      "baseline": 17.3,
+      "calibrated": 19.7
+    },
+    {
+      "game_id": "401906779",
+      "date": "2026-11-02",
+      "away": "North Carolina Central Eagles",
+      "home": "Georgia Bulldogs",
+      "actual": 16.0,
+      "line": -40.5,
+      "baseline": 29.55,
+      "calibrated": 33.45
+    },
+    {
+      "game_id": "401913525",
+      "date": "2026-11-02",
+      "away": "Fairleigh Dickinson Knights",
+      "home": "Illinois Fighting Illini",
+      "actual": 75.0,
+      "line": -39.5,
+      "baseline": 33.9,
+      "calibrated": 38.33
+    },
+    {
+      "game_id": "401909784",
+      "date": "2026-11-02",
+      "away": "Fordham Rams",
+      "home": "Kansas Jayhawks",
+      "actual": 30.0,
+      "line": -21.5,
+      "baseline": 20.07,
+      "calibrated": 22.81
+    },
+    {
+      "game_id": "401928995",
+      "date": "2026-11-02",
+      "away": "Western Illinois Leathernecks",
+      "home": "Valparaiso Beacons",
+      "actual": 22.0,
+      "line": -18.5,
+      "baseline": 17.77,
+      "calibrated": 20.23
+    },
+    {
+      "game_id": "401925096",
+      "date": "2026-11-02",
+      "away": "Texas A&M-Corpus Christi Islanders",
+      "home": "Texas State Bobcats",
+      "actual": 12.0,
+      "line": -10.5,
+      "baseline": 8.5,
+      "calibrated": 9.83
+    },
+    {
+      "game_id": "401923269",
+      "date": "2026-11-02",
+      "away": "Siena Saints",
+      "home": "Bryant Bulldogs",
+      "actual": 5.0,
+      "line": 4.5,
+      "baseline": -3.26,
+      "calibrated": -3.36
+    },
+    {
+      "game_id": "401921424",
+      "date": "2026-11-02",
+      "away": "Furman Paladins",
+      "home": "Bethune-Cookman Wildcats",
+      "actual": -9.0,
+      "line": 4.5,
+      "baseline": -2.16,
+      "calibrated": -2.42
+    },
+    {
+      "game_id": "401920732",
+      "date": "2026-11-02",
+      "away": "Binghamton Bearcats",
+      "home": "Northwestern Wildcats",
+      "actual": 26.0,
+      "line": -19.5,
+      "baseline": 22.07,
+      "calibrated": 25.05
+    },
+    {
+      "game_id": "401919047",
+      "date": "2026-11-02",
+      "away": "Lindenwood Lions",
+      "home": "TCU Horned Frogs",
+      "actual": 39.0,
+      "line": -29.5,
+      "baseline": 21.47,
+      "calibrated": 24.38
+    },
+    {
+      "game_id": "401919001",
+      "date": "2026-11-02",
+      "away": "UT Martin Skyhawks",
+      "home": "Tulane Green Wave",
+      "actual": 2.0,
+      "line": -6.5,
+      "baseline": 13.89,
+      "calibrated": 15.88
+    },
+    {
+      "game_id": "401918967",
+      "date": "2026-11-02",
+      "away": "Southern Jaguars",
+      "home": "SMU Mustangs",
+      "actual": 13.0,
+      "line": -25.5,
+      "baseline": 22.53,
+      "calibrated": 25.57
+    },
+    {
+      "game_id": "401911248",
+      "date": "2026-11-02",
+      "away": "Lehigh Mountain Hawks",
+      "home": "Saint Louis Billikens",
+      "actual": 25.0,
+      "line": -25.5,
+      "baseline": 18.24,
+      "calibrated": 20.75
+    },
+    {
+      "game_id": "401911228",
+      "date": "2026-11-02",
+      "away": "The Citadel Bulldogs",
+      "home": "Loyola Chicago Ramblers",
+      "actual": 25.0,
+      "line": -14.5,
+      "baseline": 14.01,
+      "calibrated": 16.01
+    },
+    {
+      "game_id": "401911003",
+      "date": "2026-11-02",
+      "away": "Ohio Bobcats",
+      "home": "South Alabama Jaguars",
+      "actual": -9.0,
+      "line": -1.5,
+      "baseline": 1.35,
+      "calibrated": 1.8
+    },
+    {
+      "game_id": "401910999",
+      "date": "2026-11-02",
+      "away": "Toledo Rockets",
+      "home": "Arkansas State Red Wolves",
+      "actual": 1.0,
+      "line": -3.5,
+      "baseline": 2.07,
+      "calibrated": 2.62
+    },
+    {
+      "game_id": "401910993",
+      "date": "2026-11-02",
+      "away": "Akron Zips",
+      "home": "Louisiana Ragin' Cajuns",
+      "actual": -14.0,
+      "line": 5.5,
+      "baseline": -6.71,
+      "calibrated": -7.24
+    },
+    {
+      "game_id": "401909725",
+      "date": "2026-11-02",
+      "away": "Maryland Eastern Shore Hawks",
+      "home": "Wake Forest Demon Deacons",
+      "actual": 21.0,
+      "line": -32.5,
+      "baseline": 28.27,
+      "calibrated": 32.01
+    },
+    {
+      "game_id": "401909500",
+      "date": "2026-11-02",
+      "away": "West Georgia Wolves",
+      "home": "DePaul Blue Demons",
+      "actual": 17.0,
+      "line": -24.5,
+      "baseline": 20.76,
+      "calibrated": 23.59
+    },
+    {
+      "game_id": "401909490",
+      "date": "2026-11-02",
+      "away": "Kansas City Roos",
+      "home": "Creighton Bluejays",
+      "actual": 15.0,
+      "line": -27.5,
+      "baseline": 24.1,
+      "calibrated": 27.33
+    },
+    {
+      "game_id": "401906801",
+      "date": "2026-11-02",
+      "away": "East Texas A&M Lions",
+      "home": "Oklahoma Sooners",
+      "actual": -4.0,
+      "line": -29.5,
+      "baseline": 28.51,
+      "calibrated": 32.28
+    },
+    {
+      "game_id": "401925683",
+      "date": "2026-11-02",
+      "away": "Alcorn State Braves",
+      "home": "Ole Miss Rebels",
+      "actual": 41.0,
+      "line": -30.5,
+      "baseline": 25.37,
+      "calibrated": 28.76
+    },
+    {
+      "game_id": "401917913",
+      "date": "2026-11-02",
+      "away": "Oral Roberts Golden Eagles",
+      "home": "Central Arkansas Bears",
+      "actual": 30.0,
+      "line": -8.5,
+      "baseline": 7.01,
+      "calibrated": 8.16
+    },
+    {
+      "game_id": "401911390",
+      "date": "2026-11-02",
+      "away": "Gardner-Webb Runnin' Bulldogs",
+      "home": "UConn Huskies",
+      "actual": 40.0,
+      "line": -41.5,
+      "baseline": 31.72,
+      "calibrated": 35.89
+    },
+    {
+      "game_id": "401906863",
+      "date": "2026-11-02",
+      "away": "Chicago State Cougars",
+      "home": "Texas Longhorns",
+      "actual": 50.0,
+      "line": -40.5,
+      "baseline": 30.29,
+      "calibrated": 34.28
+    },
+    {
+      "game_id": "401925811",
+      "date": "2026-11-02",
+      "away": "La Salle Explorers",
+      "home": "Houston Cougars",
+      "actual": 39.0,
+      "line": -29.5,
+      "baseline": 20.51,
+      "calibrated": 23.31
+    },
+    {
+      "game_id": "401918947",
+      "date": "2026-11-02",
+      "away": "Chattanooga Mocs",
+      "home": "Louisville Cardinals",
+      "actual": 14.0,
+      "line": -30.5,
+      "baseline": 28.06,
+      "calibrated": 31.78
+    },
+    {
+      "game_id": "401916313",
+      "date": "2026-11-02",
+      "away": "Ohio State Buckeyes",
+      "home": "BYU Cougars",
+      "actual": 11.0,
+      "line": -3.5,
+      "baseline": -0.7,
+      "calibrated": -0.79
+    },
+    {
+      "game_id": "401925771",
+      "date": "2026-11-02",
+      "away": "Davidson Wildcats",
+      "home": "Washington State Cougars",
+      "actual": -15.0,
+      "line": -2.5,
+      "baseline": -1.12,
+      "calibrated": -0.97
+    },
+    {
+      "game_id": "401924894",
+      "date": "2026-11-02",
+      "away": "Utah Tech Trailblazers",
+      "home": "New Mexico Lobos",
+      "actual": 40.0,
+      "line": -23.5,
+      "baseline": 21.01,
+      "calibrated": 23.86
+    },
+    {
+      "game_id": "401921697",
+      "date": "2026-11-02",
+      "away": "Long Beach State Beach",
+      "home": "Utah Utes",
+      "actual": 3.0,
+      "line": -19.5,
+      "baseline": 14.42,
+      "calibrated": 16.48
+    },
+    {
+      "game_id": "401919039",
+      "date": "2026-11-02",
+      "away": "Incarnate Word Cardinals",
+      "home": "Oklahoma State Cowboys",
+      "actual": 31.0,
+      "line": -27.5,
+      "baseline": 24.39,
+      "calibrated": 27.66
+    },
+    {
+      "game_id": "401916303",
+      "date": "2026-11-02",
+      "away": "North Dakota Fighting Hawks",
+      "home": "Minnesota Golden Gophers",
+      "actual": 35.0,
+      "line": -26.5,
+      "baseline": 19.92,
+      "calibrated": 22.64
+    },
+    {
+      "game_id": "401911389",
+      "date": "2026-11-02",
+      "away": "Texas Southern Tigers",
+      "home": "Grand Canyon Lopes",
+      "actual": 24.0,
+      "line": -28.5,
+      "baseline": 26.4,
+      "calibrated": 29.92
+    },
+    {
+      "game_id": "401909759",
+      "date": "2026-11-02",
+      "away": "Abilene Christian Wildcats",
+      "home": "Colorado Buffaloes",
+      "actual": 35.0,
+      "line": -18.5,
+      "baseline": 18.38,
+      "calibrated": 20.92
+    },
+    {
+      "game_id": "401925947",
+      "date": "2026-11-02",
+      "away": "Weber State Wildcats",
+      "home": "Oregon State Beavers",
+      "actual": 41.0,
+      "line": -18.5,
+      "baseline": 17.51,
+      "calibrated": 19.94
+    },
+    {
+      "game_id": "401922020",
+      "date": "2026-11-02",
+      "away": "Idaho State Bengals",
+      "home": "Utah State Aggies",
+      "actual": 36.0,
+      "line": -26.5,
+      "baseline": 22.32,
+      "calibrated": 25.33
+    },
+    {
+      "game_id": "401909750",
+      "date": "2026-11-02",
+      "away": "Northwestern State Demons",
+      "home": "Baylor Bears",
+      "actual": 22.0,
+      "line": -32.5,
+      "baseline": 22.06,
+      "calibrated": 25.04
+    },
+    {
+      "game_id": "401909738",
+      "date": "2026-11-02",
+      "away": "Arizona Wildcats",
+      "home": "UCLA Bruins",
+      "actual": 9.0,
+      "line": 4.5,
+      "baseline": -5.16,
+      "calibrated": -5.79
+    },
+    {
+      "game_id": "401925878",
+      "date": "2026-11-02",
+      "away": "Montana State Bobcats",
+      "home": "Colorado State Rams",
+      "actual": 10.0,
+      "line": -10.5,
+      "baseline": 8.1,
+      "calibrated": 9.38
+    },
+    {
+      "game_id": "401922029",
+      "date": "2026-11-02",
+      "away": "Montana Grizzlies",
+      "home": "Oregon Ducks",
+      "actual": 18.0,
+      "line": -19.5,
+      "baseline": 19.37,
+      "calibrated": 22.02
+    },
+    {
+      "game_id": "401921731",
+      "date": "2026-11-02",
+      "away": "East Tennessee State Buccaneers",
+      "home": "Arizona State Sun Devils",
+      "actual": 10.0,
+      "line": -19.5,
+      "baseline": 13.33,
+      "calibrated": 15.25
+    },
+    {
+      "game_id": "401921060",
+      "date": "2026-11-02",
+      "away": "Radford Highlanders",
+      "home": "San Francisco Dons",
+      "actual": 14.0,
+      "line": -15.5,
+      "baseline": 8.71,
+      "calibrated": 10.06
+    },
+    {
+      "game_id": "401920769",
+      "date": "2026-11-02",
+      "away": "Colgate Raiders",
+      "home": "Washington Huskies",
+      "actual": 14.0,
+      "line": -14.5,
+      "baseline": 14.43,
+      "calibrated": 16.49
+    },
+    {
+      "game_id": "401920716",
+      "date": "2026-11-02",
+      "away": "Eastern Washington Eagles",
+      "home": "Stanford Cardinal",
+      "actual": 9.0,
+      "line": -13.5,
+      "baseline": 12.04,
+      "calibrated": 13.8
+    },
+    {
+      "game_id": "401917509",
+      "date": "2026-11-02",
+      "away": "Towson Tigers",
+      "home": "Santa Clara Broncos",
+      "actual": 19.0,
+      "line": -13.5,
+      "baseline": 11.32,
+      "calibrated": 13.0
+    },
+    {
+      "game_id": "401917507",
+      "date": "2026-11-02",
+      "away": "Illinois State Redbirds",
+      "home": "Saint Mary's Gaels",
+      "actual": 5.0,
+      "line": -7.5,
+      "baseline": 7.92,
+      "calibrated": 9.18
+    },
+    {
+      "game_id": "401911517",
+      "date": "2026-11-02",
+      "away": "North Alabama Lions",
+      "home": "UC Davis Aggies",
+      "actual": -4.0,
+      "line": -9.5,
+      "baseline": 10.52,
+      "calibrated": 12.1
+    },
+    {
+      "game_id": "401911452",
+      "date": "2026-11-02",
+      "away": "Robert Morris Colonials",
+      "home": "Nevada Wolf Pack",
+      "actual": 37.0,
+      "line": -12.5,
+      "baseline": 11.07,
+      "calibrated": 12.71
+    },
+    {
+      "game_id": "401926771",
+      "date": "2026-11-02",
+      "away": "Milwaukee Panthers",
+      "home": "USC Trojans",
+      "actual": 32.0,
+      "line": -26.5,
+      "baseline": 21.1,
+      "calibrated": 23.97
+    },
+    {
+      "game_id": "401917506",
+      "date": "2026-11-02",
+      "away": "Seattle U Redhawks",
+      "home": "Hawai'i Rainbow Warriors",
+      "actual": 1.0,
+      "line": -1.5,
+      "baseline": 2.69,
+      "calibrated": 3.31
+    },
+    {
+      "game_id": "401906848",
+      "date": "2026-11-03",
+      "away": "Wofford Terriers",
+      "home": "Tennessee Volunteers",
+      "actual": 31.0,
+      "line": -25.5,
+      "baseline": 25.75,
+      "calibrated": 29.18
+    },
+    {
+      "game_id": "401921801",
+      "date": "2026-11-03",
+      "away": "Manhattan Jaspers",
+      "home": "Kentucky Wildcats",
+      "actual": 28.0,
+      "line": -33.5,
+      "baseline": 30.14,
+      "calibrated": 34.11
+    },
+    {
+      "game_id": "401925779",
+      "date": "2026-11-03",
+      "away": "Purdue Fort Wayne Mastodons",
+      "home": "Duquesne Dukes",
+      "actual": 7.0,
+      "line": -9.5,
+      "baseline": 12.34,
+      "calibrated": 14.14
+    },
+    {
+      "game_id": "401921819",
+      "date": "2026-11-03",
+      "away": "Stetson Hatters",
+      "home": "South Carolina Gamecocks",
+      "actual": 26.0,
+      "line": -18.5,
+      "baseline": 14.91,
+      "calibrated": 17.03
+    },
+    {
+      "game_id": "401920376",
+      "date": "2026-11-03",
+      "away": "Coppin State Eagles",
+      "home": "Virginia Tech Hokies",
+      "actual": 34.0,
+      "line": -31.5,
+      "baseline": 29.12,
+      "calibrated": 32.97
+    },
+    {
+      "game_id": "401920304",
+      "date": "2026-11-03",
+      "away": "Hampton Pirates",
+      "home": "Georgia Tech Yellow Jackets",
+      "actual": 20.0,
+      "line": -13.5,
+      "baseline": 8.3,
+      "calibrated": 9.61
+    },
+    {
+      "game_id": "401920061",
+      "date": "2026-11-03",
+      "away": "Holy Cross Crusaders",
+      "home": "Rhode Island Rams",
+      "actual": 44.0,
+      "line": -20.5,
+      "baseline": 15.19,
+      "calibrated": 17.34
+    },
+    {
+      "game_id": "401909551",
+      "date": "2026-11-03",
+      "away": "Wagner Seahawks",
+      "home": "Boston College Eagles",
+      "actual": 26.0,
+      "line": -20.5,
+      "baseline": 18.89,
+      "calibrated": 21.49
+    },
+    {
+      "game_id": "401920422",
+      "date": "2026-11-03",
+      "away": "Drexel Dragons",
+      "home": "Virginia Cavaliers",
+      "actual": 29.0,
+      "line": -31.5,
+      "baseline": 26.07,
+      "calibrated": 29.55
+    },
+    {
+      "game_id": "401906757",
+      "date": "2026-11-03",
+      "away": "Sam Houston Bearkats",
+      "home": "Alabama Crimson Tide",
+      "actual": 22.0,
+      "line": -27.5,
+      "baseline": 19.2,
+      "calibrated": 21.83
+    },
+    {
+      "game_id": "401921808",
+      "date": "2026-11-03",
+      "away": "LSU New Orleans Privateers",
+      "home": "LSU Tigers",
+      "actual": 43.0,
+      "line": -27.5,
+      "baseline": 16.08,
+      "calibrated": 18.33
+    },
+    {
+      "game_id": "401921165",
+      "date": "2026-11-03",
+      "away": "Cleveland State Vikings",
+      "home": "Missouri Tigers",
+      "actual": 61.0,
+      "line": -26.5,
+      "baseline": 24.43,
+      "calibrated": 27.71
+    },
+    {
+      "game_id": "401920702",
+      "date": "2026-11-03",
+      "away": "Lipscomb Bisons",
+      "home": "Iowa Hawkeyes",
+      "actual": 22.0,
+      "line": -23.5,
+      "baseline": 18.6,
+      "calibrated": 21.16
+    },
+    {
+      "game_id": "401909796",
+      "date": "2026-11-03",
+      "away": "South Dakota State Jackrabbits",
+      "home": "Kansas State Wildcats",
+      "actual": -2.0,
+      "line": -10.5,
+      "baseline": 16.47,
+      "calibrated": 18.77
+    }
+  ],
+  "limits": [
+    "Research projections only; no official betting policy or A/B grades.",
+    "No tuning on later historical seasons or the current-season check.",
+    "Historical replay does not reconstruct availability; live replay preserves saved player deltas.",
+    "Use is restricted to the evaluated opening fortnight; later phases retain baseline.",
+    "ATS is hypothetical at the original saved quote with assumed -110 prices; current-season inputs are a retrospective replay."
+  ]
+}

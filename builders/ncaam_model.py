@@ -13,8 +13,11 @@ import math
 import re
 import unicodedata
 from copy import deepcopy
+from zoneinfo import ZoneInfo
 
-MODEL_VERSION = "ncaam-v0.4-source-prior-player-fallback-2026-11-02"
+from builders.ncaam_margin_calibration import calibrate_margin
+
+MODEL_VERSION = "ncaam-v0.5-opening-margin-calibration-2026-11-03"
 GRADE_POLICY = "ncaam-research-unvalidated-v1"
 
 
@@ -127,9 +130,14 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
     possessions = (away["tempo"] + home["tempo"]) / 2
     away_score = possessions * away["offense"] * home["defense"] / efficiency / 100
     home_score = possessions * home["offense"] * away["defense"] / efficiency / 100
-    court = 0.0 if game["neutral_site"] else 3.2  # provisional baseline, versioned
-    away_score -= court / 2
-    home_score += court / 2
+    calibration = calibrate_margin(home_score - away_score, season=game["season"],
+        game_date=tipoff.astimezone(ZoneInfo("America/New_York")).date(), neutral_site=game["neutral_site"])
+    court = calibration["home_court_points"]
+    # Preserve the independently projected total. The learned correction scales
+    # the team-ratings margin, never the market gap or the player-impact delta.
+    margin_shift = (calibration["calibrated_home_margin"] - (home_score - away_score)) / 2
+    away_score -= margin_shift
+    home_score += margin_shift
     baseline_away, baseline_home = away_score, home_score
     if lineup_adjustment:
         a, h = lineup_adjustment['away'], lineup_adjustment['home']
@@ -140,8 +148,8 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
         away_def = away['defense'] - a['defense_improvement_per_100']
         home_def = home['defense'] - h['defense_improvement_per_100']
         if min(away_off, home_off, away_def, home_def) <= 0: raise ValueError('Invalid player-adjusted efficiency.')
-        away_score = possessions * away_off * home_def / efficiency / 100 - court / 2
-        home_score = possessions * home_off * away_def / efficiency / 100 + court / 2
+        away_score = possessions * away_off * home_def / efficiency / 100 - margin_shift
+        home_score = possessions * home_off * away_def / efficiency / 100 + margin_shift
     home_spread = float(market["home_spread"])
     total_line = float(market["total"])
     if not math.isfinite(home_spread) or abs(home_spread) > 100 or not 50 < total_line < 300:
@@ -159,6 +167,7 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
             "total_pick": f"{'Over' if total_edge >= 0 else 'Under'} {total_line:g}",
             "spread_grade": "Research", "total_grade": "Research", "grade_policy": GRADE_POLICY,
             "neutral_site": game["neutral_site"], "home_court_points": court,
+            "margin_calibration": calibration,
             "baseline_away_score": round(baseline_away, 2), "baseline_home_score": round(baseline_home, 2),
             "lineup_margin_change": round((home_score-away_score)-(baseline_home-baseline_away), 2),
             "lineup_total_change": round((home_score+away_score)-(baseline_home+baseline_away), 2),
@@ -168,4 +177,4 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
             "prior_policy": bundle.get('prior_policy', ''), "prior_source_url": bundle.get('prior_source_url', ''),
             "lineup_adjustment": lineup_adjustment,
             "availability_mode": "team_ratings", "injury_verified": False,
-            "model_status": "Research baseline; NCAAM grades and uncertainty await chronological validation"}
+            "model_status": "Research: frozen opening-margin calibration; NCAAM betting grades and uncertainty remain unvalidated"}
