@@ -5,7 +5,7 @@ import sqlite3
 import unittest
 
 from builders.ncaam_model import parse_ratings, project, team_key
-from builders.ncaam_margin_calibration import HOME_COURT_POINTS
+from builders.ncaam_home_court import PRIOR_POINTS
 from scripts.run_ncaam_builder import parse_slate
 from shared.ncaam_auto_storage import upsert, rows
 
@@ -28,7 +28,7 @@ class NcaamModelTests(unittest.TestCase):
         neutral = self.calculate()
         home = self.calculate({**self.game, "neutral_site": False})
         self.assertAlmostEqual(neutral["total"], home["total"])
-        self.assertAlmostEqual(neutral["fair_home_spread"] - home["fair_home_spread"], HOME_COURT_POINTS, places=2)
+        self.assertAlmostEqual(neutral["fair_home_spread"] - home["fair_home_spread"], PRIOR_POINTS, places=2)
         self.assertEqual(neutral["spread_grade"], "Research")
         self.assertNotIn("spread_probability_estimate", neutral)
 

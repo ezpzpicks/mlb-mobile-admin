@@ -1,0 +1,3825 @@
+{
+  "policy": "ncaam-team-home-court-2026-11-03-v1",
+  "model_version": "ncaam-v0.6-team-home-court-2026-11-03",
+  "historical": {
+    "2025": {
+      "baseline": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.731089108910892,
+          "margin_rmse": 12.3312112258703,
+          "favorite_underprediction": 1.581914191419142,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 309,
+              "losses": 297,
+              "pushes": 0,
+              "bets": 606,
+              "units": -16.090909090909065,
+              "roi_pct": -2.655265526552651
+            },
+            "3": {
+              "wins": 104,
+              "losses": 92,
+              "pushes": 0,
+              "bets": 196,
+              "units": 2.5454545454545467,
+              "roi_pct": 1.2987012987012994
+            },
+            "5": {
+              "wins": 41,
+              "losses": 35,
+              "pushes": 0,
+              "bets": 76,
+              "units": 2.2727272727272734,
+              "roi_pct": 2.9904306220095704
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.569020979020978,
+          "margin_rmse": 14.781747746243218,
+          "favorite_underprediction": 5.155174825174825,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 74,
+              "losses": 69,
+              "pushes": 0,
+              "bets": 143,
+              "units": -1.7272727272727337,
+              "roi_pct": -1.2078830260648488
+            },
+            "3": {
+              "wins": 51,
+              "losses": 41,
+              "pushes": 0,
+              "bets": 92,
+              "units": 5.363636363636367,
+              "roi_pct": 5.830039525691704
+            },
+            "5": {
+              "wins": 30,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 55,
+              "units": 2.2727272727272734,
+              "roi_pct": 4.132231404958679
+            }
+          }
+        }
+      },
+      "v05": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.660310267874006,
+          "margin_rmse": 12.157943947944936,
+          "favorite_underprediction": 0.02848776436384507,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 302,
+              "losses": 304,
+              "pushes": 0,
+              "bets": 606,
+              "units": -29.45454545454544,
+              "roi_pct": -4.860486048604859
+            },
+            "3": {
+              "wins": 93,
+              "losses": 76,
+              "pushes": 0,
+              "bets": 169,
+              "units": 8.545454545454547,
+              "roi_pct": 5.056481979558904
+            },
+            "5": {
+              "wins": 22,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 47,
+              "units": -5.0,
+              "roi_pct": -10.638297872340425
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.059153754766415,
+          "margin_rmse": 14.010725917027127,
+          "favorite_underprediction": 2.1121883335784495,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 75,
+              "losses": 68,
+              "pushes": 0,
+              "bets": 143,
+              "units": 0.18181818181818699,
+              "roi_pct": 0.12714558169103984
+            },
+            "3": {
+              "wins": 25,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 47,
+              "units": 0.7272727272727266,
+              "roi_pct": 1.5473887814313332
+            },
+            "5": {
+              "wins": 8,
+              "losses": 11,
+              "pushes": 0,
+              "bets": 19,
+              "units": -3.7272727272727275,
+              "roi_pct": -19.617224880382775
+            }
+          }
+        }
+      },
+      "league_only": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.65949024812951,
+          "margin_rmse": 12.175791142152821,
+          "favorite_underprediction": 0.5857599693937906,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 302,
+              "losses": 304,
+              "pushes": 0,
+              "bets": 606,
+              "units": -29.45454545454544,
+              "roi_pct": -4.860486048604859
+            },
+            "3": {
+              "wins": 82,
+              "losses": 78,
+              "pushes": 0,
+              "bets": 160,
+              "units": -3.4545454545454533,
+              "roi_pct": -2.1590909090909083
+            },
+            "5": {
+              "wins": 24,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 49,
+              "units": -3.1818181818181834,
+              "roi_pct": -6.493506493506497
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.10185802683895,
+          "margin_rmse": 14.15709370627625,
+          "favorite_underprediction": 2.92988072158849,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 80,
+              "losses": 63,
+              "pushes": 0,
+              "bets": 143,
+              "units": 9.727272727272734,
+              "roi_pct": 6.802288620470444
+            },
+            "3": {
+              "wins": 32,
+              "losses": 24,
+              "pushes": 0,
+              "bets": 56,
+              "units": 5.09090909090909,
+              "roi_pct": 9.09090909090909
+            },
+            "5": {
+              "wins": 11,
+              "losses": 13,
+              "pushes": 0,
+              "bets": 24,
+              "units": -3.0,
+              "roi_pct": -12.5
+            }
+          }
+        }
+      },
+      "team_home_court": {
+        "all": {
+          "games": 606,
+          "margin_mae": 9.649345793893428,
+          "margin_rmse": 12.132638199994872,
+          "favorite_underprediction": 0.45538076147299833,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 299,
+              "losses": 307,
+              "pushes": 0,
+              "bets": 606,
+              "units": -35.18181818181819,
+              "roi_pct": -5.805580558055807
+            },
+            "3": {
+              "wins": 85,
+              "losses": 77,
+              "pushes": 0,
+              "bets": 162,
+              "units": 0.27272727272726627,
+              "roi_pct": 0.16835016835016436
+            },
+            "5": {
+              "wins": 21,
+              "losses": 28,
+              "pushes": 0,
+              "bets": 49,
+              "units": -8.90909090909091,
+              "roi_pct": -18.181818181818183
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 143,
+          "margin_mae": 11.06159508987748,
+          "margin_rmse": 14.036107764273785,
+          "favorite_underprediction": 2.5369499523577206,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 77,
+              "losses": 66,
+              "pushes": 0,
+              "bets": 143,
+              "units": 4.0,
+              "roi_pct": 2.797202797202797
+            },
+            "3": {
+              "wins": 28,
+              "losses": 23,
+              "pushes": 0,
+              "bets": 51,
+              "units": 2.4545454545454533,
+              "roi_pct": 4.8128342245989275
+            },
+            "5": {
+              "wins": 6,
+              "losses": 14,
+              "pushes": 0,
+              "bets": 20,
+              "units": -8.545454545454547,
+              "roi_pct": -42.727272727272734
+            }
+          }
+        }
+      }
+    },
+    "2026": {
+      "baseline": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.590904605263159,
+          "margin_rmse": 12.19123163519153,
+          "favorite_underprediction": 2.919424342105263,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 297,
+              "losses": 311,
+              "pushes": 0,
+              "bets": 608,
+              "units": -41.0,
+              "roi_pct": -6.743421052631579
+            },
+            "3": {
+              "wins": 147,
+              "losses": 140,
+              "pushes": 0,
+              "bets": 287,
+              "units": -6.363636363636374,
+              "roi_pct": -2.217294900221733
+            },
+            "5": {
+              "wins": 74,
+              "losses": 70,
+              "pushes": 0,
+              "bets": 144,
+              "units": -2.7272727272727337,
+              "roi_pct": -1.8939393939393985
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 11.39,
+          "margin_rmse": 13.957478181073444,
+          "favorite_underprediction": 5.443785310734463,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 93,
+              "losses": 84,
+              "pushes": 0,
+              "bets": 177,
+              "units": 0.5454545454545467,
+              "roi_pct": 0.3081664098613258
+            },
+            "3": {
+              "wins": 73,
+              "losses": 67,
+              "pushes": 0,
+              "bets": 140,
+              "units": -0.6363636363636402,
+              "roi_pct": -0.4545454545454573
+            },
+            "5": {
+              "wins": 53,
+              "losses": 50,
+              "pushes": 0,
+              "bets": 103,
+              "units": -1.8181818181818201,
+              "roi_pct": -1.7652250661959419
+            }
+          }
+        }
+      },
+      "v05": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.424271972129615,
+          "margin_rmse": 11.89057123727775,
+          "favorite_underprediction": 1.3081297000776897,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 298,
+              "losses": 310,
+              "pushes": 0,
+              "bets": 608,
+              "units": -39.090909090909065,
+              "roi_pct": -6.4294258373205695
+            },
+            "3": {
+              "wins": 114,
+              "losses": 110,
+              "pushes": 0,
+              "bets": 224,
+              "units": -6.36363636363636,
+              "roi_pct": -2.8409090909090895
+            },
+            "5": {
+              "wins": 45,
+              "losses": 39,
+              "pushes": 0,
+              "bets": 84,
+              "units": 1.9090909090909065,
+              "roi_pct": 2.27272727272727
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 10.766936648994315,
+          "margin_rmse": 13.081054174651248,
+          "favorite_underprediction": 2.432561078921181,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 88,
+              "losses": 89,
+              "pushes": 0,
+              "bets": 177,
+              "units": -9.0,
+              "roi_pct": -5.084745762711864
+            },
+            "3": {
+              "wins": 49,
+              "losses": 38,
+              "pushes": 0,
+              "bets": 87,
+              "units": 6.545454545454547,
+              "roi_pct": 7.523510971786836
+            },
+            "5": {
+              "wins": 27,
+              "losses": 17,
+              "pushes": 0,
+              "bets": 44,
+              "units": 7.545454545454547,
+              "roi_pct": 17.148760330578515
+            }
+          }
+        }
+      },
+      "league_only": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.442469641573796,
+          "margin_rmse": 11.933606154381033,
+          "favorite_underprediction": 1.8238245829467152,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 295,
+              "losses": 313,
+              "pushes": 0,
+              "bets": 608,
+              "units": -44.81818181818181,
+              "roi_pct": -7.3714114832535875
+            },
+            "3": {
+              "wins": 121,
+              "losses": 115,
+              "pushes": 0,
+              "bets": 236,
+              "units": -5.0,
+              "roi_pct": -2.1186440677966103
+            },
+            "5": {
+              "wins": 55,
+              "losses": 43,
+              "pushes": 0,
+              "bets": 98,
+              "units": 7.0,
+              "roi_pct": 7.142857142857143
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 10.875599597646703,
+          "margin_rmse": 13.229199929492124,
+          "favorite_underprediction": 3.124843033507095,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 90,
+              "losses": 87,
+              "pushes": 0,
+              "bets": 177,
+              "units": -5.181818181818187,
+              "roi_pct": -2.9275808936825913
+            },
+            "3": {
+              "wins": 58,
+              "losses": 47,
+              "pushes": 0,
+              "bets": 105,
+              "units": 5.727272727272727,
+              "roi_pct": 5.454545454545453
+            },
+            "5": {
+              "wins": 34,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 56,
+              "units": 8.90909090909091,
+              "roi_pct": 15.90909090909091
+            }
+          }
+        }
+      },
+      "team_home_court": {
+        "all": {
+          "games": 608,
+          "margin_mae": 9.470186858989807,
+          "margin_rmse": 11.954955877068429,
+          "favorite_underprediction": 1.6665012276835576,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 297,
+              "losses": 311,
+              "pushes": 0,
+              "bets": 608,
+              "units": -41.0,
+              "roi_pct": -6.743421052631579
+            },
+            "3": {
+              "wins": 118,
+              "losses": 114,
+              "pushes": 0,
+              "bets": 232,
+              "units": -6.727272727272734,
+              "roi_pct": -2.8996865203761786
+            },
+            "5": {
+              "wins": 46,
+              "losses": 46,
+              "pushes": 0,
+              "bets": 92,
+              "units": -4.18181818181818,
+              "roi_pct": -4.545454545454544
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 177,
+          "margin_mae": 10.952569654143879,
+          "margin_rmse": 13.289155156543668,
+          "favorite_underprediction": 2.8477362538460786,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 87,
+              "losses": 90,
+              "pushes": 0,
+              "bets": 177,
+              "units": -10.909090909090907,
+              "roi_pct": -6.1633281972265
+            },
+            "3": {
+              "wins": 55,
+              "losses": 44,
+              "pushes": 0,
+              "bets": 99,
+              "units": 6.0,
+              "roi_pct": 6.0606060606060606
+            },
+            "5": {
+              "wins": 28,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 50,
+              "units": 3.4545454545454533,
+              "roi_pct": 6.9090909090909065
+            }
+          }
+        }
+      }
+    }
+  },
+  "live": {
+    "2026-11-02": {
+      "baseline": {
+        "all": {
+          "games": 115,
+          "margin_mae": 10.643304347826087,
+          "margin_rmse": 13.268897926124575,
+          "favorite_underprediction": 2.5128695652173914,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 57,
+              "losses": 58,
+              "pushes": 0,
+              "bets": 115,
+              "units": -6.18181818181818,
+              "roi_pct": -5.375494071146243
+            },
+            "3": {
+              "wins": 23,
+              "losses": 24,
+              "pushes": 0,
+              "bets": 47,
+              "units": -3.09090909090909,
+              "roi_pct": -6.576402321083171
+            },
+            "5": {
+              "wins": 13,
+              "losses": 16,
+              "pushes": 0,
+              "bets": 29,
+              "units": -4.181818181818182,
+              "roi_pct": -14.420062695924765
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 46,
+          "margin_mae": 11.753260869565217,
+          "margin_rmse": 14.299433327172824,
+          "favorite_underprediction": 4.439782608695652,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 25,
+              "losses": 21,
+              "pushes": 0,
+              "bets": 46,
+              "units": 1.7272727272727266,
+              "roi_pct": 3.7549407114624493
+            },
+            "3": {
+              "wins": 17,
+              "losses": 18,
+              "pushes": 0,
+              "bets": 35,
+              "units": -2.545454545454545,
+              "roi_pct": -7.272727272727272
+            },
+            "5": {
+              "wins": 10,
+              "losses": 14,
+              "pushes": 0,
+              "bets": 24,
+              "units": -4.909090909090908,
+              "roi_pct": -20.45454545454545
+            }
+          }
+        }
+      },
+      "v05": {
+        "all": {
+          "games": 115,
+          "margin_mae": 10.41408695652174,
+          "margin_rmse": 12.878645216353142,
+          "favorite_underprediction": 0.512695652173913,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 53,
+              "losses": 61,
+              "pushes": 0,
+              "bets": 114,
+              "units": -12.81818181818182,
+              "roi_pct": -11.244019138755982
+            },
+            "3": {
+              "wins": 15,
+              "losses": 17,
+              "pushes": 0,
+              "bets": 32,
+              "units": -3.3636363636363633,
+              "roi_pct": -10.511363636363635
+            },
+            "5": {
+              "wins": 7,
+              "losses": 7,
+              "pushes": 0,
+              "bets": 14,
+              "units": -0.6363636363636367,
+              "roi_pct": -4.545454545454548
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 46,
+          "margin_mae": 11.404565217391305,
+          "margin_rmse": 13.652205348205294,
+          "favorite_underprediction": 1.2115217391304347,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 20,
+              "losses": 26,
+              "pushes": 0,
+              "bets": 46,
+              "units": -7.818181818181817,
+              "roi_pct": -16.996047430830036
+            },
+            "3": {
+              "wins": 7,
+              "losses": 8,
+              "pushes": 0,
+              "bets": 15,
+              "units": -1.6363636363636367,
+              "roi_pct": -10.909090909090912
+            },
+            "5": {
+              "wins": 5,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 10,
+              "units": -0.45454545454545414,
+              "roi_pct": -4.545454545454541
+            }
+          }
+        }
+      },
+      "team_home_court": {
+        "all": {
+          "games": 115,
+          "margin_mae": 10.382347826086956,
+          "margin_rmse": 12.896144317619495,
+          "favorite_underprediction": 1.0195652173913043,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 53,
+              "losses": 61,
+              "pushes": 0,
+              "bets": 114,
+              "units": -12.81818181818182,
+              "roi_pct": -11.244019138755982
+            },
+            "3": {
+              "wins": 16,
+              "losses": 20,
+              "pushes": 0,
+              "bets": 36,
+              "units": -5.454545454545455,
+              "roi_pct": -15.151515151515152
+            },
+            "5": {
+              "wins": 7,
+              "losses": 8,
+              "pushes": 0,
+              "bets": 15,
+              "units": -1.6363636363636367,
+              "roi_pct": -10.909090909090912
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 46,
+          "margin_mae": 11.338695652173913,
+          "margin_rmse": 13.677837675534128,
+          "favorite_underprediction": 1.8773913043478259,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 21,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 46,
+              "units": -5.90909090909091,
+              "roi_pct": -12.845849802371543
+            },
+            "3": {
+              "wins": 9,
+              "losses": 12,
+              "pushes": 0,
+              "bets": 21,
+              "units": -3.8181818181818183,
+              "roi_pct": -18.18181818181818
+            },
+            "5": {
+              "wins": 5,
+              "losses": 6,
+              "pushes": 0,
+              "bets": 11,
+              "units": -1.4545454545454541,
+              "roi_pct": -13.223140495867765
+            }
+          }
+        }
+      }
+    },
+    "2026-11-03": {
+      "baseline": {
+        "all": {
+          "games": 14,
+          "margin_mae": 11.957857142857144,
+          "margin_rmse": 16.160126192930196,
+          "favorite_underprediction": 8.250714285714286,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 5,
+              "losses": 9,
+              "pushes": 0,
+              "bets": 14,
+              "units": -4.454545454545454,
+              "roi_pct": -31.818181818181817
+            },
+            "3": {
+              "wins": 4,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 9,
+              "units": -1.3636363636363638,
+              "roi_pct": -15.151515151515152
+            },
+            "5": {
+              "wins": 2,
+              "losses": 4,
+              "pushes": 0,
+              "bets": 6,
+              "units": -2.1818181818181817,
+              "roi_pct": -36.36363636363636
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 10,
+          "margin_mae": 12.081,
+          "margin_rmse": 17.397013824217076,
+          "favorite_underprediction": 11.653,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 5,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 10,
+              "units": -0.45454545454545414,
+              "roi_pct": -4.545454545454541
+            },
+            "3": {
+              "wins": 4,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 6,
+              "units": 1.6363636363636362,
+              "roi_pct": 27.27272727272727
+            },
+            "5": {
+              "wins": 2,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 4,
+              "units": -0.18181818181818188,
+              "roi_pct": -4.545454545454547
+            }
+          }
+        }
+      },
+      "v05": {
+        "all": {
+          "games": 14,
+          "margin_mae": 10.494285714285715,
+          "margin_rmse": 15.02725286176514,
+          "favorite_underprediction": 5.555714285714286,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 7,
+              "losses": 7,
+              "pushes": 0,
+              "bets": 14,
+              "units": -0.6363636363636367,
+              "roi_pct": -4.545454545454548
+            },
+            "3": {
+              "wins": 2,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 7,
+              "units": -3.1818181818181817,
+              "roi_pct": -45.45454545454545
+            },
+            "5": {
+              "wins": 1,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 3,
+              "units": -1.0909090909090908,
+              "roi_pct": -36.36363636363636
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 10,
+          "margin_mae": 9.965,
+          "margin_rmse": 15.781860156521473,
+          "favorite_underprediction": 8.633000000000001,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 7,
+              "losses": 3,
+              "pushes": 0,
+              "bets": 10,
+              "units": 3.3636363636363633,
+              "roi_pct": 33.63636363636363
+            },
+            "3": {
+              "wins": 2,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 4,
+              "units": -0.18181818181818188,
+              "roi_pct": -4.545454545454547
+            },
+            "5": {
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "bets": 2,
+              "units": -0.09090909090909094,
+              "roi_pct": -4.545454545454547
+            }
+          }
+        }
+      },
+      "team_home_court": {
+        "all": {
+          "games": 14,
+          "margin_mae": 10.813571428571429,
+          "margin_rmse": 15.339563459983376,
+          "favorite_underprediction": 6.252142857142857,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 6,
+              "losses": 8,
+              "pushes": 0,
+              "bets": 14,
+              "units": -2.545454545454546,
+              "roi_pct": -18.181818181818183
+            },
+            "3": {
+              "wins": 2,
+              "losses": 5,
+              "pushes": 0,
+              "bets": 7,
+              "units": -3.1818181818181817,
+              "roi_pct": -45.45454545454545
+            },
+            "5": {
+              "wins": 1,
+              "losses": 3,
+              "pushes": 0,
+              "bets": 4,
+              "units": -2.090909090909091,
+              "roi_pct": -52.27272727272727
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 10,
+          "margin_mae": 10.485000000000001,
+          "margin_rmse": 16.304088750985137,
+          "favorite_underprediction": 9.077,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 6,
+              "losses": 4,
+              "pushes": 0,
+              "bets": 10,
+              "units": 1.4545454545454541,
+              "roi_pct": 14.545454545454541
+            },
+            "3": {
+              "wins": 2,
+              "losses": 2,
+              "pushes": 0,
+              "bets": 4,
+              "units": -0.18181818181818188,
+              "roi_pct": -4.545454545454547
+            },
+            "5": {
+              "wins": 1,
+              "losses": 1,
+              "pushes": 0,
+              "bets": 2,
+              "units": -0.09090909090909094,
+              "roi_pct": -4.545454545454547
+            }
+          }
+        }
+      }
+    },
+    "combined": {
+      "baseline": {
+        "all": {
+          "games": 129,
+          "margin_mae": 10.785968992248062,
+          "margin_rmse": 13.612413253117296,
+          "favorite_underprediction": 3.1355813953488374,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 62,
+              "losses": 67,
+              "pushes": 0,
+              "bets": 129,
+              "units": -10.636363636363633,
+              "roi_pct": -8.245243128964056
+            },
+            "3": {
+              "wins": 27,
+              "losses": 29,
+              "pushes": 0,
+              "bets": 56,
+              "units": -4.454545454545453,
+              "roi_pct": -7.954545454545452
+            },
+            "5": {
+              "wins": 15,
+              "losses": 20,
+              "pushes": 0,
+              "bets": 35,
+              "units": -6.363636363636363,
+              "roi_pct": -18.181818181818183
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 56,
+          "margin_mae": 11.811785714285714,
+          "margin_rmse": 14.899877396427511,
+          "favorite_underprediction": 5.727857142857143,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 30,
+              "losses": 26,
+              "pushes": 0,
+              "bets": 56,
+              "units": 1.2727272727272734,
+              "roi_pct": 2.272727272727274
+            },
+            "3": {
+              "wins": 21,
+              "losses": 20,
+              "pushes": 0,
+              "bets": 41,
+              "units": -0.9090909090909101,
+              "roi_pct": -2.2172949002217317
+            },
+            "5": {
+              "wins": 12,
+              "losses": 16,
+              "pushes": 0,
+              "bets": 28,
+              "units": -5.090909090909092,
+              "roi_pct": -18.181818181818183
+            }
+          }
+        }
+      },
+      "v05": {
+        "all": {
+          "games": 129,
+          "margin_mae": 10.422790697674419,
+          "margin_rmse": 13.128848464945579,
+          "favorite_underprediction": 1.06,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 60,
+              "losses": 68,
+              "pushes": 0,
+              "bets": 128,
+              "units": -13.454545454545453,
+              "roi_pct": -10.511363636363635
+            },
+            "3": {
+              "wins": 17,
+              "losses": 22,
+              "pushes": 0,
+              "bets": 39,
+              "units": -6.545454545454545,
+              "roi_pct": -16.783216783216783
+            },
+            "5": {
+              "wins": 8,
+              "losses": 9,
+              "pushes": 0,
+              "bets": 17,
+              "units": -1.7272727272727275,
+              "roi_pct": -10.160427807486633
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 56,
+          "margin_mae": 11.1475,
+          "margin_rmse": 14.056185598213641,
+          "favorite_underprediction": 2.536785714285714,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 27,
+              "losses": 29,
+              "pushes": 0,
+              "bets": 56,
+              "units": -4.454545454545453,
+              "roi_pct": -7.954545454545452
+            },
+            "3": {
+              "wins": 9,
+              "losses": 10,
+              "pushes": 0,
+              "bets": 19,
+              "units": -1.8181818181818183,
+              "roi_pct": -9.569377990430624
+            },
+            "5": {
+              "wins": 6,
+              "losses": 6,
+              "pushes": 0,
+              "bets": 12,
+              "units": -0.5454545454545459,
+              "roi_pct": -4.545454545454549
+            }
+          }
+        }
+      },
+      "team_home_court": {
+        "all": {
+          "games": 129,
+          "margin_mae": 10.429147286821706,
+          "margin_rmse": 13.183247179718295,
+          "favorite_underprediction": 1.5874418604651164,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 59,
+              "losses": 69,
+              "pushes": 0,
+              "bets": 128,
+              "units": -15.363636363636367,
+              "roi_pct": -12.002840909090912
+            },
+            "3": {
+              "wins": 18,
+              "losses": 25,
+              "pushes": 0,
+              "bets": 43,
+              "units": -8.636363636363637,
+              "roi_pct": -20.084566596194502
+            },
+            "5": {
+              "wins": 8,
+              "losses": 11,
+              "pushes": 0,
+              "bets": 19,
+              "units": -3.7272727272727275,
+              "roi_pct": -19.617224880382775
+            }
+          }
+        },
+        "favorite_20_plus": {
+          "games": 56,
+          "margin_mae": 11.18625,
+          "margin_rmse": 14.18252338770704,
+          "favorite_underprediction": 3.163035714285714,
+          "ats_by_edge_threshold": {
+            "0": {
+              "wins": 27,
+              "losses": 29,
+              "pushes": 0,
+              "bets": 56,
+              "units": -4.454545454545453,
+              "roi_pct": -7.954545454545452
+            },
+            "3": {
+              "wins": 11,
+              "losses": 14,
+              "pushes": 0,
+              "bets": 25,
+              "units": -4.0,
+              "roi_pct": -16.0
+            },
+            "5": {
+              "wins": 6,
+              "losses": 7,
+              "pushes": 0,
+              "bets": 13,
+              "units": -1.5454545454545459,
+              "roi_pct": -11.888111888111892
+            }
+          }
+        }
+      }
+    }
+  },
+  "historical_unknown_home_samples": [
+    {
+      "game_id": "401706158",
+      "team": "mercyhurst",
+      "season": 2025
+    },
+    {
+      "game_id": "401818367",
+      "team": "new haven",
+      "season": 2026
+    },
+    {
+      "game_id": "401827277",
+      "team": "new haven",
+      "season": 2026
+    },
+    {
+      "game_id": "401828681",
+      "team": "new haven",
+      "season": 2026
+    }
+  ],
+  "live_exclusions": {
+    "changed_game_identity_or_unverified_result": 4,
+    "unfinished": 5
+  },
+  "live_inputs": [
+    {
+      "filename": "ncaam_yesterday.json",
+      "sha256": "e1de905ba5767d19303d911fae399e2fba3bf8bc504725d053e80ec09de10c85",
+      "as_of": "2026-11-04T03:34:06.494000+00:00"
+    },
+    {
+      "filename": "ncaam_today.json",
+      "sha256": "9c1bacce72e7f4c4f80f7cf5cf052d425ec0b4480fa36ffbaa36f4ed1458bf71",
+      "as_of": "2026-11-04T03:34:06.227000+00:00"
+    }
+  ],
+  "team_examples": {
+    "Grambling St.": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Appalachian St.": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Queens": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Tennessee St.": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "San Jose St.": {
+      "value": 2.8489,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0888,
+      "home_games": 44
+    },
+    "George Mason": {
+      "value": 3.6117,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.674,
+      "home_games": 54
+    },
+    "McNeese St.": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Florida": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Michigan": {
+      "value": 3.1126,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1749,
+      "home_games": 46
+    },
+    "Cornell": {
+      "value": 1.9299,
+      "league_points": 2.9377,
+      "venue_adjustment": -1.0078,
+      "home_games": 30
+    },
+    "Georgia St.": {
+      "value": 3.4378,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.5001,
+      "home_games": 38
+    },
+    "Duke": {
+      "value": 2.771,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1667,
+      "home_games": 50
+    },
+    "St. John's": {
+      "value": 2.6482,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2895,
+      "home_games": 53
+    },
+    "Temple": {
+      "value": 2.8566,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0811,
+      "home_games": 41
+    },
+    "Georgetown": {
+      "value": 1.8591,
+      "league_points": 2.9377,
+      "venue_adjustment": -1.0786,
+      "home_games": 55
+    },
+    "Michigan St.": {
+      "value": 3.1555,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2178,
+      "home_games": 51
+    },
+    "Iowa St.": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Texas Tech": {
+      "value": 3.3898,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4521,
+      "home_games": 51
+    },
+    "Vanderbilt": {
+      "value": 3.2187,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.281,
+      "home_games": 51
+    },
+    "Indiana St.": {
+      "value": 3.6546,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.7169,
+      "home_games": 41
+    },
+    "Yale": {
+      "value": 3.1344,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1967,
+      "home_games": 30
+    },
+    "West Virginia": {
+      "value": 3.5886,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.6509,
+      "home_games": 53
+    },
+    "UCF": {
+      "value": 2.9963,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0586,
+      "home_games": 55
+    },
+    "Columbia": {
+      "value": 2.7255,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2122,
+      "home_games": 37
+    },
+    "Presbyterian": {
+      "value": 2.2024,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7353,
+      "home_games": 33
+    },
+    "Boston University": {
+      "value": 3.275,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3373,
+      "home_games": 44
+    },
+    "Iona": {
+      "value": 3.2181,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2804,
+      "home_games": 42
+    },
+    "Marist": {
+      "value": 3.1194,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1817,
+      "home_games": 42
+    },
+    "VCU": {
+      "value": 2.6885,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2492,
+      "home_games": 51
+    },
+    "Florida Atlantic": {
+      "value": 3.6821,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.7444,
+      "home_games": 40
+    },
+    "East Carolina": {
+      "value": 2.4923,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.4454,
+      "home_games": 51
+    },
+    "Clemson": {
+      "value": 2.4322,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.5055,
+      "home_games": 49
+    },
+    "Maryland": {
+      "value": 3.3312,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3935,
+      "home_games": 51
+    },
+    "Indiana": {
+      "value": 3.9739,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.0362,
+      "home_games": 54
+    },
+    "North Carolina": {
+      "value": 3.7667,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.829,
+      "home_games": 48
+    },
+    "Cincinnati": {
+      "value": 3.7734,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.8357,
+      "home_games": 56
+    },
+    "Wright St.": {
+      "value": 2.3049,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.6328,
+      "home_games": 41
+    },
+    "Brown": {
+      "value": 2.2352,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7025,
+      "home_games": 36
+    },
+    "St. Bonaventure": {
+      "value": 2.0398,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.8979,
+      "home_games": 45
+    },
+    "Richmond": {
+      "value": 2.8915,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0462,
+      "home_games": 47
+    },
+    "Dayton": {
+      "value": 2.8706,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0671,
+      "home_games": 50
+    },
+    "Georgia Southern": {
+      "value": 3.3361,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3985,
+      "home_games": 37
+    },
+    "James Madison": {
+      "value": 3.1406,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2029,
+      "home_games": 41
+    },
+    "Troy": {
+      "value": 2.9969,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0592,
+      "home_games": 38
+    },
+    "Coastal Carolina": {
+      "value": 2.7724,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1653,
+      "home_games": 41
+    },
+    "Old Dominion": {
+      "value": 2.6589,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2788,
+      "home_games": 40
+    },
+    "Marshall": {
+      "value": 3.3605,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4228,
+      "home_games": 45
+    },
+    "Syracuse": {
+      "value": 3.378,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4403,
+      "home_games": 51
+    },
+    "Pittsburgh": {
+      "value": 3.0055,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0679,
+      "home_games": 53
+    },
+    "Xavier": {
+      "value": 3.3518,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4141,
+      "home_games": 53
+    },
+    "Providence": {
+      "value": 2.9742,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0365,
+      "home_games": 51
+    },
+    "Butler": {
+      "value": 2.3724,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.5653,
+      "home_games": 51
+    },
+    "Western Kentucky": {
+      "value": 3.5627,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.625,
+      "home_games": 41
+    },
+    "Wisconsin": {
+      "value": 3.1848,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2471,
+      "home_games": 51
+    },
+    "Seton Hall": {
+      "value": 2.3975,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.5402,
+      "home_games": 53
+    },
+    "Belmont": {
+      "value": 2.1523,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7854,
+      "home_games": 42
+    },
+    "Southeast Missouri St.": {
+      "value": 2.6876,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2501,
+      "home_games": 35
+    },
+    "Nebraska": {
+      "value": 3.015,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0773,
+      "home_games": 53
+    },
+    "N.C. State": {
+      "value": 3.3806,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4429,
+      "home_games": 52
+    },
+    "Penn St.": {
+      "value": 4.0317,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.094,
+      "home_games": 51
+    },
+    "George Washington": {
+      "value": 3.5136,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.5759,
+      "home_games": 48
+    },
+    "Louisiana Tech": {
+      "value": 2.5845,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.3532,
+      "home_games": 39
+    },
+    "Louisiana Monroe": {
+      "value": 3.0871,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1494,
+      "home_games": 37
+    },
+    "Marquette": {
+      "value": 3.9048,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.9671,
+      "home_games": 50
+    },
+    "Mississippi St.": {
+      "value": 2.3383,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.5994,
+      "home_games": 46
+    },
+    "Georgia": {
+      "value": 3.8191,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.8814,
+      "home_games": 55
+    },
+    "Illinois": {
+      "value": 2.7376,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2001,
+      "home_games": 52
+    },
+    "Kansas": {
+      "value": 4.929,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.9913,
+      "home_games": 49
+    },
+    "Valparaiso": {
+      "value": 2.7508,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1869,
+      "home_games": 47
+    },
+    "Texas St.": {
+      "value": 3.6632,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.7255,
+      "home_games": 38
+    },
+    "Bryant": {
+      "value": 3.9877,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.05,
+      "home_games": 36
+    },
+    "Bethune Cookman": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Northwestern": {
+      "value": 3.135,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1973,
+      "home_games": 50
+    },
+    "TCU": {
+      "value": 3.4701,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.5324,
+      "home_games": 52
+    },
+    "Tulane": {
+      "value": 3.2785,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3408,
+      "home_games": 48
+    },
+    "SMU": {
+      "value": 3.2792,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3415,
+      "home_games": 53
+    },
+    "Saint Louis": {
+      "value": 4.0093,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.0716,
+      "home_games": 48
+    },
+    "Loyola Chicago": {
+      "value": 2.938,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0003,
+      "home_games": 49
+    },
+    "South Alabama": {
+      "value": 2.5701,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.3676,
+      "home_games": 41
+    },
+    "Arkansas St.": {
+      "value": 3.7546,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.8169,
+      "home_games": 41
+    },
+    "Louisiana": {
+      "value": 3.0625,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1248,
+      "home_games": 43
+    },
+    "Wake Forest": {
+      "value": 2.6745,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2632,
+      "home_games": 55
+    },
+    "DePaul": {
+      "value": 2.4904,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.4473,
+      "home_games": 55
+    },
+    "Creighton": {
+      "value": 3.2437,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.306,
+      "home_games": 49
+    },
+    "Oklahoma": {
+      "value": 3.1948,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2572,
+      "home_games": 51
+    },
+    "Mississippi": {
+      "value": 1.5585,
+      "league_points": 2.9377,
+      "venue_adjustment": -1.3792,
+      "home_games": 50
+    },
+    "Central Arkansas": {
+      "value": 3.3193,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3816,
+      "home_games": 38
+    },
+    "Connecticut": {
+      "value": 2.4139,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.5237,
+      "home_games": 49
+    },
+    "Texas": {
+      "value": 2.7762,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1615,
+      "home_games": 53
+    },
+    "Houston": {
+      "value": 3.9513,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.0136,
+      "home_games": 50
+    },
+    "Louisville": {
+      "value": 2.8095,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1282,
+      "home_games": 52
+    },
+    "BYU": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Washington St.": {
+      "value": 3.8692,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.9315,
+      "home_games": 46
+    },
+    "New Mexico": {
+      "value": 3.0704,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1327,
+      "home_games": 50
+    },
+    "Utah": {
+      "value": 4.4776,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.5399,
+      "home_games": 55
+    },
+    "Oklahoma St.": {
+      "value": 3.4265,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4888,
+      "home_games": 56
+    },
+    "Minnesota": {
+      "value": 3.2829,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3452,
+      "home_games": 56
+    },
+    "Grand Canyon": {
+      "value": 2.8856,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0521,
+      "home_games": 49
+    },
+    "Colorado": {
+      "value": 4.2327,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.295,
+      "home_games": 53
+    },
+    "Oregon St.": {
+      "value": 4.5016,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.5639,
+      "home_games": 51
+    },
+    "Utah St.": {
+      "value": 3.6416,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.7039,
+      "home_games": 43
+    },
+    "Baylor": {
+      "value": 4.4624,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.5247,
+      "home_games": 47
+    },
+    "UCLA": {
+      "value": 0.0,
+      "league_points": 0.0,
+      "venue_adjustment": 0.0,
+      "home_games": 0
+    },
+    "Colorado St.": {
+      "value": 3.1978,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2601,
+      "home_games": 48
+    },
+    "Oregon": {
+      "value": 3.0797,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.142,
+      "home_games": 49
+    },
+    "Arizona St.": {
+      "value": 3.3237,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3861,
+      "home_games": 44
+    },
+    "San Francisco": {
+      "value": 1.9439,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.9938,
+      "home_games": 48
+    },
+    "Washington": {
+      "value": 3.0169,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.0792,
+      "home_games": 50
+    },
+    "Stanford": {
+      "value": 3.6703,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.7326,
+      "home_games": 54
+    },
+    "Santa Clara": {
+      "value": 3.0701,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1324,
+      "home_games": 45
+    },
+    "Saint Mary's": {
+      "value": 3.209,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.2713,
+      "home_games": 49
+    },
+    "UC Davis": {
+      "value": 2.6751,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2626,
+      "home_games": 40
+    },
+    "Nevada": {
+      "value": 3.6042,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.6665,
+      "home_games": 52
+    },
+    "USC": {
+      "value": 2.7236,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.2141,
+      "home_games": 49
+    },
+    "Hawaii": {
+      "value": 3.1333,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.1956,
+      "home_games": 52
+    },
+    "Tennessee": {
+      "value": 3.7903,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.8526,
+      "home_games": 50
+    },
+    "Kentucky": {
+      "value": 4.5525,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.6148,
+      "home_games": 54
+    },
+    "Duquesne": {
+      "value": 2.5272,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.4105,
+      "home_games": 47
+    },
+    "South Carolina": {
+      "value": 3.3175,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.3798,
+      "home_games": 54
+    },
+    "Virginia Tech": {
+      "value": 3.4154,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4777,
+      "home_games": 51
+    },
+    "Georgia Tech": {
+      "value": 2.1609,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7768,
+      "home_games": 54
+    },
+    "Rhode Island": {
+      "value": 3.9575,
+      "league_points": 2.9377,
+      "venue_adjustment": 1.0198,
+      "home_games": 48
+    },
+    "Boston College": {
+      "value": 2.7792,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.1585,
+      "home_games": 50
+    },
+    "Virginia": {
+      "value": 3.5903,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.6526,
+      "home_games": 51
+    },
+    "Alabama": {
+      "value": 3.7441,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.8064,
+      "home_games": 46
+    },
+    "LSU": {
+      "value": 2.2372,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7005,
+      "home_games": 53
+    },
+    "Missouri": {
+      "value": 2.9106,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.0271,
+      "home_games": 55
+    },
+    "Iowa": {
+      "value": 3.3939,
+      "league_points": 2.9377,
+      "venue_adjustment": 0.4562,
+      "home_games": 52
+    },
+    "Kansas St.": {
+      "value": 2.2126,
+      "league_points": 2.9377,
+      "venue_adjustment": -0.7251,
+      "home_games": 51
+    }
+  },
+  "history_sha256": "137b0bc92a27f1baf6f5c699587eb01c8fb92033e4f300822577fa6c4ae3ae63",
+  "history_sources": [
+    {
+      "season": 2022,
+      "games_url": "https://barttorvik.com/getgamestats.php?year=2022&csv=1",
+      "games_sha256": "c13fb8cee46a556434a76d3fbc1d44bb075aede0e7b8854dc95c56648f623e05",
+      "audit": {
+        "accepted_games": 5475
+      },
+      "membership_url": "https://barttorvik.com/2022_team_results.csv",
+      "membership_sha256": "f4c7b737ad52084bb2ef2452ea63c29e998d7e8154ab337f92f6ba33f7081495"
+    },
+    {
+      "season": 2023,
+      "games_url": "https://barttorvik.com/getgamestats.php?year=2023&csv=1",
+      "games_sha256": "659400af0d8b697c92c59f9c034a717153d391bdbda17f676c13c01886b05449",
+      "audit": {
+        "accepted_games": 5714
+      },
+      "membership_url": "https://barttorvik.com/2023_team_results.csv",
+      "membership_sha256": "d949e970bf47f043093806783630b49b7b3d05f936544eb713718de9ec299f69"
+    },
+    {
+      "season": 2024,
+      "games_url": "https://barttorvik.com/getgamestats.php?year=2024&csv=1",
+      "games_sha256": "bda843e0b8abb07082351cd2151eadd59328dd57ac9c120f65a93b52b83ed6f4",
+      "audit": {
+        "accepted_games": 5726
+      },
+      "membership_url": "https://barttorvik.com/2024_team_results.csv",
+      "membership_sha256": "98fe1685886da803d65e02571844760f8ba386c5a7308b98b3b980bb3c05686e"
+    },
+    {
+      "season": 2025,
+      "games_url": "https://barttorvik.com/getgamestats.php?year=2025&csv=1",
+      "games_sha256": "a68f7106f47e2f301bd96020eaa8157bd19150df0c042889ec734f50abd7ad06",
+      "audit": {
+        "accepted_games": 5764
+      },
+      "membership_url": "https://barttorvik.com/2025_team_results.csv",
+      "membership_sha256": "919ec8fe18734d32cf834cbdcf9be2b28430e7d5cb4f95f9325ea3c6e84a465a"
+    },
+    {
+      "season": 2026,
+      "games_url": "https://barttorvik.com/getgamestats.php?year=2026&csv=1",
+      "games_sha256": "f5fee034cf25bec2d45bd3f4a585680e7fe8ea0b98b701b356b1343acdfa5946",
+      "audit": {
+        "accepted_games": 5752
+      },
+      "membership_url": "https://barttorvik.com/2026_team_results.csv",
+      "membership_sha256": "00f977df0b8a42ea975ebdadf1cda89f92a202d4511c16701a993ecd8cdb0ba4"
+    }
+  ],
+  "historical_replay_sha256": "d5eee52cd17f4de52fb2601a3478c9a6729781ef775b6c3c3893574478eb5524",
+  "live_comparisons": [
+    {
+      "game_id": "401920912",
+      "date": "2026-11-02",
+      "away": "Northern Illinois Huskies",
+      "home": "Grambling Tigers",
+      "actual": 2.0,
+      "line": 7.5,
+      "baseline": -6.69,
+      "calibrated": -7.51,
+      "v05": -7.51,
+      "team_home_court": -7.51,
+      "home_court_points": 0.0,
+      "home_court_team": "grambling st"
+    },
+    {
+      "game_id": "401921422",
+      "date": "2026-11-02",
+      "away": "Merrimack Warriors",
+      "home": "App State Mountaineers",
+      "actual": 14.0,
+      "line": 3.5,
+      "baseline": -5.6,
+      "calibrated": -6.28,
+      "v05": -6.28,
+      "team_home_court": -6.28,
+      "home_court_points": 0.0,
+      "home_court_team": "appalachian st"
+    },
+    {
+      "game_id": "401921423",
+      "date": "2026-11-02",
+      "away": "Winthrop Eagles",
+      "home": "Queens University Royals",
+      "actual": 5.0,
+      "line": -2.5,
+      "baseline": 2.54,
+      "calibrated": 2.85,
+      "v05": 2.85,
+      "team_home_court": 2.85,
+      "home_court_points": 0.0,
+      "home_court_team": "queens"
+    },
+    {
+      "game_id": "401911707",
+      "date": "2026-11-02",
+      "away": "Murray State Racers",
+      "home": "Tennessee State Tigers",
+      "actual": -30.0,
+      "line": 10.5,
+      "baseline": -5.94,
+      "calibrated": -6.67,
+      "v05": -6.67,
+      "team_home_court": -6.67,
+      "home_court_points": 0.0,
+      "home_court_team": "tennessee st"
+    },
+    {
+      "game_id": "401911469",
+      "date": "2026-11-02",
+      "away": "UTSA Roadrunners",
+      "home": "San Jos\u00e9 State Spartans",
+      "actual": 21.0,
+      "line": -8.5,
+      "baseline": 5.62,
+      "calibrated": 6.6,
+      "v05": 6.6,
+      "team_home_court": 5.56,
+      "home_court_points": 2.8489,
+      "home_court_team": "san jose st"
+    },
+    {
+      "game_id": "401920071",
+      "date": "2026-11-02",
+      "away": "UMBC Retrievers",
+      "home": "George Mason Patriots",
+      "actual": 28.0,
+      "line": -19.5,
+      "baseline": 16.66,
+      "calibrated": 18.99,
+      "v05": 18.99,
+      "team_home_court": 18.72,
+      "home_court_points": 3.6117,
+      "home_court_team": "george mason"
+    },
+    {
+      "game_id": "401919014",
+      "date": "2026-11-02",
+      "away": "UAB Blazers",
+      "home": "McNeese Cowboys",
+      "actual": 21.0,
+      "line": -3.5,
+      "baseline": 5.08,
+      "calibrated": 5.7,
+      "v05": 5.7,
+      "team_home_court": 5.7,
+      "home_court_points": 0.0,
+      "home_court_team": "mcneese st"
+    },
+    {
+      "game_id": "401906769",
+      "date": "2026-11-02",
+      "away": "Miami Hurricanes",
+      "home": "Florida Gators",
+      "actual": 10.0,
+      "line": -5.5,
+      "baseline": 3.17,
+      "calibrated": 3.51,
+      "v05": 3.51,
+      "team_home_court": 3.51,
+      "home_court_points": 0.0,
+      "home_court_team": "florida"
+    },
+    {
+      "game_id": "401925733",
+      "date": "2026-11-02",
+      "away": "Oakland Golden Grizzlies",
+      "home": "Michigan Wolverines",
+      "actual": 16.0,
+      "line": -27.5,
+      "baseline": 23.69,
+      "calibrated": 26.87,
+      "v05": 26.87,
+      "team_home_court": 26.1,
+      "home_court_points": 3.1126,
+      "home_court_team": "michigan"
+    },
+    {
+      "game_id": "401924717",
+      "date": "2026-11-02",
+      "away": "Pepperdine Waves",
+      "home": "Cornell Big Red",
+      "actual": 1.0,
+      "line": 3.5,
+      "baseline": -2.17,
+      "calibrated": -2.14,
+      "v05": -2.14,
+      "team_home_court": -4.1,
+      "home_court_points": 1.9299,
+      "home_court_team": "cornell"
+    },
+    {
+      "game_id": "401910994",
+      "date": "2026-11-02",
+      "away": "Bowling Green Falcons",
+      "home": "Georgia State Panthers",
+      "actual": -3.0,
+      "line": -3.5,
+      "baseline": 0.57,
+      "calibrated": 0.93,
+      "v05": 0.93,
+      "team_home_court": 0.49,
+      "home_court_points": 3.4378,
+      "home_court_team": "georgia st"
+    },
+    {
+      "game_id": "401909562",
+      "date": "2026-11-02",
+      "away": "Army Black Knights",
+      "home": "Duke Blue Devils",
+      "actual": 34.0,
+      "line": -44.5,
+      "baseline": 37.18,
+      "calibrated": 42.01,
+      "v05": 42.01,
+      "team_home_court": 40.9,
+      "home_court_points": 2.771,
+      "home_court_team": "duke"
+    },
+    {
+      "game_id": "401920679",
+      "date": "2026-11-02",
+      "away": "Monmouth Hawks",
+      "home": "St. John's Red Storm",
+      "actual": 15.0,
+      "line": -28.5,
+      "baseline": 18.15,
+      "calibrated": 20.66,
+      "v05": 20.66,
+      "team_home_court": 19.42,
+      "home_court_points": 2.6482,
+      "home_court_team": "st john s"
+    },
+    {
+      "game_id": "401925857",
+      "date": "2026-11-02",
+      "away": "Central Connecticut Blue Devils",
+      "home": "Temple Owls",
+      "actual": 12.0,
+      "line": -14.5,
+      "baseline": 16.65,
+      "calibrated": 18.98,
+      "v05": 18.98,
+      "team_home_court": 17.95,
+      "home_court_points": 2.8566,
+      "home_court_team": "temple"
+    },
+    {
+      "game_id": "401921264",
+      "date": "2026-11-02",
+      "away": "Loyola Maryland Greyhounds",
+      "home": "Georgetown Hoyas",
+      "actual": 22.0,
+      "line": -27.5,
+      "baseline": 24.75,
+      "calibrated": 28.06,
+      "v05": 28.06,
+      "team_home_court": 26.04,
+      "home_court_points": 1.8591,
+      "home_court_team": "georgetown"
+    },
+    {
+      "game_id": "401924856",
+      "date": "2026-11-02",
+      "away": "Quinnipiac Bobcats",
+      "home": "Michigan State Spartans",
+      "actual": 37.0,
+      "line": -30.5,
+      "baseline": 24.79,
+      "calibrated": 28.11,
+      "v05": 28.11,
+      "team_home_court": 27.38,
+      "home_court_points": 3.1555,
+      "home_court_team": "michigan st"
+    },
+    {
+      "game_id": "401909771",
+      "date": "2026-11-02",
+      "away": "Memphis Tigers",
+      "home": "Iowa State Cyclones",
+      "actual": -4.0,
+      "line": -15.5,
+      "baseline": 13.84,
+      "calibrated": 15.5,
+      "v05": 15.5,
+      "team_home_court": 15.5,
+      "home_court_points": 0.0,
+      "home_court_team": "iowa st"
+    },
+    {
+      "game_id": "401921036",
+      "date": "2026-11-02",
+      "away": "Jackson State Tigers",
+      "home": "Texas Tech Red Raiders",
+      "actual": 34.0,
+      "line": -38.5,
+      "baseline": 26.13,
+      "calibrated": 29.62,
+      "v05": 29.62,
+      "team_home_court": 29.12,
+      "home_court_points": 3.3898,
+      "home_court_team": "texas tech"
+    },
+    {
+      "game_id": "401921104",
+      "date": "2026-11-02",
+      "away": "Bellarmine Knights",
+      "home": "Vanderbilt Commodores",
+      "actual": 46.0,
+      "line": -35.5,
+      "baseline": 27.05,
+      "calibrated": 30.64,
+      "v05": 30.64,
+      "team_home_court": 29.98,
+      "home_court_points": 3.2187,
+      "home_court_team": "vanderbilt"
+    },
+    {
+      "game_id": "401925818",
+      "date": "2026-11-02",
+      "away": "Charlotte 49ers",
+      "home": "Indiana State Sycamores",
+      "actual": -8.0,
+      "line": 5.5,
+      "baseline": -7.26,
+      "calibrated": -7.85,
+      "v05": -7.85,
+      "team_home_court": -8.08,
+      "home_court_points": 3.6546,
+      "home_court_team": "indiana st"
+    },
+    {
+      "game_id": "401924743",
+      "date": "2026-11-02",
+      "away": "Howard Bison",
+      "home": "Yale Bulldogs",
+      "actual": 10.0,
+      "line": -7.5,
+      "baseline": 0.78,
+      "calibrated": 1.17,
+      "v05": 1.17,
+      "team_home_court": 0.42,
+      "home_court_points": 3.1344,
+      "home_court_team": "yale"
+    },
+    {
+      "game_id": "401921766",
+      "date": "2026-11-02",
+      "away": "Niagara Purple Eagles",
+      "home": "West Virginia Mountaineers",
+      "actual": 45.0,
+      "line": -28.5,
+      "baseline": 23.47,
+      "calibrated": 26.63,
+      "v05": 26.63,
+      "team_home_court": 26.33,
+      "home_court_points": 3.5886,
+      "home_court_team": "west virginia"
+    },
+    {
+      "game_id": "401921753",
+      "date": "2026-11-02",
+      "away": "Florida Gulf Coast Eagles",
+      "home": "UCF Knights",
+      "actual": 1.0,
+      "line": -22.5,
+      "baseline": 20.69,
+      "calibrated": 23.51,
+      "v05": 23.51,
+      "team_home_court": 22.62,
+      "home_court_points": 2.9963,
+      "home_court_team": "ucf"
+    },
+    {
+      "game_id": "401921139",
+      "date": "2026-11-02",
+      "away": "Elon Phoenix",
+      "home": "Columbia Lions",
+      "actual": -13.0,
+      "line": -4.5,
+      "baseline": 5.36,
+      "calibrated": 6.31,
+      "v05": 6.31,
+      "team_home_court": 5.15,
+      "home_court_points": 2.7255,
+      "home_court_team": "columbia"
+    },
+    {
+      "game_id": "401920842",
+      "date": "2026-11-02",
+      "away": "St. Thomas Tommies",
+      "home": "Presbyterian Blue Hose",
+      "actual": -9.0,
+      "line": 3.5,
+      "baseline": -1.7,
+      "calibrated": -1.61,
+      "v05": -1.61,
+      "team_home_court": -3.29,
+      "home_court_points": 2.2024,
+      "home_court_team": "presbyterian"
+    },
+    {
+      "game_id": "401920746",
+      "date": "2026-11-02",
+      "away": "Northeastern Huskies",
+      "home": "Boston University Terriers",
+      "actual": 8.0,
+      "line": -2.5,
+      "baseline": -0.07,
+      "calibrated": 0.21,
+      "v05": 0.21,
+      "team_home_court": -0.4,
+      "home_court_points": 3.275,
+      "home_court_team": "boston university"
+    },
+    {
+      "game_id": "401920690",
+      "date": "2026-11-02",
+      "away": "Vermont Catamounts",
+      "home": "Iona Gaels",
+      "actual": 1.0,
+      "line": 1.5,
+      "baseline": 0.62,
+      "calibrated": 0.98,
+      "v05": 0.98,
+      "team_home_court": 0.32,
+      "home_court_points": 3.2181,
+      "home_court_team": "iona"
+    },
+    {
+      "game_id": "401920231",
+      "date": "2026-11-02",
+      "away": "Dartmouth Big Green",
+      "home": "Marist Red Foxes",
+      "actual": -7.0,
+      "line": -7.5,
+      "baseline": 8.45,
+      "calibrated": 9.77,
+      "v05": 9.77,
+      "team_home_court": 9.01,
+      "home_court_points": 3.1194,
+      "home_court_team": "marist"
+    },
+    {
+      "game_id": "401920201",
+      "date": "2026-11-02",
+      "away": "Little Rock Trojans",
+      "home": "VCU Rams",
+      "actual": 10.0,
+      "line": -19.5,
+      "baseline": 20.04,
+      "calibrated": 22.77,
+      "v05": 22.77,
+      "team_home_court": 21.58,
+      "home_court_points": 2.6885,
+      "home_court_team": "vcu"
+    },
+    {
+      "game_id": "401919803",
+      "date": "2026-11-02",
+      "away": "Long Island University Sharks",
+      "home": "Florida Atlantic Owls",
+      "actual": 14.0,
+      "line": -11.5,
+      "baseline": 11.12,
+      "calibrated": 12.77,
+      "v05": 12.77,
+      "team_home_court": 12.57,
+      "home_court_points": 3.6821,
+      "home_court_team": "florida atlantic"
+    },
+    {
+      "game_id": "401918976",
+      "date": "2026-11-02",
+      "away": "South Carolina Upstate Spartans",
+      "home": "East Carolina Pirates",
+      "actual": 13.0,
+      "line": -14.5,
+      "baseline": 12.72,
+      "calibrated": 14.56,
+      "v05": 14.56,
+      "team_home_court": 13.17,
+      "home_court_points": 2.4923,
+      "home_court_team": "east carolina"
+    },
+    {
+      "game_id": "401918073",
+      "date": "2026-11-02",
+      "away": "Stetson Hatters",
+      "home": "Clemson Tigers",
+      "actual": 13.0,
+      "line": -22.5,
+      "baseline": 21.44,
+      "calibrated": 24.34,
+      "v05": 24.34,
+      "team_home_court": 22.9,
+      "home_court_points": 2.4322,
+      "home_court_team": "clemson"
+    },
+    {
+      "game_id": "401916296",
+      "date": "2026-11-02",
+      "away": "Bucknell Bison",
+      "home": "Maryland Terrapins",
+      "actual": 29.0,
+      "line": -31.5,
+      "baseline": 28.21,
+      "calibrated": 31.95,
+      "v05": 31.95,
+      "team_home_court": 31.39,
+      "home_court_points": 3.3312,
+      "home_court_team": "maryland"
+    },
+    {
+      "game_id": "401916286",
+      "date": "2026-11-02",
+      "away": "Eastern Illinois Panthers",
+      "home": "Indiana Hoosiers",
+      "actual": 34.0,
+      "line": -34.5,
+      "baseline": 28.48,
+      "calibrated": 32.25,
+      "v05": 32.25,
+      "team_home_court": 32.34,
+      "home_court_points": 3.9739,
+      "home_court_team": "indiana"
+    },
+    {
+      "game_id": "401913099",
+      "date": "2026-11-02",
+      "away": "Western Carolina Catamounts",
+      "home": "North Carolina Tar Heels",
+      "actual": 8.0,
+      "line": -22.5,
+      "baseline": 16.26,
+      "calibrated": 18.53,
+      "v05": 18.53,
+      "team_home_court": 18.42,
+      "home_court_points": 3.7667,
+      "home_court_team": "north carolina"
+    },
+    {
+      "game_id": "401912207",
+      "date": "2026-11-02",
+      "away": "American University Eagles",
+      "home": "Cincinnati Bearcats",
+      "actual": 26.0,
+      "line": -25.5,
+      "baseline": 17.9,
+      "calibrated": 20.38,
+      "v05": 20.38,
+      "team_home_court": 20.27,
+      "home_court_points": 3.7734,
+      "home_court_team": "cincinnati"
+    },
+    {
+      "game_id": "401911333",
+      "date": "2026-11-02",
+      "away": "Air Force Falcons",
+      "home": "Wright State Raiders",
+      "actual": 31.0,
+      "line": -12.5,
+      "baseline": 9.61,
+      "calibrated": 11.08,
+      "v05": 11.08,
+      "team_home_court": 9.5,
+      "home_court_points": 2.3049,
+      "home_court_team": "wright st"
+    },
+    {
+      "game_id": "401911304",
+      "date": "2026-11-02",
+      "away": "New Hampshire Wildcats",
+      "home": "Brown Bears",
+      "actual": -4.0,
+      "line": -8.5,
+      "baseline": 7.06,
+      "calibrated": 8.21,
+      "v05": 8.21,
+      "team_home_court": 6.56,
+      "home_court_points": 2.2352,
+      "home_court_team": "brown"
+    },
+    {
+      "game_id": "401911261",
+      "date": "2026-11-02",
+      "away": "Youngstown State Penguins",
+      "home": "St. Bonaventure Bonnies",
+      "actual": -8.0,
+      "line": -10.5,
+      "baseline": 12.68,
+      "calibrated": 14.52,
+      "v05": 14.52,
+      "team_home_court": 12.68,
+      "home_court_points": 2.0398,
+      "home_court_team": "st bonaventure"
+    },
+    {
+      "game_id": "401911237",
+      "date": "2026-11-02",
+      "away": "UNC Asheville Bulldogs",
+      "home": "Richmond Spiders",
+      "actual": 23.0,
+      "line": -15.5,
+      "baseline": 13.19,
+      "calibrated": 15.09,
+      "v05": 15.09,
+      "team_home_court": 14.1,
+      "home_court_points": 2.8915,
+      "home_court_team": "richmond"
+    },
+    {
+      "game_id": "401911185",
+      "date": "2026-11-02",
+      "away": "NJIT Highlanders",
+      "home": "Dayton Flyers",
+      "actual": 31.0,
+      "line": -23.5,
+      "baseline": 18.8,
+      "calibrated": 21.38,
+      "v05": 21.38,
+      "team_home_court": 20.37,
+      "home_court_points": 2.8706,
+      "home_court_team": "dayton"
+    },
+    {
+      "game_id": "401911004",
+      "date": "2026-11-02",
+      "away": "Ball State Cardinals",
+      "home": "Georgia Southern Eagles",
+      "actual": 12.0,
+      "line": 1.5,
+      "baseline": -1.61,
+      "calibrated": -1.51,
+      "v05": -1.51,
+      "team_home_court": -2.06,
+      "home_court_points": 3.3361,
+      "home_court_team": "georgia southern"
+    },
+    {
+      "game_id": "401911002",
+      "date": "2026-11-02",
+      "away": "Miami (OH) RedHawks",
+      "home": "James Madison Dukes",
+      "actual": -9.0,
+      "line": -1.5,
+      "baseline": -2.98,
+      "calibrated": -3.05,
+      "v05": -3.05,
+      "team_home_court": -3.79,
+      "home_court_points": 3.1406,
+      "home_court_team": "james madison"
+    },
+    {
+      "game_id": "401911001",
+      "date": "2026-11-02",
+      "away": "Massachusetts Minutemen",
+      "home": "Troy Trojans",
+      "actual": -11.0,
+      "line": -2.5,
+      "baseline": 6.25,
+      "calibrated": 7.31,
+      "v05": 7.31,
+      "team_home_court": 6.42,
+      "home_court_points": 2.9969,
+      "home_court_team": "troy"
+    },
+    {
+      "game_id": "401910998",
+      "date": "2026-11-02",
+      "away": "Eastern Michigan Eagles",
+      "home": "Coastal Carolina Chanticleers",
+      "actual": -1.0,
+      "line": -1.5,
+      "baseline": -0.06,
+      "calibrated": 0.23,
+      "v05": 0.23,
+      "team_home_court": -0.88,
+      "home_court_points": 2.7724,
+      "home_court_team": "coastal carolina"
+    },
+    {
+      "game_id": "401910997",
+      "date": "2026-11-02",
+      "away": "Western Michigan Broncos",
+      "home": "Old Dominion Monarchs",
+      "actual": 12.0,
+      "line": 1.5,
+      "baseline": 0.92,
+      "calibrated": 1.32,
+      "v05": 1.32,
+      "team_home_court": 0.1,
+      "home_court_points": 2.6589,
+      "home_court_team": "old dominion"
+    },
+    {
+      "game_id": "401910995",
+      "date": "2026-11-02",
+      "away": "Buffalo Bulls",
+      "home": "Marshall Thundering Herd",
+      "actual": 27.0,
+      "line": -2.5,
+      "baseline": -1.88,
+      "calibrated": -1.81,
+      "v05": -1.81,
+      "team_home_court": -2.34,
+      "home_court_points": 3.3605,
+      "home_court_team": "marshall"
+    },
+    {
+      "game_id": "401909716",
+      "date": "2026-11-02",
+      "away": "New Haven Chargers",
+      "home": "Syracuse Orange",
+      "actual": 16.0,
+      "line": -26.5,
+      "baseline": 21.78,
+      "calibrated": 24.73,
+      "v05": 24.73,
+      "team_home_court": 24.23,
+      "home_court_points": 3.378,
+      "home_court_team": "syracuse"
+    },
+    {
+      "game_id": "401909705",
+      "date": "2026-11-02",
+      "away": "Rider Broncs",
+      "home": "Pittsburgh Panthers",
+      "actual": 38.0,
+      "line": -27.5,
+      "baseline": 25.91,
+      "calibrated": 29.36,
+      "v05": 29.36,
+      "team_home_court": 28.49,
+      "home_court_points": 3.0055,
+      "home_court_team": "pittsburgh"
+    },
+    {
+      "game_id": "401909541",
+      "date": "2026-11-02",
+      "away": "Mount St. Mary's Mountaineers",
+      "home": "Xavier Musketeers",
+      "actual": 45.0,
+      "line": -26.5,
+      "baseline": 23.06,
+      "calibrated": 26.16,
+      "v05": 26.16,
+      "team_home_court": 25.63,
+      "home_court_points": 3.3518,
+      "home_court_team": "xavier"
+    },
+    {
+      "game_id": "401909531",
+      "date": "2026-11-02",
+      "away": "Maine Black Bears",
+      "home": "Providence Friars",
+      "actual": 27.0,
+      "line": -31.5,
+      "baseline": 25.53,
+      "calibrated": 28.94,
+      "v05": 28.94,
+      "team_home_court": 28.03,
+      "home_court_points": 2.9742,
+      "home_court_team": "providence"
+    },
+    {
+      "game_id": "401902275",
+      "date": "2026-11-02",
+      "away": "Lafayette Leopards",
+      "home": "Butler Bulldogs",
+      "actual": 36.0,
+      "line": -19.5,
+      "baseline": 20.55,
+      "calibrated": 23.35,
+      "v05": 23.35,
+      "team_home_court": 21.84,
+      "home_court_points": 2.3724,
+      "home_court_team": "butler"
+    },
+    {
+      "game_id": "401920959",
+      "date": "2026-11-02",
+      "away": "Morehead State Eagles",
+      "home": "Western Kentucky Hilltoppers",
+      "actual": 25.0,
+      "line": -17.5,
+      "baseline": 16.12,
+      "calibrated": 18.38,
+      "v05": 18.38,
+      "team_home_court": 18.06,
+      "home_court_points": 3.5627,
+      "home_court_team": "western kentucky"
+    },
+    {
+      "game_id": "401920893",
+      "date": "2026-11-02",
+      "away": "Denver Pioneers",
+      "home": "Wisconsin Badgers",
+      "actual": 7.0,
+      "line": -25.5,
+      "baseline": 21.72,
+      "calibrated": 24.67,
+      "v05": 24.67,
+      "team_home_court": 23.97,
+      "home_court_points": 3.1848,
+      "home_court_team": "wisconsin"
+    },
+    {
+      "game_id": "401920886",
+      "date": "2026-11-02",
+      "away": "Saint Peter's Peacocks",
+      "home": "Seton Hall Pirates",
+      "actual": 24.0,
+      "line": -19.5,
+      "baseline": 17.99,
+      "calibrated": 20.47,
+      "v05": 20.47,
+      "team_home_court": 18.99,
+      "home_court_points": 2.3975,
+      "home_court_team": "seton hall"
+    },
+    {
+      "game_id": "401920758",
+      "date": "2026-11-02",
+      "away": "Southern Indiana Screaming Eagles",
+      "home": "Belmont Bruins",
+      "actual": 18.0,
+      "line": -17.5,
+      "baseline": 16.44,
+      "calibrated": 18.73,
+      "v05": 18.73,
+      "team_home_court": 17.01,
+      "home_court_points": 2.1523,
+      "home_court_team": "belmont"
+    },
+    {
+      "game_id": "401920701",
+      "date": "2026-11-02",
+      "away": "Lipscomb Bisons",
+      "home": "Southeast Missouri State Redhawks",
+      "actual": 7.0,
+      "line": 1.5,
+      "baseline": 2.35,
+      "calibrated": 2.93,
+      "v05": 2.93,
+      "team_home_court": 1.73,
+      "home_court_points": 2.6876,
+      "home_court_team": "southeast missouri st"
+    },
+    {
+      "game_id": "401919780",
+      "date": "2026-11-02",
+      "away": "Le Moyne Dolphins",
+      "home": "Nebraska Cornhuskers",
+      "actual": 42.0,
+      "line": -35.5,
+      "baseline": 29.56,
+      "calibrated": 33.46,
+      "v05": 33.46,
+      "team_home_court": 32.6,
+      "home_court_points": 3.015,
+      "home_court_team": "nebraska"
+    },
+    {
+      "game_id": "401918955",
+      "date": "2026-11-02",
+      "away": "Campbell Fighting Camels",
+      "home": "NC State Wolfpack",
+      "actual": 19.0,
+      "line": -23.5,
+      "baseline": 21.31,
+      "calibrated": 24.2,
+      "v05": 24.2,
+      "team_home_court": 23.7,
+      "home_court_points": 3.3806,
+      "home_court_team": "n c st"
+    },
+    {
+      "game_id": "401917173",
+      "date": "2026-11-02",
+      "away": "Canisius Golden Griffins",
+      "home": "Penn State Nittany Lions",
+      "actual": 40.0,
+      "line": -24.5,
+      "baseline": 16.91,
+      "calibrated": 19.27,
+      "v05": 19.27,
+      "team_home_court": 19.42,
+      "home_court_points": 4.0317,
+      "home_court_team": "penn st"
+    },
+    {
+      "game_id": "401911208",
+      "date": "2026-11-02",
+      "away": "Navy Midshipmen",
+      "home": "George Washington Revolutionaries",
+      "actual": 52.0,
+      "line": -18.5,
+      "baseline": 18.57,
+      "calibrated": 21.12,
+      "v05": 21.12,
+      "team_home_court": 20.76,
+      "home_court_points": 3.5136,
+      "home_court_team": "george washington"
+    },
+    {
+      "game_id": "401911000",
+      "date": "2026-11-02",
+      "away": "Kent State Golden Flashes",
+      "home": "Louisiana Tech Bulldogs",
+      "actual": 10.0,
+      "line": 5.5,
+      "baseline": -3.92,
+      "calibrated": -4.1,
+      "v05": -4.1,
+      "team_home_court": -5.4,
+      "home_court_points": 2.5845,
+      "home_court_team": "louisiana tech"
+    },
+    {
+      "game_id": "401910996",
+      "date": "2026-11-02",
+      "away": "Central Michigan Chippewas",
+      "home": "UL Monroe Warhawks",
+      "actual": -5.0,
+      "line": 2.5,
+      "baseline": -3.93,
+      "calibrated": -4.11,
+      "v05": -4.11,
+      "team_home_court": -4.91,
+      "home_court_points": 3.0871,
+      "home_court_team": "louisiana monroe"
+    },
+    {
+      "game_id": "401909522",
+      "date": "2026-11-02",
+      "away": "Mercyhurst Lakers",
+      "home": "Marquette Golden Eagles",
+      "actual": 35.0,
+      "line": -31.5,
+      "baseline": 23.45,
+      "calibrated": 26.6,
+      "v05": 26.6,
+      "team_home_court": 26.62,
+      "home_court_points": 3.9048,
+      "home_court_team": "marquette"
+    },
+    {
+      "game_id": "401906791",
+      "date": "2026-11-02",
+      "away": "Tennessee Tech Golden Eagles",
+      "home": "Mississippi State Bulldogs",
+      "actual": 18.0,
+      "line": -18.5,
+      "baseline": 17.3,
+      "calibrated": 19.7,
+      "v05": 19.7,
+      "team_home_court": 18.16,
+      "home_court_points": 2.3383,
+      "home_court_team": "mississippi st"
+    },
+    {
+      "game_id": "401906779",
+      "date": "2026-11-02",
+      "away": "North Carolina Central Eagles",
+      "home": "Georgia Bulldogs",
+      "actual": 16.0,
+      "line": -40.5,
+      "baseline": 29.55,
+      "calibrated": 33.45,
+      "v05": 33.45,
+      "team_home_court": 33.39,
+      "home_court_points": 3.8191,
+      "home_court_team": "georgia"
+    },
+    {
+      "game_id": "401913525",
+      "date": "2026-11-02",
+      "away": "Fairleigh Dickinson Knights",
+      "home": "Illinois Fighting Illini",
+      "actual": 75.0,
+      "line": -39.5,
+      "baseline": 33.9,
+      "calibrated": 38.33,
+      "v05": 38.33,
+      "team_home_court": 37.18,
+      "home_court_points": 2.7376,
+      "home_court_team": "illinois"
+    },
+    {
+      "game_id": "401909784",
+      "date": "2026-11-02",
+      "away": "Fordham Rams",
+      "home": "Kansas Jayhawks",
+      "actual": 30.0,
+      "line": -21.5,
+      "baseline": 20.07,
+      "calibrated": 22.81,
+      "v05": 22.81,
+      "team_home_court": 23.86,
+      "home_court_points": 4.929,
+      "home_court_team": "kansas"
+    },
+    {
+      "game_id": "401928995",
+      "date": "2026-11-02",
+      "away": "Western Illinois Leathernecks",
+      "home": "Valparaiso Beacons",
+      "actual": 22.0,
+      "line": -18.5,
+      "baseline": 17.77,
+      "calibrated": 20.23,
+      "v05": 20.23,
+      "team_home_court": 19.1,
+      "home_court_points": 2.7508,
+      "home_court_team": "valparaiso"
+    },
+    {
+      "game_id": "401925096",
+      "date": "2026-11-02",
+      "away": "Texas A&M-Corpus Christi Islanders",
+      "home": "Texas State Bobcats",
+      "actual": 12.0,
+      "line": -10.5,
+      "baseline": 8.5,
+      "calibrated": 9.83,
+      "v05": 9.83,
+      "team_home_court": 9.62,
+      "home_court_points": 3.6632,
+      "home_court_team": "texas st"
+    },
+    {
+      "game_id": "401923269",
+      "date": "2026-11-02",
+      "away": "Siena Saints",
+      "home": "Bryant Bulldogs",
+      "actual": 5.0,
+      "line": 4.5,
+      "baseline": -3.26,
+      "calibrated": -3.36,
+      "v05": -3.36,
+      "team_home_court": -3.26,
+      "home_court_points": 3.9877,
+      "home_court_team": "bryant"
+    },
+    {
+      "game_id": "401921424",
+      "date": "2026-11-02",
+      "away": "Furman Paladins",
+      "home": "Bethune-Cookman Wildcats",
+      "actual": -9.0,
+      "line": 4.5,
+      "baseline": -2.16,
+      "calibrated": -2.42,
+      "v05": -2.42,
+      "team_home_court": -2.42,
+      "home_court_points": 0.0,
+      "home_court_team": "bethune cookman"
+    },
+    {
+      "game_id": "401920732",
+      "date": "2026-11-02",
+      "away": "Binghamton Bearcats",
+      "home": "Northwestern Wildcats",
+      "actual": 26.0,
+      "line": -19.5,
+      "baseline": 22.07,
+      "calibrated": 25.05,
+      "v05": 25.05,
+      "team_home_court": 24.3,
+      "home_court_points": 3.135,
+      "home_court_team": "northwestern"
+    },
+    {
+      "game_id": "401919047",
+      "date": "2026-11-02",
+      "away": "Lindenwood Lions",
+      "home": "TCU Horned Frogs",
+      "actual": 39.0,
+      "line": -29.5,
+      "baseline": 21.47,
+      "calibrated": 24.38,
+      "v05": 24.38,
+      "team_home_court": 23.97,
+      "home_court_points": 3.4701,
+      "home_court_team": "tcu"
+    },
+    {
+      "game_id": "401919001",
+      "date": "2026-11-02",
+      "away": "UT Martin Skyhawks",
+      "home": "Tulane Green Wave",
+      "actual": 2.0,
+      "line": -6.5,
+      "baseline": 13.89,
+      "calibrated": 15.88,
+      "v05": 15.88,
+      "team_home_court": 15.28,
+      "home_court_points": 3.2785,
+      "home_court_team": "tulane"
+    },
+    {
+      "game_id": "401918967",
+      "date": "2026-11-02",
+      "away": "Southern Jaguars",
+      "home": "SMU Mustangs",
+      "actual": 13.0,
+      "line": -25.5,
+      "baseline": 22.53,
+      "calibrated": 25.57,
+      "v05": 25.57,
+      "team_home_court": 24.97,
+      "home_court_points": 3.2792,
+      "home_court_team": "smu"
+    },
+    {
+      "game_id": "401911248",
+      "date": "2026-11-02",
+      "away": "Lehigh Mountain Hawks",
+      "home": "Saint Louis Billikens",
+      "actual": 25.0,
+      "line": -25.5,
+      "baseline": 18.24,
+      "calibrated": 20.75,
+      "v05": 20.75,
+      "team_home_court": 20.88,
+      "home_court_points": 4.0093,
+      "home_court_team": "st louis"
+    },
+    {
+      "game_id": "401911228",
+      "date": "2026-11-02",
+      "away": "The Citadel Bulldogs",
+      "home": "Loyola Chicago Ramblers",
+      "actual": 25.0,
+      "line": -14.5,
+      "baseline": 14.01,
+      "calibrated": 16.01,
+      "v05": 16.01,
+      "team_home_court": 15.06,
+      "home_court_points": 2.938,
+      "home_court_team": "loyola chicago"
+    },
+    {
+      "game_id": "401911003",
+      "date": "2026-11-02",
+      "away": "Ohio Bobcats",
+      "home": "South Alabama Jaguars",
+      "actual": -9.0,
+      "line": -1.5,
+      "baseline": 1.35,
+      "calibrated": 1.8,
+      "v05": 1.8,
+      "team_home_court": 0.49,
+      "home_court_points": 2.5701,
+      "home_court_team": "south alabama"
+    },
+    {
+      "game_id": "401910999",
+      "date": "2026-11-02",
+      "away": "Toledo Rockets",
+      "home": "Arkansas State Red Wolves",
+      "actual": 1.0,
+      "line": -3.5,
+      "baseline": 2.07,
+      "calibrated": 2.62,
+      "v05": 2.62,
+      "team_home_court": 2.49,
+      "home_court_points": 3.7546,
+      "home_court_team": "arkansas st"
+    },
+    {
+      "game_id": "401910993",
+      "date": "2026-11-02",
+      "away": "Akron Zips",
+      "home": "Louisiana Ragin' Cajuns",
+      "actual": -14.0,
+      "line": 5.5,
+      "baseline": -6.71,
+      "calibrated": -7.24,
+      "v05": -7.24,
+      "team_home_court": -8.06,
+      "home_court_points": 3.0625,
+      "home_court_team": "louisiana"
+    },
+    {
+      "game_id": "401909725",
+      "date": "2026-11-02",
+      "away": "Maryland Eastern Shore Hawks",
+      "home": "Wake Forest Demon Deacons",
+      "actual": 21.0,
+      "line": -32.5,
+      "baseline": 28.27,
+      "calibrated": 32.01,
+      "v05": 32.01,
+      "team_home_court": 30.81,
+      "home_court_points": 2.6745,
+      "home_court_team": "wake forest"
+    },
+    {
+      "game_id": "401909500",
+      "date": "2026-11-02",
+      "away": "West Georgia Wolves",
+      "home": "DePaul Blue Demons",
+      "actual": 17.0,
+      "line": -24.5,
+      "baseline": 20.76,
+      "calibrated": 23.59,
+      "v05": 23.59,
+      "team_home_court": 22.19,
+      "home_court_points": 2.4904,
+      "home_court_team": "depaul"
+    },
+    {
+      "game_id": "401909490",
+      "date": "2026-11-02",
+      "away": "Kansas City Roos",
+      "home": "Creighton Bluejays",
+      "actual": 15.0,
+      "line": -27.5,
+      "baseline": 24.1,
+      "calibrated": 27.33,
+      "v05": 27.33,
+      "team_home_court": 26.69,
+      "home_court_points": 3.2437,
+      "home_court_team": "creighton"
+    },
+    {
+      "game_id": "401906801",
+      "date": "2026-11-02",
+      "away": "East Texas A&M Lions",
+      "home": "Oklahoma Sooners",
+      "actual": -4.0,
+      "line": -29.5,
+      "baseline": 28.51,
+      "calibrated": 32.28,
+      "v05": 32.28,
+      "team_home_court": 31.6,
+      "home_court_points": 3.1948,
+      "home_court_team": "oklahoma"
+    },
+    {
+      "game_id": "401925683",
+      "date": "2026-11-02",
+      "away": "Alcorn State Braves",
+      "home": "Ole Miss Rebels",
+      "actual": 41.0,
+      "line": -30.5,
+      "baseline": 25.37,
+      "calibrated": 28.76,
+      "v05": 28.76,
+      "team_home_court": 26.43,
+      "home_court_points": 1.5585,
+      "home_court_team": "mississippi"
+    },
+    {
+      "game_id": "401917913",
+      "date": "2026-11-02",
+      "away": "Oral Roberts Golden Eagles",
+      "home": "Central Arkansas Bears",
+      "actual": 30.0,
+      "line": -8.5,
+      "baseline": 7.01,
+      "calibrated": 8.16,
+      "v05": 8.16,
+      "team_home_court": 7.6,
+      "home_court_points": 3.3193,
+      "home_court_team": "central arkansas"
+    },
+    {
+      "game_id": "401911390",
+      "date": "2026-11-02",
+      "away": "Gardner-Webb Runnin' Bulldogs",
+      "home": "UConn Huskies",
+      "actual": 40.0,
+      "line": -41.5,
+      "baseline": 31.72,
+      "calibrated": 35.89,
+      "v05": 35.89,
+      "team_home_court": 34.42,
+      "home_court_points": 2.4139,
+      "home_court_team": "connecticut"
+    },
+    {
+      "game_id": "401906863",
+      "date": "2026-11-02",
+      "away": "Chicago State Cougars",
+      "home": "Texas Longhorns",
+      "actual": 50.0,
+      "line": -40.5,
+      "baseline": 30.29,
+      "calibrated": 34.28,
+      "v05": 34.28,
+      "team_home_court": 33.17,
+      "home_court_points": 2.7762,
+      "home_court_team": "texas"
+    },
+    {
+      "game_id": "401925811",
+      "date": "2026-11-02",
+      "away": "La Salle Explorers",
+      "home": "Houston Cougars",
+      "actual": 39.0,
+      "line": -29.5,
+      "baseline": 20.51,
+      "calibrated": 23.31,
+      "v05": 23.31,
+      "team_home_court": 23.38,
+      "home_court_points": 3.9513,
+      "home_court_team": "houston"
+    },
+    {
+      "game_id": "401918947",
+      "date": "2026-11-02",
+      "away": "Chattanooga Mocs",
+      "home": "Louisville Cardinals",
+      "actual": 14.0,
+      "line": -30.5,
+      "baseline": 28.06,
+      "calibrated": 31.78,
+      "v05": 31.78,
+      "team_home_court": 30.7,
+      "home_court_points": 2.8095,
+      "home_court_team": "louisville"
+    },
+    {
+      "game_id": "401916313",
+      "date": "2026-11-02",
+      "away": "Ohio State Buckeyes",
+      "home": "BYU Cougars",
+      "actual": 11.0,
+      "line": -3.5,
+      "baseline": -0.7,
+      "calibrated": -0.79,
+      "v05": -0.79,
+      "team_home_court": -0.79,
+      "home_court_points": 0.0,
+      "home_court_team": "byu"
+    },
+    {
+      "game_id": "401925771",
+      "date": "2026-11-02",
+      "away": "Davidson Wildcats",
+      "home": "Washington State Cougars",
+      "actual": -15.0,
+      "line": -2.5,
+      "baseline": -1.12,
+      "calibrated": -0.97,
+      "v05": -0.97,
+      "team_home_court": -0.98,
+      "home_court_points": 3.8692,
+      "home_court_team": "washington st"
+    },
+    {
+      "game_id": "401924894",
+      "date": "2026-11-02",
+      "away": "Utah Tech Trailblazers",
+      "home": "New Mexico Lobos",
+      "actual": 40.0,
+      "line": -23.5,
+      "baseline": 21.01,
+      "calibrated": 23.86,
+      "v05": 23.86,
+      "team_home_court": 23.05,
+      "home_court_points": 3.0704,
+      "home_court_team": "new mexico"
+    },
+    {
+      "game_id": "401921697",
+      "date": "2026-11-02",
+      "away": "Long Beach State Beach",
+      "home": "Utah Utes",
+      "actual": 3.0,
+      "line": -19.5,
+      "baseline": 14.42,
+      "calibrated": 16.48,
+      "v05": 16.48,
+      "team_home_court": 17.07,
+      "home_court_points": 4.4776,
+      "home_court_team": "utah"
+    },
+    {
+      "game_id": "401919039",
+      "date": "2026-11-02",
+      "away": "Incarnate Word Cardinals",
+      "home": "Oklahoma State Cowboys",
+      "actual": 31.0,
+      "line": -27.5,
+      "baseline": 24.39,
+      "calibrated": 27.66,
+      "v05": 27.66,
+      "team_home_court": 27.2,
+      "home_court_points": 3.4265,
+      "home_court_team": "oklahoma st"
+    },
+    {
+      "game_id": "401916303",
+      "date": "2026-11-02",
+      "away": "North Dakota Fighting Hawks",
+      "home": "Minnesota Golden Gophers",
+      "actual": 35.0,
+      "line": -26.5,
+      "baseline": 19.92,
+      "calibrated": 22.64,
+      "v05": 22.64,
+      "team_home_court": 22.04,
+      "home_court_points": 3.2829,
+      "home_court_team": "minnesota"
+    },
+    {
+      "game_id": "401911389",
+      "date": "2026-11-02",
+      "away": "Texas Southern Tigers",
+      "home": "Grand Canyon Lopes",
+      "actual": 24.0,
+      "line": -28.5,
+      "baseline": 26.4,
+      "calibrated": 29.92,
+      "v05": 29.92,
+      "team_home_court": 28.92,
+      "home_court_points": 2.8856,
+      "home_court_team": "grand canyon"
+    },
+    {
+      "game_id": "401909759",
+      "date": "2026-11-02",
+      "away": "Abilene Christian Wildcats",
+      "home": "Colorado Buffaloes",
+      "actual": 35.0,
+      "line": -18.5,
+      "baseline": 18.38,
+      "calibrated": 20.92,
+      "v05": 20.92,
+      "team_home_court": 21.27,
+      "home_court_points": 4.2327,
+      "home_court_team": "colorado"
+    },
+    {
+      "game_id": "401925947",
+      "date": "2026-11-02",
+      "away": "Weber State Wildcats",
+      "home": "Oregon State Beavers",
+      "actual": 41.0,
+      "line": -18.5,
+      "baseline": 17.51,
+      "calibrated": 19.94,
+      "v05": 19.94,
+      "team_home_court": 20.56,
+      "home_court_points": 4.5016,
+      "home_court_team": "oregon st"
+    },
+    {
+      "game_id": "401922020",
+      "date": "2026-11-02",
+      "away": "Idaho State Bengals",
+      "home": "Utah State Aggies",
+      "actual": 36.0,
+      "line": -26.5,
+      "baseline": 22.32,
+      "calibrated": 25.33,
+      "v05": 25.33,
+      "team_home_court": 25.09,
+      "home_court_points": 3.6416,
+      "home_court_team": "utah st"
+    },
+    {
+      "game_id": "401909750",
+      "date": "2026-11-02",
+      "away": "Northwestern State Demons",
+      "home": "Baylor Bears",
+      "actual": 22.0,
+      "line": -32.5,
+      "baseline": 22.06,
+      "calibrated": 25.04,
+      "v05": 25.04,
+      "team_home_court": 25.62,
+      "home_court_points": 4.4624,
+      "home_court_team": "baylor"
+    },
+    {
+      "game_id": "401909738",
+      "date": "2026-11-02",
+      "away": "Arizona Wildcats",
+      "home": "UCLA Bruins",
+      "actual": 9.0,
+      "line": 4.5,
+      "baseline": -5.16,
+      "calibrated": -5.79,
+      "v05": -5.79,
+      "team_home_court": -5.79,
+      "home_court_points": 0.0,
+      "home_court_team": "ucla"
+    },
+    {
+      "game_id": "401925878",
+      "date": "2026-11-02",
+      "away": "Montana State Bobcats",
+      "home": "Colorado State Rams",
+      "actual": 10.0,
+      "line": -10.5,
+      "baseline": 8.1,
+      "calibrated": 9.38,
+      "v05": 9.38,
+      "team_home_court": 8.7,
+      "home_court_points": 3.1978,
+      "home_court_team": "colorado st"
+    },
+    {
+      "game_id": "401922029",
+      "date": "2026-11-02",
+      "away": "Montana Grizzlies",
+      "home": "Oregon Ducks",
+      "actual": 18.0,
+      "line": -19.5,
+      "baseline": 19.37,
+      "calibrated": 22.02,
+      "v05": 22.02,
+      "team_home_court": 21.22,
+      "home_court_points": 3.0797,
+      "home_court_team": "oregon"
+    },
+    {
+      "game_id": "401921731",
+      "date": "2026-11-02",
+      "away": "East Tennessee State Buccaneers",
+      "home": "Arizona State Sun Devils",
+      "actual": 10.0,
+      "line": -19.5,
+      "baseline": 13.33,
+      "calibrated": 15.25,
+      "v05": 15.25,
+      "team_home_court": 14.69,
+      "home_court_points": 3.3237,
+      "home_court_team": "arizona st"
+    },
+    {
+      "game_id": "401921060",
+      "date": "2026-11-02",
+      "away": "Radford Highlanders",
+      "home": "San Francisco Dons",
+      "actual": 14.0,
+      "line": -15.5,
+      "baseline": 8.71,
+      "calibrated": 10.06,
+      "v05": 10.06,
+      "team_home_court": 8.12,
+      "home_court_points": 1.9439,
+      "home_court_team": "san francisco"
+    },
+    {
+      "game_id": "401920769",
+      "date": "2026-11-02",
+      "away": "Colgate Raiders",
+      "home": "Washington Huskies",
+      "actual": 14.0,
+      "line": -14.5,
+      "baseline": 14.43,
+      "calibrated": 16.49,
+      "v05": 16.49,
+      "team_home_court": 15.62,
+      "home_court_points": 3.0169,
+      "home_court_team": "washington"
+    },
+    {
+      "game_id": "401920716",
+      "date": "2026-11-02",
+      "away": "Eastern Washington Eagles",
+      "home": "Stanford Cardinal",
+      "actual": 9.0,
+      "line": -13.5,
+      "baseline": 12.04,
+      "calibrated": 13.8,
+      "v05": 13.8,
+      "team_home_court": 13.59,
+      "home_court_points": 3.6703,
+      "home_court_team": "stanford"
+    },
+    {
+      "game_id": "401917509",
+      "date": "2026-11-02",
+      "away": "Towson Tigers",
+      "home": "Santa Clara Broncos",
+      "actual": 19.0,
+      "line": -13.5,
+      "baseline": 11.32,
+      "calibrated": 13.0,
+      "v05": 13.0,
+      "team_home_court": 12.19,
+      "home_court_points": 3.0701,
+      "home_court_team": "santa clara"
+    },
+    {
+      "game_id": "401917507",
+      "date": "2026-11-02",
+      "away": "Illinois State Redbirds",
+      "home": "Saint Mary's Gaels",
+      "actual": 5.0,
+      "line": -7.5,
+      "baseline": 7.92,
+      "calibrated": 9.18,
+      "v05": 9.18,
+      "team_home_court": 8.5,
+      "home_court_points": 3.209,
+      "home_court_team": "st mary s"
+    },
+    {
+      "game_id": "401911517",
+      "date": "2026-11-02",
+      "away": "North Alabama Lions",
+      "home": "UC Davis Aggies",
+      "actual": -4.0,
+      "line": -9.5,
+      "baseline": 10.52,
+      "calibrated": 12.1,
+      "v05": 12.1,
+      "team_home_court": 10.89,
+      "home_court_points": 2.6751,
+      "home_court_team": "uc davis"
+    },
+    {
+      "game_id": "401911452",
+      "date": "2026-11-02",
+      "away": "Robert Morris Colonials",
+      "home": "Nevada Wolf Pack",
+      "actual": 37.0,
+      "line": -12.5,
+      "baseline": 11.07,
+      "calibrated": 12.71,
+      "v05": 12.71,
+      "team_home_court": 12.43,
+      "home_court_points": 3.6042,
+      "home_court_team": "nevada"
+    },
+    {
+      "game_id": "401926771",
+      "date": "2026-11-02",
+      "away": "Milwaukee Panthers",
+      "home": "USC Trojans",
+      "actual": 32.0,
+      "line": -26.5,
+      "baseline": 21.1,
+      "calibrated": 23.97,
+      "v05": 23.97,
+      "team_home_court": 22.81,
+      "home_court_points": 2.7236,
+      "home_court_team": "usc"
+    },
+    {
+      "game_id": "401917506",
+      "date": "2026-11-02",
+      "away": "Seattle U Redhawks",
+      "home": "Hawai'i Rainbow Warriors",
+      "actual": 1.0,
+      "line": -1.5,
+      "baseline": 2.69,
+      "calibrated": 3.31,
+      "v05": 3.31,
+      "team_home_court": 2.56,
+      "home_court_points": 3.1333,
+      "home_court_team": "hawaii"
+    },
+    {
+      "game_id": "401906848",
+      "date": "2026-11-03",
+      "away": "Wofford Terriers",
+      "home": "Tennessee Volunteers",
+      "actual": 31.0,
+      "line": -25.5,
+      "baseline": 25.75,
+      "calibrated": 29.18,
+      "v05": 29.18,
+      "team_home_court": 29.09,
+      "home_court_points": 3.7903,
+      "home_court_team": "tennessee"
+    },
+    {
+      "game_id": "401921801",
+      "date": "2026-11-03",
+      "away": "Manhattan Jaspers",
+      "home": "Kentucky Wildcats",
+      "actual": 28.0,
+      "line": -33.5,
+      "baseline": 30.14,
+      "calibrated": 34.11,
+      "v05": 34.11,
+      "team_home_court": 34.78,
+      "home_court_points": 4.5525,
+      "home_court_team": "kentucky"
+    },
+    {
+      "game_id": "401925779",
+      "date": "2026-11-03",
+      "away": "Purdue Fort Wayne Mastodons",
+      "home": "Duquesne Dukes",
+      "actual": 7.0,
+      "line": -9.5,
+      "baseline": 12.34,
+      "calibrated": 14.14,
+      "v05": 14.14,
+      "team_home_court": 12.79,
+      "home_court_points": 2.5272,
+      "home_court_team": "duquesne"
+    },
+    {
+      "game_id": "401921819",
+      "date": "2026-11-03",
+      "away": "Stetson Hatters",
+      "home": "South Carolina Gamecocks",
+      "actual": 26.0,
+      "line": -18.5,
+      "baseline": 14.91,
+      "calibrated": 17.03,
+      "v05": 17.03,
+      "team_home_court": 16.46,
+      "home_court_points": 3.3175,
+      "home_court_team": "south carolina"
+    },
+    {
+      "game_id": "401920376",
+      "date": "2026-11-03",
+      "away": "Coppin State Eagles",
+      "home": "Virginia Tech Hokies",
+      "actual": 34.0,
+      "line": -31.5,
+      "baseline": 29.12,
+      "calibrated": 32.97,
+      "v05": 32.97,
+      "team_home_court": 32.51,
+      "home_court_points": 3.4154,
+      "home_court_team": "virginia tech"
+    },
+    {
+      "game_id": "401920304",
+      "date": "2026-11-03",
+      "away": "Hampton Pirates",
+      "home": "Georgia Tech Yellow Jackets",
+      "actual": 20.0,
+      "line": -13.5,
+      "baseline": 8.3,
+      "calibrated": 9.61,
+      "v05": 9.61,
+      "team_home_court": 7.89,
+      "home_court_points": 2.1609,
+      "home_court_team": "georgia tech"
+    },
+    {
+      "game_id": "401920061",
+      "date": "2026-11-03",
+      "away": "Holy Cross Crusaders",
+      "home": "Rhode Island Rams",
+      "actual": 44.0,
+      "line": -20.5,
+      "baseline": 15.19,
+      "calibrated": 17.34,
+      "v05": 17.34,
+      "team_home_court": 17.41,
+      "home_court_points": 3.9575,
+      "home_court_team": "rhode island"
+    },
+    {
+      "game_id": "401909551",
+      "date": "2026-11-03",
+      "away": "Wagner Seahawks",
+      "home": "Boston College Eagles",
+      "actual": 26.0,
+      "line": -20.5,
+      "baseline": 18.89,
+      "calibrated": 21.49,
+      "v05": 21.49,
+      "team_home_court": 20.39,
+      "home_court_points": 2.7792,
+      "home_court_team": "boston college"
+    },
+    {
+      "game_id": "401920422",
+      "date": "2026-11-03",
+      "away": "Drexel Dragons",
+      "home": "Virginia Cavaliers",
+      "actual": 29.0,
+      "line": -31.5,
+      "baseline": 26.07,
+      "calibrated": 29.55,
+      "v05": 29.55,
+      "team_home_court": 29.26,
+      "home_court_points": 3.5903,
+      "home_court_team": "virginia"
+    },
+    {
+      "game_id": "401906757",
+      "date": "2026-11-03",
+      "away": "Sam Houston Bearkats",
+      "home": "Alabama Crimson Tide",
+      "actual": 22.0,
+      "line": -27.5,
+      "baseline": 19.2,
+      "calibrated": 21.83,
+      "v05": 21.83,
+      "team_home_court": 21.69,
+      "home_court_points": 3.7441,
+      "home_court_team": "alabama"
+    },
+    {
+      "game_id": "401921808",
+      "date": "2026-11-03",
+      "away": "LSU New Orleans Privateers",
+      "home": "LSU Tigers",
+      "actual": 43.0,
+      "line": -27.5,
+      "baseline": 16.08,
+      "calibrated": 18.33,
+      "v05": 18.33,
+      "team_home_court": 16.69,
+      "home_court_points": 2.2372,
+      "home_court_team": "lsu"
+    },
+    {
+      "game_id": "401921165",
+      "date": "2026-11-03",
+      "away": "Cleveland State Vikings",
+      "home": "Missouri Tigers",
+      "actual": 61.0,
+      "line": -26.5,
+      "baseline": 24.43,
+      "calibrated": 27.71,
+      "v05": 27.71,
+      "team_home_court": 26.74,
+      "home_court_points": 2.9106,
+      "home_court_team": "missouri"
+    },
+    {
+      "game_id": "401920702",
+      "date": "2026-11-03",
+      "away": "Lipscomb Bisons",
+      "home": "Iowa Hawkeyes",
+      "actual": 22.0,
+      "line": -23.5,
+      "baseline": 18.6,
+      "calibrated": 21.16,
+      "v05": 21.16,
+      "team_home_court": 20.67,
+      "home_court_points": 3.3939,
+      "home_court_team": "iowa"
+    },
+    {
+      "game_id": "401909796",
+      "date": "2026-11-03",
+      "away": "South Dakota State Jackrabbits",
+      "home": "Kansas State Wildcats",
+      "actual": -2.0,
+      "line": -10.5,
+      "baseline": 16.47,
+      "calibrated": 18.77,
+      "v05": 18.77,
+      "team_home_court": 17.1,
+      "home_court_points": 2.2126,
+      "home_court_team": "kansas st"
+    }
+  ],
+  "limits": [
+    "Retrospective research replay, not saved historical v0.6 selections.",
+    "Every fit filters game dates strictly before the evaluated day; same-day finals are excluded.",
+    "Fixed settings; no model or threshold selection on validation, holdout or current-season results.",
+    "Historical margin scaling is the original frozen opening-season coefficient.",
+    "Sample support measures data volume, not a calibrated win probability.",
+    "The team estimate pools a school's home games; arena moves are not separately identified.",
+    "Official selection and A/B grades remain on hold."
+  ]
+}

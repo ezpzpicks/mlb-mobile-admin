@@ -132,6 +132,18 @@ and player-impact deltas, and saves provenance with each immutable forecast.
 Historical and current-season checks improve point calibration, but do not
 establish a betting edge; A/B grades and official NCAAM EZPZ selection stay on hold.
 
+## v0.6: team-specific home court
+
+The v0.5 flat intercept is replaced by an opponent-adjusted, sample-shrunk school
+home value. A separate ridge strength coefficient for each school/season handles
+roster turnover. Prior-season history is bundled; current games reuse the cached
+D1 game-log input and enter only after each school has five completed D1 games.
+The compact date-indexed home-court cache needs no new provider request or job.
+Saved metadata distinguishes school evidence, league fallback and neutral courts.
+See [NCAAM_TEAM_HOME_COURT.md](NCAAM_TEAM_HOME_COURT.md) for the method, actual
+values and chronological replay. Home court applies through the season; the
+opening-only strength multiplier retains its independent scope and grading hold.
+
 Validation uses the actual 19-row sparse 2027 export, verified roster metadata,
 4,509 usable completed-season player profiles, all 119 eligible November 2
 matchups, and the completed-season 11,504 team-game rows. This validates input

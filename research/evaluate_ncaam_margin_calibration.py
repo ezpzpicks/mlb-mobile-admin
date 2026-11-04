@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from builders.ncaam_margin_calibration import (
     HOME_COURT_POINTS, NEUTRAL_MARGIN_SCALE, POLICY, REPLAY_SHA256, fitted_margin,
 )
-from builders.ncaam_model import MODEL_VERSION, project, team_key
+MODEL_VERSION = "ncaam-v0.5-opening-margin-calibration-2026-11-03"
 
 BASELINE_VERSION = "ncaam-v0.4-source-prior-player-fallback-2026-11-02"
 
@@ -107,23 +107,29 @@ def evaluate(historical_path, live_paths):
             if game_id in seen:
                 raise ValueError("Duplicate live game across input snapshots.")
             seen.add(game_id)
+            # Preserve the original v0.5 experiment when the live model changes.
+            # Reconstruct the exact source margin before saved-output rounding;
+            # availability contributes its original unscaled margin delta.
             away, home = f["away_rating"], f["home_rating"]
-            bundle = {"season": 2027, "observed_at": f["ratings_observed_at"], "source": f["ratings_source"],
-                "source_url": f["ratings_source_url"], "league_efficiency": f["league_efficiency"],
-                "teams": {team_key(away["team"]): away, team_key(home["team"]): home}}
-            game = {"away": f["away_team"], "home": f["home_team"], "away_aliases": [away["team"]],
-                    "home_aliases": [home["team"]], "tipoff": f["tipoff"], "season": 2027, "neutral_site": f["neutral_site"]}
-            revised = project(game, bundle, f["market"], f["lockedAt"], lineup_adjustment=f.get("lineup_adjustment"))
-            if (revised["total"] != f["total"] or revised["lineup_margin_change"] != f["lineup_margin_change"]
-                or revised["lineup_total_change"] != f["lineup_total_change"]):
-                raise ValueError("Margin-only replay changed a saved total or player-impact delta.")
+            pace = (away['tempo'] + home['tempo']) / 2
+            efficiency = f['league_efficiency']
+            source_away = pace * away['offense'] * home['defense'] / efficiency / 100
+            source_home = pace * home['offense'] * away['defense'] / efficiency / 100
+            adjustment = f.get('lineup_adjustment')
+            player_margin = 0.0
+            if adjustment:
+                a, h = adjustment['away'], adjustment['home']
+                adjusted_away = pace * (away['offense'] + a['offense_change_per_100']) * (home['defense'] - h['defense_improvement_per_100']) / efficiency / 100
+                adjusted_home = pace * (home['offense'] + h['offense_change_per_100']) * (away['defense'] - a['defense_improvement_per_100']) / efficiency / 100
+                player_margin = (adjusted_home - adjusted_away) - (source_home - source_away)
+            revised_margin = round(fitted_margin(source_home - source_away, neutral_site=f['neutral_site']) + player_margin, 2)
             live_rows.append({"game_id": game_id, "date": data["date"], "away": f["away_team"], "home": f["home_team"],
                 "actual": float(g["Home Score"]) - float(g["Away Score"]), "line": float(f["market"]["home_spread"]),
-                "baseline": -f["fair_home_spread"], "calibrated": -revised["fair_home_spread"]})
+                "baseline": -f["fair_home_spread"], "calibrated": revised_margin})
     live = {day: {field: summarize([r for r in live_rows if r["date"] == day], field)
                  for field in ("baseline", "calibrated")} for day in sorted({r["date"] for r in live_rows})}
     live["combined"] = {field: summarize(live_rows, field) for field in ("baseline", "calibrated")}
-    return {"policy": POLICY, "new_model_version": MODEL_VERSION, "baseline_model_version": BASELINE_VERSION,
+    return {"policy": "ncaam-opening-margin-2026-11-03-v1", "new_model_version": MODEL_VERSION, "baseline_model_version": BASELINE_VERSION,
         "historical_sha256": REPLAY_SHA256, "training_games": len(training), "training_season": 2024,
         "frozen_coefficients": {"neutral_margin_scale": fitted[0], "home_court_points": fitted[1]},
         "historical": comparisons, "live": live, "live_exclusions": dict(rejected), "live_inputs": inputs,

@@ -6,8 +6,9 @@ from datetime import datetime
 import io
 from zoneinfo import ZoneInfo
 from builders.ncaam_model import team_key, timestamp
+from builders.ncaam_home_court import parse_game_history, school_key
 
-POLICY = 'ncaam-d1-completed-games-v1'
+POLICY = 'ncaam-d1-completed-games-and-venues-v2'
 
 
 def parse_game_counts(text, season, observed_at, teams):
@@ -28,6 +29,8 @@ def parse_game_counts(text, season, observed_at, teams):
         if day >= as_of or team not in counts or opponent not in counts or not row[6].startswith(('W,', 'L,')):
             continue
         counts[team].add(game_id)
+    home_games, home_audit = parse_game_history(text, season, as_of, {school_key(k) for k in teams})
     return {'season': season, 'observed_at': observed_at, 'policy': POLICY,
             'counts': {key: len(games) for key, games in counts.items()},
+            'home_court_games': home_games, 'home_court_audit': home_audit,
             'source_url': f'https://barttorvik.com/getgamestats.php?year={season}&csv=1'}

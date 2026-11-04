@@ -26,6 +26,7 @@ from builders.ncaam_lineups import fetch_lineups, fingerprint
 from builders.ncaam_player_impact import POLICY as PLAYER_POLICY, parse_player_bundle, lineup_adjustments, valid_lineup, indexed_player_bundle
 from builders.ncaam_rosters import parse_roster, roster_url, valid_roster
 from builders.ncaam_game_counts import POLICY as GAME_COUNT_POLICY, parse_game_counts
+from builders.ncaam_home_court import POLICY as COURT_POLICY, LOOKBACK_SEASONS, bundled_history, fit_home_courts, home_court_for
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaam_division_one import division_one_matchup, division_one_aliases
@@ -136,6 +137,12 @@ def load_model_inputs(db, day, season, now, commit):
     # Fresh downloads are observed after this function starts. Validate the
     # combined input snapshot at completion, before any forecast is locked.
     teams = prepare_season_ratings(current, prior, datetime.now(timezone.utc).isoformat(), d1_games=counts)
+    try:
+        teams['home_court_model'] = load_home_court_model(db, day, season, counts, datetime.now(timezone.utc), commit)
+    except Exception as exc:
+        # A source/cache failure cannot turn missing school history into a
+        # fabricated team effect or block otherwise valid team projections.
+        emit('home_court_unavailable', error=str(exc))
     # A sparse current-season export must never block the completed-season
     # profiles. Load and validate the two independent sources independently.
     prior_players = None
@@ -160,6 +167,38 @@ def load_model_inputs(db, day, season, now, commit):
                    'prior_observed_at': prior_players['observed_at'] if prior_players else '',
                    'prior_source_url': prior_players['source_url'] if prior_players else ''}
     return teams, players
+
+
+def load_home_court_model(db, day, season, counts, now, commit):
+    """One compact indexed cache read and no additional provider request.
+
+    The same bulk log already used for D1 counts supplies current-season finals.
+    A fingerprint changes only for result/venue evidence, not download times.
+    """
+    history = bundled_history()
+    available = {source['season'] for source in history['sources']}
+    if not set(range(season - LOOKBACK_SEASONS, season)).issubset(available):
+        raise ValueError('The completed-season home-court snapshot needs its annual update.')
+    current = counts.get('home_court_games', []) if counts and counts.get('policy') == GAME_COUNT_POLICY else []
+    digest = hashlib.sha256(json.dumps({'policy':COURT_POLICY, 'history':history['sha256'], 'season':season,
+                                       'date':day, 'current':current}, sort_keys=True).encode()).hexdigest()
+    saved = store.rows(db, 'ncaam_home_court_models', day) if db is not None else []
+    for row in saved:
+        try:
+            model = json.loads(row['Details JSON'])
+            if (model.get('policy') == COURT_POLICY and model.get('input_digest') == digest
+                and model['season'] == season and model['cutoff_date'] == day
+                and timestamp(model['observed_at']) <= now):
+                return model
+        except (KeyError, TypeError, ValueError):
+            continue
+    model = fit_home_courts([*history['games'], *current], season, day, now.isoformat())
+    model.update(input_digest=digest, historical_source_sha256=history['sha256'])
+    if commit:
+        store.upsert(db, 'ncaam_home_court_models', {'Date':day, 'Game Key':f'home-court|{day}',
+                     'Market':'Home Court', 'Selection':COURT_POLICY, 'Updated At':now.isoformat(),
+                     'Details JSON':json.dumps(model)})
+    return model
 
 
 def load_rosters(db, slate, lineups, season, now, commit):
@@ -320,6 +359,12 @@ def run(args):
                       'ratings': [find_rating(bundle, game[side+'_aliases']) for side in ('away','home')],
                       'league_efficiency': bundle['league_efficiency'],
                       'rotation': [{side: adjustment[side] for side in ('away','home')}] if adjustment else []}
+            court_model = bundle.get('home_court_model')
+            home_court = home_court_for(court_model, find_rating(bundle, game['home_aliases'])['team'],
+                                       season=season, game_date=game['date'], neutral_site=game['neutral_site']) if court_model else None
+            # Actual point/venue evidence affects forecast identity. Merely
+            # refreshing an observation timestamp cannot append another row.
+            inputs['home_court'] = {key:home_court.get(key) for key in ('policy','team_key','value','cutoff_date','last_game_date')} if home_court else 'unavailable'
             # Capture material revisions, preserving earlier forecasts. Observation
             # timestamps alone cannot create another projection or another record.
             digest = hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest()[:16]
@@ -333,11 +378,11 @@ def run(args):
                 # A -> B -> A must restore A as the newest forecast. Reusing A's
                 # original key would leave B active after an availability reversal.
                 record_id += '|r' + hashlib.sha256(previous['recordId'].encode()).hexdigest()[:12]
-            forecast = project(game, bundle, market, current.isoformat(), lineup_adjustment=adjustment)
+            forecast = project(game, bundle, market, current.isoformat(), lineup_adjustment=adjustment, home_court=home_court)
             if adjustment:
                 scenarios = []
                 for scenario in adjustment['scenarios']:
-                    alternative = project(game, bundle, market, current.isoformat(), lineup_adjustment=scenario)
+                    alternative = project(game, bundle, market, current.isoformat(), lineup_adjustment=scenario, home_court=home_court)
                     scenarios.append({'player':scenario['player'], 'team':scenario['team'], 'homeMarginChange':round(forecast['fair_home_spread']-alternative['fair_home_spread'],2),
                                       'totalChange':round(alternative['total']-forecast['total'],2)})
                 forecast['availability_scenarios'] = scenarios
@@ -357,6 +402,7 @@ def run(args):
                  projected_away=forecast["away_score"], projected_home=forecast["home_score"],
                  line_source=market["source"], neutral_site=game["neutral_site"], grade_policy=forecast["grade_policy"],
                  player_profile_mode=forecast['player_profile_mode'],
+                 home_court_points=forecast['home_court_points'], home_court_source=forecast['home_court']['source'],
                  adjusted_teams=[side for side in ('away','home') if adjustment and adjustment[side]['applied']])
         except Exception as exc:
             failures += 1

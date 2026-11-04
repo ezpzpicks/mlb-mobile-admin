@@ -56,7 +56,7 @@ class MarginCalibrationTests(unittest.TestCase):
         self.assertEqual(result["spread_grade"], "Research")
         self.assertEqual(result["total_grade"], "Research")
         self.assertNotIn("spread_probability_estimate", result)
-        self.assertIn("v0.5", MODEL_VERSION)
+        self.assertIn("v0.6", MODEL_VERSION)
 
     def test_injury_effect_is_not_multiplied_by_team_margin_calibration(self):
         adjustment = {"away": {"offense_change_per_100": 0, "defense_improvement_per_100": 0},

@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 
 from builders.ncaam_margin_calibration import calibrate_margin
 
-MODEL_VERSION = "ncaam-v0.5-opening-margin-calibration-2026-11-03"
+MODEL_VERSION = "ncaam-v0.6-team-home-court-2026-11-03"
 GRADE_POLICY = "ncaam-research-unvalidated-v1"
 
 
@@ -107,7 +107,7 @@ def prepare_season_ratings(current, previous, now, *, d1_games=None):
     return output
 
 
-def project(game, bundle, market, now, *, lineup_adjustment=None):
+def project(game, bundle, market, now, *, lineup_adjustment=None, home_court=None):
     now = timestamp(now)
     tipoff = timestamp(game["tipoff"])
     observed = timestamp(bundle["observed_at"])
@@ -130,8 +130,22 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
     possessions = (away["tempo"] + home["tempo"]) / 2
     away_score = possessions * away["offense"] * home["defense"] / efficiency / 100
     home_score = possessions * home["offense"] * away["defense"] / efficiency / 100
-    calibration = calibrate_margin(home_score - away_score, season=game["season"],
-        game_date=tipoff.astimezone(ZoneInfo("America/New_York")).date(), neutral_site=game["neutral_site"])
+    from builders.ncaam_home_court import POLICY as COURT_POLICY, PRIOR_POINTS, school_key
+    day = tipoff.astimezone(ZoneInfo("America/New_York")).date().isoformat()
+    if home_court is None:
+        home_court = {"policy": COURT_POLICY, "team_key": school_key(home["team"]), "season": game["season"],
+                      "value": 0.0 if game["neutral_site"] else PRIOR_POINTS, "observed_at": now.isoformat(),
+                      "cutoff_date": now.astimezone(ZoneInfo("America/New_York")).date().isoformat(),
+                      "last_game_date": "", "source": "Neutral site" if game["neutral_site"] else "Fallback league prior; home sample unavailable",
+                      "fallback": not game["neutral_site"]}
+    if (home_court.get("policy") != COURT_POLICY or home_court.get("season") != game["season"]
+        or home_court.get("team_key") != school_key(home["team"]) or timestamp(home_court["observed_at"]) > now
+        or home_court["cutoff_date"] > day or home_court.get("last_game_date", "") >= home_court["cutoff_date"]
+        or not math.isfinite(float(home_court["value"])) or not 0 <= float(home_court["value"]) <= 8
+        or (game["neutral_site"] and float(home_court["value"]) != 0)):
+        raise ValueError("Home-court estimate is invalid, future-dated or for another school.")
+    calibration = calibrate_margin(home_score - away_score, season=game["season"], game_date=day,
+        neutral_site=game["neutral_site"], home_court_points=home_court["value"])
     court = calibration["home_court_points"]
     # Preserve the independently projected total. The learned correction scales
     # the team-ratings margin, never the market gap or the player-impact delta.
@@ -167,6 +181,7 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
             "total_pick": f"{'Over' if total_edge >= 0 else 'Under'} {total_line:g}",
             "spread_grade": "Research", "total_grade": "Research", "grade_policy": GRADE_POLICY,
             "neutral_site": game["neutral_site"], "home_court_points": court,
+            "home_court": home_court,
             "margin_calibration": calibration,
             "baseline_away_score": round(baseline_away, 2), "baseline_home_score": round(baseline_home, 2),
             "lineup_margin_change": round((home_score-away_score)-(baseline_home-baseline_away), 2),
@@ -177,4 +192,4 @@ def project(game, bundle, market, now, *, lineup_adjustment=None):
             "prior_policy": bundle.get('prior_policy', ''), "prior_source_url": bundle.get('prior_source_url', ''),
             "lineup_adjustment": lineup_adjustment,
             "availability_mode": "team_ratings", "injury_verified": False,
-            "model_status": "Research: frozen opening-margin calibration; NCAAM betting grades and uncertainty remain unvalidated"}
+            "model_status": "Research: team-specific home court and opening strength calibration; betting grades remain unvalidated"}
