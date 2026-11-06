@@ -81,7 +81,10 @@ def parse_props_html(html, *, observed_at=None):
     match = re.search(r"\bWeek\s+(\d{1,2})\b", heading.get_text(" ", strip=True) if heading else "", re.I)
     if not match or "NFL" not in heading.get_text():
         raise SourceError("RotoWire NFL week heading is missing; no odds applied.")
-    week = int(match[1])
+    heading_week = int(match[1])
+    # The page heading can lag behind the comparison tables. apply_quotes
+    # checks the agreed table week against each scheduled matchup.
+    week = None
     quotes, seen, rejected = [], set(), []
     for script in soup.select("script"):
         text = script.get_text()
@@ -91,8 +94,12 @@ def parse_props_html(html, *, observed_at=None):
         code = code[1]
         source_week = re.search(r'const dayNFL\s*=\s*"(\d+)"', text)
         start = re.search(r"const settings\s*=\s*\{\s*container:\s*propID,\s*data:\s*", text)
-        if not source_week or int(source_week[1]) != week or not start:
-            raise SourceError("RotoWire comparison table has inconsistent week or layout.")
+        if not source_week or not start:
+            raise SourceError("RotoWire comparison table week or layout is missing.")
+        table_week = int(source_week[1])
+        if week is not None and table_week != week:
+            raise SourceError("RotoWire comparison tables disagree on NFL week.")
+        week = table_week
         try:
             rows, _ = json.JSONDecoder().raw_decode(text[start.end():])
         except (ValueError, TypeError):
@@ -140,7 +147,7 @@ def parse_props_html(html, *, observed_at=None):
         pairs.setdefault(pair, set()).add(quote["source_game_id"])
     bad = {pair for pair, ids in pairs.items() if len(ids) != 1}
     quotes = [q for q in quotes if (q["away"], q["home"]) not in bad]
-    return {"week": week, "observed_at": (observed_at or datetime.now(timezone.utc)).isoformat(),
+    return {"week": week, "heading_week": heading_week, "observed_at": (observed_at or datetime.now(timezone.utc)).isoformat(),
             "source": URL, "source_sha256": hashlib.sha256(html.encode()).hexdigest(), "quotes": quotes,
             "rejected": rejected, "ambiguous_games": sorted(bad)}
 
@@ -149,7 +156,8 @@ def fetch_props(*, on_event=None):
     html, status = read_public_html(URL)
     report = parse_props_html(html)
     if on_event:
-        on_event("rotowire_props_read", http_status=status, week=report["week"], quotes=len(report["quotes"]),
+        on_event("rotowire_props_read", http_status=status, week=report["week"], heading_week=report["heading_week"],
+                 quotes=len(report["quotes"]),
                  games=len({q["source_game_id"] for q in report["quotes"]}), rejected=len(report["rejected"]), source_sha256=report["source_sha256"])
     return report
 

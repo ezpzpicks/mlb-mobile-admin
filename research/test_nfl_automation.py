@@ -76,9 +76,18 @@ def test_wrong_identity_or_stale_quotes_are_blocked(change):
         apply_quotes(projection(), game(), report, now=NOW)
 
 
-def test_changed_layout_or_week_is_not_an_empty_healthy_report():
+def test_stale_heading_uses_table_week_for_the_scheduled_matchup():
+    report = parse_props_html(page(source_row(), week=6, table_week=7), observed_at=NOW)
+    assert (report["heading_week"], report["week"]) == (6, 7)
+    out, _ = apply_quotes(projection(), game(), report, now=NOW)
+    assert out.iloc[0]["Market Line"] == 245.5
+
+
+def test_changed_layout_or_disagreeing_table_weeks_are_rejected():
     with pytest.raises(SourceError): parse_props_html("<h1>Subscribe now</h1>")
-    with pytest.raises(SourceError): parse_props_html(page(source_row(), table_week=6))
+    stale_table = page(source_row(), code="rushyds", table_week=6).split("</h1>", 1)[1]
+    with pytest.raises(SourceError, match="disagree on NFL week"):
+        parse_props_html(page(source_row()) + stale_table)
     with pytest.raises(SourceError): parse_props_html(page(source_row()).replace('data: [', 'data: evil('))
 
 
