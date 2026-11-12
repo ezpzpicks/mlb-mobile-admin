@@ -32,6 +32,7 @@ from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaam_division_one import division_one_matchup, division_one_aliases
 from builders.ncaam_matchup_grades import load_policy, market_reference, policy_digest, population_benchmark
 from builders.ncaam_matchup_live import capture_grade, grade_storage_row, load_reference_quotes, unavailable_grade
+from builders.ncaam_spread_grades import load_spread_policy, capture_spread_grade, unavailable_spread_grade, spread_storage_row
 
 ET = ZoneInfo("America/New_York")
 MAX_SLATE_GAMES = 200
@@ -340,6 +341,7 @@ def run(args):
         return 0
     bundle, player_inputs = load_model_inputs(db, day, season, datetime.now(timezone.utc), args.commit)
     matchup_policy = load_policy()
+    spread_policy = load_spread_policy()
     matchup_benchmark = population_benchmark(bundle)
     try:
         matchup_references = load_reference_quotes(db, day, datetime.now(timezone.utc).isoformat())
@@ -380,6 +382,7 @@ def run(args):
             # refreshing an observation timestamp cannot append another row.
             inputs['home_court'] = {key:home_court.get(key) for key in ('policy','team_key','value','cutoff_date','last_game_date')} if home_court else 'unavailable'
             inputs['matchup_grade_policy'] = policy_digest(matchup_policy)
+            inputs['spread_grade_policy'] = policy_digest(spread_policy)
             inputs['matchup_population'] = matchup_benchmark['metrics']
             inputs['matchup_price_context'] = matchup_reference_signature
             # A quote change can change the factor grade's price context even
@@ -420,6 +423,12 @@ def run(args):
                 matchup_grade = unavailable_grade(forecast, exc, matchup_policy)
                 emit('matchup_grade_unavailable', game_id=game['game_id'], error=str(exc))
             forecast['matchup_total'] = matchup_grade
+            try:
+                spread_grade = capture_spread_grade(forecast, [matchup_benchmark], policy=spread_policy)
+            except Exception as exc:
+                spread_grade = unavailable_spread_grade(forecast, exc, spread_policy)
+                emit('spread_grade_unavailable', game_id=game['game_id'], error=str(exc))
+            forecast['matchup_spread'] = spread_grade
             if args.commit:
                 if datetime.now(timezone.utc) >= timestamp(game['tipoff']):
                     emit('tipoff_reached_before_save', game_id=game['game_id'])
@@ -427,7 +436,8 @@ def run(args):
                 row = {"Date": day, "Game Key": f"{day}|ncaam|{game['game_id']}", "Game": f"{game['away']} @ {game['home']}",
                        "Market": "Forecast", "Selection": record_id, "Updated At": current.isoformat(), "Details JSON": json.dumps(forecast)}
                 store.upsert_many(db, [(store.FORECASTS,row,True),
-                                      (store.MATCHUP_GRADES,grade_storage_row(forecast,matchup_grade,day),True)])
+                                      (store.MATCHUP_GRADES,grade_storage_row(forecast,matchup_grade,day),True),
+                                      (store.SPREAD_GRADES,spread_storage_row(forecast,spread_grade,day),True)])
             emit("built", game_id=game["game_id"], phase=phase, saved=args.commit, model_version=MODEL_VERSION,
                  projected_away=forecast["away_score"], projected_home=forecast["home_score"],
                  line_source=market["source"], neutral_site=game["neutral_site"], grade_policy=forecast["grade_policy"],
@@ -435,6 +445,8 @@ def run(args):
                  home_court_points=forecast['home_court_points'], home_court_source=forecast['home_court']['source'],
                  matchup_total_grade=matchup_grade['grade'], matchup_total_side=matchup_grade['side'],
                  matchup_grade_policy=matchup_grade['policy_version'],
+                 matchup_spread_grade=spread_grade['grade'], matchup_spread_side=spread_grade['side'],
+                 spread_grade_policy=spread_grade['policy_version'],
                  adjusted_teams=[side for side in ('away','home') if adjustment and adjustment[side]['applied']])
         except Exception as exc:
             failures += 1
