@@ -1,8 +1,9 @@
 # Configurable NCAAM matchup total grades
 
 The matchup grader selects an Over or Under from adjusted offense, adjusted
-defense and tempo combinations. It does not require the numeric model to agree
-and does not use a minimum model point edge. Every grade retains the qualifying
+defense and tempo combinations. The live November 12 policy requires the point
+projection to favor the same direction. It does not use a minimum point edge.
+Every grade retains the qualifying
 profile, normalized inputs, market context and downgrade reasons.
 
 The automated NCAAM builder captures a grade alongside each new pregame forecast.
@@ -22,6 +23,17 @@ Edit `config/ncaam_matchup_grades.json` to adjust thresholds, enable profiles,
 set A/B assignments and priorities, change market quartiles, or change penalties.
 `builders/ncaam_matchup_grades.py` validates the policy and emits its version and
 SHA-256 with every result. No win probability is attached to an A/B label.
+
+After the factor grade is determined, projection agreement is a required filter:
+Over needs projected total above the saved market total; Under needs projected
+total below it. An opposing, exactly equal, missing or invalid projection leaves
+the game Research. The filter never creates a play or promotes another side.
+The original factor side and grade remain in `projection_gate` for explanation.
+Only direction is checked; even a 0.01-point favorable gap satisfies agreement.
+
+The original November 11 policy is archived unchanged in
+`config/ncaam_matchup_grades_v1.json`. Earlier replay selections and records retain
+that policy; they are not rewritten after the completed results are known.
 
 The initial profile paths are:
 
@@ -86,6 +98,13 @@ to a dry run, verifies source capture identities before saving, and writes only
 the separate `ncaam_matchup_total_grades` dataset. It never edits source forecasts.
 The site keeps replay records separate from live model records and replay grades
 cannot create pregame model signals or retrospective official picks.
+
+`scripts/refresh_ncaam_matchup_grades.py` applies the current reviewed policy to
+the latest saved capture for each unstarted game. It uses the saved dated
+national benchmark and earlier-game quote references, requires the expected
+policy hash, and writes immutable grade annotations only with `--commit`.
+The public reader chooses the newest valid live annotation over an older inline
+grade for the same capture. Source forecasts and closed games remain intact.
 
 ## Verification
 

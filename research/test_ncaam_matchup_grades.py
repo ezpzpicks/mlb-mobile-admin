@@ -2,7 +2,7 @@ from copy import deepcopy
 import unittest
 
 from builders.ncaam_matchup_grades import (
-    grade_matchup, grade_saved_forecast, load_policy, market_reference, select_benchmark,
+    apply_projection_agreement, grade_matchup, grade_saved_forecast, load_policy, market_reference, select_benchmark,
 )
 from research.replay_ncaam_matchup_grades import latest_forecasts, settle
 
@@ -89,14 +89,37 @@ class MatchupGradeTests(unittest.TestCase):
         self.assertEqual(ref["quote_count"], 2)
         self.assertEqual((ref["low_total"], ref["high_total"]), (152.5, 157.5))
 
-    def test_forecast_model_projection_and_results_do_not_affect_grade(self):
+    def test_projection_direction_is_required_without_an_edge_size_or_result_gate(self):
         forecast = {"lockedAt": NOW, "tipoff": TIP, "ratings_observed_at": self.benchmark["observed_at"],
                     "home_court": {"season": 2027}, "away_rating": self.over, "home_rating": self.neutral,
-                    "market": {"total": 155, "as_of": NOW}, "total": 100, "total_edge": -55, "totalResult": "LOSS"}
+                    "market": {"total": 155, "as_of": NOW}, "total": 155.01, "total_edge": -55, "totalResult": "LOSS"}
         quotes = [{"game_id": str(i), "total": value, "observed_at": "2026-11-10T18:00:00+00:00"} for i, value in enumerate([130, 140, 160, 170, 180])]
         baseline = grade_saved_forecast(forecast, [self.benchmark], quotes, self.policy)
-        changed = grade_saved_forecast({**forecast, "total": 250, "total_edge": 95, "totalResult": "WIN"}, [self.benchmark], quotes, self.policy)
+        changed = grade_saved_forecast({**forecast, "total_edge": 95, "totalResult": "WIN"}, [self.benchmark], quotes, self.policy)
         self.assertEqual(baseline, changed)
+        self.assertEqual((baseline['side'],baseline['grade']),('Over','A'))
+        opposed = grade_saved_forecast({**forecast,'total':154.99},[self.benchmark],quotes,self.policy)
+        self.assertEqual((opposed['side'],opposed['grade']),(None,'Research'))
+        self.assertEqual(opposed['directions'],baseline['directions'])
+        self.assertFalse(opposed['projection_gate']['agrees'])
+
+    def test_agreement_handles_both_directions_flat_and_missing_projections(self):
+        for side, projection, expected in [('Over',155.01,True),('Over',154.99,False),
+                ('Under',154.99,True),('Under',155.01,False),('Under',155,False),
+                ('Over',None,False),('Under',float('nan'),False),('Over',True,False)]:
+            with self.subTest(side=side,projection=projection):
+                factor={'side':side,'grade':'B','line':155,'reason':'profile'}
+                result=apply_projection_agreement(factor,projection,self.policy)
+                self.assertEqual(result['grade'],'B' if expected else 'Research')
+                self.assertEqual(result['side'],side if expected else None)
+                self.assertEqual(factor['grade'],'B')
+
+    def test_legacy_policy_preserves_original_factor_only_replay(self):
+        policy=load_policy(__import__('pathlib').Path(__file__).resolve().parents[1]/'config/ncaam_matchup_grades_v1.json')
+        factor={'side':'Over','grade':'A','line':155,'reason':'profile'}
+        self.assertEqual(apply_projection_agreement(factor,100,policy),factor)
+        from builders.ncaam_matchup_grades import policy_digest
+        self.assertEqual(policy_digest(policy),'82fe89a811f37c7b87fa3586bd31dfc057bf6b03744ae547d868bdf4e2c60679')
 
     def test_replay_uses_latest_pregame_capture_not_postgame_update(self):
         game = {"Game ID": "1", "Game Time": TIP}

@@ -88,7 +88,8 @@ def grade_slate(public_path, benchmark_path, reference_paths, policy_path, as_of
             "test_type": "Retrospective replay; this date was included in earlier exploratory analysis",
             "game_date_et": day, "input_as_of_utc": stamp(as_of).isoformat(),
             "sources": {"public_board": public_source, "national_cache": cache_source, "prior_market_inputs": sources},
-            "grading_does_not_read": ["final scores", "stored total results", "model total edge"],
+            "grading_does_not_read": ["final scores", "stored total results"],
+            "projection_agreement_required": policy.get('projection_agreement_required', False),
             "rejected_forecast_rows": rejected, "rows": rows}
 
 

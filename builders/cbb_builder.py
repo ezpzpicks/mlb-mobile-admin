@@ -309,7 +309,7 @@ def render():
     page = st.radio("CBB section", ["Automated Slate", "Build", "Team Ratings", "Slate", "Tracker", "Setup"], horizontal=True, key="cbb_nav")
     if page == "Automated Slate":
         st.subheader("Automated NCAAM forecasts")
-        st.caption("Total A/B grades combine adjusted offense, defense, tempo and the market total. The point-model lean remains separate context. Replay grades are labeled separately from live captures.")
+        st.caption("Total A/B grades require the point projection to agree with the matchup direction. Offense, defense, tempo and the market total determine the grade; no minimum point edge is required. Original replay grades retain their saved rules.")
         import json
         from shared import ncaam_auto_storage, turso_storage
         selected_day = st.date_input("NCAAM slate date", value=datetime.now(ZoneInfo("America/New_York")).date(), key="ncaam_auto_date")

@@ -1,4 +1,4 @@
-"""Configurable factor-only NCAAM total grades; independent of model point edge.
+"""Configurable NCAAM total grades with optional projection-direction agreement.
 
 The grading engine has no database/network writes. Production capture is in
 ncaam_matchup_live.py; saved forecast replay is in research/.
@@ -47,6 +47,8 @@ def load_policy(path=POLICY_PATH):
 def validate_policy(policy):
     if not policy.get("version") or not policy.get("profiles"):
         raise ValueError("Policy requires a version and profiles.")
+    if type(policy.get("projection_agreement_required", False)) is not bool:
+        raise ValueError("Projection agreement requirement must be a boolean.")
     t = policy["thresholds"]
     if not 0 <= number(t["support_z"]) < number(t["extreme_z"]) < number(t["very_extreme_z"]):
         raise ValueError("Support, extreme and very-extreme thresholds must be ordered.")
@@ -209,6 +211,35 @@ def grade_matchup(away, home, line, benchmark, reference, *, as_of, tipoff, quot
             "as_of": cutoff.isoformat(), "tipoff": start.isoformat()}
 
 
+def apply_projection_agreement(result, projection, policy):
+    """Retain a factor grade only when the point projection favors its side.
+
+    No minimum point edge is introduced. An unavailable or exactly equal
+    projection cannot support a direction. Legacy replay policies are unchanged.
+    """
+    if not policy.get('projection_agreement_required', False):
+        return result
+    result = deepcopy(result)
+    factor_side, factor_grade = result['side'], result['grade']
+    try:
+        projected = number(projection)
+        if projected <= 0:
+            raise ValueError('Projection must be positive.')
+    except (TypeError, ValueError):
+        projected = None
+    gap = None if projected is None else projected - result['line']
+    direction = None if gap is None or gap == 0 else 'Over' if gap > 0 else 'Under'
+    agrees = factor_side is not None and direction == factor_side
+    result['projection_gate'] = {'required':True, 'projection_total':projected,
+        'direction':direction, 'agrees':agrees, 'factor_side':factor_side, 'factor_grade':factor_grade}
+    if factor_grade in ('A', 'B') and not agrees:
+        result['side'], result['grade'] = None, 'Research'
+        result['reason'] = ('Point projection unavailable; direction agreement required' if projected is None
+            else 'Point projection equals market total; no directional support' if direction is None
+            else f'Factor {factor_side} conflicts with point projection {direction}; agreement required')
+    return result
+
+
 def grade_saved_forecast(forecast, benchmarks, reference_quotes, policy=None):
     policy = load_policy() if policy is None else policy
     locked = forecast["lockedAt"]
@@ -222,4 +253,4 @@ def grade_saved_forecast(forecast, benchmarks, reference_quotes, policy=None):
     result = grade_matchup(forecast["away_rating"], forecast["home_rating"], market["total"], benchmark, reference,
                           as_of=locked, tipoff=forecast["tipoff"], quote_observed_at=market["as_of"], season=season, policy=policy)
     result["benchmark_exact_rating_timestamp"] = stamp(benchmark["observed_at"]) == stamp(forecast["ratings_observed_at"])
-    return result
+    return apply_projection_agreement(result, forecast.get('total'), policy)
