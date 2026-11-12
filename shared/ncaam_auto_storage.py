@@ -7,6 +7,7 @@ SPORT = "NCAAM"
 FORECASTS = "ncaam_model_forecasts"
 RATINGS = "ncaam_rating_inputs"
 MATCHUP_GRADES = "ncaam_matchup_total_grades"
+SPREAD_GRADES = "ncaam_matchup_spread_grades"
 
 
 def rows(db, dataset, day):
