@@ -309,20 +309,30 @@ def render():
     page = st.radio("CBB section", ["Automated Slate", "Build", "Team Ratings", "Slate", "Tracker", "Setup"], horizontal=True, key="cbb_nav")
     if page == "Automated Slate":
         st.subheader("Automated NCAAM forecasts")
-        st.caption("Dated adjusted-efficiency research forecasts. Warren Nolan ELO and current RPI SOS are collected on the public board. A/B grades and an EZPZ threshold await NCAAM validation.")
+        st.caption("Total A/B grades combine adjusted offense, defense, tempo and the market total. The point-model lean remains separate context. Replay grades are labeled separately from live captures.")
         import json
         from shared import ncaam_auto_storage, turso_storage
         selected_day = st.date_input("NCAAM slate date", value=datetime.now(ZoneInfo("America/New_York")).date(), key="ncaam_auto_date")
         rows = ncaam_auto_storage.rows(turso_storage, ncaam_auto_storage.FORECASTS, str(selected_day))
+        grades = {}
+        for grade_row in ncaam_auto_storage.rows(turso_storage, ncaam_auto_storage.MATCHUP_GRADES, str(selected_day)):
+            try:
+                grade = json.loads(grade_row["Details JSON"])
+                grades[grade["forecast_record_id"]] = grade
+            except (ValueError, TypeError, KeyError):
+                continue
         records = []
         for row in rows:
             try:
                 forecast = json.loads(row["Details JSON"])
+                grade = forecast.get("matchup_total") or grades.get(forecast.get("recordId"), {})
                 records.append({"Date": row["Date"], "Game": row["Game"], "Phase": forecast["phase"],
                     "Projected Away": forecast["away_score"], "Projected Home": forecast["home_score"],
                     "Model Home Spread": forecast["fair_home_spread"], "Model Total": forecast["total"],
-                    "Spread Pick": forecast["spread_pick"], "Total Pick": forecast["total_pick"],
-                    "Grade": forecast["spread_grade"], "Line Source": forecast["market"]["source"],
+                    "Spread Pick": forecast["spread_pick"], "Point-Model Lean": forecast["total_pick"],
+                    "Matchup Total": f"{grade['side']} {grade['line']}" if grade.get("side") else "Research",
+                    "Total Grade": grade.get("grade", "Research"), "Grade Reason": grade.get("reason", "Awaiting matchup inputs"),
+                    "Record Mode": grade.get("record_mode", ""), "Spread Grade": forecast["spread_grade"], "Line Source": forecast["market"]["source"],
                     "Saved": forecast["lockedAt"], "Model Version": forecast["modelVersion"]})
             except (ValueError, TypeError, KeyError):
                 continue

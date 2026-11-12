@@ -30,6 +30,8 @@ from builders.ncaam_home_court import POLICY as COURT_POLICY, LOOKBACK_SEASONS, 
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaam_division_one import division_one_matchup, division_one_aliases
+from builders.ncaam_matchup_grades import load_policy, market_reference, policy_digest, population_benchmark
+from builders.ncaam_matchup_live import capture_grade, grade_storage_row, load_reference_quotes, unavailable_grade
 
 ET = ZoneInfo("America/New_York")
 MAX_SLATE_GAMES = 200
@@ -337,6 +339,18 @@ def run(args):
         for game, _, _ in pending: emit('waiting_for_market', game_id=game['game_id'], game=f"{game['away']} @ {game['home']}")
         return 0
     bundle, player_inputs = load_model_inputs(db, day, season, datetime.now(timezone.utc), args.commit)
+    matchup_policy = load_policy()
+    matchup_benchmark = population_benchmark(bundle)
+    try:
+        matchup_references = load_reference_quotes(db, day, datetime.now(timezone.utc).isoformat())
+    except Exception as exc:
+        matchup_references = []
+        emit('matchup_reference_unavailable', error=str(exc))
+    try:
+        reference = market_reference(matchup_references, datetime.now(timezone.utc).isoformat(), matchup_policy)
+        matchup_reference_signature = {k:reference[k] for k in ('low_total','high_total','quote_count')}
+    except ValueError:
+        matchup_reference_signature = 'unavailable'
     if player_inputs: player_inputs = indexed_player_bundle(player_inputs)
     lineups = load_lineups(db, modeled_slate, day, datetime.now(timezone.utc), args.commit)
     rosters = load_rosters(db, modeled_slate, lineups, season, datetime.now(timezone.utc), args.commit) if player_inputs else {}
@@ -365,6 +379,12 @@ def run(args):
             # Actual point/venue evidence affects forecast identity. Merely
             # refreshing an observation timestamp cannot append another row.
             inputs['home_court'] = {key:home_court.get(key) for key in ('policy','team_key','value','cutoff_date','last_game_date')} if home_court else 'unavailable'
+            inputs['matchup_grade_policy'] = policy_digest(matchup_policy)
+            inputs['matchup_population'] = matchup_benchmark['metrics']
+            inputs['matchup_price_context'] = matchup_reference_signature
+            # A quote change can change the factor grade's price context even
+            # when the independent point projection has not changed.
+            inputs['market_quote'] = {'home_spread':market['home_spread'], 'total':market['total'], 'source':market['source']}
             # Capture material revisions, preserving earlier forecasts. Observation
             # timestamps alone cannot create another projection or another record.
             digest = hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest()[:16]
@@ -394,15 +414,27 @@ def run(args):
                             availability_as_of=lineup['observedAt'] if lineup else '', availability_source=lineup['sourceUrl'] if lineup else '')
             forecast.update(recordId=record_id, gameId=game["game_id"], modelVersion=MODEL_VERSION,
                             lockedAt=current.isoformat(), tipoff=game["tipoff"], phase=phase, inputDigest=digest)
+            try:
+                matchup_grade = capture_grade(forecast, [matchup_benchmark], matchup_references, policy=matchup_policy)
+            except Exception as exc:
+                matchup_grade = unavailable_grade(forecast, exc, matchup_policy)
+                emit('matchup_grade_unavailable', game_id=game['game_id'], error=str(exc))
+            forecast['matchup_total'] = matchup_grade
             if args.commit:
+                if datetime.now(timezone.utc) >= timestamp(game['tipoff']):
+                    emit('tipoff_reached_before_save', game_id=game['game_id'])
+                    continue
                 row = {"Date": day, "Game Key": f"{day}|ncaam|{game['game_id']}", "Game": f"{game['away']} @ {game['home']}",
                        "Market": "Forecast", "Selection": record_id, "Updated At": current.isoformat(), "Details JSON": json.dumps(forecast)}
-                store.upsert(db, store.FORECASTS, row, immutable=True)
+                store.upsert_many(db, [(store.FORECASTS,row,True),
+                                      (store.MATCHUP_GRADES,grade_storage_row(forecast,matchup_grade,day),True)])
             emit("built", game_id=game["game_id"], phase=phase, saved=args.commit, model_version=MODEL_VERSION,
                  projected_away=forecast["away_score"], projected_home=forecast["home_score"],
                  line_source=market["source"], neutral_site=game["neutral_site"], grade_policy=forecast["grade_policy"],
                  player_profile_mode=forecast['player_profile_mode'],
                  home_court_points=forecast['home_court_points'], home_court_source=forecast['home_court']['source'],
+                 matchup_total_grade=matchup_grade['grade'], matchup_total_side=matchup_grade['side'],
+                 matchup_grade_policy=matchup_grade['policy_version'],
                  adjusted_teams=[side for side in ('away','home') if adjustment and adjustment[side]['applied']])
         except Exception as exc:
             failures += 1

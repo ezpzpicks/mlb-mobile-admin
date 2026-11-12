@@ -1,12 +1,20 @@
 # Configurable NCAAM matchup total grades
 
-The candidate grader selects an Over or Under from adjusted offense, adjusted
+The matchup grader selects an Over or Under from adjusted offense, adjusted
 defense and tempo combinations. It does not require the numeric model to agree
 and does not use a minimum model point edge. Every grade retains the qualifying
 profile, normalized inputs, market context and downgrade reasons.
 
-This implementation is offline. `builders/ncaam_model.py` and production
-selection/storage remain unchanged. No automatic publishing is connected.
+The automated NCAAM builder captures a grade alongside each new pregame forecast.
+`builders/ncaam_model.py` retains its independent point projections and spread
+behavior. The public board reads the saved grade, settles its selected side and
+counts it in model records. Only live grades published before the decision can
+contribute a model signal; the existing EZPZ selection rules still apply.
+
+`builders/ncaam_matchup_live.py` reads the previous three days of market quotes,
+retains the national benchmark and policy digest, and saves the forecast and
+grade in one transaction. Material policy, population or quote changes produce
+a new immutable capture. Timestamp-only refreshes do not.
 
 ## Initial policy
 
@@ -72,10 +80,17 @@ to fit its results. However, November 11 was included in the preceding explorato
 analysis, so this demonstration is retrospective, not an independent validation.
 The private input cache and connection credentials are not included in this repo.
 
+`scripts/save_ncaam_matchup_replay.py` can annotate saved forecasts with explicit
+`record_mode: replay` grades. It requires the reviewed policy digest, defaults
+to a dry run, verifies source capture identities before saving, and writes only
+the separate `ncaam_matchup_total_grades` dataset. It never edits source forecasts.
+The site keeps replay records separate from live model records and replay grades
+cannot create pregame model signals or retrospective official picks.
+
 ## Verification
 
 ```bash
-python -m unittest research.test_ncaam_matchup_grades research.test_ncaam_model -v
+python -m unittest research.test_ncaam_matchup_grades research.test_ncaam_matchup_live research.test_ncaam_model -v
 ```
 
 Tests cover directional grading, configurable rules, market-line effects,

@@ -1,7 +1,7 @@
 """Configurable factor-only NCAAM total grades; independent of model point edge.
 
-This candidate module is pure and has no database/network writes. The existing
-live model does not import it. Saved forecast replay is in research/.
+The grading engine has no database/network writes. Production capture is in
+ncaam_matchup_live.py; saved forecast replay is in research/.
 """
 from __future__ import annotations
 
