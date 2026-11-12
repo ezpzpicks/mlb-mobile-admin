@@ -1,0 +1,31 @@
+{
+  "version": "ncaam-matchup-grades-2026-11-11-v1",
+  "status": "candidate",
+  "thresholds": {
+    "support_z": 0.0,
+    "extreme_z": 1.0,
+    "very_extreme_z": 1.5,
+    "opposing_matchup_tempo_z": 1.0,
+    "max_benchmark_age_hours": 30.0,
+    "max_market_age_minutes": 90.0
+  },
+  "market_context": {
+    "low_quantile": 0.25,
+    "high_quantile": 0.75,
+    "downgrade_levels": 1
+  },
+  "conflicts": {
+    "fast_versus_slow_downgrade_levels": 1,
+    "opposing_matchup_tempo_downgrade_levels": 1
+  },
+  "profiles": [
+    {"id": "over-same-team-three", "side": "Over", "kind": "same_team_three", "grade": "A", "priority": 100, "enabled": true, "label": "One team: strong offense, weak defense, fast tempo"},
+    {"id": "over-very-fast-supported", "side": "Over", "kind": "tempo_supported", "tempo_threshold": "very_extreme_z", "grade": "A", "priority": 90, "enabled": true, "label": "Very fast team with favorable opposing offense/defense pairing"},
+    {"id": "over-extreme-opposing-pair", "side": "Over", "kind": "extreme_pair_supported", "grade": "B", "priority": 80, "enabled": true, "label": "Extreme offense facing extreme weak defense with faster matchup tempo"},
+    {"id": "over-fast-supported", "side": "Over", "kind": "tempo_supported", "tempo_threshold": "extreme_z", "grade": "B", "priority": 70, "enabled": true, "label": "Fast team with favorable opposing offense/defense pairing"},
+    {"id": "under-same-team-three", "side": "Under", "kind": "same_team_three", "grade": "A", "priority": 100, "enabled": true, "label": "One team: weak offense, good defense, slow tempo"},
+    {"id": "under-very-slow-supported", "side": "Under", "kind": "tempo_supported", "tempo_threshold": "very_extreme_z", "grade": "A", "priority": 90, "enabled": true, "label": "Very slow team with favorable opposing offense/defense pairing"},
+    {"id": "under-three-matchup", "side": "Under", "kind": "matchup_three", "grade": "B", "priority": 80, "enabled": true, "label": "Weak offense, good defense and slow team somewhere in the matchup"},
+    {"id": "under-slow-supported", "side": "Under", "kind": "tempo_supported", "tempo_threshold": "extreme_z", "grade": "B", "priority": 70, "enabled": true, "label": "Slow team with favorable opposing offense/defense pairing"}
+  ]
+}
