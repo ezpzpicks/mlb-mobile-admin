@@ -1,6 +1,7 @@
 {
-  "version": "ncaam-matchup-grades-2026-11-11-v1",
-  "status": "candidate",
+  "version": "ncaam-matchup-grades-2026-11-12-v2",
+  "status": "live",
+  "projection_agreement_required": true,
   "thresholds": {
     "support_z": 0.0,
     "extreme_z": 1.0,

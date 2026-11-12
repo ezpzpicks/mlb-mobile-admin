@@ -2,9 +2,11 @@ from copy import deepcopy
 import json
 import sqlite3
 import unittest
+from unittest.mock import patch
 
 from builders.ncaam_matchup_live import capture_grade, grade_storage_row, load_reference_quotes
 from shared import ncaam_auto_storage as store
+from scripts.refresh_ncaam_matchup_grades import refresh
 
 
 class CaptureTests(unittest.TestCase):
@@ -14,7 +16,7 @@ class CaptureTests(unittest.TestCase):
         self.forecast = {'recordId':'capture-1','gameId':'1','away_team':'Away','home_team':'Home',
             'lockedAt':'2026-11-11T17:00:00+00:00','tipoff':'2026-11-11T19:00:00+00:00','home_court':{'season':2027},
             'ratings_observed_at':self.benchmark['observed_at'],'away_rating':{'offense':120,'defense':115,'tempo':76},
-            'home_rating':{'offense':110,'defense':108,'tempo':71},'market':{'total':155,'as_of':'2026-11-11T17:00:00+00:00'}}
+            'home_rating':{'offense':110,'defense':108,'tempo':71},'total':155.01,'market':{'total':155,'as_of':'2026-11-11T17:00:00+00:00'}}
         self.references = [{'game_id':str(i),'total':v,'observed_at':'2026-11-10T18:00:00+00:00'} for i,v in enumerate([130,140,160,170,180])]
 
     def test_live_capture_is_pretipoff_and_replay_is_explicit(self):
@@ -35,6 +37,23 @@ class CaptureTests(unittest.TestCase):
     def test_missing_and_future_inputs_do_not_create_a_grade(self):
         with self.assertRaises(ValueError): capture_grade(self.forecast,[],self.references,mode='replay')
         with self.assertRaises(ValueError): capture_grade(self.forecast,[self.benchmark],[],mode='replay')
+
+    def test_policy_refresh_uses_only_latest_unstarted_capture_and_keeps_forecasts_intact(self):
+        first={**self.forecast,'matchup_total':{'national_benchmark':self.benchmark}}
+        latest={**first,'recordId':'capture-2','lockedAt':'2026-11-11T17:01:00+00:00'}
+        closed={**first,'gameId':'closed','tipoff':'2026-11-11T16:59:00+00:00'}
+        future={**first,'recordId':'future','lockedAt':'2026-11-11T18:00:00+00:00'}
+        original=deepcopy(first)
+        rows=[{'Details JSON':json.dumps(f)} for f in (first,latest,closed,future)]
+        with patch('scripts.refresh_ncaam_matchup_grades.store.rows',return_value=rows), \
+                patch('scripts.refresh_ncaam_matchup_grades.load_reference_quotes',return_value=self.references), \
+                patch('scripts.refresh_ncaam_matchup_grades.store.upsert_many') as save:
+            result=refresh(None,'2026-11-11',now='2026-11-11T17:02:00+00:00')
+            self.assertEqual(result['rows'],1)
+            self.assertEqual(result['selections'][0]['record_id'],'capture-2')
+            self.assertEqual(result['selections'][0]['side'],'Over')
+            save.assert_not_called()
+        self.assertEqual(first,original)
 
 
 class StorageTests(unittest.TestCase):
