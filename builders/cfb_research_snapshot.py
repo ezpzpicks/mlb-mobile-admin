@@ -41,7 +41,7 @@ def research_snapshot(result: dict[str, Any], model_version: str,
     except (ValueError, TypeError):
         status = "KICKOFF_UNKNOWN"
     projection = result.get("projection", {})
-    prefixes = ("regression_", "total_regression_", "schedule_adjustment_", "regime_2026_")
+    prefixes = ("regression_", "total_regression_", "schedule_adjustment_", "regime_2026_", "matchup_")
     components = {k: v for k, v in projection.items() if k.startswith(prefixes)}
     sim = result.get("simulation", {})
     simulation = {k: sim[k] for k in ("away_mean", "home_mean", "away_p10", "away_p90",

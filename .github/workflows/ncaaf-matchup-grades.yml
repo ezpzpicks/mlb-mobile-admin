@@ -1,0 +1,26 @@
+name: NCAAF published SP+ matchup grades
+on:
+  pull_request:
+    paths:
+      - 'builders/cfb_*'
+      - 'config/ncaaf_matchup_grades.json'
+      - 'research/test_cfb_matchup_grades.py'
+      - '.github/workflows/ncaaf-matchup-grades.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'builders/cfb_*'
+      - 'config/ncaaf_matchup_grades.json'
+      - 'research/test_cfb_matchup_grades.py'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install numpy pandas
+      - run: python -m unittest research.test_cfb_matchup_grades -v
+      - run: PYTHONPATH=. python research/test_cfb_research_snapshot.py
+      - run: PYTHONPATH=. python research/test_cfb_schedule_adjustment_window.py

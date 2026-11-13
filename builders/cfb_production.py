@@ -15,6 +15,7 @@ def load_production_builder():
     from builders.cfb_market_calibration import install_market_calibration
     from builders.cfb_covers import install_covers_layer
     from builders.cfb_interactive_recovery import install_interactive_recovery
+    from builders.cfb_matchup_grades import install_matchup_grading
 
     # Order matches the interactive admin; every installer is idempotent.
     install_runtime_guard(cfb_builder)
@@ -26,5 +27,6 @@ def load_production_builder():
     install_market_calibration(cfb_builder)
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
+    install_matchup_grading(cfb_builder)
     cfb_builder.MODEL_VERSION = MODEL_VERSION
     return cfb_builder
