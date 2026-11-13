@@ -468,7 +468,7 @@ def install_market_calibration(cfb_builder: Any) -> None:
             st.dataframe(total_breakdown, hide_index=True, use_container_width=True)
             st.markdown(
                 f"**Calibrated margin residual SD:** {MARGIN_RESIDUAL_SD:.2f} points  \n"
-                f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'cover probabilities uncalibrated; v2.6 point-edge grades active'}"
+                f"**Spread ATS calibration:** {'validated' if ATS_CALIBRATION_PROVEN else 'cover probabilities uncalibrated; new decisions use provisional SP+ matchup grades'}"
             )
             st.caption(TEAM_RESIDUAL_STATUS)
             pricing = pd.DataFrame([

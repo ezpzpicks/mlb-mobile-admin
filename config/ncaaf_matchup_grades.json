@@ -1,0 +1,22 @@
+{
+  "version": "ncaaf-sp-matchup-2026-11-13-v1",
+  "status": "provisional",
+  "description": "Published SP+ factors with projection agreement; grades measure matchup support, not calibrated win probabilities.",
+  "thresholds": {
+    "strong_z": 0.5,
+    "extreme_z": 1.0,
+    "minimum_tempo_teams": 100,
+    "spread_max_market_line": 20.0,
+    "maximum_population_age_days": 8
+  },
+  "total": {
+    "A": "One team's offense, defensive points allowed and tempo all support the projected direction at strong_z, with mean matchup tempo in agreement.",
+    "B": "Both offense-versus-opposing-defense pairings favor the projected direction and mean matchup tempo agrees; or one strongly favorable pairing with extreme supporting tempo.",
+    "minimum_projection_edge": 0.0
+  },
+  "spread": {
+    "A": "The projected cover side has strong relative offense and defense advantages, with no extreme role-tempo conflict.",
+    "B": "The projected cover side has at least one relative offense/defense advantage and no extreme role-tempo conflict.",
+    "minimum_projection_edge": 0.0
+  }
+}
