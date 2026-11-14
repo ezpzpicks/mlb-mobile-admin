@@ -1,5 +1,5 @@
 {
-  "version": "ncaaf-sp-matchup-2026-11-13-v2",
+  "version": "ncaaf-sp-matchup-2026-11-14-v3",
   "status": "provisional",
   "description": "Published SP+ factors with projection agreement; grades measure matchup support, not calibrated win probabilities.",
   "thresholds": {
@@ -21,7 +21,7 @@
   },
   "selection_review": {
     "version": "ryan-ncaaf-review-2026-11-13-v1",
-    "enabled": true,
+    "enabled": false,
     "basis": "Explicit matchup preferences; not historical probability calibration",
     "minimum_attacking_pair_z": 0.5,
     "suppressed_attack_pair_z": 0.5,

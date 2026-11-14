@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import unittest
 
-from builders.ncaam_matchup_grades import apply_projection_agreement, grade_matchup, load_policy, stamp
+from builders.ncaam_matchup_grades import apply_projection_agreement, grade_matchup, load_policy as load_total_policy, stamp
 from builders.ncaam_selection_review import apply_total_review, validate_review
 from builders.ncaam_spread_grades import grade_saved_spread, load_spread_policy
 
@@ -11,7 +11,18 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = json.loads((ROOT / 'research/fixtures/ncaam_selection_preferences_2026_11_13.json').read_text())['cases']
 
 
+def load_policy(path=None):
+    """Keep the former preference cases explicitly enabled for historical replay."""
+    p = load_total_policy() if path is None else load_total_policy(path)
+    if path is None:
+        p['selection_review']['enabled'] = True
+    return p
+
+
 def spread(forecast, policy=None):
+    if policy is None:
+        policy = load_spread_policy()
+        policy['selection_review']['enabled'] = True
     return grade_saved_spread(forecast, [forecast['benchmark']], policy)
 
 
@@ -24,6 +35,21 @@ def total(forecast, policy=None):
 
 
 class SelectionReviewTests(unittest.TestCase):
+    def test_live_policies_leave_preference_decisions_to_manual_review(self):
+        totals, spreads = load_total_policy(), load_spread_policy()
+        self.assertFalse(totals['selection_review']['enabled'])
+        self.assertFalse(spreads['selection_review']['enabled'])
+        for name in ('rutgers', 'pitt', 'purdue', 'charlotte', 'marist', 'elon'):
+            with self.subTest(spread=name):
+                self.assertIn(spread(CASES[name], spreads)['grade'], ('A', 'B'))
+        for name in ('tennessee', 'fordham', 'drake'):
+            with self.subTest(total=name):
+                self.assertIn(total(CASES[name], totals)['grade'], ('A', 'B'))
+        # Disabling preferences does not bypass projection agreement.
+        opposed = deepcopy(CASES['tennessee'])
+        opposed['total'] = opposed['market']['total'] + 1
+        self.assertEqual(total(opposed, totals)['grade'], 'Research')
+
     def test_reviewed_spread_exclusions_and_retained_candidates(self):
         expected = {'rutgers': 'Research', 'pitt': 'Research', 'purdue': 'Research', 'charlotte': 'Research',
                     'marist': 'Research', 'elon': 'Research', 'columbia': 'B', 'fiu': 'B'}

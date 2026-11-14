@@ -1,5 +1,5 @@
 {
-  "version": "ncaam-matchup-grades-2026-11-13-v3",
+  "version": "ncaam-matchup-grades-2026-11-14-v4",
   "status": "live",
   "projection_agreement_required": true,
   "thresholds": {
@@ -31,7 +31,7 @@
   ],
   "selection_review": {
     "version": "ryan-matchup-review-2026-11-13-v1",
-    "enabled": true,
+    "enabled": false,
     "basis": "Explicit matchup preferences; operational defaults, not optimized or validated probabilities",
     "meaningful_efficiency_z": 1.0,
     "strong_defense_z": 1.0,
