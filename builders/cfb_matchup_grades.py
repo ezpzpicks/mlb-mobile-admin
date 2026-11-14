@@ -15,6 +15,7 @@ from pathlib import Path
 import statistics
 
 from builders.cfb_sp_ratings import load_population, stamp, team_key
+from builders.cfb_selection_review import apply_selection_review, validate_review
 
 POLICY_PATH = Path(__file__).resolve().parents[1] / "config" / "ncaaf_matchup_grades.json"
 SLATE_FIELDS = ["Grading Policy Version", "Matchup Factors JSON", "Matchup Spread JSON", "Matchup Total JSON"]
@@ -31,6 +32,7 @@ def number(value):
 
 def load_policy():
     policy = json.loads(POLICY_PATH.read_text())
+    validate_review(policy)
     t = policy["thresholds"]
     if not 0 < t["strong_z"] < t["extreme_z"] <= 3:
         raise ValueError("Invalid matchup support thresholds")
@@ -130,6 +132,7 @@ def grade_matchup(factors, *, projected_margin, projected_total, home_line, tota
             z[side][metric] = (number(factors[side][metric]) - number(b["mean"])) / number(b["sd"])
     mean_tempo = (z["away"]["tempo"] + z["home"]["tempo"]) / 2
     common = {"policy_version": policy["version"], "policy_sha256": digest(policy),
+        "thresholds": deepcopy(t),
         "status": policy["status"], "as_of": clock.isoformat(), "kickoff": start.isoformat(),
         "published_at": clock.isoformat(), "record_mode": "live", "z": z,
         "mean_tempo_z": mean_tempo, "source_population_sha256": factors["population_sha256"]}
@@ -185,7 +188,7 @@ def grade_matchup(factors, *, projected_margin, projected_total, home_line, tota
         "home_line": spread, "edge": abs(cover_gap), "projected_margin": margin, "role": role,
         "offense_advantage_z": offense_advantage, "defense_advantage_z": defense_advantage,
         "role_tempo_support_z": role_tempo, "reason": reason}
-    return output
+    return apply_selection_review(output, policy)
 
 
 def apply_price_and_direction(grade, market, expected_pick, available):

@@ -1,5 +1,10 @@
 # Published SP+ matchup grades for NCAAF
 
+The November 13 v2 policy adds Ryan's explicit
+[selection preferences](NCAAF_SELECTION_PREFERENCES.md). The original v1 policy
+below remains available for historical replay; v2 captures preserve its point
+model, source/clock and price requirements while adding the review exclusions.
+
 The new policy is `ncaaf-sp-matchup-2026-11-13-v1`. It replaces the old
 point-gap-only A/B ladder for newly evaluated spreads and totals. The numerical
 score projections, simulation and personnel/weather adjustments are retained.

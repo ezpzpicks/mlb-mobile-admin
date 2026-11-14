@@ -1,0 +1,263 @@
+{
+  "source": "Retrospective preference acceptance fixtures from saved pregame inputs; no outcome fields; not a live record",
+  "cases": {
+    "pitt": {
+      "factors": {
+        "away": {
+          "team": "Florida State",
+          "offense": 33.2,
+          "defense": 28.0,
+          "overall": 5.5,
+          "special_teams": 0.3,
+          "tempo": 11.871014492753623,
+          "possessions": 11.512820512820515,
+          "plays": 71.1025641025641
+        },
+        "home": {
+          "team": "Pittsburgh",
+          "offense": 30.2,
+          "defense": 20.4,
+          "overall": 10.2,
+          "special_teams": 0.4,
+          "tempo": 12.777571391818883,
+          "possessions": 12.49112426035503,
+          "plays": 75.74556213017752
+        },
+        "national": {
+          "offense": {
+            "mean": 26.679710144927537,
+            "sd": 7.404064291450073,
+            "teams": 138
+          },
+          "defense": {
+            "mean": 25.854347826086958,
+            "sd": 7.119081519137034,
+            "teams": 138
+          },
+          "tempo": {
+            "mean": 11.938324292841337,
+            "sd": 0.5991016799571846,
+            "teams": 138
+          }
+        },
+        "source": "Bill Connelly SP+ via CFB Update",
+        "source_url": "https://pay.cfbupdate.com/sp-ratings",
+        "season": 2026,
+        "observed_at": "2026-11-13T14:09:24.501609+00:00",
+        "population_sha256": "49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85",
+        "source_update_label": "12 hours ago",
+        "pace_source": "SportsDataverse play-by-play; current season through the prior week, blended with the previous season",
+        "pace_through_week": 10,
+        "pace_population_sha256": "f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361"
+      },
+      "inputs": {
+        "projected_margin": 7.355608136308177,
+        "projected_total": 54.56693333333333,
+        "home_line": -3.5,
+        "total_line": 52.5,
+        "as_of": "2026-11-13T14:09:24.582136+00:00",
+        "kickoff": "2026-11-14T00:00:00+00:00"
+      },
+      "saved_row": {
+        "Date": "2026-11-13",
+        "Season": "2026",
+        "Game ID": "401858293",
+        "Away Team": "Florida St",
+        "Home Team": "Pitt",
+        "Model Version": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
+        "Build Captured At": "2026-11-13T08:44:13-05:00",
+        "Grading Policy Version": "ncaaf-sp-matchup-2026-11-13-v1",
+        "Matchup Factors JSON": "{\"away\": {\"team\": \"Florida State\", \"offense\": 33.2, \"defense\": 28.0, \"overall\": 5.5, \"special_teams\": 0.3, \"tempo\": 11.871014492753623, \"possessions\": 11.512820512820515, \"plays\": 71.1025641025641}, \"home\": {\"team\": \"Pittsburgh\", \"offense\": 30.2, \"defense\": 20.4, \"overall\": 10.2, \"special_teams\": 0.4, \"tempo\": 12.777571391818883, \"possessions\": 12.49112426035503, \"plays\": 75.74556213017752}, \"national\": {\"offense\": {\"mean\": 26.679710144927537, \"sd\": 7.404064291450073, \"teams\": 138}, \"defense\": {\"mean\": 25.854347826086958, \"sd\": 7.119081519137034, \"teams\": 138}, \"tempo\": {\"mean\": 11.938324292841337, \"sd\": 0.5991016799571846, \"teams\": 138}}, \"source\": \"Bill Connelly SP+ via CFB Update\", \"source_url\": \"https://pay.cfbupdate.com/sp-ratings\", \"season\": 2026, \"observed_at\": \"2026-11-13T14:09:24.501609+00:00\", \"population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"source_update_label\": \"12 hours ago\", \"pace_source\": \"SportsDataverse play-by-play; current season through the prior week, blended with the previous season\", \"pace_through_week\": 10, \"pace_population_sha256\": \"f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361\"}",
+        "Matchup Spread JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:24.582136+00:00\", \"kickoff\": \"2026-11-14T00:00:00+00:00\", \"published_at\": \"2026-11-13T14:09:24.582136+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 0.8806365799121767, \"defense\": 0.3013945223334281, \"tempo\": -0.11235121238939544}, \"home\": {\"offense\": 0.4754537125153758, \"defense\": -0.7661589225274286, \"tempo\": 1.400842506463217}}, \"mean_tempo_z\": 0.6442456470369108, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"B\", \"side\": \"home\", \"selection_team\": \"Pittsburgh\", \"line\": -3.5, \"home_line\": -3.5, \"edge\": 3.8556081363081773, \"projected_margin\": 7.355608136308177, \"role\": \"Favorite\", \"offense_advantage_z\": -0.40518286739680087, \"defense_advantage_z\": 1.0675534448608568, \"role_tempo_support_z\": 0.6442456470369108, \"reason\": \"A relative offense or defense advantage supports the projected cover side\"}",
+        "Matchup Total JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:24.582136+00:00\", \"kickoff\": \"2026-11-14T00:00:00+00:00\", \"published_at\": \"2026-11-13T14:09:24.582136+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 0.8806365799121767, \"defense\": 0.3013945223334281, \"tempo\": -0.11235121238939544}, \"home\": {\"offense\": 0.4754537125153758, \"defense\": -0.7661589225274286, \"tempo\": 1.400842506463217}}, \"mean_tempo_z\": 0.6442456470369108, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"B\", \"side\": \"Over\", \"line\": 52.5, \"edge\": 2.0669333333333313, \"projected_total\": 54.56693333333333, \"reason\": \"Both offenses facing the opposing defenses and matchup tempo support the projection\", \"pairing_support_z\": [0.057238828692374066, 0.38842411742440197]}",
+        "Projected Away": "23.61",
+        "Projected Home": "30.96",
+        "Projected Total": "54.57",
+        "Market Home Spread": "-3.5",
+        "Market Total": "52.5",
+        "Spread Pick": "Pittsburgh -3.5",
+        "Spread Grade": "B Spread",
+        "Spread Probability": "0.5903",
+        "Spread Edge": "3.86",
+        "Total Pick": "Over 52.5",
+        "Total Grade": "B Total",
+        "Total Probability": "0.5373",
+        "Total Edge": "2.07",
+        "Spread Odds": "-110",
+        "Total Odds": "-110"
+      }
+    },
+    "ucla": {
+      "factors": {
+        "away": {
+          "team": "Illinois",
+          "offense": 31.0,
+          "defense": 23.4,
+          "overall": 8.0,
+          "special_teams": 0.4,
+          "tempo": 10.726246462567534,
+          "possessions": 10.118343195266274,
+          "plays": 66.50295857988166
+        },
+        "home": {
+          "team": "UCLA",
+          "offense": 33.3,
+          "defense": 13.0,
+          "overall": 20.2,
+          "special_teams": -0.1,
+          "tempo": 11.871661092530656,
+          "possessions": 11.794871794871796,
+          "plays": 68.87179487179486
+        },
+        "national": {
+          "offense": {
+            "mean": 26.679710144927537,
+            "sd": 7.404064291450073,
+            "teams": 138
+          },
+          "defense": {
+            "mean": 25.854347826086958,
+            "sd": 7.119081519137034,
+            "teams": 138
+          },
+          "tempo": {
+            "mean": 11.938324292841337,
+            "sd": 0.5991016799571846,
+            "teams": 138
+          }
+        },
+        "source": "Bill Connelly SP+ via CFB Update",
+        "source_url": "https://pay.cfbupdate.com/sp-ratings",
+        "season": 2026,
+        "observed_at": "2026-11-13T14:09:24.501609+00:00",
+        "population_sha256": "49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85",
+        "source_update_label": "12 hours ago",
+        "pace_source": "SportsDataverse play-by-play; current season through the prior week, blended with the previous season",
+        "pace_through_week": 10,
+        "pace_population_sha256": "f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361"
+      },
+      "inputs": {
+        "projected_margin": 5.035818612857568,
+        "projected_total": 42.2729,
+        "home_line": -10.0,
+        "total_line": 47.5,
+        "as_of": "2026-11-13T14:09:27.918035+00:00",
+        "kickoff": "2026-11-14T02:00:00+00:00"
+      },
+      "saved_row": {
+        "Date": "2026-11-13",
+        "Season": "2026",
+        "Game ID": "401858526",
+        "Away Team": "Illinois",
+        "Home Team": "UCLA",
+        "Model Version": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
+        "Build Captured At": "2026-11-13T08:44:13-05:00",
+        "Grading Policy Version": "ncaaf-sp-matchup-2026-11-13-v1",
+        "Matchup Factors JSON": "{\"away\": {\"team\": \"Illinois\", \"offense\": 31.0, \"defense\": 23.4, \"overall\": 8.0, \"special_teams\": 0.4, \"tempo\": 10.726246462567534, \"possessions\": 10.118343195266274, \"plays\": 66.50295857988166}, \"home\": {\"team\": \"UCLA\", \"offense\": 33.3, \"defense\": 13.0, \"overall\": 20.2, \"special_teams\": -0.1, \"tempo\": 11.871661092530656, \"possessions\": 11.794871794871796, \"plays\": 68.87179487179486}, \"national\": {\"offense\": {\"mean\": 26.679710144927537, \"sd\": 7.404064291450073, \"teams\": 138}, \"defense\": {\"mean\": 25.854347826086958, \"sd\": 7.119081519137034, \"teams\": 138}, \"tempo\": {\"mean\": 11.938324292841337, \"sd\": 0.5991016799571846, \"teams\": 138}}, \"source\": \"Bill Connelly SP+ via CFB Update\", \"source_url\": \"https://pay.cfbupdate.com/sp-ratings\", \"season\": 2026, \"observed_at\": \"2026-11-13T14:09:24.501609+00:00\", \"population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"source_update_label\": \"12 hours ago\", \"pace_source\": \"SportsDataverse play-by-play; current season through the prior week, blended with the previous season\", \"pace_through_week\": 10, \"pace_population_sha256\": \"f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361\"}",
+        "Matchup Spread JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:27.918035+00:00\", \"kickoff\": \"2026-11-14T02:00:00+00:00\", \"published_at\": \"2026-11-13T14:09:27.918035+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 0.5835024771545226, \"defense\": -0.3447562469244589, \"tempo\": -2.023158790608674}, \"home\": {\"offense\": 0.8941426754920693, \"defense\": -1.80561885568142, \"tempo\": -0.11127193019295879}}, \"mean_tempo_z\": -1.0672153604008165, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"Research\", \"side\": \"away\", \"selection_team\": \"Illinois\", \"line\": 10.0, \"home_line\": -10.0, \"edge\": 4.964181387142432, \"projected_margin\": 5.035818612857568, \"role\": \"Underdog\", \"offense_advantage_z\": -0.31064019833754664, \"defense_advantage_z\": -1.4608626087569612, \"role_tempo_support_z\": 1.0672153604008165, \"reason\": \"The projected cover side lacks a relative offense or defense advantage\"}",
+        "Matchup Total JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:27.918035+00:00\", \"kickoff\": \"2026-11-14T02:00:00+00:00\", \"published_at\": \"2026-11-13T14:09:27.918035+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 0.5835024771545226, \"defense\": -0.3447562469244589, \"tempo\": -2.023158790608674}, \"home\": {\"offense\": 0.8941426754920693, \"defense\": -1.80561885568142, \"tempo\": -0.11127193019295879}}, \"mean_tempo_z\": -1.0672153604008165, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"B\", \"side\": \"Under\", \"line\": 47.5, \"edge\": 5.2271, \"projected_total\": 42.2729, \"reason\": \"Strong scoring pairing and extreme supporting matchup tempo\", \"pairing_support_z\": [0.6110581892634488, -0.2746932142838052]}",
+        "Projected Away": "18.62",
+        "Projected Home": "23.65",
+        "Projected Total": "42.27",
+        "Market Home Spread": "-10.0",
+        "Market Total": "47.5",
+        "Spread Pick": "Illinois +10",
+        "Spread Grade": "No Play",
+        "Spread Probability": "0.6059",
+        "Spread Edge": "4.96",
+        "Total Pick": "Under 47.5",
+        "Total Grade": "B Total",
+        "Total Probability": "0.6667",
+        "Total Edge": "5.23",
+        "Spread Odds": "-110",
+        "Total Odds": "-110"
+      }
+    },
+    "houston": {
+      "factors": {
+        "away": {
+          "team": "Houston",
+          "offense": 37.2,
+          "defense": 23.4,
+          "overall": 14.1,
+          "special_teams": 0.4,
+          "tempo": 11.830527399022381,
+          "possessions": 10.91715976331361,
+          "plays": 75.27810650887574
+        },
+        "home": {
+          "team": "Colorado",
+          "offense": 21.9,
+          "defense": 26.5,
+          "overall": -5.2,
+          "special_teams": -0.6,
+          "tempo": 12.479442586399106,
+          "possessions": 12.435897435897434,
+          "plays": 72.1025641025641
+        },
+        "national": {
+          "offense": {
+            "mean": 26.679710144927537,
+            "sd": 7.404064291450073,
+            "teams": 138
+          },
+          "defense": {
+            "mean": 25.854347826086958,
+            "sd": 7.119081519137034,
+            "teams": 138
+          },
+          "tempo": {
+            "mean": 11.938324292841337,
+            "sd": 0.5991016799571846,
+            "teams": 138
+          }
+        },
+        "source": "Bill Connelly SP+ via CFB Update",
+        "source_url": "https://pay.cfbupdate.com/sp-ratings",
+        "season": 2026,
+        "observed_at": "2026-11-13T14:09:24.501609+00:00",
+        "population_sha256": "49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85",
+        "source_update_label": "12 hours ago",
+        "pace_source": "SportsDataverse play-by-play; current season through the prior week, blended with the previous season",
+        "pace_through_week": 10,
+        "pace_population_sha256": "f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361"
+      },
+      "inputs": {
+        "projected_margin": -12.051803771512816,
+        "projected_total": 46.32086666666667,
+        "home_line": 8.5,
+        "total_line": 51.5,
+        "as_of": "2026-11-13T14:09:31.121427+00:00",
+        "kickoff": "2026-11-14T03:15:00+00:00"
+      },
+      "saved_row": {
+        "Date": "2026-11-13",
+        "Season": "2026",
+        "Game ID": "401856860",
+        "Away Team": "Houston",
+        "Home Team": "Colorado",
+        "Model Version": "cfb-v2.8.1-five-game-residual-totals-2026-10-07",
+        "Build Captured At": "2026-11-13T08:44:13-05:00",
+        "Grading Policy Version": "ncaaf-sp-matchup-2026-11-13-v1",
+        "Matchup Factors JSON": "{\"away\": {\"team\": \"Houston\", \"offense\": 37.2, \"defense\": 23.4, \"overall\": 14.1, \"special_teams\": 0.4, \"tempo\": 11.830527399022381, \"possessions\": 10.91715976331361, \"plays\": 75.27810650887574}, \"home\": {\"team\": \"Colorado\", \"offense\": 21.9, \"defense\": 26.5, \"overall\": -5.2, \"special_teams\": -0.6, \"tempo\": 12.479442586399106, \"possessions\": 12.435897435897434, \"plays\": 72.1025641025641}, \"national\": {\"offense\": {\"mean\": 26.679710144927537, \"sd\": 7.404064291450073, \"teams\": 138}, \"defense\": {\"mean\": 25.854347826086958, \"sd\": 7.119081519137034, \"teams\": 138}, \"tempo\": {\"mean\": 11.938324292841337, \"sd\": 0.5991016799571846, \"teams\": 138}}, \"source\": \"Bill Connelly SP+ via CFB Update\", \"source_url\": \"https://pay.cfbupdate.com/sp-ratings\", \"season\": 2026, \"observed_at\": \"2026-11-13T14:09:24.501609+00:00\", \"population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"source_update_label\": \"12 hours ago\", \"pace_source\": \"SportsDataverse play-by-play; current season through the prior week, blended with the previous season\", \"pace_through_week\": 10, \"pace_population_sha256\": \"f05abbdc9cadc7b0b012f3231f0c38d456f683985331b2fb719e51357306a361\"}",
+        "Matchup Spread JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:31.121427+00:00\", \"kickoff\": \"2026-11-14T03:15:00+00:00\", \"published_at\": \"2026-11-13T14:09:31.121427+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 1.4208804031079105, \"defense\": -0.3447562469244589, \"tempo\": -0.17993088222797024}, \"home\": {\"offense\": -0.6455522206157721, \"defense\": 0.0906931845319433, \"tempo\": 0.9032161178323532}}, \"mean_tempo_z\": 0.3616426178021915, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"B\", \"side\": \"away\", \"selection_team\": \"Houston\", \"line\": -8.5, \"home_line\": 8.5, \"edge\": 3.551803771512816, \"projected_margin\": -12.051803771512816, \"role\": \"Favorite\", \"offense_advantage_z\": 2.0664326237236827, \"defense_advantage_z\": 0.4354494314564022, \"role_tempo_support_z\": 0.3616426178021915, \"reason\": \"A relative offense or defense advantage supports the projected cover side\"}",
+        "Matchup Total JSON": "{\"policy_version\": \"ncaaf-sp-matchup-2026-11-13-v1\", \"policy_sha256\": \"eee42655ffc1b34fa890fb33c871db0009711c3869ce0febda5898df60b46c89\", \"status\": \"provisional\", \"as_of\": \"2026-11-13T14:09:31.121427+00:00\", \"kickoff\": \"2026-11-14T03:15:00+00:00\", \"published_at\": \"2026-11-13T14:09:31.121427+00:00\", \"record_mode\": \"live\", \"z\": {\"away\": {\"offense\": 1.4208804031079105, \"defense\": -0.3447562469244589, \"tempo\": -0.17993088222797024}, \"home\": {\"offense\": -0.6455522206157721, \"defense\": 0.0906931845319433, \"tempo\": 0.9032161178323532}}, \"mean_tempo_z\": 0.3616426178021915, \"source_population_sha256\": \"49e6597e5dce523b0e03a340a361cd97f988caef393d61970f1c1e606f48ec85\", \"grade\": \"Research\", \"side\": \"Under\", \"line\": 51.5, \"edge\": 5.179133333333333, \"projected_total\": 46.32086666666667, \"reason\": \"The projected direction lacks offense\\u2013defense\\u2013tempo agreement\", \"pairing_support_z\": [-0.755786793819927, 0.49515423377011547]}",
+        "Projected Away": "29.19",
+        "Projected Home": "17.13",
+        "Projected Total": "46.32",
+        "Market Home Spread": "8.5",
+        "Market Total": "51.5",
+        "Spread Pick": "Houston -8.5",
+        "Spread Grade": "B Spread",
+        "Spread Probability": "0.5941",
+        "Spread Edge": "3.55",
+        "Total Pick": "Under 51.5",
+        "Total Grade": "No Play",
+        "Total Probability": "0.6567",
+        "Total Edge": "5.18",
+        "Spread Odds": "-110",
+        "Total Odds": "-110"
+      }
+    }
+  }
+}
