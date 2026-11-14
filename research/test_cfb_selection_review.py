@@ -14,10 +14,25 @@ def grade(name, *, line=None, total=None, policy=None):
     c = CASES[name]; values = deepcopy(c['inputs'])
     if line is not None: values['home_line'] = line
     if total is not None: values['total_line'] = total
+    if policy is None:
+        policy = load_policy()
+        policy['selection_review']['enabled'] = True
     return grade_matchup(c['factors'], **values, policy=policy)
 
 
 class SelectionReviewTests(unittest.TestCase):
+    def test_live_policy_restores_candidates_for_manual_review(self):
+        policy = load_policy()
+        self.assertFalse(policy['selection_review']['enabled'])
+        restored = grade('pitt', policy=policy)
+        self.assertEqual(restored['spread']['grade'], 'B')
+        self.assertEqual(restored['total']['grade'], 'B')
+        self.assertNotIn('selection_review', restored['total'])
+        self.assertEqual(grade('houston', line=12, policy=policy)['spread']['grade'], 'B')
+        # The original market-size limit and projection direction still apply.
+        self.assertEqual(grade('houston', line=20, policy=policy)['spread']['grade'], 'Research')
+        self.assertNotEqual(grade('ucla', total=40, policy=policy)['total']['side'], 'Under')
+
     def test_pitt_favorite_and_over_are_excluded_without_flipping_the_selection(self):
         g = grade('pitt')
         self.assertEqual((g['spread']['grade'], g['spread']['side']), ('Research', 'home'))
