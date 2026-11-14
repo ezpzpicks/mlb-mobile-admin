@@ -1,0 +1,47 @@
+{
+  "version": "ncaam-spread-grades-2026-11-12-v1",
+  "status": "live",
+  "evaluation_dates": [
+    "2026-11-08",
+    "2026-11-09",
+    "2026-11-10",
+    "2026-11-11"
+  ],
+  "selection": "Latest valid pregame projection at its paired saved market spread",
+  "projection_agreement": "Projected selected-team margin plus its saved spread must be positive",
+  "edge_window": {
+    "minimum_inclusive": 1.0,
+    "maximum_exclusive": 4.0
+  },
+  "A_profiles": [
+    {
+      "id": "defense-supported",
+      "minimum_edge": 2.0,
+      "picked_defense_z_maximum": -1.0,
+      "maximum_opposing_matchup_tempo_z_exclusive": 1.0
+    },
+    {
+      "id": "three-factor-confluence",
+      "minimum_edge": 3.0,
+      "picked_offense_higher_than_opponent": true,
+      "picked_defense_lower_than_opponent": true,
+      "tempo": "Average matchup tempo above national mean for favorite; below mean for underdog"
+    }
+  ],
+  "B_profile": {
+    "minimum_edge": 1.0,
+    "require_any": [
+      "Picked offense higher than opponent",
+      "Picked defense lower than opponent"
+    ],
+    "exclude_A": true
+  },
+  "Research": "Outside edge window, flat projection, or no qualifying A/B combination",
+  "national_average": "Latest retained same-season 365-team snapshot observed no later than forecast capture",
+  "price_assumption": "-110; one unit risked per play; overtime included",
+  "research_limit": "Exploratory rules selected using these four days; no independent validation claim",
+  "input_limits": {
+    "max_benchmark_age_hours": 30,
+    "max_market_age_minutes": 90
+  }
+}

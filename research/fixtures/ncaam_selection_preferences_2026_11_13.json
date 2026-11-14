@@ -1,0 +1,922 @@
+{
+  "source": "Saved public pregame forecasts; outcome fields deliberately omitted",
+  "date": "2026-11-13",
+  "cases": {
+    "miami": {
+      "recordId": "401921721|ncaam-v0.6-team-home-court-2026-11-03|pregame|020de10a644446e9",
+      "gameId": "401921721",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "North Alabama Lions",
+      "home_team": "Miami Hurricanes",
+      "lockedAt": "2026-11-13T20:37:23.836434+00:00",
+      "tipoff": "2026-11-13T22:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T17:37:17+00:00",
+      "market": {
+        "home_spread": -32.5,
+        "total": 152.5,
+        "as_of": "2026-11-13T20:37:14+00:00",
+        "source": "ESPN",
+        "source_url": "https://www.espn.com/mens-college-basketball/game/_/gameId/401921721",
+        "provider_id": "100",
+        "provider": "Draft Kings",
+        "quote_kind": "current_pregame",
+        "odds": -110
+      },
+      "fair_home_spread": -30.45,
+      "total": 152.25,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 100.5120413246147,
+        "defense": 112.4449967947258,
+        "tempo": 69.30005844647124
+      },
+      "home_rating": {
+        "offense": 118.45802805653665,
+        "defense": 95.86564047260262,
+        "tempo": 71.18223669040934
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T17:37:17+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.89226727688826,
+            "sd": 7.045312738590407
+          },
+          "defense": {
+            "mean": 105.91457298082075,
+            "sd": 5.661674099257878
+          },
+          "tempo": {
+            "mean": 70.67259053931467,
+            "sd": 2.348390026695696
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.7636603443880637,
+          "defense": 1.1534439636433758,
+          "tempo": -0.5844566180408503
+        },
+        "home": {
+          "offense": 1.7835632350030333,
+          "defense": -1.7749047953034467,
+          "tempo": 0.21701938149165495
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "fsu": {
+      "recordId": "401909696|ncaam-v0.6-team-home-court-2026-11-03|pregame|9827e9713a6f9cf5",
+      "gameId": "401909696",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Texas A&M-Corpus Christi Islanders",
+      "home_team": "Florida State Seminoles",
+      "lockedAt": "2026-11-13T21:07:21.564918+00:00",
+      "tipoff": "2026-11-13T22:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T17:37:17+00:00",
+      "market": {
+        "home_spread": -24.5,
+        "total": 148.5,
+        "as_of": "2026-11-13T21:05:11.516000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -17.38,
+      "total": 145.66,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 99.39962528487052,
+        "defense": 102.91992046958143,
+        "tempo": 69.28309178763732
+      },
+      "home_rating": {
+        "offense": 114.54362071982383,
+        "defense": 99.24132674868886,
+        "tempo": 73.19265418247147
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T17:37:17+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.89226727688826,
+            "sd": 7.045312738590407
+          },
+          "defense": {
+            "mean": 105.91457298082075,
+            "sd": 5.661674099257878
+          },
+          "tempo": {
+            "mean": 70.67259053931467,
+            "sd": 2.348390026695696
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.9215548312645601,
+          "defense": -0.5289341030123682,
+          "tempo": -0.5916814225414023
+        },
+        "home": {
+          "offense": 1.2279587527105993,
+          "defense": -1.1786701451089536,
+          "tempo": 1.0731026850351004
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "rutgers": {
+      "recordId": "401923270|ncaam-v0.6-team-home-court-2026-11-03|pregame|d38abca839cd9cd1",
+      "gameId": "401923270",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Bryant Bulldogs",
+      "home_team": "Rutgers Scarlet Knights",
+      "lockedAt": "2026-11-13T21:37:24.022559+00:00",
+      "tipoff": "2026-11-13T23:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T17:37:17+00:00",
+      "market": {
+        "home_spread": -21.5,
+        "total": 148.5,
+        "as_of": "2026-11-13T21:35:12.259000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -24.03,
+      "total": 150.39,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 94.69844219249904,
+        "defense": 109.56688484537109,
+        "tempo": 69.37415199086364
+      },
+      "home_rating": {
+        "offense": 113.44610918779887,
+        "defense": 101.84805446580555,
+        "tempo": 74.92386240446713
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T17:37:17+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.89226727688826,
+            "sd": 7.045312738590407
+          },
+          "defense": {
+            "mean": 105.91457298082075,
+            "sd": 5.661674099257878
+          },
+          "tempo": {
+            "mean": 70.67259053931467,
+            "sd": 2.348390026695696
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -1.588832958837371,
+          "defense": 0.6450939775973824,
+          "tempo": -0.5529058349298137
+        },
+        "home": {
+          "offense": 1.0721797869290814,
+          "defense": -0.7182537256159333,
+          "tempo": 1.8102920796057953
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "pitt": {
+      "recordId": "401902278|ncaam-v0.6-team-home-court-2026-11-03|pregame|cdc402ce5dc30f1f",
+      "gameId": "401902278",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Pittsburgh Panthers",
+      "home_team": "Butler Bulldogs",
+      "lockedAt": "2026-11-13T23:07:25.673277+00:00",
+      "tipoff": "2026-11-13T23:30:00+00:00",
+      "ratings_observed_at": "2026-11-13T17:37:17+00:00",
+      "market": {
+        "home_spread": -3.5,
+        "total": 157.5,
+        "as_of": "2026-11-13T23:05:09.357000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -1.51,
+      "total": 157.36,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 110.73148775225877,
+        "defense": 100.98685610731141,
+        "tempo": 69.54692778914571
+      },
+      "home_rating": {
+        "offense": 110.90751871447054,
+        "defense": 102.13959546920263,
+        "tempo": 78.52146891187756
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T17:37:17+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.89226727688826,
+            "sd": 7.045312738590407
+          },
+          "defense": {
+            "mean": 105.91457298082075,
+            "sd": 5.661674099257878
+          },
+          "tempo": {
+            "mean": 70.67259053931467,
+            "sd": 2.348390026695696
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": 0.6868709246736319,
+          "defense": -0.8703639218928648,
+          "tempo": -0.47933381481474824
+        },
+        "home": {
+          "offense": 0.7118564673660899,
+          "defense": -0.6667599451040348,
+          "tempo": 3.3422379942596945
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "tennessee": {
+      "recordId": "401906850|ncaam-v0.6-team-home-court-2026-11-03|pregame|04ca28f307ec30d9",
+      "gameId": "401906850",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Tennessee State Tigers",
+      "home_team": "Tennessee Volunteers",
+      "lockedAt": "2026-11-13T23:37:39.198929+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -27.5,
+        "total": 157.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -23.48,
+      "total": 151.78,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 103.95573126254466,
+        "defense": 106.63104024467904,
+        "tempo": 72.97756407014603
+      },
+      "home_rating": {
+        "offense": 118.41373986972286,
+        "defense": 96.29223034397215,
+        "tempo": 69.03369829322972
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.27395233674890906,
+          "defense": 0.12719297168438087,
+          "tempo": 0.9817460287105605
+        },
+        "home": {
+          "offense": 1.7782083503303439,
+          "defense": -1.7014553205368033,
+          "tempo": -0.6905650587848352
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "purdue": {
+      "recordId": "401926133|ncaam-v0.6-team-home-court-2026-11-03|pregame|b891be5b23a871da",
+      "gameId": "401926133",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Ohio Bobcats",
+      "home_team": "Purdue Boilermakers",
+      "lockedAt": "2026-11-13T23:37:40.281572+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -18.5,
+        "total": 149.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -20.66,
+      "total": 151.67,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 106.24359082930405,
+        "defense": 109.3111255806572,
+        "tempo": 72.11027194271263
+      },
+      "home_rating": {
+        "offense": 116.46869450833147,
+        "defense": 97.30934872297044,
+        "tempo": 67.1363040523351
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": 0.050785017338068755,
+          "defense": 0.6012256233833366,
+          "tempo": 0.6139895372768197
+        },
+        "home": {
+          "offense": 1.5021298298588919,
+          "defense": -1.5215553316014392,
+          "tempo": -1.4951140992136271
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "charlotte": {
+      "recordId": "401925820|ncaam-v0.6-team-home-court-2026-11-03|pregame|c3adb148e966319f",
+      "gameId": "401925820",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "App State Mountaineers",
+      "home_team": "Charlotte 49ers",
+      "lockedAt": "2026-11-13T23:37:40.659186+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -8.5,
+        "total": 132.5,
+        "as_of": "2026-11-13T23:37:28+00:00",
+        "source": "ESPN",
+        "source_url": "https://www.espn.com/mens-college-basketball/game/_/gameId/401925820",
+        "provider_id": "100",
+        "provider": "Draft Kings",
+        "quote_kind": "current_pregame",
+        "odds": -110
+      },
+      "fair_home_spread": -11.72,
+      "total": 140.52,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 100.09566286599704,
+        "defense": 105.29870485377367,
+        "tempo": 65.95292144210615
+      },
+      "home_rating": {
+        "offense": 110.94526641425756,
+        "defense": 104.15963893968117,
+        "tempo": 68.66297354215422
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.821848027508089,
+          "defense": -0.10846015093260128,
+          "tempo": -1.9969019317048462
+        },
+        "home": {
+          "offense": 0.7181379053458642,
+          "defense": -0.30992927151196237,
+          "tempo": -0.8477628810994875
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "marist": {
+      "recordId": "401924796|ncaam-v0.6-team-home-court-2026-11-03|pregame|d90491d2ce0c28a1",
+      "gameId": "401924796",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Marist Red Foxes",
+      "home_team": "Lehigh Mountain Hawks",
+      "lockedAt": "2026-11-13T23:37:40.974270+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -2.5,
+        "total": 133.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -1.14,
+      "total": 137.61,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 98.60712526700009,
+        "defense": 104.3058890979107,
+        "tempo": 69.0484756775386
+      },
+      "home_rating": {
+        "offense": 99.28263287483934,
+        "defense": 107.34668228005097,
+        "tempo": 70.12950480000035
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -1.0331301220825984,
+          "defense": -0.2840616808848047,
+          "tempo": -0.6842990281890241
+        },
+        "home": {
+          "offense": -0.9372489952763517,
+          "defense": 0.25377016948498005,
+          "tempo": -0.2259119811501886
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "columbia": {
+      "recordId": "401924704|ncaam-v0.6-team-home-court-2026-11-03|pregame|d6ff2b3a58606755",
+      "gameId": "401924704",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Columbia Lions",
+      "home_team": "Bucknell Bison",
+      "lockedAt": "2026-11-13T23:37:41.333698+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": 5.5,
+        "total": 146.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": 7.8,
+      "total": 146.85,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 104.37238698973115,
+        "defense": 109.36721823980731,
+        "tempo": 69.4953790769818
+      },
+      "home_rating": {
+        "offense": 95.89326955822983,
+        "defense": 113.47390861719154,
+        "tempo": 69.78483690380365
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.21481248377122963,
+          "defense": 0.6111468567115538,
+          "tempo": -0.49479929564168396
+        },
+        "home": {
+          "offense": -1.4183331017778003,
+          "defense": 1.3375063136903862,
+          "tempo": -0.37206095703245756
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "fiu": {
+      "recordId": "401922211|ncaam-v0.6-team-home-court-2026-11-03|pregame|13a7e7774440b24a",
+      "gameId": "401922211",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Florida International Panthers",
+      "home_team": "Florida Gulf Coast Eagles",
+      "lockedAt": "2026-11-13T23:37:41.665944+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -2.5,
+        "total": 160.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": 0.96,
+      "total": 158.29,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 105.32653628592658,
+        "defense": 106.35966538252075,
+        "tempo": 80.96279070216355
+      },
+      "home_rating": {
+        "offense": 103.06420737063996,
+        "defense": 108.20367365556797,
+        "tempo": 68.977784569994
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.0793811302247644,
+          "defense": 0.07919429649802326,
+          "tempo": 4.3677088855214885
+        },
+        "home": {
+          "offense": -0.40049467963078883,
+          "defense": 0.4053481393227166,
+          "tempo": -0.7142740652772804
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "elon": {
+      "recordId": "401920973|ncaam-v0.6-team-home-court-2026-11-03|pregame|ae6bfcc9bc76e225",
+      "gameId": "401920973",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Chattanooga Mocs",
+      "home_team": "Elon Phoenix",
+      "lockedAt": "2026-11-13T23:37:42.362861+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -1.5,
+        "total": 151.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -5.09,
+      "total": 153.12,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 104.89603591664442,
+        "defense": 113.42501420700862,
+        "tempo": 70.31160625786757
+      },
+      "home_rating": {
+        "offense": 104.50309108534648,
+        "defense": 108.87174943687614,
+        "tempo": 69.03387092399963
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.14048608303101187,
+          "defense": 1.3288582506600315,
+          "tempo": -0.14869579168885838
+        },
+        "home": {
+          "offense": -0.19626042629570326,
+          "defense": 0.5235121880184953,
+          "tempo": -0.6904918584360167
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "fordham": {
+      "recordId": "401911197|ncaam-v0.6-team-home-court-2026-11-03|pregame|09e55c39c06a2b0e",
+      "gameId": "401911197",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "Long Island University Sharks",
+      "home_team": "Fordham Rams",
+      "lockedAt": "2026-11-13T23:37:44.022071+00:00",
+      "tipoff": "2026-11-14T00:00:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -12.5,
+        "total": 145.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -9.44,
+      "total": 145.33,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 98.88991579945703,
+        "defense": 106.47369321164166,
+        "tempo": 71.19550410173609
+      },
+      "home_rating": {
+        "offense": 107.78079005658114,
+        "defense": 105.06543383652856,
+        "tempo": 69.57470101426293
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.9929910110090152,
+          "defense": 0.09936265213955527,
+          "tempo": 0.2261019950832785
+        },
+        "home": {
+          "offense": 0.2689741129553196,
+          "defense": -0.14971931435728264,
+          "tempo": -0.4611645416464417
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    },
+    "drake": {
+      "recordId": "401927363|ncaam-v0.6-team-home-court-2026-11-03|pregame|41bb22ddfd952c5f",
+      "gameId": "401927363",
+      "modelVersion": "ncaam-v0.6-team-home-court-2026-11-03",
+      "away_team": "South Dakota Coyotes",
+      "home_team": "Drake Bulldogs",
+      "lockedAt": "2026-11-13T23:37:45.021902+00:00",
+      "tipoff": "2026-11-14T00:30:00+00:00",
+      "ratings_observed_at": "2026-11-13T23:36:27+00:00",
+      "market": {
+        "home_spread": -13.5,
+        "total": 158.5,
+        "as_of": "2026-11-13T23:35:08.913000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "fair_home_spread": -12.63,
+      "total": 158.78,
+      "home_court": {
+        "season": 2027
+      },
+      "away_rating": {
+        "offense": 101.91558343821862,
+        "defense": 114.16650016009666,
+        "tempo": 74.59702165055627
+      },
+      "home_rating": {
+        "offense": 107.85160092991744,
+        "defense": 107.08334278248331,
+        "tempo": 70.18778646319716
+      },
+      "benchmark": {
+        "observed_at": "2026-11-13T23:36:27+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.88579710368965,
+            "sd": 7.045261464274334
+          },
+          "defense": {
+            "mean": 105.91191674753378,
+            "sd": 5.653799008090704
+          },
+          "tempo": {
+            "mean": 70.66228039284054,
+            "sd": 2.3583326131162603
+          }
+        }
+      },
+      "z": {
+        "away": {
+          "offense": -0.5635296412494423,
+          "defense": 1.4600065196428806,
+          "tempo": 1.66844203223583
+        },
+        "home": {
+          "offense": 0.2790249639699161,
+          "defense": 0.20719272709786787,
+          "tempo": -0.20119890086937264
+        }
+      },
+      "reference": {
+        "low_total": 144.5,
+        "high_total": 157.5,
+        "quote_count": 128,
+        "observed_at": "2026-11-13T01:35:08.301000+00:00"
+      }
+    }
+  }
+}

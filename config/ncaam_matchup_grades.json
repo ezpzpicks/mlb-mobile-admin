@@ -1,5 +1,5 @@
 {
-  "version": "ncaam-matchup-grades-2026-11-12-v2",
+  "version": "ncaam-matchup-grades-2026-11-13-v3",
   "status": "live",
   "projection_agreement_required": true,
   "thresholds": {
@@ -28,5 +28,25 @@
     {"id": "under-very-slow-supported", "side": "Under", "kind": "tempo_supported", "tempo_threshold": "very_extreme_z", "grade": "A", "priority": 90, "enabled": true, "label": "Very slow team with favorable opposing offense/defense pairing"},
     {"id": "under-three-matchup", "side": "Under", "kind": "matchup_three", "grade": "B", "priority": 80, "enabled": true, "label": "Weak offense, good defense and slow team somewhere in the matchup"},
     {"id": "under-slow-supported", "side": "Under", "kind": "tempo_supported", "tempo_threshold": "extreme_z", "grade": "B", "priority": 70, "enabled": true, "label": "Slow team with favorable opposing offense/defense pairing"}
-  ]
+  ],
+  "selection_review": {
+    "version": "ryan-matchup-review-2026-11-13-v1",
+    "enabled": true,
+    "basis": "Explicit matchup preferences; operational defaults, not optimized or validated probabilities",
+    "meaningful_efficiency_z": 1.0,
+    "strong_defense_z": 1.0,
+    "very_strong_defense_z": 1.5,
+    "solid_defense_z": 0.5,
+    "weak_attack_z": 0.5,
+    "tempo_gap_z": 1.0,
+    "matched_tempo_z": 0.5,
+    "near_even_dog_points": 5.0,
+    "matched_tempo_points": 3.5,
+    "weak_favorite_maximum_points": 8.0,
+    "medium_favorite_points": 8.0,
+    "large_favorite_points": 15.0,
+    "very_large_favorite_points": 25.0,
+    "slow_controller_tempo_z": 1.0,
+    "high_total_points": 150.0
+  }
 }

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'builders/ncaam_*.py'
+      - 'config/ncaam_*.json'
       - 'scripts/run_ncaam_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'shared/ncaam_*.py'
@@ -20,6 +21,7 @@ on:
     branches: [main]
     paths:
       - 'builders/ncaam_*.py'
+      - 'config/ncaam_*.json'
       - 'scripts/run_ncaam_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'shared/ncaam_*.py'
