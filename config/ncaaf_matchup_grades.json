@@ -1,5 +1,5 @@
 {
-  "version": "ncaaf-sp-matchup-2026-11-13-v1",
+  "version": "ncaaf-sp-matchup-2026-11-13-v2",
   "status": "provisional",
   "description": "Published SP+ factors with projection agreement; grades measure matchup support, not calibrated win probabilities.",
   "thresholds": {
@@ -18,5 +18,18 @@
     "A": "The projected cover side has strong relative offense and defense advantages, with no extreme role-tempo conflict.",
     "B": "The projected cover side has at least one relative offense/defense advantage and no extreme role-tempo conflict.",
     "minimum_projection_edge": 0.0
+  },
+  "selection_review": {
+    "version": "ryan-ncaaf-review-2026-11-13-v1",
+    "enabled": true,
+    "basis": "Explicit matchup preferences; not historical probability calibration",
+    "minimum_attacking_pair_z": 0.5,
+    "suppressed_attack_pair_z": 0.5,
+    "strong_offense_z": 0.5,
+    "average_band_z": 0.5,
+    "slow_tempo_z": 0.5,
+    "good_defense_z": 0.5,
+    "medium_favorite_points": 7.0,
+    "strong_attack_weak_opponent_maximum_points": 11.5
   }
 }
