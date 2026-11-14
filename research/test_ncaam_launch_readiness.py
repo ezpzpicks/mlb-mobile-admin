@@ -10,6 +10,7 @@ from builders.ncaam_model import team_key
 from builders.ncaam_player_impact import POLICY
 from scripts import run_ncaam_builder as runner
 from scripts import run_scheduled_builders as dispatcher
+from research.ncaam_test_support import atomic_grade_storage, complete_population
 
 NOW=datetime(2026,11,1,6,tzinfo=timezone.utc)
 SOURCE=json.loads((Path(__file__).parent/'fixtures/espn_ncaam_odds_2026_11_01.json').read_text())
@@ -42,8 +43,8 @@ def test_default_builder_saves_all_119_games_and_repeat_is_idempotent(monkeypatc
         payload['events'].append(event)
     games=runner.parse_slate(payload,'2026-11-01')
     bundle={'season':2027,'observed_at':NOW.isoformat(),'source':'Test','source_url':'https://example.test',
-            'league_efficiency':105,'teams':{team_key(game[side]):{'team':game[side],'offense':110,'defense':100,'tempo':68}
-                                           for game in games for side in ['away','home']}}
+            'league_efficiency':105,'teams':complete_population({team_key(game[side]):{'team':game[side],'offense':110,'defense':100,'tempo':68}
+                                           for game in games for side in ['away','home']})}
     class Clock(datetime):
         @classmethod
         def now(cls,tz=None): return NOW.astimezone(tz) if tz else NOW.replace(tzinfo=None)
@@ -56,10 +57,11 @@ def test_default_builder_saves_all_119_games_and_repeat_is_idempotent(monkeypatc
     monkeypatch.setattr(ncaaf_auto_builder,'eligible_markets',lambda *_a:([],[]))
     saved=[]
     monkeypatch.setattr(runner.store,'rows',lambda _db,dataset,_day:saved if dataset==runner.store.FORECASTS else [])
-    monkeypatch.setattr(runner.store,'upsert',lambda _db,_dataset,row,**_kw:saved.append(row))
+    annotations=atomic_grade_storage(monkeypatch,runner,saved,Clock)
     monkeypatch.setenv('NCAAM_AUTO_BUILDER_ENABLED','1')
     assert runner.main(['--commit'])==0
     assert len(saved)==119
+    assert len(annotations)==238
     ids={json.loads(row['Details JSON'])['gameId'] for row in saved}
     assert ids=={game['game_id'] for game in games}
     assert runner.main(['--commit'])==0 and len(saved)==119

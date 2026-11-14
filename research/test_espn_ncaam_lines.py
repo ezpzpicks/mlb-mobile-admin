@@ -125,13 +125,14 @@ def test_cache_age_and_server_clock_are_preserved():
 
 @pytest.mark.parametrize('mode', ['espn', 'sao', 'covers'])
 def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_forecasts(monkeypatch, mode):
+    from research.ncaam_test_support import atomic_grade_storage, complete_population
     payload = deepcopy(FIXTURE)
     if mode == 'covers':
         payload['events'][1]['competitions'][0]['odds'] = []
     games = runner.parse_slate(payload, '2026-11-01')
     bundle = {'season': 2027, 'observed_at': NOW.isoformat(), 'source': 'Test dated ratings', 'source_url': 'https://example.test',
-              'league_efficiency': 105, 'teams': {team_key(game[side]): {'team': game[side], 'offense': 110, 'defense': 100, 'tempo': 68}
-                                                 for game in games for side in ['away', 'home']}}
+              'league_efficiency': 105, 'teams': complete_population({team_key(game[side]): {'team': game[side], 'offense': 110, 'defense': 100, 'tempo': 68}
+                                                 for game in games for side in ['away', 'home']})}
     saved, requests, covers = [], [], []
     class Clock(datetime):
         offset = timedelta()
@@ -150,10 +151,7 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     monkeypatch.setattr(turso_storage, 'is_turso_ready', lambda: True)
     monkeypatch.setattr(runner.store, 'rows', lambda _db, dataset, _day: saved if dataset == runner.store.FORECASTS else
                         [{'Details JSON': json.dumps(bundle)}] if dataset == runner.store.RATINGS else [])
-    def save(_db, dataset, row, *, immutable=False):
-        assert dataset == runner.store.FORECASTS and immutable
-        saved.append(row)
-    monkeypatch.setattr(runner.store, 'upsert', save)
+    annotations = atomic_grade_storage(monkeypatch, runner, saved, Clock)
     def market(game, source):
         return MarketGame(game['date'], game['away'], game['home'], datetime.fromisoformat(game['tipoff']), NOW,
                           -4.5, 150, None, None, game['game_id'], source, 'https://example.test')
@@ -167,6 +165,7 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     assert runner.run(args) == 0
     forecasts = {json.loads(row['Details JSON'])['gameId']: json.loads(row['Details JSON']) for row in saved}
     assert len(forecasts) == 2 and len(requests) == 1
+    assert len(annotations) == 4
     assert forecasts['401920982']['market']['source'] == ('ScoresAndOdds' if mode == 'sao' else 'ESPN')
     assert forecasts['401920409']['market']['source'] == ('Covers' if mode == 'covers' else 'ESPN')
     assert all(f['spread_grade'] == 'Research' and f['modelVersion'] == MODEL_VERSION for f in forecasts.values())
@@ -177,12 +176,15 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     target = bundle['teams'][team_key(games[0]['home'])]
     target['offense'] = 115
     Clock.offset = timedelta(seconds=1)
-    assert runner.run(args) == 0 and len(saved) == 3
+    # The changed national population is part of both games' grade inputs,
+    # so both retain new immutable captures even if one score is unchanged.
+    assert runner.run(args) == 0 and len(saved) == 4
     target['offense'] = 110
     Clock.offset = timedelta(seconds=2)
-    assert runner.run(args) == 0 and len(saved) == 4
-    restored = json.loads(saved[-1]['Details JSON'])
+    assert runner.run(args) == 0 and len(saved) == 6
+    restored = next(json.loads(row['Details JSON']) for row in reversed(saved)
+                    if json.loads(row['Details JSON'])['gameId'] == games[0]['game_id'])
     assert restored['home_score'] == forecasts[games[0]['game_id']]['home_score']
     assert restored['inputDigest'] == forecasts[games[0]['game_id']]['inputDigest']
     assert restored['recordId'] != forecasts[games[0]['game_id']]['recordId']
-    assert runner.run(args) == 0 and len(saved) == 4
+    assert runner.run(args) == 0 and len(saved) == 6

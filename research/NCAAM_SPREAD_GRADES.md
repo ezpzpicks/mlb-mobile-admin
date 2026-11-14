@@ -1,5 +1,9 @@
 # NCAAM spread matchup grades — November 12, 2026
 
+November 13 update: the core profiles below pass through the explicit
+[selection preferences](NCAAM_SELECTION_PREFERENCES.md). Exclusions can remove
+an A/B grade; the prior policy is retained in `config/ncaam_spread_grades_v1.json`.
+
 The approved policy is `config/ncaam_spread_grades.json`. Its thresholds are versioned and hashed with each capture. It grades the model's projected **cover** side at the paired market spread. A projected losing underdog can qualify. It never switches to the opponent to obtain a grade.
 
 Eligible edge is **1.00 inclusive to 4.00 exclusive**. A qualifies through either:

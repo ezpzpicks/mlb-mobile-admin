@@ -1,5 +1,9 @@
 # Configurable NCAAM matchup total grades
 
+November 13 update: projection-aligned candidates also pass through the explicit
+[selection preferences](NCAAM_SELECTION_PREFERENCES.md). The prior policy is
+retained in `config/ncaam_matchup_grades_v2.json` for historical replay.
+
 The matchup grader selects an Over or Under from adjusted offense, adjusted
 defense and tempo combinations. The live November 12 policy requires the point
 projection to favor the same direction. It does not use a minimum point edge.

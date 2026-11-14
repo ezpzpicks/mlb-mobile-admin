@@ -9,11 +9,14 @@ from pathlib import Path
 
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
 
+from builders.ncaam_selection_review import apply_spread_review, validate_review
+
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_spread_grades.json'
 
 
 def load_spread_policy(path=POLICY_PATH):
     policy=json.loads(Path(path).read_text())
+    validate_review(policy)
     low,high=(number(policy['edge_window'][k]) for k in ('minimum_inclusive','maximum_exclusive'))
     if not policy['version'].startswith('ncaam-spread-grades-') or not 0<low<high<=100:
         raise ValueError('Invalid spread policy or edge window.')
@@ -91,7 +94,7 @@ def grade_saved_spread(forecast, benchmarks, policy=None):
             grade='A';reason='Strong national defense with projection support' if profiles[0]=='defense-supported' else 'Offense, defense and tempo support the projected cover'
         elif edge>=policy['B_profile']['minimum_edge'] and (offense_adv>0 or defense_adv>0):
             grade='B';reason='Projected cover with a relative offense or defense advantage'
-    return {'policy_version':policy['version'],'policy_sha256':policy_digest(policy),'policy':policy,
+    result = {'policy_version':policy['version'],'policy_sha256':policy_digest(policy),'policy':policy,
         'grade':grade,'side':location if grade in ('A','B') else None,'projected_side':location,
         'selection_team':forecast[location+'_team'] if location else None,
         'line':line,'home_line':home_line,'fair_home_spread':fair,'projected_margin':projected_margin,
@@ -102,6 +105,7 @@ def grade_saved_spread(forecast, benchmarks, policy=None):
         'benchmark_observed_at':benchmark['observed_at'],'benchmark_exact_rating_timestamp':stamp(benchmark['observed_at'])==ratings,
         'benchmark_age_hours':(lock-stamp(benchmark['observed_at'])).total_seconds()/3600,
         'national_benchmark':deepcopy(benchmark)}
+    return apply_spread_review(result, policy)
 
 
 def capture_spread_grade(forecast, benchmarks, *, mode='live', policy=None, published_at=None):

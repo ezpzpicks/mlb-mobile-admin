@@ -13,6 +13,8 @@ import math
 from pathlib import Path
 import statistics
 
+from builders.ncaam_selection_review import apply_total_review, validate_review
+
 METRICS = ("offense", "defense", "tempo")
 RANK = {"Research": 0, "B": 1, "A": 2}
 POLICY_PATH = Path(__file__).resolve().parents[1] / "config/ncaam_matchup_grades.json"
@@ -45,6 +47,7 @@ def load_policy(path=POLICY_PATH):
 
 
 def validate_policy(policy):
+    validate_review(policy)
     if not policy.get("version") or not policy.get("profiles"):
         raise ValueError("Policy requires a version and profiles.")
     if type(policy.get("projection_agreement_required", False)) is not bool:
@@ -253,4 +256,5 @@ def grade_saved_forecast(forecast, benchmarks, reference_quotes, policy=None):
     result = grade_matchup(forecast["away_rating"], forecast["home_rating"], market["total"], benchmark, reference,
                           as_of=locked, tipoff=forecast["tipoff"], quote_observed_at=market["as_of"], season=season, policy=policy)
     result["benchmark_exact_rating_timestamp"] = stamp(benchmark["observed_at"]) == stamp(forecast["ratings_observed_at"])
-    return apply_projection_agreement(result, forecast.get('total'), policy)
+    result = apply_projection_agreement(result, forecast.get('total'), policy)
+    return apply_total_review(result, forecast, policy)
