@@ -445,6 +445,16 @@ def install_market_calibration(cfb_builder: Any) -> None:
         sim = result["simulation"]
         spread = result["spread"]
         total = result["total_market"]
+        if projection.get("matchup_projection_applied"):
+            p = projection["matchup_projection"]
+            with st.expander("SP+ matchup scoring breakdown · Provisional", expanded=False):
+                rows = [{"Side": side.title(), **p["pairings"][side],
+                    "Final projected points": p[f"{side}_points"]} for side in ("away", "home")]
+                st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+                st.write({"Pace multiplier": p["tempo_scale"], "Live adjustments": p["adjustments"],
+                    "Special-teams margin": p["special_teams_margin"]})
+                st.caption("Offense versus opposing defense and matchup pace set the forecast. Simulation probabilities are not calibrated for this new model.")
+            return
         breakdown = pd.DataFrame([
             {"Component": "Regression base margin", "Home-margin points": _num(projection.get("regression_base_margin"))},
             {"Component": "Team-specific residual model", "Home-margin points": _num(projection.get("team_specific_residual_delta"))},

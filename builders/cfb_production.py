@@ -1,7 +1,7 @@
 """One production model configuration for the admin and scheduled builder."""
 from __future__ import annotations
 
-MODEL_VERSION = "cfb-v2.8.1-five-game-residual-totals-2026-10-07"
+from builders.cfb_matchup_projection import MODEL_VERSION
 
 
 def load_production_builder():
@@ -16,6 +16,7 @@ def load_production_builder():
     from builders.cfb_covers import install_covers_layer
     from builders.cfb_interactive_recovery import install_interactive_recovery
     from builders.cfb_matchup_grades import install_matchup_grading
+    from builders.cfb_matchup_projection import install_matchup_projection
 
     # Order matches the interactive admin; every installer is idempotent.
     install_runtime_guard(cfb_builder)
@@ -27,6 +28,7 @@ def load_production_builder():
     install_market_calibration(cfb_builder)
     install_covers_layer(cfb_builder)
     install_interactive_recovery(cfb_builder)
+    install_matchup_projection(cfb_builder)
     install_matchup_grading(cfb_builder)
     cfb_builder.MODEL_VERSION = MODEL_VERSION
     return cfb_builder
