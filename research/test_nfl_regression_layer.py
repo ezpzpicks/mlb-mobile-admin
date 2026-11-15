@@ -49,10 +49,8 @@ def main() -> None:
         assert 0.0 <= simulation[key] <= 1.0
     assert simulation["margin_sd"] > 0 and simulation["total_sd"] > 0
 
-    spread = nfl_builder._spread_confluence(True, 2.0, away, home, lineup, lineup, 75.0,
-        home_spread=-2.5, projection=projection)
-    total = nfl_builder._total_confluence(False, 2.0, projection, away, home, -1.0, 75.0,
-        market_total=46.5)
+    spread = nfl_builder._spread_confluence(True, 2.0, away, home, lineup, lineup, 75.0)
+    total = nfl_builder._total_confluence(False, 2.0, projection, away, home, -1.0, 75.0)
     moneyline = nfl_builder._moneyline_confluence(True, 0.06, away, home, lineup, lineup, 75.0)
     assert isinstance(spread[0], int) and isinstance(total[0], int) and isinstance(moneyline[0], int)
     print("NFL v4 regression smoke test passed")

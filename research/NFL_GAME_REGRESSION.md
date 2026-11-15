@@ -93,31 +93,3 @@ The old automatic rest coefficient is intentionally not applied to the v4 base g
 ## Isolation
 
 NFL v4 is installed through an NFL-only integration layer. The MLB builder and the existing NFL player-prop regression code are not modified by the game-model replacement.
-
-## Market-relative matchup support (November 15, 2026)
-
-Spread and total confluence now compares scoring and success-rate support with
-the actual quoted spread or total. Previously these checks compared the teams'
-raw strength or used fixed scoring/success benchmarks, which could penalize an
-underdog covering a large spread or an Over at a low total.
-
-Each supporting check uses the existing team-score equation, retains its own
-matchup input, and holds the other input at the scoring engine's existing
-neutral value (22.5 scoring points or 0.43 success rate). The published forecast
-minus its unadjusted regression base supplies the common venue, weather,
-personnel, manual and score-bound offsets exactly once. The resulting point
-margin is compared with the home spread; the point total is compared with the
-quoted total. Exact pushes, missing quotes and non-finite data provide no
-directional matchup support. These component estimates are grade checks rather
-than additional score forecasts or independent probability estimates.
-
-Both the interactive and scheduled builders pass the quote and saved projection
-to the same functions. Forecast equations, simulations, probability/edge and
-reliability requirements, the remaining supporting checks and player-prop
-models retain their existing behavior. Game slate and tracker rows carry
-`nfl-market-relative-confluence-v1-2026-11-15` separately from the unchanged
-forecast identity. Existing saved games and historical grades are not rewritten.
-The slate also freezes the two signed component edges per market. The website
-rechecks both against a moved line, in addition to the existing model-edge gate,
-instead of carrying forward the saved support count unchanged.
-This is a grading policy change, not a new profitability claim.
