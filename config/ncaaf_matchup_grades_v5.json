@@ -1,0 +1,41 @@
+{
+  "version": "ncaaf-sp-edge-2026-11-14-v5",
+  "status": "provisional",
+  "description": "Provisional grades measure projected edge at the saved market line. The SP+ score formula is unchanged; confidence flags are separate from numerical edge grades.",
+  "thresholds": {
+    "strong_z": 0.5,
+    "extreme_z": 1.0,
+    "minimum_tempo_teams": 100,
+    "spread_max_market_line": 20.0,
+    "maximum_population_age_days": 8,
+    "spread_a_points": 6.0,
+    "spread_b_points": 3.0,
+    "total_a_points": 6.0,
+    "total_b_points": 3.0
+  },
+  "total": {
+    "A": "Projected point edge >= 6.0",
+    "B": "Projected point edge >= 3.0 and < 6.0",
+    "minimum_projection_edge": 3.0
+  },
+  "spread": {
+    "A": "Projected point edge >= 6.0",
+    "B": "Projected point edge >= 3.0 and < 6.0",
+    "minimum_projection_edge": 3.0
+  },
+  "selection_review": {
+    "version": "ryan-ncaaf-review-2026-11-13-v1",
+    "enabled": false,
+    "basis": "Explicit matchup preferences; not historical probability calibration",
+    "minimum_attacking_pair_z": 0.5,
+    "suppressed_attack_pair_z": 0.5,
+    "strong_offense_z": 0.5,
+    "average_band_z": 0.5,
+    "slow_tempo_z": 0.5,
+    "good_defense_z": 0.5,
+    "medium_favorite_points": 7.0,
+    "strong_attack_weak_opponent_maximum_points": 11.5
+  },
+  "grading_basis": "market_point_edge"
+}
+

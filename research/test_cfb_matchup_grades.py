@@ -111,7 +111,7 @@ class MatchupTests(unittest.TestCase):
         self.assertEqual(captured['simulation'],original['simulation'])
         self.assertEqual(captured['projection']['total'],original['projection']['total'])
         row=builder.slate_row(captured).iloc[0]
-        self.assertEqual(json.loads(row['Matchup Total JSON'])['grade'],'B')
+        self.assertEqual(json.loads(row['Matchup Total JSON'])['grade'],'Research')
         self.assertEqual(json.loads(row['Matchup Factors JSON'])['population_sha256'],'a'*64)
         self.assertEqual(builder.tracker_rows(captured).iloc[0]['Grading Policy Version'],load_policy()['version'])
         with patch('builders.cfb_matchup_grades.load_population',side_effect=ValueError('no published source')):

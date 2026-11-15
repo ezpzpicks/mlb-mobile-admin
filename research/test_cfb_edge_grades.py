@@ -10,9 +10,9 @@ from builders.cfb_matchup_grades import grade_matchup,load_policy,apply_price_an
 from research.test_cfb_matchup_grades import factors,AS_OF,KICKOFF
 
 
-def grade(*,edge=6.,market="spread",under=False,f=None,**kwargs):
-    values=dict(projected_margin=10.,projected_total=50.+edge*(-1 if under else 1),
-        home_line=edge-10.,total_line=50.,as_of=AS_OF,kickoff=KICKOFF)
+def grade(*,edge=10.,market="spread",under=False,f=None,**kwargs):
+    values=dict(projected_margin=14.,projected_total=50.+edge*(-1 if under else 1),
+        home_line=edge-14.,total_line=50.,as_of=AS_OF,kickoff=KICKOFF)
     values.update(kwargs)
     return grade_matchup(f or factors(),**values)[market]
 
@@ -20,7 +20,7 @@ def grade(*,edge=6.,market="spread",under=False,f=None,**kwargs):
 class EdgeGradeTests(unittest.TestCase):
     def test_exact_boundaries_apply_to_both_markets_and_total_directions(self):
         for market in ("spread","total"):
-            for edge,expected in ((0.,"Research"),(2.999,"Research"),(3.,"B"),(5.999,"B"),(6.,"A"),(12.,"A")):
+            for edge,expected in ((0.,"Research"),(3.,"Research"),(6.,"Research"),(7.999,"Research"),(8.,"B"),(9.999,"B"),(10.,"A"),(12.,"A")):
                 for under in (False,True):
                     with self.subTest(market=market,edge=edge,under=under):
                         g=grade(edge=edge,market=market,under=under)
@@ -34,32 +34,32 @@ class EdgeGradeTests(unittest.TestCase):
     def test_weaker_fast_underdog_can_have_an_a_at_a_good_number(self):
         f=factors();f["away"].update(offense=10.,defense=40.,tempo=15.)
         f["home"].update(offense=45.,defense=10.,tempo=15.)
-        g=grade(f=f,projected_margin=1.,home_line=-8.)
-        self.assertEqual((g["grade"],g["side"],g["role"],g["edge"]),("A","away","Underdog",7.))
+        g=grade(f=f,projected_margin=1.,home_line=-11.)
+        self.assertEqual((g["grade"],g["side"],g["role"],g["edge"]),("A","away","Underdog",10.))
 
     def test_factor_agreement_does_not_add_a_second_grade_bonus(self):
-        f=factors();original=grade(edge=4.,f=f)
+        f=factors();original=grade(edge=8.,f=f)
         f["away"].update(offense=45.,defense=10.,tempo=8.)
         f["home"].update(offense=10.,defense=45.,tempo=16.)
-        changed=grade(edge=4.,f=f)
+        changed=grade(edge=8.,f=f)
         self.assertEqual((changed["grade"],changed["edge"]),(original["grade"],original["edge"]))
 
     def test_favorite_dog_and_over_under_use_the_same_point_scale(self):
-        fav=grade(projected_margin=10.,home_line=-4.)
-        dog=grade(projected_margin=-2.,home_line=8.)
+        fav=grade(projected_margin=14.,home_line=-4.)
+        dog=grade(projected_margin=-2.,home_line=12.)
         self.assertEqual((fav["role"],dog["role"]),("Favorite","Underdog"))
         for g in (fav,dog,grade(market="total"),grade(market="total",under=True)):
-            self.assertEqual((g["grade"],g["edge"]),("A",6.))
+            self.assertEqual((g["grade"],g["edge"]),("A",10.))
 
     def test_changed_line_promotes_downgrades_and_can_change_the_cover_side(self):
-        self.assertEqual(grade(projected_margin=10.,home_line=-4.)["grade"],"A")
-        self.assertEqual(grade(projected_margin=10.,home_line=-6.)["grade"],"B")
-        self.assertEqual(grade(projected_margin=10.,home_line=-8.)["grade"],"Research")
-        opposite=grade(projected_margin=10.,home_line=-16.)
+        self.assertEqual(grade(projected_margin=14.,home_line=-4.)["grade"],"A")
+        self.assertEqual(grade(projected_margin=14.,home_line=-6.)["grade"],"B")
+        self.assertEqual(grade(projected_margin=14.,home_line=-8.)["grade"],"Research")
+        opposite=grade(projected_margin=4.,home_line=-14.)
         self.assertEqual((opposite["side"],opposite["role"],opposite["grade"]),("away","Underdog","A"))
 
     def test_large_spread_keeps_its_edge_grade_but_remains_projection_only(self):
-        g=grade(projected_margin=30.,home_line=-21.)
+        g=grade(projected_margin=32.,home_line=-21.)
         self.assertEqual((g["edge_grade"],g["grade"],g["eligible"]),("A","Research",False))
         self.assertTrue(any("20+" in x for x in g["confidence_flags"]))
 
@@ -77,6 +77,13 @@ class EdgeGradeTests(unittest.TestCase):
         f.update(result="Win",actual_home=99,actual_away=0)
         self.assertEqual(grade(f=f),before)
         self.assertEqual(f["away"],original["away"])
+
+    def test_previous_point_edge_policy_keeps_its_captured_cutoffs(self):
+        archived=json.loads((Path(__file__).resolve().parents[1]/"config/ncaaf_matchup_grades_v5.json").read_text())
+        self.assertNotEqual(archived["version"],load_policy()["version"])
+        self.assertEqual(grade(edge=4.,policy=archived)["grade"],"B")
+        self.assertEqual(grade(edge=6.,policy=archived)["grade"],"A")
+        self.assertEqual(grade(edge=6.)["grade"],"Research")
 
     def test_invalid_or_reversed_cutoffs_fail_policy_loading(self):
         for a,b in ((3.,6.),(6.,0.),(True,3.),(float("nan"),3.)):
