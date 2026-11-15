@@ -109,6 +109,10 @@ def grade_saved_spread(forecast, benchmarks, policy=None):
 
 
 def capture_spread_grade(forecast, benchmarks, *, mode='live', policy=None, published_at=None):
+    if str(forecast.get('modelVersion','')).startswith('ncaam-v0.7-matchup-projection-'):
+        from builders.ncaam_point_edges import capture_grades
+        return capture_grades(forecast,benchmarks,mode=mode,policy=policy,
+            published_at=published_at or datetime.now(timezone.utc).isoformat())['spread']
     published_at=published_at or datetime.now(timezone.utc).isoformat()
     if mode not in ('live','replay') or stamp(published_at)<stamp(forecast['lockedAt']):
         raise ValueError('Invalid spread capture publication mode or time.')
@@ -134,3 +138,4 @@ def spread_storage_row(forecast, grade, day):
         'Game':forecast['away_team']+' @ '+forecast['home_team'],'Market':'Spread',
         'Selection':forecast['recordId']+'|'+grade['policy_sha256'],'Updated At':grade['published_at'],
         'Details JSON':json.dumps(grade,sort_keys=True)}
+

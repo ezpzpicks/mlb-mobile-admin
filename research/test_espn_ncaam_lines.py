@@ -7,7 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from builders.ncaam_model import MODEL_VERSION, team_key
+from builders.ncaam_model import team_key
+from builders.ncaam_matchup_projection import MODEL_VERSION
 from scripts import run_ncaam_builder as runner
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaaf_auto_builder import MarketGame
@@ -130,7 +131,7 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     if mode == 'covers':
         payload['events'][1]['competitions'][0]['odds'] = []
     games = runner.parse_slate(payload, '2026-11-01')
-    bundle = {'season': 2027, 'observed_at': NOW.isoformat(), 'source': 'Test dated ratings', 'source_url': 'https://example.test',
+    bundle = {'season': 2027, 'observed_at': NOW.isoformat(), 'source': 'Synthetic Torvik fixture', 'source_url': 'https://barttorvik.com/2027_team_results.csv',
               'league_efficiency': 105, 'teams': complete_population({team_key(game[side]): {'team': game[side], 'offense': 110, 'defense': 100, 'tempo': 68}
                                                  for game in games for side in ['away', 'home']})}
     saved, requests, covers = [], [], []
@@ -188,3 +189,4 @@ def test_runner_source_priority_reuses_one_request_and_saves_only_immutable_fore
     assert restored['inputDigest'] == forecasts[games[0]['game_id']]['inputDigest']
     assert restored['recordId'] != forecasts[games[0]['game_id']]['recordId']
     assert runner.run(args) == 0 and len(saved) == 6
+

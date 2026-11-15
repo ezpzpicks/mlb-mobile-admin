@@ -21,7 +21,9 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from builders.ncaam_model import MODEL_VERSION, prepare_season_ratings, find_rating, parse_ratings, project, team_key, timestamp
+from builders.ncaam_model import prepare_season_ratings, find_rating, parse_ratings, team_key, timestamp
+from builders.ncaam_matchup_projection import MODEL_VERSION, project
+from builders.ncaam_point_edges import load_policy
 from builders.ncaam_lineups import fetch_lineups, fingerprint
 from builders.ncaam_player_impact import POLICY as PLAYER_POLICY, parse_player_bundle, lineup_adjustments, valid_lineup, indexed_player_bundle
 from builders.ncaam_rosters import parse_roster, roster_url, valid_roster
@@ -30,7 +32,7 @@ from builders.ncaam_home_court import POLICY as COURT_POLICY, LOOKBACK_SEASONS, 
 from shared import ncaam_auto_storage as store
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaam_division_one import division_one_matchup, division_one_aliases
-from builders.ncaam_matchup_grades import load_policy, market_reference, policy_digest, population_benchmark
+from builders.ncaam_matchup_grades import market_reference, policy_digest, population_benchmark
 from builders.ncaam_matchup_live import capture_grade, grade_storage_row, load_reference_quotes, unavailable_grade
 from builders.ncaam_spread_grades import load_spread_policy, capture_spread_grade, unavailable_spread_grade, spread_storage_row
 
@@ -341,18 +343,10 @@ def run(args):
         return 0
     bundle, player_inputs = load_model_inputs(db, day, season, datetime.now(timezone.utc), args.commit)
     matchup_policy = load_policy()
-    spread_policy = load_spread_policy()
+    spread_policy = matchup_policy
     matchup_benchmark = population_benchmark(bundle)
-    try:
-        matchup_references = load_reference_quotes(db, day, datetime.now(timezone.utc).isoformat())
-    except Exception as exc:
-        matchup_references = []
-        emit('matchup_reference_unavailable', error=str(exc))
-    try:
-        reference = market_reference(matchup_references, datetime.now(timezone.utc).isoformat(), matchup_policy)
-        matchup_reference_signature = {k:reference[k] for k in ('low_total','high_total','quote_count')}
-    except ValueError:
-        matchup_reference_signature = 'unavailable'
+    matchup_references = []
+    matchup_reference_signature = 'point_edge_grading'
     if player_inputs: player_inputs = indexed_player_bundle(player_inputs)
     lineups = load_lineups(db, modeled_slate, day, datetime.now(timezone.utc), args.commit)
     rosters = load_rosters(db, modeled_slate, lineups, season, datetime.now(timezone.utc), args.commit) if player_inputs else {}
@@ -472,3 +466,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
