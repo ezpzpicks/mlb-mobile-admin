@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - 'builders/cfb_*'
-      - 'config/ncaaf_matchup_grades.json'
+      - 'config/ncaaf_matchup_grades*.json'
       - 'research/test_cfb_matchup_projection.py'
       - 'research/test_cfb_edge_grades.py'
       - 'research/replay_ncaaf_matchup_projection.py'
@@ -17,7 +17,7 @@ on:
     branches: [main]
     paths:
       - 'builders/cfb_*'
-      - 'config/ncaaf_matchup_grades.json'
+      - 'config/ncaaf_matchup_grades*.json'
       - 'research/test_cfb_matchup_projection.py'
       - 'research/test_cfb_edge_grades.py'
       - 'research/replay_ncaaf_matchup_projection.py'

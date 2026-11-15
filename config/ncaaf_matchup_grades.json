@@ -1,5 +1,5 @@
 {
-  "version": "ncaaf-sp-edge-2026-11-14-v5",
+  "version": "ncaaf-sp-edge-2026-11-14-v6",
   "status": "provisional",
   "description": "Provisional grades measure projected edge at the saved market line. The SP+ score formula is unchanged; confidence flags are separate from numerical edge grades.",
   "thresholds": {
@@ -8,20 +8,20 @@
     "minimum_tempo_teams": 100,
     "spread_max_market_line": 20.0,
     "maximum_population_age_days": 8,
-    "spread_a_points": 6.0,
-    "spread_b_points": 3.0,
-    "total_a_points": 6.0,
-    "total_b_points": 3.0
+    "spread_a_points": 10.0,
+    "spread_b_points": 8.0,
+    "total_a_points": 10.0,
+    "total_b_points": 8.0
   },
   "total": {
-    "A": "Projected point edge >= 6.0",
-    "B": "Projected point edge >= 3.0 and < 6.0",
-    "minimum_projection_edge": 3.0
+    "A": "Projected point edge >= 10.0",
+    "B": "Projected point edge >= 8.0 and < 10.0",
+    "minimum_projection_edge": 8.0
   },
   "spread": {
-    "A": "Projected point edge >= 6.0",
-    "B": "Projected point edge >= 3.0 and < 6.0",
-    "minimum_projection_edge": 3.0
+    "A": "Projected point edge >= 10.0",
+    "B": "Projected point edge >= 8.0 and < 10.0",
+    "minimum_projection_edge": 8.0
   },
   "selection_review": {
     "version": "ryan-ncaaf-review-2026-11-13-v1",
