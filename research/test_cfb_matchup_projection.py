@@ -48,6 +48,7 @@ def fake_builder():
         return {"game":game,"projection":p,"simulation":{"home_mean":p["home_points"],"away_mean":p["away_points"]},
             "spread":{"pick":"Home -3.5","price_edge":.1,"ev":.1},
             "total_market":{"pick":"Over 48.5","price_edge":.1,"ev":.1},
+            "moneyline":{"grade":"A ML"},
             "market_availability":{"spread":True,"total":True}}
     builder.evaluate_game=evaluate
     return builder,game,env
@@ -143,6 +144,7 @@ class MatchupProjectionTests(unittest.TestCase):
         self.assertEqual(r["projection"]["projection_engine"],"legacy_fallback")
         self.assertEqual(r["spread"]["grade"],"No Play")
         self.assertEqual(r["total_market"]["grade"],"No Play")
+        self.assertEqual(r["moneyline"]["grade"],"No Play")
         self.assertEqual(r["projection"]["total"],81.)
 
     def test_neutral_site_zeroes_the_full_home_field_adjustment(self):

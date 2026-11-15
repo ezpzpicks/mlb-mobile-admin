@@ -248,6 +248,8 @@ def install_matchup_grading(builder):
                 "policy_version": policy["version"], "policy_sha256": digest(policy), "status": "provisional"}
                 for kind in ("spread", "total")}
             result["matchup_factors"] = {"unavailable": str(exc), "source": "Published SP+"}
+            if getattr(builder, "_MATCHUP_PROJECTION_INSTALLED", False) and not p.get("matchup_projection_applied") and "moneyline" in result:
+                result["moneyline"]["grade"] = "No Play"
         for kind, field in (("spread", "spread"), ("total", "total_market")):
             grade = grades[kind]
             result[field]["grade"] = f"{grade['grade']} {kind.title()}" if grade["grade"] in ("A", "B") else "No Play"
