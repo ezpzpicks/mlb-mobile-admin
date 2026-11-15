@@ -10,11 +10,16 @@ stored kickoff, including international games and daylight-saving changes.
   game grades explicitly say `No Play (pending pregame)` so the public board
   cannot select previews. Early props are not published as official picks or
   added to betting records.
-- **Pregame:** first run with 10–75 minutes remaining, normally 45–75 minutes
+- **Pregame:** first run with 10–90 minutes remaining, normally 60–90 minutes
   before kickoff. The lower bound permits a retry if an input was unavailable.
   Both teams' published game-day inactive lists are required. Save the official
   game and prop projections, graded trackers, lineups and completion marker in
   one transaction. Each matchup locks once; manual saves are protected.
+  On the existing `:07`/`:37` schedule, a 1 PM kickoff is first eligible at
+  11:37 AM ET (previously 12:07 PM), 4:05 PM at 2:37 PM, 4:25 PM at 3:07 PM,
+  and 8:20 PM at 7:07 PM. These are start times; source readiness and build time
+  can delay completion. The saved public board updates on its next five-minute
+  producer tick after the model save.
 - **Late check:** one run 15–45 minutes before kickoff, normally near 30 minutes.
   Re-fetch props, current depth/status and weather. Unchanged inputs skip model
   computation. Changed inputs create a separate review forecast; original
