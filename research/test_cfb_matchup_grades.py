@@ -2,6 +2,7 @@
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 import json
+from pathlib import Path
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -28,7 +29,8 @@ def factors():
 
 def grade(f=None, **kwargs):
     values = dict(projected_margin=3., projected_total=58., home_line=-5.5,
-                  total_line=54., as_of=AS_OF, kickoff=KICKOFF)
+                  total_line=54., as_of=AS_OF, kickoff=KICKOFF,
+                  policy=json.loads((Path(__file__).resolve().parents[1]/'config/ncaaf_matchup_grades_v4.json').read_text()))
     values.update(kwargs)
     return grade_matchup(f or factors(), **values)
 
@@ -109,7 +111,7 @@ class MatchupTests(unittest.TestCase):
         self.assertEqual(captured['simulation'],original['simulation'])
         self.assertEqual(captured['projection']['total'],original['projection']['total'])
         row=builder.slate_row(captured).iloc[0]
-        self.assertEqual(json.loads(row['Matchup Total JSON'])['grade'],'A')
+        self.assertEqual(json.loads(row['Matchup Total JSON'])['grade'],'B')
         self.assertEqual(json.loads(row['Matchup Factors JSON'])['population_sha256'],'a'*64)
         self.assertEqual(builder.tracker_rows(captured).iloc[0]['Grading Policy Version'],load_policy()['version'])
         with patch('builders.cfb_matchup_grades.load_population',side_effect=ValueError('no published source')):

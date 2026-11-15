@@ -39,6 +39,10 @@ def load_policy():
         raise ValueError("Invalid matchup support thresholds")
     if t["minimum_tempo_teams"] < 100 or t["spread_max_market_line"] > 20:
         raise ValueError("Invalid population/market guardrails")
+    if policy.get("grading_basis") == "market_point_edge":
+        for market in ("spread", "total"):
+            if not 0 < number(t[f"{market}_b_points"]) < number(t[f"{market}_a_points"]):
+                raise ValueError("Invalid edge grade thresholds")
     return policy
 
 
@@ -106,6 +110,38 @@ def collect_factors(builder, game, population):
         "pace_population_sha256": digest(tempos)}
 
 
+def point_edge_grade(edge, market, thresholds):
+    edge = number(edge)
+    return "A" if edge >= number(thresholds[f"{market}_a_points"]) else "B" if edge >= number(thresholds[f"{market}_b_points"]) else "Research"
+
+
+def edge_grades(factors, margin, total, spread, line, common):
+    t = common["thresholds"]
+    cover_gap, total_gap = margin+spread, total-line
+    selected = "home" if cover_gap > 0 else "away" if cover_gap < 0 else None
+    selected_line = spread if selected == "home" else -spread if selected else None
+    output = {}
+    for market, gap in (("spread", cover_gap), ("total", total_gap)):
+        edge = abs(gap)
+        grade = point_edge_grade(edge, market, t)
+        flags = ["Provisional model and edge thresholds"]
+        reason = (f"{edge:.2f}-point edge at the saved line; A >= {t[f'{market}_a_points']:g}, B >= {t[f'{market}_b_points']:g}")
+        effective = grade
+        if market == "spread" and abs(spread) >= t["spread_max_market_line"]:
+            effective = "Research"
+            reason = "20+ point spreads remain projection-only"
+            flags.append("20+ point market spread; projection-only")
+        output[market] = {**deepcopy(common), "grade": effective, "edge_grade": grade,
+            "grading_basis": "market_point_edge", "reason": reason, "edge": edge,
+            "confidence_flags": flags, "eligible": effective in ("A", "B")}
+    output["spread"].update(side=selected, selection_team=factors[selected]["team"] if selected else None,
+        line=selected_line, home_line=spread, projected_margin=margin,
+        role="Favorite" if selected_line is not None and selected_line < 0 else "Underdog" if selected_line else "Pick'em")
+    output["total"].update(side="Over" if total_gap > 0 else "Under" if total_gap < 0 else None,
+        line=line, projected_total=total)
+    return output
+
+
 def grade_matchup(factors, *, projected_margin, projected_total, home_line, total_line,
                   as_of, kickoff, policy=None):
     policy = deepcopy(policy or load_policy())
@@ -137,6 +173,8 @@ def grade_matchup(factors, *, projected_margin, projected_total, home_line, tota
         "status": policy["status"], "as_of": clock.isoformat(), "kickoff": start.isoformat(),
         "published_at": clock.isoformat(), "record_mode": "live", "z": z,
         "mean_tempo_z": mean_tempo, "source_population_sha256": factors["population_sha256"]}
+    if policy.get("grading_basis") == "market_point_edge":
+        return edge_grades(factors, margin, total, spread, line, common)
     output = {}
     gap = total - line
     direction = 1 if gap > 0 else -1 if gap < 0 else 0
@@ -196,10 +234,15 @@ def apply_price_and_direction(grade, market, expected_pick, available):
     grade = deepcopy(grade)
     if not available:
         grade.update(grade="Research", reason="Confirmed market unavailable")
+        if grade.get("grading_basis") == "market_point_edge":
+            grade["edge_grade"] = "Research"
+            grade["confidence_flags"] = list(dict.fromkeys([*grade.get("confidence_flags", []), "Confirmed market unavailable"]))
     elif market.get("pick") != expected_pick:
         grade.update(grade="Research", reason="Price-selected side opposes the point projection")
     elif number(market.get("price_edge")) <= 0 or number(market.get("ev")) <= 0:
         grade.update(grade="Research", reason="Saved side price lacks positive model edge or expected value")
+    if grade.get("grading_basis") == "market_point_edge":
+        grade["eligible"] = grade["grade"] in ("A", "B")
     return grade
 
 
@@ -230,6 +273,10 @@ def install_matchup_grading(builder):
                 kickoff=game["Game Time"], policy=policy)
             for market_name, result_name in (("spread", "spread"), ("total", "total_market")):
                 grade = grades[market_name]
+                if grade.get("grading_basis") == "market_point_edge":
+                    quality = [str(r) for r in (result.get("reliability_reasons") or [])
+                        if any(word in str(r).lower() for word in ("unconfirmed", "not confirmed", "incomplete", "missing", "limited"))]
+                    grade["confidence_flags"] = list(dict.fromkeys([*grade["confidence_flags"], *quality]))
                 if p.get("matchup_projection_applied"):
                     grade.update(projection_model_version=p["projection_engine"],
                                  projection_sha256=p["matchup_projection"]["sha256"])
@@ -253,7 +300,10 @@ def install_matchup_grading(builder):
         for kind, field in (("spread", "spread"), ("total", "total_market")):
             grade = grades[kind]
             result[field]["grade"] = f"{grade['grade']} {kind.title()}" if grade["grade"] in ("A", "B") else "No Play"
-            result[field]["support"] = [grade["reason"], "Provisional SP+ matchup support; projection agreement and saved-price checks required"]
+            result[field]["support"] = [grade["reason"],
+                "Provisional point-edge grade; input confidence and price eligibility are separate"
+                if grade.get("grading_basis") == "market_point_edge"
+                else "Provisional SP+ matchup support; projection agreement and saved-price checks required"]
             p[f"matchup_{kind}"] = grade
         result["matchup_grades"] = grades
         result["grading_policy_version"] = policy["version"]
