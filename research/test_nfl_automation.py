@@ -92,18 +92,36 @@ def test_changed_layout_or_disagreeing_table_weeks_are_rejected():
 
 
 def test_phase_windows_cover_normal_international_and_dst_kickoffs():
-    early = game(NOW + timedelta(minutes=83))
+    early = game(NOW + timedelta(minutes=113))
     assert phase_for_game(early, NOW, {}) == "early"
     assert phase_for_game(early, NOW + timedelta(minutes=30), {}) == "pregame"
     prior = {(early["Game ID"], "pregame"): {}}
-    assert phase_for_game(early, NOW + timedelta(minutes=60), prior) == "late"
-    assert phase_for_game(early, NOW + timedelta(minutes=80), prior) is None
+    assert phase_for_game(early, NOW + timedelta(minutes=90), prior) == "late"
+    assert phase_for_game(early, NOW + timedelta(minutes=110), prior) is None
     for offset in (4, 5):
         # The hour is Eastern, not a fixed UTC hour that drifts with DST.
         current = datetime(2035, 11 if offset == 5 else 10, 21, 8 + offset, 7, tzinfo=timezone.utc)
         g = game(current + timedelta(hours=5))
         assert phase_for_game(g, current, {}) == "early"
         assert phase_for_game(g, current - timedelta(hours=1), {}) is None
+
+
+@pytest.mark.parametrize("kickoff,run", [
+    ("2026-11-15T13:00:00-05:00", "2026-11-15T11:37:00-05:00"),
+    ("2026-11-15T16:05:00-05:00", "2026-11-15T14:37:00-05:00"),
+    ("2026-11-15T16:25:00-05:00", "2026-11-15T15:07:00-05:00"),
+    ("2026-11-15T20:20:00-05:00", "2026-11-15T19:07:00-05:00"),
+])
+def test_pregame_uses_the_first_scheduled_tick_within_90_minutes(kickoff, run):
+    current = datetime.fromisoformat(run)
+    scheduled = game(datetime.fromisoformat(kickoff))
+    previous = {(scheduled["Game ID"], "early"): {}}
+    assert phase_for_game(scheduled, current - timedelta(minutes=30), previous) is None
+    assert phase_for_game(scheduled, current, previous) == "pregame"
+    # A missing input may be retried, but a successful lock is never repeated.
+    assert phase_for_game(scheduled, current + timedelta(minutes=30), previous) == "pregame"
+    previous[(scheduled["Game ID"], "pregame")] = {}
+    assert phase_for_game(scheduled, current, previous) is None
 
 
 def market_rows(g=None):

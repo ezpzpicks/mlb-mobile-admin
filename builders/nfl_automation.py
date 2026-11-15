@@ -17,6 +17,9 @@ from shared.ncaaf_auto_builder import MarketGame, number, timestamp
 from shared.nfl_auto_storage import POLICY, clean, records
 
 ET = ZoneInfo("America/New_York")
+# Include the first half-hour tick after the game-day inactive lists arrive.
+# A 75-minute window misses the :37 run for a 1 PM kickoff and waits until :07.
+PREGAME_WINDOW_MINUTES = 90
 
 
 def normalize_game(row):
@@ -47,11 +50,11 @@ def phase_for_game(game, now, previous):
     if all(str(game.get(k, "")).strip() not in {"", "None", "nan"} for k in ("Away Score", "Home Score")):
         return None
     gid = game["Game ID"]
-    if minutes <= 75 and (gid, "pregame") not in previous:
+    if minutes <= PREGAME_WINDOW_MINUTES and (gid, "pregame") not in previous:
         return "pregame"
     if 15 <= minutes <= 45 and (gid, "pregame") in previous and (gid, "late") not in previous:
         return "late"
-    if minutes > 75 and (gid, "early") not in previous and (gid, "pregame") not in previous:
+    if minutes > PREGAME_WINDOW_MINUTES and (gid, "early") not in previous and (gid, "pregame") not in previous:
         return "early"
     return None
 
