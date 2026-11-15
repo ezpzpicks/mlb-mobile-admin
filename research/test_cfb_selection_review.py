@@ -15,14 +15,14 @@ def grade(name, *, line=None, total=None, policy=None):
     if line is not None: values['home_line'] = line
     if total is not None: values['total_line'] = total
     if policy is None:
-        policy = load_policy()
+        policy = json.loads((ROOT / 'config/ncaaf_matchup_grades_v4.json').read_text())
         policy['selection_review']['enabled'] = True
     return grade_matchup(c['factors'], **values, policy=policy)
 
 
 class SelectionReviewTests(unittest.TestCase):
-    def test_live_policy_restores_candidates_for_manual_review(self):
-        policy = load_policy()
+    def test_archived_v4_policy_restores_candidates_for_manual_review(self):
+        policy = json.loads((ROOT / 'config/ncaaf_matchup_grades_v4.json').read_text())
         self.assertFalse(policy['selection_review']['enabled'])
         restored = grade('pitt', policy=policy)
         self.assertEqual(restored['spread']['grade'], 'B')

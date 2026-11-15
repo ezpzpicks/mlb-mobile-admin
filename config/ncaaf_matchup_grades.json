@@ -1,23 +1,27 @@
 {
-  "version": "ncaaf-sp-projection-2026-11-14-v4",
+  "version": "ncaaf-sp-edge-2026-11-14-v5",
   "status": "provisional",
-  "description": "Published SP+ offense-versus-opposing-defense and real pace directly set the point forecast. Provisional matchup-support grades, not calibrated win probabilities.",
+  "description": "Provisional grades measure projected edge at the saved market line. The SP+ score formula is unchanged; confidence flags are separate from numerical edge grades.",
   "thresholds": {
     "strong_z": 0.5,
     "extreme_z": 1.0,
     "minimum_tempo_teams": 100,
     "spread_max_market_line": 20.0,
-    "maximum_population_age_days": 8
+    "maximum_population_age_days": 8,
+    "spread_a_points": 6.0,
+    "spread_b_points": 3.0,
+    "total_a_points": 6.0,
+    "total_b_points": 3.0
   },
   "total": {
-    "A": "One team's offense, defensive points allowed and tempo all support the projected direction at strong_z, with mean matchup tempo in agreement.",
-    "B": "Both offense-versus-opposing-defense pairings favor the projected direction and mean matchup tempo agrees; or one strongly favorable pairing with extreme supporting tempo.",
-    "minimum_projection_edge": 0.0
+    "A": "Projected point edge >= 6.0",
+    "B": "Projected point edge >= 3.0 and < 6.0",
+    "minimum_projection_edge": 3.0
   },
   "spread": {
-    "A": "The projected cover side has strong relative offense and defense advantages, with no extreme role-tempo conflict.",
-    "B": "The projected cover side has at least one relative offense/defense advantage and no extreme role-tempo conflict.",
-    "minimum_projection_edge": 0.0
+    "A": "Projected point edge >= 6.0",
+    "B": "Projected point edge >= 3.0 and < 6.0",
+    "minimum_projection_edge": 3.0
   },
   "selection_review": {
     "version": "ryan-ncaaf-review-2026-11-13-v1",
@@ -31,5 +35,6 @@
     "good_defense_z": 0.5,
     "medium_favorite_points": 7.0,
     "strong_attack_weak_opponent_maximum_points": 11.5
-  }
+  },
+  "grading_basis": "market_point_edge"
 }

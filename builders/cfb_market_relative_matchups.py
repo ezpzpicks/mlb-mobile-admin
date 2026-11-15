@@ -147,7 +147,7 @@ def from_saved_row(row):
                 raise ValueError("After-start capture is ineligible")
     if instant(sg["kickoff"]) != instant(tg["kickoff"]):
         raise ValueError("Paired kickoff mismatch")
-    if str(row.get("Grading Policy Version","")).startswith("ncaaf-sp-projection-"):
+    if str(row.get("Grading Policy Version","")).startswith(("ncaaf-sp-projection-", "ncaaf-sp-edge-")):
         p = json.loads(row["Matchup Projection JSON"])
         if (p.get("sha256") != fingerprint({k:v for k,v in p.items() if k != "sha256"})
             or p.get("model_version") != row.get("Model Version")
