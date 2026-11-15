@@ -13,6 +13,7 @@ from datetime import date, datetime
 import gc
 import hashlib
 import html
+import json
 import math
 import os
 import re
@@ -22,6 +23,8 @@ import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
+
+from builders.nfl_game_regression import GRADING_VERSION as GAME_GRADING_VERSION, matchup_grade_edges
 
 try:
     import polars as pl
@@ -110,6 +113,7 @@ SLATE_COLUMNS = [
     "Total Over Odds", "Total Under Odds", "Away ML", "Home ML",
     "Spread Pick", "Spread Probability", "Spread Edge", "Spread Grade", "Spread Confluence",
     "Total Pick", "Total Probability", "Total Edge", "Total Grade", "Total Confluence",
+    "Spread Matchup Edges JSON", "Total Matchup Edges JSON",
     "ML Pick", "ML Probability", "ML Odds", "ML Edge", "ML Grade", "ML Confluence",
     "Reliability", "Data Confidence", "Personnel Confidence", "Previous Season Weight",
     "Current Season Weight", "Away Offensive Absence", "Away Defensive Absence",
@@ -2238,20 +2242,15 @@ def _spread_confluence(
     away_lineup: dict[str, float],
     home_lineup: dict[str, float],
     reliability: float,
+    *,
+    home_spread: float | None = None,
+    projection: dict[str, float] | None = None,
 ) -> tuple[int, list[str]]:
-    checks: list[tuple[bool, str]] = []
-    checks.append((spread_edge >= 1.5, "Model edge"))
-    power_home = _num(home.get("Power Rating")) > _num(away.get("Power Rating"))
-    checks.append((power_home == pick_home, "Power rating"))
-    home_qb = _num(home.get("QB Adjustment")) - home_lineup.get("offense_absence", 0)
-    away_qb = _num(away.get("QB Adjustment")) - away_lineup.get("offense_absence", 0)
-    checks.append(((home_qb >= away_qb) == pick_home, "QB/personnel"))
-    home_health = -home_lineup.get("offense_absence", 0) - home_lineup.get("defense_absence", 0)
-    away_health = -away_lineup.get("offense_absence", 0) - away_lineup.get("defense_absence", 0)
-    checks.append(((home_health >= away_health) == pick_home, "Lineup health"))
-    checks.append((reliability >= 62, "Reliability"))
-    passed = [label for ok, label in checks if ok]
-    return len(passed), passed
+    from builders.nfl_game_regression import spread_confluence
+    return spread_confluence(
+        pick_home, spread_edge, away, home, away_lineup, home_lineup, reliability,
+        home_spread=home_spread, projection=projection,
+    )
 
 
 def _total_confluence(
@@ -2262,21 +2261,14 @@ def _total_confluence(
     home: dict[str, Any],
     weather_adjustment: float,
     reliability: float,
+    *,
+    market_total: float | None = None,
 ) -> tuple[int, list[str]]:
-    pace = (_num(away.get("Pace", 64), 64) + _num(home.get("Pace", 64), 64)) / 2
-    offense_signal = (
-        _num(away.get("Off EPA/Play")) + _num(home.get("Off EPA/Play"))
-        - _num(away.get("Def EPA Edge")) - _num(home.get("Def EPA Edge"))
+    from builders.nfl_game_regression import total_confluence
+    return total_confluence(
+        over_pick, total_edge, projection, away, home, weather_adjustment, reliability,
+        market_total=market_total,
     )
-    checks = [
-        (total_edge >= 1.75, "Model edge"),
-        (((pace >= 64.5) == over_pick), "Pace"),
-        (((offense_signal >= 0) == over_pick), "Efficiency matchup"),
-        (((weather_adjustment >= -0.5) == over_pick), "Weather/environment"),
-        (reliability >= 62, "Reliability"),
-    ]
-    passed = [label for ok, label in checks if ok]
-    return len(passed), passed
 
 
 def _moneyline_confluence(
@@ -4696,7 +4688,7 @@ def _game_tracker_rows(
             "Grade": grade, "Confluence": confluence, "Result": "Pending", "Reliability": reliability,
             "Data Confidence": data_confidence, "Personnel Confidence": personnel_confidence,
             "Projected Away": round(projected_away, 1), "Projected Home": round(projected_home, 1),
-            "Model Version": MODEL_VERSION, "Notes": notes,
+            "Model Version": f"{MODEL_VERSION}|{GAME_GRADING_VERSION}", "Notes": notes,
         })
     return rows
 
@@ -5491,7 +5483,8 @@ def _render_build() -> None:
         spread_ev = away_spread_ev
     spread_price_edge = spread_probability - spread_implied
     spread_confluence, spread_reasons = _spread_confluence(
-        spread_pick_home, spread_edge, away_rating, home_rating, away_lineup_summary, home_lineup_summary, reliability
+        spread_pick_home, spread_edge, away_rating, home_rating, away_lineup_summary, home_lineup_summary, reliability,
+        home_spread=home_spread if spread_market_ready else None, projection=projection,
     )
     spread_grade = _grade_spread(spread_probability, spread_edge, reliability, spread_confluence)
     if spread_price_edge <= 0 or spread_ev <= 0:
@@ -5518,7 +5511,8 @@ def _render_build() -> None:
         total_pick_odds, total_implied, total_ev = total_under_odds, under_novig, under_ev
     total_price_edge = total_probability - total_implied
     total_confluence, total_reasons = _total_confluence(
-        over_pick, total_edge, projection, away_rating, home_rating, weather_total_adjustment, reliability
+        over_pick, total_edge, projection, away_rating, home_rating, weather_total_adjustment, reliability,
+        market_total=market_total if total_market_ready else None,
     )
     total_grade = _grade_total_direction(total_pick, total_probability, total_edge, reliability, total_confluence)
     if total_price_edge <= 0 or total_ev <= 0:
@@ -5545,6 +5539,9 @@ def _render_build() -> None:
     _market_card("Total", f"{projection['total']:.1f} points", total_pick, total_probability, total_edge_text, total_grade, total_confluence, total_reasons)
 
     game = f"{away_team} at {home_team}"
+    matchup_edges = matchup_grade_edges(
+        away_rating, home_rating, projection, home_spread, market_total, spread_pick_home, over_pick,
+    )
     slate_row = {
         "Date": slate_date_str, "Season": season, "Week": week, "Game ID": game_id, "Game": game,
         "Away Team": away_team, "Home Team": home_team, "Projected Away": round(projection["away_score"], 1),
@@ -5558,13 +5555,15 @@ def _render_build() -> None:
         "Spread Grade": spread_grade, "Spread Confluence": spread_confluence, "Total Pick": total_pick,
         "Total Probability": round(total_probability, 4), "Total Edge": round(total_edge, 2), "Total Grade": total_grade,
         "Total Confluence": total_confluence, "ML Pick": "", "ML Probability": "",
+        "Spread Matchup Edges JSON": json.dumps(matchup_edges["Spread"]),
+        "Total Matchup Edges JSON": json.dumps(matchup_edges["Total"]),
         "ML Odds": "", "ML Edge": "", "ML Grade": "No market line", "ML Confluence": "",
         "Reliability": reliability, "Data Confidence": data_confidence, "Personnel Confidence": personnel_confidence,
         "Previous Season Weight": away_rating.get("Previous Season Weight", ""), "Current Season Weight": away_rating.get("Current Season Weight", ""),
         "Away Offensive Absence": away_lineup_summary["offense_absence"], "Away Defensive Absence": away_lineup_summary["defense_absence"],
         "Home Offensive Absence": home_lineup_summary["offense_absence"], "Home Defensive Absence": home_lineup_summary["defense_absence"],
         "Weather Adjustment": weather_total_adjustment, "Roof": roof, "Temperature": temperature, "Wind": wind,
-        "Model Version": MODEL_VERSION, "Notes": notes,
+        "Model Version": f"{MODEL_VERSION}|{GAME_GRADING_VERSION}", "Notes": notes,
     }
 
     st.markdown("### Manual player prop lines")
