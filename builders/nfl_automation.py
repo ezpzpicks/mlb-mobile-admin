@@ -311,12 +311,14 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         if kind == "Spread":
             pick = f"{game['Home Team']} {market.home_spread:+.1f}" if positive else f"{game['Away Team']} {-market.home_spread:+.1f}"
             edge = (projection["margin"] + market.home_spread) * (1 if positive else -1)
-            confluence, _ = builder._spread_confluence(positive, edge, ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], reliability)
+            confluence, _ = builder._spread_confluence(positive, edge, ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], reliability,
+                home_spread=market.home_spread, projection=projection)
             grade = builder._grade_spread(probability, edge, reliability, confluence)
         else:
             pick = f"{'Over' if positive else 'Under'} {market.total:.1f}"
             edge = (projection["total"] - market.total) * (1 if positive else -1)
-            confluence, _ = builder._total_confluence(positive, edge, projection, ratings["Away"], ratings["Home"], weather_adjustment, reliability)
+            confluence, _ = builder._total_confluence(positive, edge, projection, ratings["Away"], ratings["Home"], weather_adjustment, reliability,
+                market_total=market.total)
             grade = builder._grade_total_direction(pick, probability, edge, reliability, confluence)
         from shared.modeling import expected_value_per_unit
         if probability <= 0.5 or expected_value_per_unit(probability, -110) <= 0:
@@ -325,6 +327,10 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
     label = f"{game['Away Team']} at {game['Home Team']}"
     note = f"{POLICY}; {phase}; ScoresAndOdds game lines, assumed -110 game prices; RotoWire actual prop prices; {weather['source']}; availability observed, workload conditional."
     version = f"{builder.MODEL_VERSION}|{POLICY}"
+    game_version = f"{builder.MODEL_VERSION}|{builder.GAME_GRADING_VERSION}|{POLICY}"
+    from builders.nfl_game_regression import matchup_grade_edges
+    matchup_edges = matchup_grade_edges(ratings["Away"], ratings["Home"], projection, market.home_spread, market.total,
+        selections["Spread"]["Pick"].startswith(game["Home Team"] + " "), selections["Total"]["Pick"].startswith("Over "))
     slate = {"Date": game["Date"], "Season": game["Season"], "Week": game["Week"], "Game ID": game["Game ID"], "Game": label,
         "Away Team": game["Away Team"], "Home Team": game["Home Team"], "Game Time": game["Game Time"],
         "Projected Away": round(projection["away_score"], 1), "Projected Home": round(projection["home_score"], 1),
@@ -334,7 +340,9 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         "Reliability": reliability, "Data Confidence": data_confidence, "Personnel Confidence": personnel_confidence,
         "Previous Season Weight": ratings["Away"].get("Previous Season Weight", ""), "Current Season Weight": ratings["Away"].get("Current Season Weight", ""),
         "Weather Adjustment": weather_adjustment, "Roof": weather["roof"], "Temperature": weather["temperature"], "Wind": weather["wind"],
-        "ML Grade": "No market line", "Model Version": version, "Notes": note}
+        "ML Grade": "No market line", "Model Version": game_version, "Notes": note,
+        "Spread Matchup Edges JSON": json.dumps(matchup_edges["Spread"]),
+        "Total Matchup Edges JSON": json.dumps(matchup_edges["Total"])}
     for side in ("Away", "Home"):
         for label_part, field in (("Low", "low"), ("High", "high")):
             slate[f"{side} Score {label_part}"] = round(simulation[f"{side.lower()}_{field}"], 1)
@@ -362,11 +370,14 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
             l_rows.append(row)
     for row in [*p_rows, *p_tracker, *g_tracker, *l_rows]:
         row.update({"Model Version": version, "Game Time": game["Game Time"]})
+    for row in g_tracker:
+        row["Model Version"] = game_version
     fingerprint = input_identity(game, market, matched, depth, weather, inactives)
     result = clean({"slate": slate, "props": p_rows, "prop_tracker": p_tracker, "game_tracker": g_tracker, "lineups": l_rows,
         "input_hash": fingerprint, "provenance": {"props": {k: props[k] for k in ("source", "source_sha256", "observed_at", "week")},
             "quotes": matched, "depth_observed_at": depth_at, "game_market_observed_at": market.captured.isoformat(),
             "inactives": inactives, "weather": weather, "model_version": builder.MODEL_VERSION,
+            "game_grading_version": builder.GAME_GRADING_VERSION,
             "weekly_input_key": weekly.get("input_cache_key"), "weekly_input_observed_at": weekly.get("input_observed_at"),
             "ratings": ratings, "home_field": hfa, "lineup_summaries": summaries, "game_projection": projection}})
     from builders.nfl_research import attach

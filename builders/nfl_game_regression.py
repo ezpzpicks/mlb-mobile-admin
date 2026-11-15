@@ -22,6 +22,7 @@ from builders.nfl_game_regression_coefficients import (
 )
 
 MODEL_VERSION = "nfl-v4.0-team-score-regression-2026-08-20"
+GRADING_VERSION = "nfl-market-relative-confluence-v1-2026-11-15"
 
 
 def _num(value: Any, default: float = 0.0) -> float:
@@ -171,6 +172,55 @@ def simulate_game(
     }
 
 
+def _matchup_point_estimates(
+    away: dict[str, Any],
+    home: dict[str, Any],
+    projection: dict[str, float] | None,
+) -> dict[str, dict[str, float]]:
+    """Express each matchup input in points using the existing fitted model.
+
+    For each check, retain that input and hold the other at the same neutral
+    value used by the scoring engine. Carry the forecast's non-feature offsets
+    (venue, weather, personnel, manual adjustments and score bounds) once.
+    These are supporting grade checks, not replacement score forecasts.
+    """
+    if projection is None:
+        return {}
+    try:
+        margin, total = float(projection["margin"]), float(projection["total"])
+        scores = {"away": (total - margin) / 2.0, "home": (total + margin) / 2.0}
+    except (KeyError, TypeError, ValueError):
+        return {}
+    if not all(math.isfinite(value) for value in scores.values()):
+        return {}
+
+    neutral = _matchup_features({}, {}, 0.0)
+    features = {"away": _matchup_features(away, home, 0.0), "home": _matchup_features(home, away, 0.0)}
+    offsets = {side: scores[side] - _team_score(features[side]) for side in scores}
+    estimates = {}
+    for name, label in (("scoring_matchup", "Scoring matchup"), ("success_matchup", "Success-rate matchup")):
+        points = {
+            side: _team_score({**neutral, name: features[side][name]}) + offsets[side]
+            for side in scores
+        }
+        estimates[label] = {"margin": points["home"] - points["away"], "total": points["home"] + points["away"]}
+    return estimates
+
+
+def _supports_edge(edge: float, positive: bool) -> bool:
+    # A push, missing quote or non-finite value is not directional evidence.
+    return math.isfinite(edge) and (edge if positive else -edge) > 1e-6
+
+
+def matchup_grade_edges(away, home, projection, home_spread, market_total, pick_home, over_pick):
+    """Freeze the two signed component edges for current-line regrading."""
+    estimates = _matchup_point_estimates(away, home, projection)
+    return {
+        "Spread": [(value["margin"] + home_spread) * (1 if pick_home else -1) for value in estimates.values()],
+        "Total": [(value["total"] - market_total) * (1 if over_pick else -1) for value in estimates.values()],
+    }
+
+
 def spread_confluence(
     pick_home: bool,
     spread_edge: float,
@@ -179,11 +229,11 @@ def spread_confluence(
     away_lineup: dict[str, float],
     home_lineup: dict[str, float],
     reliability: float,
+    *,
+    home_spread: float | None = None,
+    projection: dict[str, float] | None = None,
 ) -> tuple[int, list[str]]:
-    away_features = _matchup_features(away, home, 0.0)
-    home_features = _matchup_features(home, away, 0.0)
-    scoring_home = home_features["scoring_matchup"] >= away_features["scoring_matchup"]
-    success_home = home_features["success_matchup"] >= away_features["success_matchup"]
+    estimates = _matchup_point_estimates(away, home, projection) if home_spread is not None else {}
     home_qb = _num(home.get("QB Adjustment")) - _num(home_lineup.get("offense_absence"))
     away_qb = _num(away.get("QB Adjustment")) - _num(away_lineup.get("offense_absence"))
     health_home = (
@@ -192,8 +242,7 @@ def spread_confluence(
     )
     checks = [
         (spread_edge >= 1.5, "Model edge"),
-        (scoring_home == pick_home, "Scoring matchup"),
-        (success_home == pick_home, "Success-rate matchup"),
+        *[(_supports_edge(values["margin"] + float(home_spread), pick_home), label) for label, values in estimates.items()],
         (((home_qb >= away_qb) == pick_home), "QB/personnel"),
         (health_home == pick_home, "Lineup health"),
         (reliability >= 62, "Reliability"),
@@ -210,15 +259,13 @@ def total_confluence(
     home: dict[str, Any],
     weather_adjustment: float,
     reliability: float,
+    *,
+    market_total: float | None = None,
 ) -> tuple[int, list[str]]:
-    away_features = _matchup_features(away, home, weather_adjustment)
-    home_features = _matchup_features(home, away, weather_adjustment)
-    scoring_sum = away_features["scoring_matchup"] + home_features["scoring_matchup"]
-    success_sum = away_features["success_matchup"] + home_features["success_matchup"]
+    estimates = _matchup_point_estimates(away, home, projection) if market_total is not None else {}
     checks = [
         (total_edge >= 1.75, "Model edge"),
-        (((scoring_sum >= 45.0) == over_pick), "Scoring matchup"),
-        (((success_sum >= 0.86) == over_pick), "Success-rate matchup"),
+        *[(_supports_edge(values["total"] - float(market_total), over_pick), label) for label, values in estimates.items()],
         (((_num(weather_adjustment) >= -0.25) == over_pick), "Weather/environment"),
         (reliability >= 62, "Reliability"),
     ]
