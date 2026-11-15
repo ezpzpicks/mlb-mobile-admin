@@ -215,19 +215,30 @@ def install_matchup_grading(builder):
         game, p, sim = result["game"], result["projection"], result["simulation"]
         policy = load_policy()
         try:
-            population = load_population(int(number(game["Season"])))
-            factors = collect_factors(builder, game, population)
+            if getattr(builder, "_MATCHUP_PROJECTION_INSTALLED", False) and not p.get("matchup_projection_applied"):
+                raise ValueError("Published-rating projection unavailable; legacy forecast is not a new matchup decision")
+            factors = p.get("matchup_factors")
+            if not factors:
+                population = load_population(int(number(game["Season"])))
+                factors = collect_factors(builder, game, population)
             as_of = datetime.now(timezone.utc).isoformat()
-            grades = grade_matchup(factors, projected_margin=number(sim["home_mean"]) - number(sim["away_mean"]),
-                projected_total=number(sim["home_mean"]) + number(sim["away_mean"]),
+            projected_margin = number(p["margin"]) if p.get("matchup_projection_applied") else number(sim["home_mean"])-number(sim["away_mean"])
+            projected_total = number(p["total"]) if p.get("matchup_projection_applied") else number(sim["home_mean"])+number(sim["away_mean"])
+            grades = grade_matchup(factors, projected_margin=projected_margin,
+                projected_total=projected_total,
                 home_line=game["Home Spread"], total_line=game["Total"], as_of=as_of,
                 kickoff=game["Game Time"], policy=policy)
             for market_name, result_name in (("spread", "spread"), ("total", "total_market")):
                 grade = grades[market_name]
+                if p.get("matchup_projection_applied"):
+                    grade.update(projection_model_version=p["projection_engine"],
+                                 projection_sha256=p["matchup_projection"]["sha256"])
                 if market_name == "spread":
                     expected = f"{grade['selection_team']} {grade['line']:+g}" if grade["side"] else ""
                 else:
                     expected = f"{grade['side']} {grade['line']:g}" if grade["side"] else ""
+                if p.get("matchup_projection_applied"):
+                    result[result_name]["model_edge_points"] = grade["edge"] * (1 if result[result_name].get("pick") == expected else -1)
                 grades[market_name] = apply_price_and_direction(grade, result[result_name], expected,
                     result.get("market_availability", {}).get(market_name, False))
             p["matchup_factors"] = factors
@@ -237,6 +248,8 @@ def install_matchup_grading(builder):
                 "policy_version": policy["version"], "policy_sha256": digest(policy), "status": "provisional"}
                 for kind in ("spread", "total")}
             result["matchup_factors"] = {"unavailable": str(exc), "source": "Published SP+"}
+            if getattr(builder, "_MATCHUP_PROJECTION_INSTALLED", False) and not p.get("matchup_projection_applied") and "moneyline" in result:
+                result["moneyline"]["grade"] = "No Play"
         for kind, field in (("spread", "spread"), ("total", "total_market")):
             grade = grades[kind]
             result[field]["grade"] = f"{grade['grade']} {kind.title()}" if grade["grade"] in ("A", "B") else "No Play"
@@ -251,8 +264,8 @@ def install_matchup_grading(builder):
                 ("away", "Away Spread Odds"), ("Over", "Total Over Odds"), ("Under", "Total Under Odds"))
                 if field in game and str(game[field]).strip()}
             result["market_relative_matchup"] = comparison(result["matchup_factors"],
-                projected_margin=number(sim["home_mean"]) - number(sim["away_mean"]),
-                projected_total=number(sim["home_mean"]) + number(sim["away_mean"]),
+                projected_margin=projected_margin,
+                projected_total=projected_total,
                 home_line=game["Home Spread"], total_line=game["Total"],
                 as_of=grades["spread"]["as_of"], kickoff=game["Game Time"], odds=prices,
                 model_version=getattr(builder, "MODEL_VERSION", ""), policy_version=policy["version"])

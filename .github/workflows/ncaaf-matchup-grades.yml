@@ -4,6 +4,8 @@ on:
     paths:
       - 'builders/cfb_*'
       - 'config/ncaaf_matchup_grades.json'
+      - 'research/test_cfb_matchup_projection.py'
+      - 'research/replay_ncaaf_matchup_projection.py'
       - 'research/test_cfb_matchup_grades.py'
       - 'research/test_cfb_market_relative_matchups.py'
       - 'research/ncaaf_market_relative_audit.py'
@@ -15,6 +17,8 @@ on:
     paths:
       - 'builders/cfb_*'
       - 'config/ncaaf_matchup_grades.json'
+      - 'research/test_cfb_matchup_projection.py'
+      - 'research/replay_ncaaf_matchup_projection.py'
       - 'research/test_cfb_matchup_grades.py'
       - 'research/test_cfb_market_relative_matchups.py'
       - 'research/ncaaf_market_relative_audit.py'
@@ -30,5 +34,6 @@ jobs:
           python-version: '3.12'
       - run: pip install numpy pandas
       - run: python -m unittest research.test_cfb_matchup_grades research.test_cfb_selection_review research.test_cfb_market_relative_matchups -v
+      - run: python -m unittest research.test_cfb_matchup_projection -v
       - run: PYTHONPATH=. python research/test_cfb_research_snapshot.py
       - run: PYTHONPATH=. python research/test_cfb_schedule_adjustment_window.py

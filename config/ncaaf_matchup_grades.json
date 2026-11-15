@@ -1,7 +1,7 @@
 {
-  "version": "ncaaf-sp-matchup-2026-11-14-v3",
+  "version": "ncaaf-sp-projection-2026-11-14-v4",
   "status": "provisional",
-  "description": "Published SP+ factors with projection agreement; grades measure matchup support, not calibrated win probabilities.",
+  "description": "Published SP+ offense-versus-opposing-defense and real pace directly set the point forecast. Provisional matchup-support grades, not calibrated win probabilities.",
   "thresholds": {
     "strong_z": 0.5,
     "extreme_z": 1.0,

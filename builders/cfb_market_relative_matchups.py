@@ -111,7 +111,9 @@ def comparison(factors, *, projected_margin, projected_total, home_line, total_l
         "as_of": clock.isoformat(), "kickoff": start.isoformat(),
         "factor_observed_at": observed.isoformat(), "population_sha256": population,
         "model_version": str(model_version), "grading_policy_version": str(policy_version),
-        "forecast_basis": "Existing point model; no additional matchup adjustment fitted",
+        "forecast_basis": ("Published SP+ offense-versus-defense and real pace directly set the point forecast"
+            if str(model_version).startswith("cfb-v3.0-sp-matchup-projection")
+            else "Existing point model; no additional matchup adjustment fitted"),
         "projected_home_margin": margin, "projected_total": total,
         "home_line": spread, "total_line": line, "teams": names, "z": z,
         "alternatives": alternatives}
@@ -145,6 +147,21 @@ def from_saved_row(row):
                 raise ValueError("After-start capture is ineligible")
     if instant(sg["kickoff"]) != instant(tg["kickoff"]):
         raise ValueError("Paired kickoff mismatch")
+    if str(row.get("Grading Policy Version","")).startswith("ncaaf-sp-projection-"):
+        p = json.loads(row["Matchup Projection JSON"])
+        if (p.get("sha256") != fingerprint({k:v for k,v in p.items() if k != "sha256"})
+            or p.get("model_version") != row.get("Model Version")
+            or row.get("Projection Engine") != p.get("model_version")
+            or p.get("source_population_sha256") != f.get("population_sha256")):
+            raise ValueError("Matchup projection provenance mismatch")
+        for g in (sg,tg):
+            if (g.get("projection_sha256") != p["sha256"]
+                or g.get("projection_model_version") != p["model_version"]
+                or not instant(f["observed_at"]) <= instant(p["data_as_of"]) <= instant(g["as_of"])
+                or instant(p["kickoff"]) != instant(g["kickoff"])):
+                raise ValueError("Grade does not reference the saved matchup projection")
+        if abs(finite(sg["projected_margin"])-finite(p["margin"])) > 1e-6 or abs(finite(tg["projected_total"])-finite(p["total"])) > 1e-6:
+            raise ValueError("Saved grade and matchup point forecasts differ")
     if row.get("Season") and int(finite(row["Season"])) != int(finite(f["season"])):
         raise ValueError("Saved factor season mismatch")
     for side in ("away", "home"):
