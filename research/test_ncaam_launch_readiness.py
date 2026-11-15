@@ -42,7 +42,7 @@ def test_default_builder_saves_all_119_games_and_repeat_is_idempotent(monkeypatc
         event=deepcopy(SOURCE['events'][0]);event['id']=str(900000000+i)
         payload['events'].append(event)
     games=runner.parse_slate(payload,'2026-11-01')
-    bundle={'season':2027,'observed_at':NOW.isoformat(),'source':'Test','source_url':'https://example.test',
+    bundle={'season':2027,'observed_at':NOW.isoformat(),'source':'Synthetic Torvik fixture','source_url':'https://barttorvik.com/2027_team_results.csv',
             'league_efficiency':105,'teams':complete_population({team_key(game[side]):{'team':game[side],'offense':110,'defense':100,'tempo':68}
                                            for game in games for side in ['away','home']})}
     class Clock(datetime):
@@ -81,3 +81,4 @@ def test_dispatcher_explicitly_supplies_full_ncaam_slate_limit(monkeypatch):
     nba=next(args for args in calls if args[2].endswith('run_nba_builder.py'))
     assert nba[3:]==['--commit']
     with pytest.raises(SystemExit): runner.main(['--limit','201'])
+

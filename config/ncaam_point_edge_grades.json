@@ -1,0 +1,19 @@
+{
+  "version": "ncaam-point-edge-2026-11-14-v1",
+  "status": "provisional",
+  "grading_basis": "market_point_edge",
+  "thresholds": {
+    "spread_a_points": 7.0,
+    "spread_b_points": 5.0,
+    "total_a_points": 10.0,
+    "total_b_points": 8.0,
+    "spread_max_market_line": 20.0,
+    "max_benchmark_age_hours": 30.0,
+    "max_market_age_minutes": 90.0,
+    "extreme_z": 1.0,
+    "very_extreme_z": 1.5
+  },
+  "price_basis": "Retain the NCAAM quote policy: assumed -110; a worse price needs separate probability evidence",
+  "full_saturday_target": {"minimum": 10, "maximum": 15},
+  "category_policy": "Report actual favorites, underdogs, Overs and Unders; grades do not fill quotas"
+}
