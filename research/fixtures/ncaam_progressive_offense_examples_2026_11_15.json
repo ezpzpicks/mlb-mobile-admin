@@ -1,0 +1,219 @@
+{
+  "note": "Frozen pregame inputs only; expected previews agreed before implementation. Not published retrospective forecasts.",
+  "games": [
+    {
+      "gameId": "401926063",
+      "away_team": "Boise State Broncos",
+      "home_team": "Nebraska Cornhuskers",
+      "ratings_source_url": "https://barttorvik.com/2027_team_results.csv",
+      "ratings_observed_at": "2026-11-15T17:05:05+00:00",
+      "lockedAt": "2026-11-15T17:07:33.144174+00:00",
+      "tipoff": "2026-11-15T18:00:00+00:00",
+      "home_court_points": 0,
+      "neutral_site": true,
+      "market": {
+        "home_spread": -9.5,
+        "total": 159.5,
+        "as_of": "2026-11-15T17:05:08.966000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "lineup_adjustment": {
+        "away": {
+          "offense_change_per_100": 0.14397796299497465,
+          "defense_improvement_per_100": -0.9349786038107029
+        },
+        "home": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        }
+      },
+      "benchmark": {
+        "observed_at": "2026-11-15T17:05:05+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.92941294999447,
+            "sd": 7.081680163508407
+          },
+          "defense": {
+            "mean": 105.96622984487,
+            "sd": 5.659487908049647
+          },
+          "tempo": {
+            "mean": 70.20131135559078,
+            "sd": 2.3262929785697066
+          }
+        }
+      },
+      "away_rating": {
+        "team": "Boise St.",
+        "offense": 111.43405955771354,
+        "defense": 100.57091955397203,
+        "tempo": 70.09821749798643
+      },
+      "home_rating": {
+        "team": "Nebraska",
+        "offense": 117.12805075284123,
+        "defense": 94.07074671272898,
+        "tempo": 70.09383103645577
+      },
+      "expected": {
+        "away_points": 69.78159623112987,
+        "home_points": 83.87002920833804,
+        "away_bonus": 0,
+        "home_bonus": 5
+      }
+    },
+    {
+      "gameId": "401912210",
+      "away_team": "Harvard Crimson",
+      "home_team": "American University Eagles",
+      "ratings_source_url": "https://barttorvik.com/2027_team_results.csv",
+      "ratings_observed_at": "2026-11-15T17:05:05+00:00",
+      "lockedAt": "2026-11-15T17:07:34.505647+00:00",
+      "tipoff": "2026-11-15T18:00:00+00:00",
+      "home_court_points": 3.0633,
+      "neutral_site": false,
+      "market": {
+        "home_spread": -1.5,
+        "total": 130.5,
+        "as_of": "2026-11-15T17:05:08.966000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "lineup_adjustment": {
+        "away": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        },
+        "home": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        }
+      },
+      "benchmark": {
+        "observed_at": "2026-11-15T17:05:05+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.92941294999447,
+            "sd": 7.081680163508407
+          },
+          "defense": {
+            "mean": 105.96622984487,
+            "sd": 5.659487908049647
+          },
+          "tempo": {
+            "mean": 70.20131135559078,
+            "sd": 2.3262929785697066
+          }
+        }
+      },
+      "away_rating": {
+        "team": "Harvard",
+        "offense": 105.59068580449964,
+        "defense": 103.91067389789049,
+        "tempo": 66.83471605014874
+      },
+      "home_rating": {
+        "team": "American",
+        "offense": 105.18931798736733,
+        "defense": 107.37489878828205,
+        "tempo": 68.06732813801689
+      },
+      "expected": {
+        "away_points": 67.81914682717162,
+        "home_points": 68.37742404897422,
+        "away_bonus": 0,
+        "home_bonus": 0
+      }
+    },
+    {
+      "gameId": "401918453",
+      "away_team": "William & Mary Tribe",
+      "home_team": "Michigan Wolverines",
+      "ratings_source_url": "https://barttorvik.com/2027_team_results.csv",
+      "ratings_observed_at": "2026-11-15T17:05:05+00:00",
+      "lockedAt": "2026-11-15T18:37:32.696796+00:00",
+      "tipoff": "2026-11-15T19:00:00+00:00",
+      "home_court_points": 3.1133,
+      "neutral_site": false,
+      "market": {
+        "home_spread": -26.5,
+        "total": 169.5,
+        "as_of": "2026-11-15T18:35:07.244000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "lineup_adjustment": {
+        "policy": "ncaam-torvik-roster-verified-minute-deltas-v2",
+        "as_of": "2026-11-15T18:37:32.696796+00:00",
+        "ratingsSource": "Bart Torvik player profiles with completed-season fallback",
+        "ratingsSourceUrl": "https://barttorvik.com/getadvstats.php?year=2026&csv=1",
+        "reference": "Availability deltas from the verified current roster; 200 regulation minutes",
+        "scenarios": [],
+        "away": {
+          "applied": false,
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0,
+          "players": [],
+          "flags": [
+            "RotoWire unavailable; availability unchecked. Team baseline retained."
+          ]
+        },
+        "home": {
+          "applied": false,
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0,
+          "players": [],
+          "flags": [
+            "RotoWire unavailable; availability unchecked. Team baseline retained."
+          ]
+        }
+      },
+      "benchmark": {
+        "observed_at": "2026-11-15T17:05:05+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.92941294999447,
+            "sd": 7.081680163508407
+          },
+          "defense": {
+            "mean": 105.96622984487,
+            "sd": 5.659487908049647
+          },
+          "tempo": {
+            "mean": 70.20131135559078,
+            "sd": 2.3262929785697066
+          }
+        }
+      },
+      "away_rating": {
+        "team": "William & Mary",
+        "offense": 107.3959441889752,
+        "defense": 109.41431168661197,
+        "tempo": 72.45584801523158
+      },
+      "home_rating": {
+        "team": "Michigan",
+        "offense": 117.85726762123575,
+        "defense": 95.31639330622883,
+        "tempo": 72.20727699179254
+      },
+      "expected": {
+        "away_points": 70.55830148951375,
+        "home_points": 99.97467996663356,
+        "away_bonus": 0,
+        "home_bonus": 8
+      }
+    }
+  ]
+}
