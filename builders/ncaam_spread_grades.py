@@ -109,7 +109,8 @@ def grade_saved_spread(forecast, benchmarks, policy=None):
 
 
 def capture_spread_grade(forecast, benchmarks, *, mode='live', policy=None, published_at=None):
-    if str(forecast.get('modelVersion','')).startswith('ncaam-v0.7-matchup-projection-'):
+    from builders.ncaam_matchup_projection import POINT_MODEL_VERSIONS
+    if forecast.get('modelVersion') in POINT_MODEL_VERSIONS:
         from builders.ncaam_point_edges import capture_grades
         return capture_grades(forecast,benchmarks,mode=mode,policy=policy,
             published_at=published_at or datetime.now(timezone.utc).isoformat())['spread']
