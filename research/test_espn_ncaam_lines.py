@@ -7,7 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from builders.ncaam_model import MODEL_VERSION, team_key
+from builders.ncaam_model import team_key
+from builders.ncaam_matchup_projection import MODEL_VERSION
 from scripts import run_ncaam_builder as runner
 from shared.espn_ncaam_lines import parse_espn_ncaam_lines, response_observed_at
 from shared.ncaaf_auto_builder import MarketGame
