@@ -9,12 +9,17 @@ import math
 from builders.ncaam_model import project as legacy_project, team_key
 from builders.ncaam_matchup_grades import number, policy_digest, population_benchmark, stamp
 
-MODEL_VERSION = "ncaam-v0.7-matchup-projection-2026-11-14"
+LEGACY_POINT_MODEL_VERSION = "ncaam-v0.7-matchup-projection-2026-11-14"
+MODEL_VERSION = "ncaam-v0.8-adjusted-tempo-2026-11-15"
+POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, MODEL_VERSION)
 GRADE_POLICY = "ncaam-point-edge-2026-11-14-v1"
 
 
 def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
-                         home_court_points, neutral_site, lineup_adjustment=None):
+                         home_court_points, neutral_site, lineup_adjustment=None,
+                         model_version=MODEL_VERSION):
+    if model_version not in POINT_MODEL_VERSIONS:
+        raise ValueError('Unknown captured point model.')
     observed, clock, start = map(stamp, (benchmark['observed_at'], as_of, tipoff))
     season = int(benchmark['season'])
     if (not observed <= clock < start or (clock-observed).total_seconds() > 30*3600
@@ -42,7 +47,15 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
             if not (45 < value < 95 if metric == 'tempo' else 60 < value < 150):
                 raise ValueError('Team rating outside its basketball scale.')
     center = (number(metrics['offense']['mean'])+number(metrics['defense']['mean']))/2
-    possessions = (number(away['tempo'])+number(home['tempo']))/2
+    national_tempo = number(metrics['tempo']['mean'])
+    # Adjusted tempo describes a team's pace against an average opponent.
+    # Combine both relative pace effects; averaging halves their departures
+    # from the national baseline. Keep v0.7 reproducible for saved captures.
+    possessions = ((number(away['tempo'])+number(home['tempo']))/2
+        if model_version == LEGACY_POINT_MODEL_VERSION else
+        number(away['tempo'])*number(home['tempo'])/national_tempo)
+    if not 45 < possessions < 95:
+        raise ValueError('Combined matchup pace outside the supported range.')
     pairings, points, adjustments = {}, {}, {}
     impact = lineup_adjustment or {}
     for side, opponent in (('away','home'), ('home','away')):
@@ -63,7 +76,7 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         adjustments[side] = {'player_offense_per_100':offense_change,
             'opponent_defense_per_100':defense_change, 'player_points':player_points,
             'home_court_points':venue_points}
-    payload = {'model_version':MODEL_VERSION, 'status':'provisional', 'as_of':clock.isoformat(),
+    payload = {'model_version':model_version, 'status':'provisional', 'as_of':clock.isoformat(),
         'tipoff':start.isoformat(), 'season':season, 'ratings_source_url':source_url,
         'ratings_observed_at':observed.isoformat(), 'benchmark_sha256':policy_digest(benchmark),
         'national_benchmark':deepcopy(benchmark), 'team_inputs':{side:{k:ratings[side][k]
@@ -72,6 +85,11 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         'away_points':points['away'], 'home_points':points['home'],
         'margin':points['home']-points['away'], 'total':points['home']+points['away'],
         'calibrated_probabilities':False}
+    if model_version == MODEL_VERSION:
+        payload['tempo_model'] = {'method':'adjusted-tempo-ratios-v1',
+            'national_tempo':national_tempo,
+            'away_ratio':number(away['tempo'])/national_tempo,
+            'home_ratio':number(home['tempo'])/national_tempo}
     payload['sha256'] = policy_digest(payload)
     return payload
 

@@ -2,10 +2,11 @@
 from copy import deepcopy
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
-from builders.ncaam_matchup_projection import MODEL_VERSION, GRADE_POLICY
+from builders.ncaam_matchup_projection import MODEL_VERSION, POINT_MODEL_VERSIONS, GRADE_POLICY
 
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_point_edge_grades.json'
 
@@ -32,8 +33,9 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
     if mode not in ('live','replay') or published<lock or (mode=='live' and published>=tip) or not lock<tip:
         raise ValueError('Grade publication must respect its live/replay clock.')
     p=f['matchup_projection']
-    if (f['modelVersion']!=MODEL_VERSION or f.get('projection_engine')!=MODEL_VERSION
-        or p['model_version']!=MODEL_VERSION or p['sha256']!=policy_digest({k:v for k,v in p.items() if k!='sha256'})
+    model=f['modelVersion']
+    if (model not in POINT_MODEL_VERSIONS or f.get('projection_engine')!=model
+        or p['model_version']!=model or p['sha256']!=policy_digest({k:v for k,v in p.items() if k!='sha256'})
         or stamp(p['as_of'])!=lock or stamp(p['tipoff'])!=tip
         or abs(number(f['fair_home_spread'])+number(p['margin']))>1e-8
         or abs(number(f['total'])-number(p['total']))>1e-8):
@@ -47,6 +49,17 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
         or stamp(benchmark['observed_at'])!=stamp(f['ratings_observed_at'])
         or (lock-stamp(benchmark['observed_at'])).total_seconds()>3600*t['max_benchmark_age_hours']):
         raise ValueError('The grade benchmark must match the captured score inputs.')
+    away_tempo,home_tempo=(number(f[s+'_rating']['tempo']) for s in ('away','home'))
+    national_tempo=number(benchmark['metrics']['tempo']['mean'])
+    pace=away_tempo*home_tempo/national_tempo if model==MODEL_VERSION else (away_tempo+home_tempo)/2
+    if not 45<pace<95 or not math.isclose(number(p['possessions']),pace,abs_tol=1e-8,rel_tol=0):
+        raise ValueError('Saved pace does not match its projection model.')
+    if model==MODEL_VERSION:
+        tempo=p.get('tempo_model',{})
+        if (tempo.get('method')!='adjusted-tempo-ratios-v1' or tempo.get('national_tempo')!=national_tempo
+            or not math.isclose(number(tempo.get('away_ratio')),away_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)
+            or not math.isclose(number(tempo.get('home_ratio')),home_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)):
+            raise ValueError('Saved adjusted-tempo proof is unavailable.')
     market=f['market'];quote=stamp(market['as_of'])
     if not quote<=lock or (lock-quote).total_seconds()>60*t['max_market_age_minutes']:
         raise ValueError('Quote is stale or was unavailable before capture.')
@@ -73,7 +86,7 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
             'side':side if grade in ('A','B') else None,'projected_side':side,'edge':edge,'reason':reason,
             'confidence_flags':[*flags,*(['20+ point market spread; projection-only'] if large else [])],
             'forecast_record_id':f['recordId'],'game_id':str(f['gameId']),'as_of':f['lockedAt'],'tipoff':f['tipoff'],
-            'published_at':published_at,'record_mode':mode,'projection_model_version':MODEL_VERSION,'projection_sha256':p['sha256'],
+            'published_at':published_at,'record_mode':mode,'projection_model_version':model,'projection_sha256':p['sha256'],
             'thresholds':deepcopy(t),'national_benchmark':deepcopy(benchmark),'benchmark_observed_at':benchmark['observed_at'],
             'benchmark_exact_rating_timestamp':True,'z':z}
         if name=='spread':

@@ -1,0 +1,235 @@
+{
+  "source": "Saved pregame forecasts; outcome fields omitted",
+  "games": [
+    {
+      "recordId": "401926063|ncaam-v0.7-matchup-projection-2026-11-14|pregame|0a9e83e27d715e1d",
+      "gameId": "401926063",
+      "modelVersion": "ncaam-v0.7-matchup-projection-2026-11-14",
+      "away_team": "Boise State Broncos",
+      "home_team": "Nebraska Cornhuskers",
+      "away_rating": {
+        "team": "Boise St.",
+        "offense": 111.43405955771354,
+        "defense": 100.57091955397203,
+        "tempo": 70.09821749798643,
+        "record": "3-0",
+        "conference": "P12",
+        "strength_of_schedule": 0.3094288208491549,
+        "opponent_offense": 106.44292094929364,
+        "opponent_defense": 108.0681963337052,
+        "games_played": 2,
+        "d1_games_played": 2,
+        "game_count_basis": "Verified D1 game logs",
+        "current_weight": 1,
+        "prior_weight": 0,
+        "opponent_adjusted": true,
+        "source_preseason_prior": true,
+        "prior_season": 2026,
+        "prior_available": true,
+        "prior_record": "20-12",
+        "prior_competition": {
+          "strength_of_schedule": 0.6439807044873124,
+          "opponent_offense": 114.10132386335304,
+          "opponent_defense": 105.65658630095729
+        },
+        "current_offense": 111.43405955771354,
+        "prior_offense": 118.32719523792946,
+        "current_defense": 100.57091955397203,
+        "prior_defense": 103.90129704493624,
+        "current_tempo": 70.09821749798643,
+        "prior_tempo": 65.80348912382273
+      },
+      "home_rating": {
+        "team": "Nebraska",
+        "offense": 117.12805075284123,
+        "defense": 94.07074671272898,
+        "tempo": 70.09383103645577,
+        "record": "3-0",
+        "conference": "B10",
+        "strength_of_schedule": 0.3864865597750131,
+        "opponent_offense": 101.49343486551147,
+        "opponent_defense": 106.56504067506371,
+        "games_played": 3,
+        "d1_games_played": 3,
+        "game_count_basis": "Verified D1 game logs",
+        "current_weight": 1,
+        "prior_weight": 0,
+        "opponent_adjusted": true,
+        "source_preseason_prior": true,
+        "prior_season": 2026,
+        "prior_available": true,
+        "prior_record": "28-7",
+        "prior_competition": {
+          "strength_of_schedule": 0.7040535250822184,
+          "opponent_offense": 117.04761764724608,
+          "opponent_defense": 104.90219649397109
+        },
+        "current_offense": 117.12805075284123,
+        "prior_offense": 118.31991108976263,
+        "current_defense": 94.07074671272898,
+        "prior_defense": 94.0055999414133,
+        "current_tempo": 70.09383103645577,
+        "prior_tempo": 66.56349637574849
+      },
+      "ratings_source_url": "https://barttorvik.com/2027_team_results.csv",
+      "ratings_observed_at": "2026-11-15T17:05:05+00:00",
+      "lockedAt": "2026-11-15T17:07:33.144174+00:00",
+      "tipoff": "2026-11-15T18:00:00+00:00",
+      "home_court_points": 0,
+      "neutral_site": true,
+      "market": {
+        "home_spread": -9.5,
+        "total": 159.5,
+        "as_of": "2026-11-15T17:05:08.966000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "total": 148.8749063916179,
+      "benchmark": {
+        "observed_at": "2026-11-15T17:05:05+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.92941294999447,
+            "sd": 7.081680163508407
+          },
+          "defense": {
+            "mean": 105.96622984487,
+            "sd": 5.659487908049647
+          },
+          "tempo": {
+            "mean": 70.20131135559078,
+            "sd": 2.3262929785697066
+          }
+        }
+      },
+      "lineup_adjustment": {
+        "away": {
+          "offense_change_per_100": 0.14397796299497465,
+          "defense_improvement_per_100": -0.9349786038107029
+        },
+        "home": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        }
+      }
+    },
+    {
+      "recordId": "401912210|ncaam-v0.7-matchup-projection-2026-11-14|pregame|34edfa5f86738de0",
+      "gameId": "401912210",
+      "modelVersion": "ncaam-v0.7-matchup-projection-2026-11-14",
+      "away_team": "Harvard Crimson",
+      "home_team": "American University Eagles",
+      "away_rating": {
+        "team": "Harvard",
+        "offense": 105.59068580449964,
+        "defense": 103.91067389789049,
+        "tempo": 66.83471605014874,
+        "record": "2-2",
+        "conference": "Ivy",
+        "strength_of_schedule": 0.32706005203308447,
+        "opponent_offense": 110.28182073356497,
+        "opponent_defense": 103.02571697085219,
+        "games_played": 2,
+        "d1_games_played": 2,
+        "game_count_basis": "Verified D1 game logs",
+        "current_weight": 1,
+        "prior_weight": 0,
+        "opponent_adjusted": true,
+        "source_preseason_prior": true,
+        "prior_season": 2026,
+        "prior_available": true,
+        "prior_record": "17-12",
+        "prior_competition": {
+          "strength_of_schedule": 0.40605273543555637,
+          "opponent_offense": 107.77434769558995,
+          "opponent_defense": 111.3673770904813
+        },
+        "current_offense": 105.59068580449964,
+        "prior_offense": 105.44260304765575,
+        "current_defense": 103.91067389789049,
+        "prior_defense": 105.11640062392375,
+        "current_tempo": 66.83471605014874,
+        "prior_tempo": 63.187091959462705
+      },
+      "home_rating": {
+        "team": "American",
+        "offense": 105.18931798736733,
+        "defense": 107.37489878828205,
+        "tempo": 68.06732813801689,
+        "record": "1-2",
+        "conference": "Pat",
+        "strength_of_schedule": 0.7089358977870154,
+        "opponent_offense": 111.55824771489347,
+        "opponent_defense": 100.58329108792799,
+        "games_played": 3,
+        "d1_games_played": 3,
+        "game_count_basis": "Verified D1 game logs",
+        "current_weight": 1,
+        "prior_weight": 0,
+        "opponent_adjusted": true,
+        "source_preseason_prior": true,
+        "prior_season": 2026,
+        "prior_available": true,
+        "prior_record": "16-16",
+        "prior_competition": {
+          "strength_of_schedule": 0.33096206611635837,
+          "opponent_offense": 105.93442798375321,
+          "opponent_defense": 112.61323384778218
+        },
+        "current_offense": 105.18931798736733,
+        "prior_offense": 105.66932704025794,
+        "current_defense": 107.37489878828205,
+        "prior_defense": 112.52746698748003,
+        "current_tempo": 68.06732813801689,
+        "prior_tempo": 66.8137017103862
+      },
+      "ratings_source_url": "https://barttorvik.com/2027_team_results.csv",
+      "ratings_observed_at": "2026-11-15T17:05:05+00:00",
+      "lockedAt": "2026-11-15T17:07:34.505647+00:00",
+      "tipoff": "2026-11-15T18:00:00+00:00",
+      "home_court_points": 3.0633,
+      "neutral_site": false,
+      "market": {
+        "home_spread": -1.5,
+        "total": 130.5,
+        "as_of": "2026-11-15T17:05:08.966000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      },
+      "total": 141.7617684037576,
+      "benchmark": {
+        "observed_at": "2026-11-15T17:05:05+00:00",
+        "season": 2027,
+        "team_count": 365,
+        "metrics": {
+          "offense": {
+            "mean": 105.92941294999447,
+            "sd": 7.081680163508407
+          },
+          "defense": {
+            "mean": 105.96622984487,
+            "sd": 5.659487908049647
+          },
+          "tempo": {
+            "mean": 70.20131135559078,
+            "sd": 2.3262929785697066
+          }
+        }
+      },
+      "lineup_adjustment": {
+        "away": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        },
+        "home": {
+          "offense_change_per_100": 0,
+          "defense_improvement_per_100": 0
+        }
+      }
+    }
+  ]
+}

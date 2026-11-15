@@ -7,11 +7,14 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from builders.ncaam_matchup_grades import policy_digest, stamp
-from builders.ncaam_matchup_projection import from_captured_inputs, MODEL_VERSION, GRADE_POLICY
+from builders.ncaam_matchup_projection import from_captured_inputs, MODEL_VERSION, POINT_MODEL_VERSIONS, GRADE_POLICY
 from builders.ncaam_point_edges import capture_grades, load_policy
 
 
-def replay(payload):
+def replay(payload, model_version=None):
+    model_version=model_version or payload.get('model_version',MODEL_VERSION)
+    if model_version not in POINT_MODEL_VERSIONS:
+        raise ValueError('Unknown replay model version.')
     data=payload.get('ncaamMarket',payload);latest={};computed=datetime.now(timezone.utc).isoformat()
     for f in data.get('forecasts',data.get('games',[])):
         if not stamp(f['lockedAt'])<stamp(f['tipoff']):continue
@@ -29,11 +32,11 @@ def replay(payload):
             inputs['national_benchmark']=deepcopy(b)
             p=from_captured_inputs(source['away_rating'],source['home_rating'],b,as_of=source['lockedAt'],tipoff=source['tipoff'],
                 source_url=source['ratings_source_url'],home_court_points=source['home_court_points'],
-                neutral_site=source['neutral_site'],lineup_adjustment=source.get('lineup_adjustment'))
+                neutral_site=source['neutral_site'],lineup_adjustment=source.get('lineup_adjustment'),model_version=model_version)
             source_record=source.get('replay_source_record_id',source['recordId'])
             f={**{k:v for k,v in inputs.items() if k!='national_benchmark'},'gameId':str(source['gameId']),
-                'recordId':f"{source['gameId']}|{MODEL_VERSION}|replay|{policy_digest(source_record)[:16]}",
-                'modelVersion':MODEL_VERSION,'projection_engine':MODEL_VERSION,'lockedAt':source['lockedAt'],'tipoff':source['tipoff'],
+                'recordId':f"{source['gameId']}|{model_version}|replay|{policy_digest(source_record)[:16]}",
+                'modelVersion':model_version,'projection_engine':model_version,'lockedAt':source['lockedAt'],'tipoff':source['tipoff'],
                 'phase':'replay','computed_at':computed,'replay_source_record_id':source_record,'replay_inputs':inputs,
                 'matchup_projection':p,'away_score':round(p['away_points'],1),'home_score':round(p['home_points'],1),
                 'fair_home_spread':-p['margin'],'total':p['total'],'home_spread_edge':p['margin']+source['market']['home_spread'],
@@ -55,7 +58,7 @@ def replay(payload):
             errors.append({'game_id':source.get('gameId'),'reason':str(exc)})
     plays.sort(key=lambda p:(-p['edge_points'],p['game'],p['market']))
     return {'computed_at':computed,'date':payload.get('today',data.get('date')),'record_mode':'RETROSPECTIVE_FORMULA_REPLAY',
-        'uses_final_results':False,'model_version':MODEL_VERSION,'grading_policy':policy,
+        'uses_final_results':False,'model_version':model_version,'grading_policy':policy,
         'schedule_games':payload.get('schedule_games',len(data.get('games',[]))),'frozen_forecast_games':len(latest),'games':output,'errors':errors,
         'ranked_candidates':plays,'mix':{role:sum(p['role']==role for p in plays) for role in ('Favorite','Underdog','Over','Under')},
         'grade_counts':{g:sum(p['grade']==g for p in plays) for g in ('A','B')}}
@@ -63,6 +66,7 @@ def replay(payload):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--input',required=True);parser.add_argument('--output',required=True)
-    args=parser.parse_args();result=replay(json.loads(Path(args.input).read_text()))
+    parser.add_argument('--model-version',choices=POINT_MODEL_VERSIONS)
+    args=parser.parse_args();result=replay(json.loads(Path(args.input).read_text()),model_version=args.model_version)
     Path(args.output).write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
     print(json.dumps({k:v for k,v in result.items() if k not in ('games','grading_policy')},indent=2))

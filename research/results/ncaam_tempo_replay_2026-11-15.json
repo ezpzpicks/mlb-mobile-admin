@@ -1,0 +1,3504 @@
+{
+  "hypothesis": "Combine both adjusted-tempo ratios to the captured national mean",
+  "coefficients_fitted": false,
+  "uses_market_to_project": false,
+  "source_inputs": [
+    {
+      "file": "2026-11-10.json",
+      "sha256": "ecfdeacee72abda6e25813d5eee369be2c803a3f52b574efde1d240e538e5b66"
+    },
+    {
+      "file": "2026-11-11.json",
+      "sha256": "f62fda1eb7b0de9c2b3d1da911e47f4956d8e215dd364db4f3de7700d976c493"
+    },
+    {
+      "file": "2026-11-12.json",
+      "sha256": "9e3e3753c5673f7eb2201602bf66109761376aee07e37994463b3e4d480c8ff7"
+    },
+    {
+      "file": "2026-11-13.json",
+      "sha256": "53320a169736bfaf5ecfab7b4d743f99c4c4f557c5edb3b8ae925617e291c65e"
+    },
+    {
+      "file": "2026-11-14.json",
+      "sha256": "ac7c793e806e30ccf7b8ef0d842a481482bcdfe8631bb3b86b776d25466e1ead"
+    }
+  ],
+  "pace_outcome_source": {
+    "url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+    "sha256": "839e29c91c58b63004d3b112c95d5ca1883d613679eb40578c9509f84630cf26"
+  },
+  "all": {
+    "games": 173,
+    "arithmetic": {
+      "mae": 12.622737604186833,
+      "rmse": 16.00269634932711,
+      "bias": 2.9846502345697954
+    },
+    "combined": {
+      "mae": 12.66415192604489,
+      "rmse": 16.080770061374697,
+      "bias": 3.014555827006454
+    }
+  },
+  "by_profile": {
+    "both_slow": {
+      "games": 45,
+      "arithmetic": {
+        "mae": 14.568856440321753,
+        "rmse": 18.285384856841638,
+        "bias": 4.879749447515609
+      },
+      "combined": {
+        "mae": 13.485882332178427,
+        "rmse": 17.330217326570384,
+        "bias": 1.6086304411215886
+      }
+    },
+    "both_fast": {
+      "games": 32,
+      "arithmetic": {
+        "mae": 12.736174130293398,
+        "rmse": 16.009252247771204,
+        "bias": -0.8167059863529929
+      },
+      "combined": {
+        "mae": 12.883423096983632,
+        "rmse": 16.16636274545341,
+        "bias": 3.079283287670771
+      }
+    },
+    "mixed": {
+      "games": 96,
+      "arithmetic": {
+        "mae": 11.672682224379734,
+        "rmse": 14.809717648410489,
+        "bias": 3.363441218809041
+      },
+      "combined": {
+        "mae": 12.20587540785688,
+        "rmse": 15.430587558319749,
+        "bias": 3.6520075314185454
+      }
+    }
+  },
+  "by_date": {
+    "2026-11-11": {
+      "games": 38,
+      "arithmetic": {
+        "mae": 11.301722735178167,
+        "rmse": 14.51580908204205,
+        "bias": 2.079555578185446
+      },
+      "combined": {
+        "mae": 10.371644966617291,
+        "rmse": 13.682925830783864,
+        "bias": 1.6073129224196476
+      }
+    },
+    "2026-11-12": {
+      "games": 24,
+      "arithmetic": {
+        "mae": 12.491751225521147,
+        "rmse": 15.913469586161176,
+        "bias": 2.429199542709926
+      },
+      "combined": {
+        "mae": 13.397764265746284,
+        "rmse": 16.15874901036534,
+        "bias": 1.8852406110479183
+      }
+    },
+    "2026-11-13": {
+      "games": 55,
+      "arithmetic": {
+        "mae": 11.238092974459768,
+        "rmse": 15.18110305751971,
+        "bias": 1.3058733730850747
+      },
+      "combined": {
+        "mae": 11.205911852537822,
+        "rmse": 15.124563427693772,
+        "bias": 1.5534065574743858
+      }
+    },
+    "2026-11-14": {
+      "games": 56,
+      "arithmetic": {
+        "mae": 14.935196403209947,
+        "rmse": 17.699197342150857,
+        "bias": 5.485670608300184
+      },
+      "combined": {
+        "mae": 15.337576432264605,
+        "rmse": 18.309790080515064,
+        "bias": 5.888520208820155
+      }
+    }
+  },
+  "pace": {
+    "all": {
+      "games": 174,
+      "arithmetic": {
+        "mae": 4.082900455233875,
+        "rmse": 5.062265781545004,
+        "bias": 1.616548341358815
+      },
+      "combined": {
+        "mae": 3.8642228204757245,
+        "rmse": 4.843949979588958,
+        "bias": 1.6109136672183204
+      }
+    },
+    "by_profile": {
+      "both_slow": {
+        "games": 46,
+        "arithmetic": {
+          "mae": 5.461950643848363,
+          "rmse": 6.391413752394977,
+          "bias": 3.386695800999905
+        },
+        "combined": {
+          "mae": 4.63961852101567,
+          "rmse": 5.604392590544095,
+          "bias": 1.8160982342083283
+        }
+      },
+      "both_fast": {
+        "games": 32,
+        "arithmetic": {
+          "mae": 3.7617510961051037,
+          "rmse": 4.47333184935573,
+          "bias": -1.6388474142423384
+        },
+        "combined": {
+          "mae": 3.392906801036654,
+          "rmse": 4.154232851581485,
+          "bias": 0.1839231536023842
+        }
+      },
+      "mixed": {
+        "games": 96,
+        "arithmetic": {
+          "mae": 3.5291553595656904,
+          "rmse": 4.494866195729989,
+          "bias": 1.8534846021478437
+        },
+        "combined": {
+          "mae": 3.6497843871133577,
+          "rmse": 4.661054708400725,
+          "bias": 1.9882595667409202
+        }
+      }
+    },
+    "games": [
+      {
+        "date": "2026-11-11",
+        "game_id": "401925858",
+        "profile": "mixed",
+        "actual": 71.2,
+        "arithmetic": 71.09371477336248,
+        "combined": 71.28687761678006
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401921175",
+        "profile": "mixed",
+        "actual": 71.7,
+        "arithmetic": 72.37167649780474,
+        "combined": 73.85030657291989
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401920680",
+        "profile": "mixed",
+        "actual": 72.1,
+        "arithmetic": 71.75568198181145,
+        "combined": 72.62994794134961
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401909524",
+        "profile": "both_fast",
+        "actual": 75.7,
+        "arithmetic": 71.61090957601519,
+        "combined": 72.34279145916939
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401926868",
+        "profile": "both_fast",
+        "actual": 74.1,
+        "arithmetic": 71.6465239154549,
+        "combined": 72.41919109935392
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401926863",
+        "profile": "mixed",
+        "actual": 69.6,
+        "arithmetic": 70.44298187927492,
+        "combined": 69.99709687969293
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925895",
+        "profile": "both_slow",
+        "actual": 64.2,
+        "arithmetic": 69.95028995250402,
+        "combined": 69.03025373426138
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925682",
+        "profile": "mixed",
+        "actual": 75.7,
+        "arithmetic": 70.94986033852456,
+        "combined": 70.99025457088155
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401924735",
+        "profile": "both_slow",
+        "actual": 62.4,
+        "arithmetic": 68.3112811374521,
+        "combined": 65.83476236064816
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401921821",
+        "profile": "both_slow",
+        "actual": 64.7,
+        "arithmetic": 67.33636775289713,
+        "combined": 63.96045220010046
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401921286",
+        "profile": "both_slow",
+        "actual": 74.8,
+        "arithmetic": 69.61851931138716,
+        "combined": 68.38029313630929
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401920903",
+        "profile": "both_slow",
+        "actual": 67.0,
+        "arithmetic": 69.48356996707898,
+        "combined": 68.11490726264141
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401920740",
+        "profile": "both_slow",
+        "actual": 59.4,
+        "arithmetic": 68.09641183383886,
+        "combined": 65.42291463179944
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401920202",
+        "profile": "mixed",
+        "actual": 67.8,
+        "arithmetic": 70.6148654649951,
+        "combined": 70.3366168506148
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401918452",
+        "profile": "both_fast",
+        "actual": 75.0,
+        "arithmetic": 72.35611024737665,
+        "combined": 73.86079073403367
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401917901",
+        "profile": "mixed",
+        "actual": 72.1,
+        "arithmetic": 71.11400608391543,
+        "combined": 71.34420960124153
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401912209",
+        "profile": "both_slow",
+        "actual": 56.3,
+        "arithmetic": 69.17833906293647,
+        "combined": 67.5165349163376
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401911263",
+        "profile": "mixed",
+        "actual": 71.5,
+        "arithmetic": 71.3906669899064,
+        "combined": 71.88890544562061
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401911012",
+        "profile": "both_fast",
+        "actual": 75.5,
+        "arithmetic": 71.81917101159772,
+        "combined": 72.76971672460196
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401928794",
+        "profile": "both_fast",
+        "actual": 70.9,
+        "arithmetic": 71.8427326224187,
+        "combined": 72.81617190702887
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925702",
+        "profile": "both_slow",
+        "actual": 66.4,
+        "arithmetic": 67.8369600702328,
+        "combined": 64.92504799939844
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401928824",
+        "profile": "mixed",
+        "actual": 64.9,
+        "arithmetic": 70.75603628038894,
+        "combined": 70.61393070234328
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401928996",
+        "profile": "both_slow",
+        "actual": 66.5,
+        "arithmetic": 69.61624415183256,
+        "combined": 68.37560808797694
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925863",
+        "profile": "both_slow",
+        "actual": 67.9,
+        "arithmetic": 70.81613554158734,
+        "combined": 70.75316504628684
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401921037",
+        "profile": "both_fast",
+        "actual": 71.6,
+        "arithmetic": 73.60912990246699,
+        "combined": 76.41534318503902
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401917963",
+        "profile": "mixed",
+        "actual": 63.9,
+        "arithmetic": 70.25514859067445,
+        "combined": 69.62823223419225
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401917522",
+        "profile": "mixed",
+        "actual": 72.5,
+        "arithmetic": 71.56463717601461,
+        "combined": 72.15753541629155
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401930177",
+        "profile": "mixed",
+        "actual": 76.4,
+        "arithmetic": 71.88420016691518,
+        "combined": 72.80153055493389
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401926062",
+        "profile": "mixed",
+        "actual": 74.7,
+        "arithmetic": 72.04367231927101,
+        "combined": 73.19035534709636
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401928814",
+        "profile": "both_slow",
+        "actual": 75.0,
+        "arithmetic": 69.85563516950059,
+        "combined": 68.84681594024315
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925915",
+        "profile": "mixed",
+        "actual": 71.8,
+        "arithmetic": 69.91457641356054,
+        "combined": 68.94592319611932
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401911454",
+        "profile": "both_slow",
+        "actual": 67.6,
+        "arithmetic": 68.65600120327645,
+        "combined": 66.49942999116273
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401911346",
+        "profile": "both_fast",
+        "actual": 80.7,
+        "arithmetic": 73.71184759238443,
+        "combined": 76.65499704254039
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401925738",
+        "profile": "mixed",
+        "actual": 67.2,
+        "arithmetic": 70.41796794888319,
+        "combined": 69.95638992748805
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401919734",
+        "profile": "both_slow",
+        "actual": 60.0,
+        "arithmetic": 69.5871210618449,
+        "combined": 68.31017622798763
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401917523",
+        "profile": "both_slow",
+        "actual": 67.5,
+        "arithmetic": 69.47947068878861,
+        "combined": 68.1049775267225
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401917521",
+        "profile": "mixed",
+        "actual": 72.1,
+        "arithmetic": 70.99354091908617,
+        "combined": 71.1047827166567
+      },
+      {
+        "date": "2026-11-11",
+        "game_id": "401918054",
+        "profile": "both_fast",
+        "actual": 68.9,
+        "arithmetic": 72.04497474704021,
+        "combined": 73.22241794358256
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401920073",
+        "profile": "both_slow",
+        "actual": 66.7,
+        "arithmetic": 69.005999159775,
+        "combined": 67.24677109158644
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401925631",
+        "profile": "mixed",
+        "actual": 61.0,
+        "arithmetic": 70.24061145696763,
+        "combined": 69.69821934371672
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401921086",
+        "profile": "both_fast",
+        "actual": 76.7,
+        "arithmetic": 73.40868191243318,
+        "combined": 76.13478003899951
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401917176",
+        "profile": "mixed",
+        "actual": 64.5,
+        "arithmetic": 69.969527591468,
+        "combined": 69.06447629065093
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401916288",
+        "profile": "mixed",
+        "actual": 75.8,
+        "arithmetic": 71.31614907150662,
+        "combined": 71.83571219913675
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401928818",
+        "profile": "mixed",
+        "actual": 69.1,
+        "arithmetic": 70.82219597123515,
+        "combined": 70.86186681530194
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401924876",
+        "profile": "mixed",
+        "actual": 62.2,
+        "arithmetic": 70.28378366267441,
+        "combined": 69.74321575503188
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401924857",
+        "profile": "mixed",
+        "actual": 70.0,
+        "arithmetic": 71.49584645872602,
+        "combined": 72.22083528050165
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401922239",
+        "profile": "mixed",
+        "actual": 67.6,
+        "arithmetic": 70.49874327970662,
+        "combined": 70.20066156885656
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401921768",
+        "profile": "mixed",
+        "actual": 67.0,
+        "arithmetic": 70.01489106308306,
+        "combined": 69.21308396259633
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401920566",
+        "profile": "both_slow",
+        "actual": 69.7,
+        "arithmetic": 68.67594213092593,
+        "combined": 66.60954253927105
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401920412",
+        "profile": "both_fast",
+        "actual": 75.2,
+        "arithmetic": 71.68897196367553,
+        "combined": 72.61107709796686
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401920135",
+        "profile": "mixed",
+        "actual": 73.2,
+        "arithmetic": 70.24512340099703,
+        "combined": 69.71854027585671
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401920064",
+        "profile": "mixed",
+        "actual": 59.4,
+        "arithmetic": 70.38796301128995,
+        "combined": 69.99271496125341
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401911307",
+        "profile": "both_slow",
+        "actual": 71.5,
+        "arithmetic": 69.4126713003281,
+        "combined": 68.08177229038745
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401911013",
+        "profile": "both_slow",
+        "actual": 71.9,
+        "arithmetic": 69.66905065035716,
+        "combined": 68.57452769553223
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401922250",
+        "profile": "mixed",
+        "actual": 65.1,
+        "arithmetic": 71.42435285676476,
+        "combined": 72.00611543260861
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401919041",
+        "profile": "both_fast",
+        "actual": 75.5,
+        "arithmetic": 73.61133131166821,
+        "combined": 76.56549016254259
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401917524",
+        "profile": "both_slow",
+        "actual": 61.6,
+        "arithmetic": 68.42575200383592,
+        "combined": 66.13607826686071
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401916306",
+        "profile": "mixed",
+        "actual": 69.0,
+        "arithmetic": 70.19104418571152,
+        "combined": 69.5118459837893
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401911239",
+        "profile": "mixed",
+        "actual": 71.2,
+        "arithmetic": 70.91250007590976,
+        "combined": 71.05196746808772
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401921741",
+        "profile": "mixed",
+        "actual": 70.8,
+        "arithmetic": 70.6620130274957,
+        "combined": 70.54713036343485
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401911533",
+        "profile": "both_slow",
+        "actual": 59.6,
+        "arithmetic": 69.49777298722202,
+        "combined": 68.24657547322288
+      },
+      {
+        "date": "2026-11-12",
+        "game_id": "401911471",
+        "profile": "mixed",
+        "actual": 72.4,
+        "arithmetic": 70.43771894865344,
+        "combined": 70.10208219289814
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921167",
+        "profile": "mixed",
+        "actual": 65.6,
+        "arithmetic": 69.12842030900981,
+        "combined": 67.58336691661418
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921721",
+        "profile": "mixed",
+        "actual": 76.6,
+        "arithmetic": 70.24114756844028,
+        "combined": 69.79980676174253
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401909696",
+        "profile": "mixed",
+        "actual": 72.7,
+        "arithmetic": 71.2378729850544,
+        "combined": 71.75360828303015
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401923270",
+        "profile": "mixed",
+        "actual": 59.3,
+        "arithmetic": 72.14900719766538,
+        "combined": 73.54731697996223
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401909515",
+        "profile": "both_slow",
+        "actual": 61.9,
+        "arithmetic": 68.85634781145595,
+        "combined": 67.07764531143457
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401902278",
+        "profile": "mixed",
+        "actual": 70.7,
+        "arithmetic": 74.03419835051164,
+        "combined": 77.27079036778937
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906772",
+        "profile": "mixed",
+        "actual": 63.2,
+        "arithmetic": 69.36684572217989,
+        "combined": 67.98677138150387
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401913528",
+        "profile": "both_fast",
+        "actual": 78.6,
+        "arithmetic": 72.75756669132117,
+        "combined": 74.90829473839946
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401925755",
+        "profile": "mixed",
+        "actual": 73.9,
+        "arithmetic": 71.50617682796687,
+        "combined": 72.34057241924798
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906850",
+        "profile": "mixed",
+        "actual": 76.2,
+        "arithmetic": 71.00563118168787,
+        "combined": 71.2956206930415
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921825",
+        "profile": "both_fast",
+        "actual": 69.4,
+        "arithmetic": 72.01755075100738,
+        "combined": 73.37554346027422
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921803",
+        "profile": "mixed",
+        "actual": 60.3,
+        "arithmetic": 69.28696596623291,
+        "combined": 67.89979902506512
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401926133",
+        "profile": "mixed",
+        "actual": 64.2,
+        "arithmetic": 69.62328799752387,
+        "combined": 68.51204228802433
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401925820",
+        "profile": "both_slow",
+        "actual": 61.4,
+        "arithmetic": 67.30794749213018,
+        "combined": 64.08686041309724
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401924796",
+        "profile": "both_slow",
+        "actual": 62.4,
+        "arithmetic": 69.58899023876947,
+        "combined": 68.52786776113263
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401924704",
+        "profile": "both_slow",
+        "actual": 66.9,
+        "arithmetic": 69.64010799039272,
+        "combined": 68.63242549622775
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401922211",
+        "profile": "mixed",
+        "actual": 74.6,
+        "arithmetic": 74.97028763607878,
+        "combined": 79.03274426174876
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921191",
+        "profile": "both_slow",
+        "actual": 59.7,
+        "arithmetic": 68.95002039822502,
+        "combined": 67.25178747082671
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920973",
+        "profile": "both_slow",
+        "actual": 66.3,
+        "arithmetic": 69.67273859093359,
+        "combined": 68.6912780606569
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920747",
+        "profile": "mixed",
+        "actual": 63.6,
+        "arithmetic": 70.22595280438054,
+        "combined": 69.74264325299343
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920379",
+        "profile": "mixed",
+        "actual": 70.6,
+        "arithmetic": 70.62985271460985,
+        "combined": 70.59569327356589
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401918958",
+        "profile": "mixed",
+        "actual": 62.2,
+        "arithmetic": 69.47651611144155,
+        "combined": 68.23229880203492
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401911210",
+        "profile": "mixed",
+        "actual": 63.1,
+        "arithmetic": 69.38670844820851,
+        "combined": 68.08936222588486
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401911197",
+        "profile": "mixed",
+        "actual": 70.3,
+        "arithmetic": 70.38510255799952,
+        "combined": 70.0997177546494
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906782",
+        "profile": "both_fast",
+        "actual": 73.6,
+        "arithmetic": 72.45820905854498,
+        "combined": 74.29741502385619
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401916316",
+        "profile": "mixed",
+        "actual": 66.5,
+        "arithmetic": 69.44707894527113,
+        "combined": 68.23071394722407
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401927363",
+        "profile": "mixed",
+        "actual": 68.2,
+        "arithmetic": 72.39240405687671,
+        "combined": 74.09610611618793
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401926794",
+        "profile": "both_slow",
+        "actual": 59.8,
+        "arithmetic": 68.27984744801789,
+        "combined": 65.96979948427159
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401926152",
+        "profile": "mixed",
+        "actual": 69.6,
+        "arithmetic": 71.0246860386518,
+        "combined": 71.36067306046264
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401909565",
+        "profile": "mixed",
+        "actual": 72.2,
+        "arithmetic": 69.67847886595369,
+        "combined": 68.6872711864909
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401916297",
+        "profile": "mixed",
+        "actual": 75.2,
+        "arithmetic": 70.51185257902371,
+        "combined": 70.35896279853742
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401917916",
+        "profile": "both_fast",
+        "actual": 69.6,
+        "arithmetic": 70.94930237002657,
+        "combined": 71.23669790651843
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401929199",
+        "profile": "mixed",
+        "actual": 75.0,
+        "arithmetic": 70.14182063703052,
+        "combined": 69.5919827232027
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401927380",
+        "profile": "both_fast",
+        "actual": 82.5,
+        "arithmetic": 75.41121113559613,
+        "combined": 80.46338317963341
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401927374",
+        "profile": "both_slow",
+        "actual": 65.7,
+        "arithmetic": 68.5291258549883,
+        "combined": 66.45808525876843
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401926117",
+        "profile": "both_slow",
+        "actual": 70.4,
+        "arithmetic": 70.21821732104152,
+        "combined": 69.7741724499687
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401925686",
+        "profile": "mixed",
+        "actual": 71.0,
+        "arithmetic": 70.51290531631126,
+        "combined": 70.35180034355268
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921026",
+        "profile": "both_fast",
+        "actual": 73.0,
+        "arithmetic": 72.45890475854145,
+        "combined": 74.29343488223061
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920123",
+        "profile": "mixed",
+        "actual": 73.7,
+        "arithmetic": 72.10812879795816,
+        "combined": 73.50736800549403
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401919049",
+        "profile": "mixed",
+        "actual": 75.7,
+        "arithmetic": 71.34067938905858,
+        "combined": 72.01509748145457
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906804",
+        "profile": "both_slow",
+        "actual": 62.0,
+        "arithmetic": 69.47876006250272,
+        "combined": 68.3135855201861
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401929040",
+        "profile": "mixed",
+        "actual": 67.9,
+        "arithmetic": 72.18362487441578,
+        "combined": 73.70486996420779
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401909741",
+        "profile": "mixed",
+        "actual": 72.0,
+        "arithmetic": 71.77559737630796,
+        "combined": 72.87766464266929
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906760",
+        "profile": "mixed",
+        "actual": 73.8,
+        "arithmetic": 72.41027112124851,
+        "combined": 73.96316538647841
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401921728",
+        "profile": "mixed",
+        "actual": 68.4,
+        "arithmetic": 71.19672414109473,
+        "combined": 71.72331426685109
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401917980",
+        "profile": "mixed",
+        "actual": 69.6,
+        "arithmetic": 71.61044942620478,
+        "combined": 72.38777254963169
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401911014",
+        "profile": "mixed",
+        "actual": 69.5,
+        "arithmetic": 70.78067195525564,
+        "combined": 70.84528794110842
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401909503",
+        "profile": "both_slow",
+        "actual": 63.1,
+        "arithmetic": 68.83815554703551,
+        "combined": 67.04118110118702
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401906794",
+        "profile": "both_fast",
+        "actual": 78.3,
+        "arithmetic": 72.89528091089247,
+        "combined": 75.1555223100686
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401925739",
+        "profile": "mixed",
+        "actual": 75.5,
+        "arithmetic": 72.31637750825314,
+        "combined": 73.89825990723955
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401917526",
+        "profile": "mixed",
+        "actual": 62.0,
+        "arithmetic": 71.10626848416413,
+        "combined": 71.52400006824092
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920372",
+        "profile": "both_slow",
+        "actual": 78.4,
+        "arithmetic": 69.99073888347097,
+        "combined": 69.32527163745269
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401917527",
+        "profile": "mixed",
+        "actual": 69.6,
+        "arithmetic": 70.59832164584634,
+        "combined": 70.52208018595758
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401917525",
+        "profile": "mixed",
+        "actual": 66.4,
+        "arithmetic": 71.21398126366867,
+        "combined": 71.74827224405512
+      },
+      {
+        "date": "2026-11-13",
+        "game_id": "401920345",
+        "profile": "mixed",
+        "actual": 63.6,
+        "arithmetic": 70.41267682671935,
+        "combined": 69.8718511539722
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401919004",
+        "profile": "both_fast",
+        "actual": 67.9,
+        "arithmetic": 71.0168376990857,
+        "combined": 71.47356961672232
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401919847",
+        "profile": "both_slow",
+        "actual": 72.3,
+        "arithmetic": 69.08756120154398,
+        "combined": 67.64402662693057
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401923303",
+        "profile": "both_slow",
+        "actual": 66.2,
+        "arithmetic": 68.35537655143338,
+        "combined": 66.21005475080509
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401922031",
+        "profile": "both_slow",
+        "actual": 72.2,
+        "arithmetic": 70.32356145565925,
+        "combined": 70.31729925872273
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920750",
+        "profile": "both_fast",
+        "actual": 75.2,
+        "arithmetic": 71.87787150724887,
+        "combined": 73.21190912037767
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920074",
+        "profile": "both_slow",
+        "actual": 62.0,
+        "arithmetic": 67.96999593939668,
+        "combined": 65.4690695322127
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401912229",
+        "profile": "both_slow",
+        "actual": 57.7,
+        "arithmetic": 69.72905570899437,
+        "combined": 68.90350350746814
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911231",
+        "profile": "both_slow",
+        "actual": 73.6,
+        "arithmetic": 69.16842205426863,
+        "combined": 67.8020997600259
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401922230",
+        "profile": "both_fast",
+        "actual": 70.7,
+        "arithmetic": 72.76572106252905,
+        "combined": 75.01249167769603
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401922220",
+        "profile": "mixed",
+        "actual": 72.3,
+        "arithmetic": 71.19564918269921,
+        "combined": 71.62068101448277
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921096",
+        "profile": "both_slow",
+        "actual": 66.8,
+        "arithmetic": 69.47390370622398,
+        "combined": 68.39608371407417
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920915",
+        "profile": "both_slow",
+        "actual": 57.8,
+        "arithmetic": 68.85130908357513,
+        "combined": 67.18113124601685
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401918993",
+        "profile": "mixed",
+        "actual": 67.5,
+        "arithmetic": 71.2404412516731,
+        "combined": 71.90721357621223
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911392",
+        "profile": "mixed",
+        "actual": 64.2,
+        "arithmetic": 69.87653602670184,
+        "combined": 69.15069681430627
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911015",
+        "profile": "mixed",
+        "actual": 71.0,
+        "arithmetic": 71.00088720936078,
+        "combined": 71.42710101862828
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921038",
+        "profile": "both_fast",
+        "actual": 75.2,
+        "arithmetic": 73.80377069493434,
+        "combined": 77.19409658707784
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401924921",
+        "profile": "mixed",
+        "actual": 62.8,
+        "arithmetic": 70.01844264245892,
+        "combined": 69.47269378089867
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921689",
+        "profile": "both_fast",
+        "actual": 70.1,
+        "arithmetic": 71.95040654777662,
+        "combined": 73.36606888854011
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911016",
+        "profile": "mixed",
+        "actual": 65.5,
+        "arithmetic": 71.77715445444932,
+        "combined": 72.97321096531493
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401928804",
+        "profile": "both_fast",
+        "actual": 68.5,
+        "arithmetic": 71.78987541759535,
+        "combined": 73.03689042523462
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925889",
+        "profile": "mixed",
+        "actual": 66.9,
+        "arithmetic": 70.34559540174581,
+        "combined": 70.11549757590029
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401922046",
+        "profile": "mixed",
+        "actual": 70.3,
+        "arithmetic": 69.95257661921215,
+        "combined": 69.32698733581454
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921221",
+        "profile": "both_slow",
+        "actual": 57.9,
+        "arithmetic": 69.63296647662747,
+        "combined": 68.71582025039727
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920307",
+        "profile": "mixed",
+        "actual": 72.3,
+        "arithmetic": 71.21416193160609,
+        "combined": 71.86428931985208
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401918979",
+        "profile": "mixed",
+        "actual": 64.7,
+        "arithmetic": 71.12803569059892,
+        "combined": 71.69404483987144
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911264",
+        "profile": "both_slow",
+        "actual": 65.2,
+        "arithmetic": 69.86744530675242,
+        "combined": 69.17973894957171
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401909728",
+        "profile": "mixed",
+        "actual": 65.9,
+        "arithmetic": 71.57642793872357,
+        "combined": 72.58964652935077
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920741",
+        "profile": "mixed",
+        "actual": 68.6,
+        "arithmetic": 68.62521401075351,
+        "combined": 66.6641187092987
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401927387",
+        "profile": "mixed",
+        "actual": 66.3,
+        "arithmetic": 71.76020188729586,
+        "combined": 72.94376354638847
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920567",
+        "profile": "mixed",
+        "actual": 65.3,
+        "arithmetic": 72.0948508578148,
+        "combined": 73.62376026110769
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401918055",
+        "profile": "both_fast",
+        "actual": 67.4,
+        "arithmetic": 71.20646620280382,
+        "combined": 71.8539776968324
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401926777",
+        "profile": "both_fast",
+        "actual": 78.5,
+        "arithmetic": 71.17638778124469,
+        "combined": 71.79641944871902
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925827",
+        "profile": "both_slow",
+        "actual": 57.6,
+        "arithmetic": 67.64592363579177,
+        "combined": 64.83391034508642
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401919782",
+        "profile": "mixed",
+        "actual": 71.2,
+        "arithmetic": 71.02715816473363,
+        "combined": 71.48426372009158
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401909534",
+        "profile": "both_fast",
+        "actual": 70.4,
+        "arithmetic": 72.413418051387,
+        "combined": 74.3062704982566
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920193",
+        "profile": "both_fast",
+        "actual": 76.5,
+        "arithmetic": 72.59339958845999,
+        "combined": 74.67664276584944
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925774",
+        "profile": "mixed",
+        "actual": 62.8,
+        "arithmetic": 69.58725129165762,
+        "combined": 68.80385251805944
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925108",
+        "profile": "mixed",
+        "actual": 73.4,
+        "arithmetic": 66.4218956326597,
+        "combined": 62.45357113374137
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921775",
+        "profile": "both_slow",
+        "actual": 78.1,
+        "arithmetic": 69.12395152171851,
+        "combined": 67.93696918484973
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401921063",
+        "profile": "mixed",
+        "actual": 71.5,
+        "arithmetic": 69.9075809813544,
+        "combined": 69.47710015004144
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920867",
+        "profile": "mixed",
+        "actual": 67.0,
+        "arithmetic": 69.93676095991282,
+        "combined": 69.54241942998168
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920705",
+        "profile": "mixed",
+        "actual": 70.1,
+        "arithmetic": 71.12439043950513,
+        "combined": 71.91841432522763
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401919017",
+        "profile": "mixed",
+        "actual": 65.6,
+        "arithmetic": 69.91588289955536,
+        "combined": 69.43682714904772
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401917951",
+        "profile": "mixed",
+        "actual": 71.9,
+        "arithmetic": 70.6114357591568,
+        "combined": 70.89088032317285
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911376",
+        "profile": "both_fast",
+        "actual": 82.7,
+        "arithmetic": 71.81557424568805,
+        "combined": 73.32987845856354
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911308",
+        "profile": "mixed",
+        "actual": 73.0,
+        "arithmetic": 75.24948383150914,
+        "combined": 80.03484562848851
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920961",
+        "profile": "mixed",
+        "actual": 65.1,
+        "arithmetic": 71.16756820506384,
+        "combined": 71.93390091838857
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920568",
+        "profile": "mixed",
+        "actual": 66.2,
+        "arithmetic": 70.06330031232281,
+        "combined": 69.67548776292224
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911276",
+        "profile": "both_slow",
+        "actual": 62.7,
+        "arithmetic": 68.47313381316047,
+        "combined": 66.64893257039877
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911188",
+        "profile": "mixed",
+        "actual": 70.4,
+        "arithmetic": 69.91718557064183,
+        "combined": 69.49934170001917
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925079",
+        "profile": "mixed",
+        "actual": 62.2,
+        "arithmetic": 69.44075426826305,
+        "combined": 68.54590220123909
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401925063",
+        "profile": "both_slow",
+        "actual": 73.2,
+        "arithmetic": 68.22486761428368,
+        "combined": 66.18131269307605
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911520",
+        "profile": "both_fast",
+        "actual": 80.6,
+        "arithmetic": 72.36920462767002,
+        "combined": 74.45163989344495
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911347",
+        "profile": "both_fast",
+        "actual": 66.1,
+        "arithmetic": 73.86004353566686,
+        "combined": 77.56339941279222
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401920760",
+        "profile": "mixed",
+        "actual": 69.6,
+        "arithmetic": 70.9198689092236,
+        "combined": 71.49832062960276
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401917530",
+        "profile": "both_fast",
+        "actual": 75.5,
+        "arithmetic": 72.71949530369295,
+        "combined": 75.16922752932989
+      },
+      {
+        "date": "2026-11-14",
+        "game_id": "401911455",
+        "profile": "mixed",
+        "actual": 71.6,
+        "arithmetic": 70.15515796065421,
+        "combined": 69.96405340181572
+      }
+    ]
+  },
+  "exclusions": {
+    "missing_matching_pregame_benchmark": 66,
+    "unverified_result_identity": 1
+  },
+  "games": [
+    {
+      "date": "2026-11-11",
+      "game_id": "401925858",
+      "game": "Charleston Cougars @ Temple Owls",
+      "actual": 172.0,
+      "arithmetic": 154.8059881518938,
+      "combined": 155.2265986790665,
+      "old_pace": 71.09371477336248,
+      "new_pace": 71.28687761678006,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401921175",
+      "game": "Southern Indiana Screaming Eagles @ IU Indianapolis Jaguars",
+      "actual": 144.0,
+      "arithmetic": 156.8080180338586,
+      "combined": 160.0117720810803,
+      "old_pace": 72.37167649780474,
+      "new_pace": 73.85030657291989,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401920680",
+      "game": "Colgate Raiders @ St. John's Red Storm",
+      "actual": 149.0,
+      "arithmetic": 154.83523241973865,
+      "combined": 156.72173352046084,
+      "old_pace": 71.75568198181145,
+      "new_pace": 72.62994794134961,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401909524",
+      "game": "Marquette Golden Eagles @ Michigan Wolverines",
+      "actual": 154.0,
+      "arithmetic": 154.31322277087065,
+      "combined": 155.89034353006522,
+      "old_pace": 71.61090957601519,
+      "new_pace": 72.34279145916939,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401926868",
+      "game": "Milwaukee Panthers @ Indiana State Sycamores",
+      "actual": 155.0,
+      "arithmetic": 151.78702347764442,
+      "combined": 153.42396056228625,
+      "old_pace": 71.6465239154549,
+      "new_pace": 72.41919109935392,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401926863",
+      "game": "Kent State Golden Flashes @ UNC Wilmington Seahawks",
+      "actual": 164.0,
+      "arithmetic": 152.9005994084255,
+      "combined": 151.93278001911926,
+      "old_pace": 70.44298187927492,
+      "new_pace": 69.99709687969293,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925895",
+      "game": "Old Dominion Monarchs @ Norfolk State Spartans",
+      "actual": 131.0,
+      "arithmetic": 148.810542937918,
+      "combined": 146.85328029823205,
+      "old_pace": 69.95028995250402,
+      "new_pace": 69.03025373426138,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925682",
+      "game": "South Carolina State Bulldogs @ Notre Dame Fighting Irish",
+      "actual": 158.0,
+      "arithmetic": 151.79835612593223,
+      "combined": 151.88478022936954,
+      "old_pace": 70.94986033852456,
+      "new_pace": 70.99025457088155,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401924735",
+      "game": "Stony Brook Seawolves @ Princeton Tigers",
+      "actual": 128.0,
+      "arithmetic": 146.3074321989491,
+      "combined": 141.00328481665068,
+      "old_pace": 68.3112811374521,
+      "new_pace": 65.83476236064816,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401921821",
+      "game": "Saint Peter's Peacocks @ South Carolina Gamecocks",
+      "actual": 118.0,
+      "arithmetic": 136.5173975259232,
+      "combined": 129.6730841048854,
+      "old_pace": 67.33636775289713,
+      "new_pace": 63.96045220010046,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401921286",
+      "game": "Furman Paladins @ Holy Cross Crusaders",
+      "actual": 147.0,
+      "arithmetic": 152.1567155075178,
+      "combined": 149.45047541912126,
+      "old_pace": 69.61851931138716,
+      "new_pace": 68.38029313630929,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401920903",
+      "game": "James Madison Dukes @ Delaware Blue Hens",
+      "actual": 132.0,
+      "arithmetic": 152.90028219997416,
+      "combined": 149.8885066990286,
+      "old_pace": 69.48356996707898,
+      "new_pace": 68.11490726264141,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401920740",
+      "game": "Campbell Fighting Camels @ East Tennessee State Buccaneers",
+      "actual": 121.0,
+      "arithmetic": 147.16497095761179,
+      "combined": 141.38720488304347,
+      "old_pace": 68.09641183383886,
+      "new_pace": 65.42291463179944,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401920202",
+      "game": "NJIT Highlanders @ VCU Rams",
+      "actual": 136.0,
+      "arithmetic": 147.7733828791886,
+      "combined": 147.19110124829308,
+      "old_pace": 70.6148654649951,
+      "new_pace": 70.3366168506148,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401918452",
+      "game": "William & Mary Tribe @ Florida Atlantic Owls",
+      "actual": 185.0,
+      "arithmetic": 155.49625034829083,
+      "combined": 158.72987046478806,
+      "old_pace": 72.35611024737665,
+      "new_pace": 73.86079073403367,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401917901",
+      "game": "UNC Asheville Bulldogs @ West Georgia Wolves",
+      "actual": 143.0,
+      "arithmetic": 148.3053737775457,
+      "combined": 148.78545387093357,
+      "old_pace": 71.11400608391543,
+      "new_pace": 71.34420960124153,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401912209",
+      "game": "American University Eagles @ Drexel Dragons",
+      "actual": 130.0,
+      "arithmetic": 140.38188564869077,
+      "combined": 137.00962775932277,
+      "old_pace": 69.17833906293647,
+      "new_pace": 67.5165349163376,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401911263",
+      "game": "Cornell Big Red @ St. Bonaventure Bonnies",
+      "actual": 152.0,
+      "arithmetic": 152.84234034934366,
+      "combined": 153.9090334457139,
+      "old_pace": 71.3906669899064,
+      "new_pace": 71.88890544562061,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401911012",
+      "game": "UMass Lowell River Hawks @ Massachusetts Minutemen",
+      "actual": 134.0,
+      "arithmetic": 147.48851015266828,
+      "combined": 149.44055957162303,
+      "old_pace": 71.81917101159772,
+      "new_pace": 72.76971672460196,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401928794",
+      "game": "Pepperdine Waves @ Sam Houston Bearkats",
+      "actual": 162.0,
+      "arithmetic": 155.585827689826,
+      "combined": 157.6939512435034,
+      "old_pace": 71.8427326224187,
+      "new_pace": 72.81617190702887,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925702",
+      "game": "Jacksonville State Gamecocks @ Houston Cougars",
+      "actual": 138.0,
+      "arithmetic": 143.11938361814467,
+      "combined": 136.97596179770076,
+      "old_pace": 67.8369600702328,
+      "new_pace": 64.92504799939844,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401928824",
+      "game": "Robert Morris Colonials @ Arkansas Razorbacks",
+      "actual": 129.0,
+      "arithmetic": 148.63607041689798,
+      "combined": 148.33755150861253,
+      "old_pace": 70.75603628038894,
+      "new_pace": 70.61393070234328,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401928996",
+      "game": "Valparaiso Beacons @ South Dakota State Jackrabbits",
+      "actual": 150.0,
+      "arithmetic": 145.6131407814415,
+      "combined": 143.0181585897746,
+      "old_pace": 69.61624415183256,
+      "new_pace": 68.37560808797694,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925863",
+      "game": "Oral Roberts Golden Eagles @ Tulsa Golden Hurricane",
+      "actual": 151.0,
+      "arithmetic": 153.70817413554633,
+      "combined": 153.57149511764982,
+      "old_pace": 70.81613554158734,
+      "new_pace": 70.75316504628684,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401921037",
+      "game": "Jackson State Tigers @ Southern Miss Golden Eagles",
+      "actual": 164.0,
+      "arithmetic": 156.48625549770574,
+      "combined": 162.45200742684116,
+      "old_pace": 73.60912990246699,
+      "new_pace": 76.41534318503902,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401917963",
+      "game": "Stephen F. Austin Lumberjacks @ Abilene Christian Wildcats",
+      "actual": 147.0,
+      "arithmetic": 144.05313225572877,
+      "combined": 142.76768532941486,
+      "old_pace": 70.25514859067445,
+      "new_pace": 69.62823223419225,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401917522",
+      "game": "Santa Clara Broncos @ North Texas Mean Green",
+      "actual": 147.0,
+      "arithmetic": 148.3293551346869,
+      "combined": 149.5582332106627,
+      "old_pace": 71.56463717601461,
+      "new_pace": 72.15753541629155,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401930177",
+      "game": "Arkansas-Pine Bluff Golden Lions @ UCLA Bruins",
+      "actual": 143.0,
+      "arithmetic": 150.8772668208873,
+      "combined": 152.8026454353065,
+      "old_pace": 71.88420016691518,
+      "new_pace": 72.80153055493389,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401926062",
+      "game": "Lindenwood Lions @ Nebraska Cornhuskers",
+      "actual": 154.0,
+      "arithmetic": 148.75374625450672,
+      "combined": 151.1213850861249,
+      "old_pace": 72.04367231927101,
+      "new_pace": 73.19035534709636,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401928814",
+      "game": "Oakland Golden Grizzlies @ Boise State Broncos",
+      "actual": 190.0,
+      "arithmetic": 147.31540212163566,
+      "combined": 145.1879486947862,
+      "old_pace": 69.85563516950059,
+      "new_pace": 68.84681594024315,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925915",
+      "game": "Portland State Vikings @ Colorado State Rams",
+      "actual": 158.0,
+      "arithmetic": 150.88762658790372,
+      "combined": 148.79710709305783,
+      "old_pace": 69.91457641356054,
+      "new_pace": 68.94592319611932,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401911454",
+      "game": "Nevada Wolf Pack @ UC Santa Barbara Gauchos",
+      "actual": 139.0,
+      "arithmetic": 148.35848486571686,
+      "combined": 143.6983585558999,
+      "old_pace": 68.65600120327645,
+      "new_pace": 66.49942999116273,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401911346",
+      "game": "Cal Poly Mustangs @ Grand Canyon Lopes",
+      "actual": 170.0,
+      "arithmetic": 161.93565111572448,
+      "combined": 168.40138000611157,
+      "old_pace": 73.71184759238443,
+      "new_pace": 76.65499704254039,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401925738",
+      "game": "Mississippi Valley State Delta Devils @ Oregon Ducks",
+      "actual": 166.0,
+      "arithmetic": 147.57624172949505,
+      "combined": 146.60890410748527,
+      "old_pace": 70.41796794888319,
+      "new_pace": 69.95638992748805,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401919734",
+      "game": "Chicago State Cougars @ California Baptist Lancers",
+      "actual": 143.0,
+      "arithmetic": 137.78358247098384,
+      "combined": 135.2552118308146,
+      "old_pace": 69.5871210618449,
+      "new_pace": 68.31017622798763,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401917523",
+      "game": "Pacific Tigers @ Long Beach State Beach",
+      "actual": 121.0,
+      "arithmetic": 147.7633144124495,
+      "combined": 144.84015361040684,
+      "old_pace": 69.47947068878861,
+      "new_pace": 68.1049775267225,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401917521",
+      "game": "UTSA Roadrunners @ Seattle U Redhawks",
+      "actual": 145.0,
+      "arithmetic": 148.0364515808218,
+      "combined": 148.2684141053926,
+      "old_pace": 70.99354091908617,
+      "new_pace": 71.1047827166567,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-11",
+      "game_id": "401918054",
+      "game": "USC Trojans @ California Golden Bears",
+      "actual": 142.0,
+      "arithmetic": 152.81047960895842,
+      "combined": 155.30788709931682,
+      "old_pace": 72.04497474704021,
+      "new_pace": 73.22241794358256,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401920073",
+      "game": "Kansas City Roos @ George Mason Patriots",
+      "actual": 144.0,
+      "arithmetic": 148.2123167214865,
+      "combined": 144.43381527519946,
+      "old_pace": 69.005999159775,
+      "new_pace": 67.24677109158644,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401925631",
+      "game": "Bradley Braves @ Coppin State Eagles",
+      "actual": 110.0,
+      "arithmetic": 142.4061976481299,
+      "combined": 141.30654892810534,
+      "old_pace": 70.24061145696763,
+      "new_pace": 69.69821934371672,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401921086",
+      "game": "Morgan State Bears @ UMBC Retrievers",
+      "actual": 155.0,
+      "arithmetic": 155.26392192687172,
+      "combined": 161.02978879249784,
+      "old_pace": 73.40868191243318,
+      "new_pace": 76.13478003899951,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401917176",
+      "game": "Mercyhurst Lakers @ Penn State Nittany Lions",
+      "actual": 129.0,
+      "arithmetic": 151.89012719285313,
+      "combined": 149.9254382499779,
+      "old_pace": 69.969527591468,
+      "new_pace": 69.06447629065093,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401916288",
+      "game": "Tennessee Tech Golden Eagles @ Indiana Hoosiers",
+      "actual": 156.0,
+      "arithmetic": 159.66317596674398,
+      "combined": 160.82637813277043,
+      "old_pace": 71.31614907150662,
+      "new_pace": 71.83571219913675,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401928818",
+      "game": "Western Michigan Broncos @ Purdue Fort Wayne Mastodons",
+      "actual": 140.0,
+      "arithmetic": 155.1353485992354,
+      "combined": 155.22224720692654,
+      "old_pace": 70.82219597123515,
+      "new_pace": 70.86186681530194,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401924876",
+      "game": "Central Connecticut Blue Devils @ Sacred Heart Pioneers",
+      "actual": 154.0,
+      "arithmetic": 144.6755064328819,
+      "combined": 143.56277556206112,
+      "old_pace": 70.28378366267441,
+      "new_pace": 69.74321575503188,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401924857",
+      "game": "Monmouth Hawks @ Quinnipiac Bobcats",
+      "actual": 144.0,
+      "arithmetic": 146.77073008401794,
+      "combined": 148.2590282711887,
+      "old_pace": 71.49584645872602,
+      "new_pace": 72.22083528050165,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401922239",
+      "game": "Stetson Hatters @ Howard Bison",
+      "actual": 137.0,
+      "arithmetic": 150.75929015271944,
+      "combined": 150.12185202198617,
+      "old_pace": 70.49874327970662,
+      "new_pace": 70.20066156885656,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401921768",
+      "game": "Mercer Bears @ West Virginia Mountaineers",
+      "actual": 136.0,
+      "arithmetic": 150.3093191975093,
+      "combined": 148.5879842418739,
+      "old_pace": 70.01489106308306,
+      "new_pace": 69.21308396259633,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401920566",
+      "game": "Loyola Maryland Greyhounds @ Towson Tigers",
+      "actual": 150.0,
+      "arithmetic": 139.95620073542568,
+      "combined": 135.74503992604204,
+      "old_pace": 68.67594213092593,
+      "new_pace": 66.60954253927105,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401920412",
+      "game": "Southern Utah Thunderbirds @ High Point Panthers",
+      "actual": 147.0,
+      "arithmetic": 155.69516576272244,
+      "combined": 157.69780728207482,
+      "old_pace": 71.68897196367553,
+      "new_pace": 72.61107709796686,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401920135",
+      "game": "Cal State Bakersfield Roadrunners @ Western Illinois Leathernecks",
+      "actual": 174.0,
+      "arithmetic": 147.34152924345634,
+      "combined": 146.23700327531103,
+      "old_pace": 70.24512340099703,
+      "new_pace": 69.71854027585671,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401920064",
+      "game": "Maryland Eastern Shore Hawks @ Rhode Island Rams",
+      "actual": 114.0,
+      "arithmetic": 138.34885565588388,
+      "combined": 137.57198823305473,
+      "old_pace": 70.38796301128995,
+      "new_pace": 69.99271496125341,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401911307",
+      "game": "Canisius Golden Griffins @ Brown Bears",
+      "actual": 167.0,
+      "arithmetic": 143.20298016995955,
+      "combined": 140.45724656025405,
+      "old_pace": 69.4126713003281,
+      "new_pace": 68.08177229038745,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401911013",
+      "game": "Niagara Purple Eagles @ Bowling Green Falcons",
+      "actual": 164.0,
+      "arithmetic": 151.83081754346284,
+      "combined": 149.44550708638246,
+      "old_pace": 69.66905065035716,
+      "new_pace": 68.57452769553223,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401922250",
+      "game": "West Florida Argonauts @ Alabama A&M Bulldogs",
+      "actual": 168.0,
+      "arithmetic": 148.0979617321041,
+      "combined": 149.30424289879912,
+      "old_pace": 71.42435285676476,
+      "new_pace": 72.00611543260861,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401919041",
+      "game": "Oklahoma State Cowboys @ Texas A&M Aggies",
+      "actual": 157.0,
+      "arithmetic": 162.13965237141483,
+      "combined": 168.6466164569127,
+      "old_pace": 73.61133131166821,
+      "new_pace": 76.56549016254259,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401917524",
+      "game": "Loyola Marymount Lions @ South Alabama Jaguars",
+      "actual": 151.0,
+      "arithmetic": 148.86542055194116,
+      "combined": 143.88406143202326,
+      "old_pace": 68.42575200383592,
+      "new_pace": 66.13607826686071,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401916306",
+      "game": "Southern Jaguars @ Minnesota Golden Gophers",
+      "actual": 152.0,
+      "arithmetic": 140.74388835177263,
+      "combined": 139.3819910184441,
+      "old_pace": 70.19104418571152,
+      "new_pace": 69.5118459837893,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401911239",
+      "game": "Richmond Spiders @ Southern Illinois Salukis",
+      "actual": 150.0,
+      "arithmetic": 146.20152835567853,
+      "combined": 146.48907069123814,
+      "old_pace": 70.91250007590976,
+      "new_pace": 71.05196746808772,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401921741",
+      "game": "Montana State Bobcats @ BYU Cougars",
+      "actual": 157.0,
+      "arithmetic": 155.44514731613882,
+      "combined": 155.19242379647258,
+      "old_pace": 70.6620130274957,
+      "new_pace": 70.54713036343485,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401911533",
+      "game": "New Mexico State Aggies @ UTEP Miners",
+      "actual": 118.0,
+      "arithmetic": 149.4573079391844,
+      "combined": 146.76656542896188,
+      "old_pace": 69.49777298722202,
+      "new_pace": 68.24657547322288,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-12",
+      "game_id": "401911471",
+      "game": "UC Riverside Highlanders @ San Jos\u00e9 State Spartans",
+      "actual": 155.0,
+      "arithmetic": 154.88839937344383,
+      "combined": 154.15035389659172,
+      "old_pace": 70.43771894865344,
+      "new_pace": 70.10208219289814,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921167",
+      "game": "West Florida Argonauts @ Cleveland State Vikings",
+      "actual": 136.0,
+      "arithmetic": 148.9457413582105,
+      "combined": 145.6167325085986,
+      "old_pace": 69.12842030900981,
+      "new_pace": 67.58336691661418,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921721",
+      "game": "North Alabama Lions @ Miami Hurricanes",
+      "actual": 146.0,
+      "arithmetic": 151.35131646296514,
+      "combined": 150.4003423628133,
+      "old_pace": 70.24114756844028,
+      "new_pace": 69.79980676174253,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401909696",
+      "game": "Texas A&M-Corpus Christi Islanders @ Florida State Seminoles",
+      "actual": 144.0,
+      "arithmetic": 145.53730253083603,
+      "combined": 146.59093764011385,
+      "old_pace": 71.2378729850544,
+      "new_pace": 71.75360828303015,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401923270",
+      "game": "Bryant Bulldogs @ Rutgers Scarlet Knights",
+      "actual": 123.0,
+      "arithmetic": 149.8914747147981,
+      "combined": 152.79650034879444,
+      "old_pace": 72.14900719766538,
+      "new_pace": 73.54731697996223,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401909515",
+      "game": "Georgetown Hoyas @ Clemson Tigers",
+      "actual": 163.0,
+      "arithmetic": 151.13638237238317,
+      "combined": 147.23221565842888,
+      "old_pace": 68.85634781145595,
+      "new_pace": 67.07764531143457,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401902278",
+      "game": "Pittsburgh Panthers @ Butler Bulldogs",
+      "actual": 140.0,
+      "arithmetic": 157.66220549585051,
+      "combined": 164.55480711920208,
+      "old_pace": 74.03419835051164,
+      "new_pace": 77.27079036778937,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906772",
+      "game": "Merrimack Warriors @ Florida Gators",
+      "actual": 137.0,
+      "arithmetic": 144.4445113712656,
+      "combined": 141.57074420310926,
+      "old_pace": 69.36684572217989,
+      "new_pace": 67.98677138150387,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401913528",
+      "game": "Sam Houston Bearkats @ Illinois Fighting Illini",
+      "actual": 194.0,
+      "arithmetic": 158.29616858913818,
+      "combined": 162.97543460931837,
+      "old_pace": 72.75756669132117,
+      "new_pace": 74.90829473839946,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401925755",
+      "game": "Northern Iowa Panthers @ Michigan State Spartans",
+      "actual": 178.0,
+      "arithmetic": 153.24961220347743,
+      "combined": 155.0378605263567,
+      "old_pace": 71.50617682796687,
+      "new_pace": 72.34057241924798,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906850",
+      "game": "Tennessee State Tigers @ Tennessee Volunteers",
+      "actual": 161.0,
+      "arithmetic": 151.59349208039754,
+      "combined": 152.21260526848116,
+      "old_pace": 71.00563118168787,
+      "new_pace": 71.2956206930415,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921825",
+      "game": "Prairie View A&M Panthers @ Vanderbilt Commodores",
+      "actual": 151.0,
+      "arithmetic": 152.50317311798116,
+      "combined": 155.37883599563574,
+      "old_pace": 72.01755075100738,
+      "new_pace": 73.37554346027422,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921803",
+      "game": "Northern Arizona Lumberjacks @ Kentucky Wildcats",
+      "actual": 155.0,
+      "arithmetic": 153.44470219755718,
+      "combined": 150.37264650544444,
+      "old_pace": 69.28696596623291,
+      "new_pace": 67.89979902506512,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401926133",
+      "game": "Ohio Bobcats @ Purdue Boilermakers",
+      "actual": 142.0,
+      "arithmetic": 151.4550514259448,
+      "combined": 149.0377025629451,
+      "old_pace": 69.62328799752387,
+      "new_pace": 68.51204228802433,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401925820",
+      "game": "App State Mountaineers @ Charlotte 49ers",
+      "actual": 126.0,
+      "arithmetic": 140.47273589672784,
+      "combined": 133.75027693887205,
+      "old_pace": 67.30794749213018,
+      "new_pace": 64.08686041309724,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401924796",
+      "game": "Marist Red Foxes @ Lehigh Mountain Hawks",
+      "actual": 125.0,
+      "arithmetic": 137.6084812952987,
+      "combined": 135.5101687301228,
+      "old_pace": 69.58899023876947,
+      "new_pace": 68.52786776113263,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401924704",
+      "game": "Columbia Lions @ Bucknell Bison",
+      "actual": 136.0,
+      "arithmetic": 147.1558642307161,
+      "combined": 145.0265397282402,
+      "old_pace": 69.64010799039272,
+      "new_pace": 68.63242549622775,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401922211",
+      "game": "Florida International Panthers @ Florida Gulf Coast Eagles",
+      "actual": 169.0,
+      "arithmetic": 158.3045370838203,
+      "combined": 166.88267298042445,
+      "old_pace": 74.97028763607878,
+      "new_pace": 79.03274426174876,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921191",
+      "game": "Iona Gaels @ Hofstra Pride",
+      "actual": 121.0,
+      "arithmetic": 139.0054077960333,
+      "combined": 135.581716849428,
+      "old_pace": 68.95002039822502,
+      "new_pace": 67.25178747082671,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920973",
+      "game": "Chattanooga Mocs @ Elon Phoenix",
+      "actual": 147.0,
+      "arithmetic": 153.20908188436704,
+      "combined": 151.05086807232945,
+      "old_pace": 69.67273859093359,
+      "new_pace": 68.6912780606569,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920747",
+      "game": "Yale Bulldogs @ Northeastern Huskies",
+      "actual": 157.0,
+      "arithmetic": 153.11946126714295,
+      "combined": 152.06566142280616,
+      "old_pace": 70.22595280438054,
+      "new_pace": 69.74264325299343,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920379",
+      "game": "Mount St. Mary's Mountaineers @ Virginia Tech Hokies",
+      "actual": 144.0,
+      "arithmetic": 149.00137229335658,
+      "combined": 148.92930922941548,
+      "old_pace": 70.62985271460985,
+      "new_pace": 70.59569327356589,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401918958",
+      "game": "Troy Trojans @ NC State Wolfpack",
+      "actual": 143.0,
+      "arithmetic": 151.82722666079525,
+      "combined": 149.10823506444694,
+      "old_pace": 69.47651611144155,
+      "new_pace": 68.23229880203492,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401911210",
+      "game": "Harvard Crimson @ George Washington Revolutionaries",
+      "actual": 142.0,
+      "arithmetic": 141.20814996207952,
+      "combined": 138.56793450854843,
+      "old_pace": 69.38670844820851,
+      "new_pace": 68.08936222588486,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401911197",
+      "game": "Long Island University Sharks @ Fordham Rams",
+      "actual": 138.0,
+      "arithmetic": 145.28338168758347,
+      "combined": 144.6943128675333,
+      "old_pace": 70.38510255799952,
+      "new_pace": 70.0997177546494,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906782",
+      "game": "Georgia Bulldogs @ North Carolina Tar Heels",
+      "actual": 148.0,
+      "arithmetic": 158.57100485803508,
+      "combined": 162.59601102158305,
+      "old_pace": 72.45820905854498,
+      "new_pace": 74.29741502385619,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401916316",
+      "game": "Ohio State Buckeyes @ UConn Huskies",
+      "actual": 152.0,
+      "arithmetic": 147.86730484568346,
+      "combined": 145.2774102568616,
+      "old_pace": 69.44707894527113,
+      "new_pace": 68.23071394722407,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401927363",
+      "game": "South Dakota Coyotes @ Drake Bulldogs",
+      "actual": 153.0,
+      "arithmetic": 158.69813117030697,
+      "combined": 162.43297512812424,
+      "old_pace": 72.39240405687671,
+      "new_pace": 74.09610611618793,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401926794",
+      "game": "North Carolina Central Eagles @ Liberty Flames",
+      "actual": 140.0,
+      "arithmetic": 140.06325128597658,
+      "combined": 135.3246228249921,
+      "old_pace": 68.27984744801789,
+      "new_pace": 65.96979948427159,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401926152",
+      "game": "Southeast Missouri State Redhawks @ Middle Tennessee Blue Raiders",
+      "actual": 163.0,
+      "arithmetic": 145.58272635957417,
+      "combined": 146.27141517165902,
+      "old_pace": 71.0246860386518,
+      "new_pace": 71.36067306046264,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401909565",
+      "game": "SIU Edwardsville Cougars @ Duke Blue Devils",
+      "actual": 137.0,
+      "arithmetic": 143.76538764609057,
+      "combined": 141.7202603902288,
+      "old_pace": 69.67847886595369,
+      "new_pace": 68.6872711864909,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401916297",
+      "game": "Virginia Cavaliers @ Maryland Terrapins",
+      "actual": 170.0,
+      "arithmetic": 156.63734634406484,
+      "combined": 156.29771196172237,
+      "old_pace": 70.51185257902371,
+      "new_pace": 70.35896279853742,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401917916",
+      "game": "Central Arkansas Bears @ Arkansas Razorbacks",
+      "actual": 145.0,
+      "arithmetic": 151.72638378545744,
+      "combined": 152.3409844088797,
+      "old_pace": 70.94930237002657,
+      "new_pace": 71.23669790651843,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401929199",
+      "game": "Southern Miss Golden Eagles @ Texas State Bobcats",
+      "actual": 150.0,
+      "arithmetic": 151.66605073946891,
+      "combined": 150.4771488236115,
+      "old_pace": 70.14182063703052,
+      "new_pace": 69.5919827232027,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401927380",
+      "game": "Texas Southern Tigers @ Murray State Racers",
+      "actual": 177.0,
+      "arithmetic": 158.24114580750526,
+      "combined": 168.8425070776167,
+      "old_pace": 75.41121113559613,
+      "new_pace": 80.46338317963341,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401927374",
+      "game": "Illinois State Redbirds @ North Dakota State Bison",
+      "actual": 163.0,
+      "arithmetic": 149.56166434844337,
+      "combined": 145.04171352987782,
+      "old_pace": 68.5291258549883,
+      "new_pace": 66.45808525876843,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401926117",
+      "game": "Wright State Raiders @ Samford Bulldogs",
+      "actual": 156.0,
+      "arithmetic": 153.17070141146897,
+      "combined": 152.20208291109574,
+      "old_pace": 70.21821732104152,
+      "new_pace": 69.7741724499687,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401925686",
+      "game": "Alcorn State Braves @ Tarleton State Texans",
+      "actual": 142.0,
+      "arithmetic": 151.9742354829648,
+      "combined": 151.62701102869423,
+      "old_pace": 70.51290531631126,
+      "new_pace": 70.35180034355268,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921026",
+      "game": "Georgia Southern Eagles @ UCF Knights",
+      "actual": 154.0,
+      "arithmetic": 154.28213213203264,
+      "combined": 158.1882803119752,
+      "old_pace": 72.45890475854145,
+      "new_pace": 74.29343488223061,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920123",
+      "game": "Cal Poly Mustangs @ Idaho Vandals",
+      "actual": 157.0,
+      "arithmetic": 155.2395810826919,
+      "combined": 158.2519641805944,
+      "old_pace": 72.10812879795816,
+      "new_pace": 73.50736800549403,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401919049",
+      "game": "Milwaukee Panthers @ TCU Horned Frogs",
+      "actual": 140.0,
+      "arithmetic": 151.70925366374888,
+      "combined": 153.14343492373865,
+      "old_pace": 71.34067938905858,
+      "new_pace": 72.01509748145457,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906804",
+      "game": "Fairleigh Dickinson Knights @ Oklahoma Sooners",
+      "actual": 132.0,
+      "arithmetic": 150.49508825997063,
+      "combined": 147.97125154459943,
+      "old_pace": 69.47876006250272,
+      "new_pace": 68.3135855201861,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401929040",
+      "game": "Lindenwood Lions @ Omaha Mavericks",
+      "actual": 123.0,
+      "arithmetic": 147.615909040397,
+      "combined": 150.72686359821498,
+      "old_pace": 72.18362487441578,
+      "new_pace": 73.70486996420779,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401909741",
+      "game": "Arizona Wildcats @ Auburn Tigers",
+      "actual": 149.0,
+      "arithmetic": 155.74105652757504,
+      "combined": 158.13235840037873,
+      "old_pace": 71.77559737630796,
+      "new_pace": 72.87766464266929,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906760",
+      "game": "Seton Hall Pirates @ Alabama Crimson Tide",
+      "actual": 158.0,
+      "arithmetic": 153.96873677785868,
+      "combined": 157.2707154152079,
+      "old_pace": 72.41027112124851,
+      "new_pace": 73.96316538647841,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401921728",
+      "game": "Stanford Cardinal @ UNLV Rebels",
+      "actual": 144.0,
+      "arithmetic": 152.25159783967803,
+      "combined": 153.37769161744956,
+      "old_pace": 71.19672414109473,
+      "new_pace": 71.72331426685109,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401917980",
+      "game": "UL Monroe Warhawks @ Arizona State Sun Devils",
+      "actual": 154.0,
+      "arithmetic": 154.05639921635716,
+      "combined": 155.7286635630035,
+      "old_pace": 71.61044942620478,
+      "new_pace": 72.38777254963169,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401911014",
+      "game": "Ball State Cardinals @ SMU Mustangs",
+      "actual": 155.0,
+      "arithmetic": 149.3895881130891,
+      "combined": 149.52596652325977,
+      "old_pace": 70.78067195525564,
+      "new_pace": 70.84528794110842,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401909503",
+      "game": "DePaul Blue Demons @ Northwestern Wildcats",
+      "actual": 114.0,
+      "arithmetic": 144.2554004767787,
+      "combined": 140.48970881533825,
+      "old_pace": 68.83815554703551,
+      "new_pace": 67.04118110118702,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401906794",
+      "game": "Xavier Musketeers @ Mississippi State Bulldogs",
+      "actual": 144.0,
+      "arithmetic": 159.1920192408843,
+      "combined": 164.12803687893316,
+      "old_pace": 72.89528091089247,
+      "new_pace": 75.1555223100686,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401925739",
+      "game": "Mississippi Valley State Delta Devils @ Oregon State Beavers",
+      "actual": 146.0,
+      "arithmetic": 153.24430194484736,
+      "combined": 156.59643976402737,
+      "old_pace": 72.31637750825314,
+      "new_pace": 73.89825990723955,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401917526",
+      "game": "Chicago State Cougars @ San Diego Toreros",
+      "actual": 154.0,
+      "arithmetic": 149.8313873312539,
+      "combined": 150.711609344145,
+      "old_pace": 71.10626848416413,
+      "new_pace": 71.52400006824092,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920372",
+      "game": "UC San Diego Tritons @ Utah State Aggies",
+      "actual": 202.0,
+      "arithmetic": 149.42473928151134,
+      "combined": 148.00401889302935,
+      "old_pace": 69.99073888347097,
+      "new_pace": 69.32527163745269,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401917527",
+      "game": "East Texas A&M Lions @ Portland Pilots",
+      "actual": 182.0,
+      "arithmetic": 145.5965335030547,
+      "combined": 145.43929899647958,
+      "old_pace": 70.59832164584634,
+      "new_pace": 70.52208018595758,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401917525",
+      "game": "UIC Flames @ Saint Mary's Gaels",
+      "actual": 145.0,
+      "arithmetic": 152.1235846356351,
+      "combined": 153.26490910216,
+      "old_pace": 71.21398126366867,
+      "new_pace": 71.74827224405512,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-13",
+      "game_id": "401920345",
+      "game": "Arkansas-Pine Bluff Golden Lions @ California Baptist Lancers",
+      "actual": 134.0,
+      "arithmetic": 141.17355838854783,
+      "combined": 140.08923255220037,
+      "old_pace": 70.41267682671935,
+      "new_pace": 69.8718511539722,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401919004",
+      "game": "Tulane Green Wave @ Akron Zips",
+      "actual": 128.0,
+      "arithmetic": 155.43361408059798,
+      "combined": 156.43325719234886,
+      "old_pace": 71.0168376990857,
+      "new_pace": 71.47356961672232,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401919847",
+      "game": "Stonehill Skyhawks @ Texas Tech Red Raiders",
+      "actual": 125.0,
+      "arithmetic": 146.33528355553773,
+      "combined": 143.2777137466681,
+      "old_pace": 69.08756120154398,
+      "new_pace": 67.64402662693057,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401923303",
+      "game": "Drexel Dragons @ Maine Black Bears",
+      "actual": 130.0,
+      "arithmetic": 133.75636635632307,
+      "combined": 129.558445677748,
+      "old_pace": 68.35537655143338,
+      "new_pace": 66.21005475080509,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401922031",
+      "game": "Montana Grizzlies @ North Dakota Fighting Hawks",
+      "actual": 151.0,
+      "arithmetic": 149.53191290659,
+      "combined": 149.5185973368502,
+      "old_pace": 70.32356145565925,
+      "new_pace": 70.31729925872273,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920750",
+      "game": "Marshall Thundering Herd @ Youngstown State Penguins",
+      "actual": 145.0,
+      "arithmetic": 151.151454717253,
+      "combined": 153.95679273914496,
+      "old_pace": 71.87787150724887,
+      "new_pace": 73.21190912037767,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401912229",
+      "game": "St. Thomas Tommies @ Army Black Knights",
+      "actual": 156.0,
+      "arithmetic": 146.4687048863349,
+      "combined": 144.73459905994537,
+      "old_pace": 69.72905570899437,
+      "new_pace": 68.90350350746814,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911231",
+      "game": "Loyola Chicago Ramblers @ Colorado State Rams",
+      "actual": 131.0,
+      "arithmetic": 150.37241276737646,
+      "combined": 147.40202290013417,
+      "old_pace": 69.16842205426863,
+      "new_pace": 67.8020997600259,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401922230",
+      "game": "Wofford Terriers @ Queens University Royals",
+      "actual": 189.0,
+      "arithmetic": 163.3146112014651,
+      "combined": 168.35723929772982,
+      "old_pace": 72.76572106252905,
+      "new_pace": 75.01249167769603,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401922220",
+      "game": "The Citadel Bulldogs @ North Florida Ospreys",
+      "actual": 151.0,
+      "arithmetic": 152.42613866768434,
+      "combined": 153.33610945485097,
+      "old_pace": 71.19564918269921,
+      "new_pace": 71.62068101448277,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921096",
+      "game": "Rice Owls @ Stephen F. Austin Lumberjacks",
+      "actual": 159.0,
+      "arithmetic": 147.4515039018738,
+      "combined": 145.1639373437885,
+      "old_pace": 69.47390370622398,
+      "new_pace": 68.39608371407417,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920915",
+      "game": "Northern Illinois Huskies @ Bellarmine Knights",
+      "actual": 136.0,
+      "arithmetic": 158.77427701036908,
+      "combined": 154.92277030459,
+      "old_pace": 68.85130908357513,
+      "new_pace": 67.18113124601685,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401918993",
+      "game": "Coppin State Eagles @ South Florida Bulls",
+      "actual": 136.0,
+      "arithmetic": 151.95085752493776,
+      "combined": 153.37303606155984,
+      "old_pace": 71.2404412516731,
+      "new_pace": 71.90721357621223,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911392",
+      "game": "Gardner-Webb Runnin' Bulldogs @ South Carolina Gamecocks",
+      "actual": 141.0,
+      "arithmetic": 147.80834716090504,
+      "combined": 146.27299494699784,
+      "old_pace": 69.87653602670184,
+      "new_pace": 69.15069681430627,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911015",
+      "game": "Miami (OH) RedHawks @ Evansville Purple Aces",
+      "actual": 164.0,
+      "arithmetic": 151.6644112237327,
+      "combined": 152.5748430363292,
+      "old_pace": 71.00088720936078,
+      "new_pace": 71.42710101862828,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921038",
+      "game": "Jackson State Tigers @ Winthrop Eagles",
+      "actual": 148.0,
+      "arithmetic": 159.5513494565718,
+      "combined": 166.8806642882621,
+      "old_pace": 73.80377069493434,
+      "new_pace": 77.19409658707784,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401924921",
+      "game": "Wyoming Cowboys @ Denver Pioneers",
+      "actual": 129.0,
+      "arithmetic": 151.5968571813274,
+      "combined": 150.41525689002572,
+      "old_pace": 70.01844264245892,
+      "new_pace": 69.47269378089867,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921689",
+      "game": "LSU Tigers @ Gonzaga Bulldogs",
+      "actual": 161.0,
+      "arithmetic": 158.4833957634067,
+      "combined": 161.6016404792248,
+      "old_pace": 71.95040654777662,
+      "new_pace": 73.36606888854011,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911016",
+      "game": "Central Michigan Chippewas @ Northern Kentucky Norse",
+      "actual": 125.0,
+      "arithmetic": 153.91862138723954,
+      "combined": 156.48343982637812,
+      "old_pace": 71.77715445444932,
+      "new_pace": 72.97321096531493,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401928804",
+      "game": "Toledo Rockets @ Detroit Mercy Titans",
+      "actual": 157.0,
+      "arithmetic": 151.99959917489497,
+      "combined": 154.63988487289453,
+      "old_pace": 71.78987541759535,
+      "new_pace": 73.03689042523462,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925889",
+      "game": "South Dakota State Jackrabbits @ Northern Colorado Bears",
+      "actual": 117.0,
+      "arithmetic": 148.63369764098036,
+      "combined": 148.14752234486906,
+      "old_pace": 70.34559540174581,
+      "new_pace": 70.11549757590029,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401922046",
+      "game": "Longwood Lancers @ Old Dominion Monarchs",
+      "actual": 154.0,
+      "arithmetic": 149.1295764294154,
+      "combined": 147.79590339890342,
+      "old_pace": 69.95257661921215,
+      "new_pace": 69.32698733581454,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921221",
+      "game": "Hampton Pirates @ Navy Midshipmen",
+      "actual": 114.0,
+      "arithmetic": 140.63150472923937,
+      "combined": 138.77922612647743,
+      "old_pace": 69.63296647662747,
+      "new_pace": 68.71582025039727,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920307",
+      "game": "UNC Asheville Bulldogs @ Georgia Tech Yellow Jackets",
+      "actual": 149.0,
+      "arithmetic": 150.8178554643342,
+      "combined": 152.1946998421148,
+      "old_pace": 71.21416193160609,
+      "new_pace": 71.86428931985208,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401918979",
+      "game": "Delaware State Hornets @ East Carolina Pirates",
+      "actual": 120.0,
+      "arithmetic": 149.20761952847448,
+      "combined": 150.3949555342325,
+      "old_pace": 71.12803569059892,
+      "new_pace": 71.69404483987144,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911264",
+      "game": "Lafayette Leopards @ St. Bonaventure Bonnies",
+      "actual": 139.0,
+      "arithmetic": 142.33233292715096,
+      "combined": 140.9313535474612,
+      "old_pace": 69.86744530675242,
+      "new_pace": 69.17973894957171,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401909728",
+      "game": "Southern Utah Thunderbirds @ Wake Forest Demon Deacons",
+      "actual": 140.0,
+      "arithmetic": 150.07685906959597,
+      "combined": 152.2013107642577,
+      "old_pace": 71.57642793872357,
+      "new_pace": 72.58964652935077,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920741",
+      "game": "South Carolina Upstate Spartans @ Campbell Fighting Camels",
+      "actual": 170.0,
+      "arithmetic": 142.81562408325664,
+      "combined": 138.73439747578664,
+      "old_pace": 68.62521401075351,
+      "new_pace": 66.6641187092987,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401927387",
+      "game": "Northern Iowa Panthers @ Oakland Golden Grizzlies",
+      "actual": 156.0,
+      "arithmetic": 156.97760323005667,
+      "combined": 159.5666800112389,
+      "old_pace": 71.76020188729586,
+      "new_pace": 72.94376354638847,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920567",
+      "game": "Morgan State Bears @ Loyola Maryland Greyhounds",
+      "actual": 124.0,
+      "arithmetic": 152.70464427963805,
+      "combined": 155.94303875285897,
+      "old_pace": 72.0948508578148,
+      "new_pace": 73.62376026110769,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401918055",
+      "game": "Utah Tech Trailblazers @ California Golden Bears",
+      "actual": 152.0,
+      "arithmetic": 145.43964517776175,
+      "combined": 146.76219138686332,
+      "old_pace": 71.20646620280382,
+      "new_pace": 71.8539776968324,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401926777",
+      "game": "UC Riverside Highlanders @ Fresno State Bulldogs",
+      "actual": 169.0,
+      "arithmetic": 148.9289861796244,
+      "combined": 150.22633619294646,
+      "old_pace": 71.17638778124469,
+      "new_pace": 71.79641944871902,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925827",
+      "game": "South Alabama Jaguars @ North Texas Mean Green",
+      "actual": 131.0,
+      "arithmetic": 142.31341365701178,
+      "combined": 136.3975034418776,
+      "old_pace": 67.64592363579177,
+      "new_pace": 64.83391034508642,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401919782",
+      "game": "Manhattan Jaspers @ Le Moyne Dolphins",
+      "actual": 138.0,
+      "arithmetic": 151.01771429061446,
+      "combined": 151.9896106460845,
+      "old_pace": 71.02715816473363,
+      "new_pace": 71.48426372009158,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401909534",
+      "game": "Colorado Buffaloes @ Providence Friars",
+      "actual": 120.0,
+      "arithmetic": 152.24868076535873,
+      "combined": 156.2283891629774,
+      "old_pace": 72.413418051387,
+      "new_pace": 74.3062704982566,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920193",
+      "game": "Pennsylvania Quakers @ Saint Joseph's Hawks",
+      "actual": 160.0,
+      "arithmetic": 143.78318090782477,
+      "combined": 147.90938704154598,
+      "old_pace": 72.59339958845999,
+      "new_pace": 74.67664276584944,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925774",
+      "game": "Howard Bison @ Davidson Wildcats",
+      "actual": 122.0,
+      "arithmetic": 144.55018434542836,
+      "combined": 142.9228684932045,
+      "old_pace": 69.58725129165762,
+      "new_pace": 68.80385251805944,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925108",
+      "game": "UT Rio Grande Valley Vaqueros @ UT Arlington Mavericks",
+      "actual": 162.0,
+      "arithmetic": 134.2577946723619,
+      "combined": 126.23666714062806,
+      "old_pace": 66.4218956326597,
+      "new_pace": 62.45357113374137,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921775",
+      "game": "Rider Broncs @ Villanova Wildcats",
+      "actual": 161.0,
+      "arithmetic": 147.68455262584487,
+      "combined": 145.1485437383876,
+      "old_pace": 69.12395152171851,
+      "new_pace": 67.93696918484973,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401921063",
+      "game": "Portland State Vikings @ San Francisco Dons",
+      "actual": 152.0,
+      "arithmetic": 144.65202743914392,
+      "combined": 143.76128105443183,
+      "old_pace": 69.9075809813544,
+      "new_pace": 69.47710015004144,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920867",
+      "game": "NJIT Highlanders @ Fairfield Stags",
+      "actual": 123.0,
+      "arithmetic": 141.54976009892462,
+      "combined": 140.75162549571084,
+      "old_pace": 69.93676095991282,
+      "new_pace": 69.54241942998168,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920705",
+      "game": "Lipscomb Bisons @ Western Carolina Catamounts",
+      "actual": 143.0,
+      "arithmetic": 153.98317208780824,
+      "combined": 155.70222114933983,
+      "old_pace": 71.12439043950513,
+      "new_pace": 71.91841432522763,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401919017",
+      "game": "UAB Blazers @ Jacksonville State Gamecocks",
+      "actual": 139.0,
+      "arithmetic": 147.97350320442933,
+      "combined": 146.95960543624005,
+      "old_pace": 69.91588289955536,
+      "new_pace": 69.43682714904772,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401917951",
+      "game": "Austin Peay Governors @ Wichita State Shockers",
+      "actual": 136.0,
+      "arithmetic": 150.55755469502517,
+      "combined": 151.1533858062148,
+      "old_pace": 70.6114357591568,
+      "new_pace": 70.89088032317285,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911376",
+      "game": "West Georgia Wolves @ Charleston Southern Buccaneers",
+      "actual": 160.0,
+      "arithmetic": 148.91395040475194,
+      "combined": 152.0539520662632,
+      "old_pace": 71.81557424568805,
+      "new_pace": 73.32987845856354,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911308",
+      "game": "Brown Bears @ Siena Saints",
+      "actual": 153.0,
+      "arithmetic": 150.91027456838538,
+      "combined": 160.50715451919282,
+      "old_pace": 75.24948383150914,
+      "new_pace": 80.03484562848851,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920961",
+      "game": "IU Indianapolis Jaguars @ Morehead State Eagles",
+      "actual": 154.0,
+      "arithmetic": 157.74973612079305,
+      "combined": 159.44838603052966,
+      "old_pace": 71.16756820506384,
+      "new_pace": 71.93390091838857,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920568",
+      "game": "UMBC Retrievers @ Towson Tigers",
+      "actual": 110.0,
+      "arithmetic": 142.07388557664183,
+      "combined": 141.28748191704958,
+      "old_pace": 70.06330031232281,
+      "new_pace": 69.67548776292224,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911276",
+      "game": "Binghamton Bearcats @ Duquesne Dukes",
+      "actual": 129.0,
+      "arithmetic": 149.95452167835026,
+      "combined": 145.95956468470953,
+      "old_pace": 68.47313381316047,
+      "new_pace": 66.64893257039877,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911188",
+      "game": "Cincinnati Bearcats @ Dayton Flyers",
+      "actual": 167.0,
+      "arithmetic": 145.43702299129097,
+      "combined": 144.56785229852736,
+      "old_pace": 69.91718557064183,
+      "new_pace": 69.49934170001917,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925079",
+      "game": "Northwestern State Demons @ Little Rock Trojans",
+      "actual": 167.0,
+      "arithmetic": 150.08688985391217,
+      "combined": 148.1527869624009,
+      "old_pace": 69.44075426826305,
+      "new_pace": 68.54590220123909,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401925063",
+      "game": "Louisiana Tech Bulldogs @ Nicholls Colonels",
+      "actual": 139.0,
+      "arithmetic": 137.99738655256112,
+      "combined": 133.8639195592996,
+      "old_pace": 68.22486761428368,
+      "new_pace": 66.18131269307605,
+      "profile": "both_slow"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911520",
+      "game": "UC Davis Aggies @ Sacramento State Hornets",
+      "actual": 131.0,
+      "arithmetic": 154.17716697216872,
+      "combined": 158.6136392442069,
+      "old_pace": 72.36920462767002,
+      "new_pace": 74.45163989344495,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911347",
+      "game": "UL Monroe Warhawks @ Grand Canyon Lopes",
+      "actual": 140.0,
+      "arithmetic": 157.1635585831993,
+      "combined": 165.04376769880813,
+      "old_pace": 73.86004353566686,
+      "new_pace": 77.56339941279222,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401920760",
+      "game": "Furman Paladins @ Belmont Bruins",
+      "actual": 134.0,
+      "arithmetic": 152.06503851245722,
+      "combined": 153.30534372579095,
+      "old_pace": 70.9198689092236,
+      "new_pace": 71.49832062960276,
+      "profile": "mixed"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401917530",
+      "game": "New Mexico Lobos @ Santa Clara Broncos",
+      "actual": 175.0,
+      "arithmetic": 154.4622267980932,
+      "combined": 159.6656608022854,
+      "old_pace": 72.71949530369295,
+      "new_pace": 75.16922752932989,
+      "profile": "both_fast"
+    },
+    {
+      "date": "2026-11-14",
+      "game_id": "401911455",
+      "game": "Utah Valley Wolverines @ Nevada Wolf Pack",
+      "actual": 144.0,
+      "arithmetic": 147.94868899847933,
+      "combined": 147.5456727447401,
+      "old_pace": 70.15515796065421,
+      "new_pace": 69.96405340181572,
+      "profile": "mixed"
+    }
+  ],
+  "limits": [
+    "Recent, limited sample; not an independent season holdout.",
+    "Comparison isolates pace; it does not validate efficiency calibration.",
+    "Final totals include overtime; availability deltas are retained as captured.",
+    "Saved benchmark availability limits which games can be evaluated."
+  ]
+}

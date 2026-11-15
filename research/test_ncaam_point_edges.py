@@ -4,22 +4,22 @@ import math
 from pathlib import Path
 import unittest
 
-from builders.ncaam_matchup_projection import from_captured_inputs, project, MODEL_VERSION
+from builders.ncaam_matchup_projection import from_captured_inputs, project, MODEL_VERSION, LEGACY_POINT_MODEL_VERSION
 from builders.ncaam_point_edges import capture_grades, load_policy
 
 LOCK='2026-11-14T12:00:00+00:00'
 TIP='2026-11-14T23:00:00+00:00'
 
 
-def forecast(*,court=0.,away=None,home=None,impact=None,home_line=0.,total_line=150.):
+def forecast(*,court=0.,away=None,home=None,impact=None,home_line=0.,total_line=150.,model_version=MODEL_VERSION):
     b={'season':2027,'team_count':365,'observed_at':'2026-11-14T11:00:00+00:00',
        'metrics':{m:{'mean':70. if m=='tempo' else 105.,'sd':3. if m=='tempo' else 8.} for m in ('offense','defense','tempo')}}
     a=away or {'team':'Away','offense':110.,'defense':108.,'tempo':70.}
     h=home or {'team':'Home','offense':115.,'defense':105.,'tempo':70.}
     url='https://barttorvik.com/2027_team_results.csv'
     p=from_captured_inputs(a,h,b,as_of=LOCK,tipoff=TIP,source_url=url,home_court_points=court,
-        neutral_site=court==0,lineup_adjustment=impact)
-    f={'recordId':'synthetic-point-forecast','gameId':'synthetic','modelVersion':MODEL_VERSION,'projection_engine':MODEL_VERSION,
+        neutral_site=court==0,lineup_adjustment=impact,model_version=model_version)
+    f={'recordId':'synthetic-point-forecast','gameId':'synthetic','modelVersion':model_version,'projection_engine':model_version,
        'lockedAt':LOCK,'tipoff':TIP,'phase':'pregame','away_team':'Away','home_team':'Home',
        'away_rating':a,'home_rating':h,'ratings_source_url':url,'ratings_observed_at':b['observed_at'],
        'home_court':{'season':2027,'fallback':False},'home_court_points':court,'neutral_site':court==0,'matchup_projection':p,
@@ -46,7 +46,7 @@ class ProjectionTests(unittest.TestCase):
         market={'home_spread':-2.,'total':150.,'as_of':LOCK}
         f=project(game,bundle,market,LOCK)
         self.assertEqual(f['projection_engine'],MODEL_VERSION)
-        self.assertAlmostEqual(f['matchup_projection']['margin'],5.6)
+        self.assertAlmostEqual(f['matchup_projection']['margin'],f['matchup_projection']['possessions']*.08)
         changed=project(game,bundle,{**market,'home_spread':10.,'total':170.},LOCK)
         self.assertEqual(f['matchup_projection'],changed['matchup_projection'])
         self.assertIn('margin_calibration',f['legacy_forecast'])
@@ -55,6 +55,55 @@ class ProjectionTests(unittest.TestCase):
         a={'team':'Away','offense':105.,'defense':105.,'tempo':70.};h={**a,'team':'Home'}
         f,_=forecast(away=a,home=h)
         self.assertEqual((f['total'],f['fair_home_spread']),(147.,0.))
+
+    def test_adjusted_tempo_against_an_average_opponent_is_not_halved(self):
+        for pace in (60., 80.):
+            a={'team':'Away','offense':105.,'defense':105.,'tempo':pace}
+            h={**a,'team':'Home','tempo':70.}
+            f,_=forecast(away=a,home=h)
+            self.assertEqual(f['matchup_projection']['possessions'],pace)
+        for a_pace,h_pace in ((60.,65.),(75.,80.)):
+            a={'team':'Away','offense':105.,'defense':105.,'tempo':a_pace}
+            h={**a,'team':'Home','tempo':h_pace}
+            f,_=forecast(away=a,home=h)
+            pace=f['matchup_projection']['possessions']
+            self.assertLess(pace,min(a_pace,h_pace)) if a_pace<70 else self.assertGreater(pace,max(a_pace,h_pace))
+
+    def test_unsupported_combined_pace_is_rejected_instead_of_clamped(self):
+        a={'team':'Away','offense':105.,'defense':105.,'tempo':50.}
+        with self.assertRaises(ValueError):forecast(away=a,home={**a,'team':'Home'})
+
+    def test_original_point_model_remains_reproducible(self):
+        a={'team':'Away','offense':105.,'defense':105.,'tempo':60.}
+        h={**a,'team':'Home','tempo':65.}
+        f,b=forecast(away=a,home=h,model_version=LEGACY_POINT_MODEL_VERSION)
+        self.assertEqual(f['matchup_projection']['possessions'],62.5)
+        self.assertNotIn('tempo_model',f['matchup_projection'])
+        self.assertEqual(grades(f,b)['total']['projection_model_version'],LEGACY_POINT_MODEL_VERSION)
+        from research.replay_ncaam_point_model import replay
+        g=grades(f,b);f.update(matchup_spread=g['spread'],matchup_total=g['total'])
+        r=replay({'model_version':LEGACY_POINT_MODEL_VERSION,'games':[f]})
+        self.assertEqual(r['errors'],[])
+        self.assertEqual(r['games'][0]['matchup_projection'],f['matchup_projection'])
+
+    def test_user_examples_change_scores_without_using_market_or_outcomes(self):
+        samples=json.loads((Path(__file__).parent/'fixtures/ncaam_tempo_examples_2026_11_15.json').read_text())['games']
+        for f in samples:
+            kwargs={'as_of':f['lockedAt'],'tipoff':f['tipoff'],'source_url':f['ratings_source_url'],
+                'home_court_points':f['home_court_points'],'neutral_site':f['neutral_site'],'lineup_adjustment':f['lineup_adjustment']}
+            old=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],model_version=LEGACY_POINT_MODEL_VERSION,**kwargs)
+            revised=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kwargs)
+            self.assertAlmostEqual(old['total'],f['total'])
+            for side in ('away','home'):
+                self.assertEqual(old['pairings'][side]['expected_efficiency'],revised['pairings'][side]['expected_efficiency'])
+            if 'Harvard' in f['away_team']:
+                self.assertAlmostEqual(revised['total'],136.20,places=2)
+                self.assertLess(revised['total']-f['market']['total'],8)
+                self.assertGreater(revised['total'],f['market']['total'])
+            else:
+                self.assertAlmostEqual(revised['total'],148.65,places=2)
+            f['market']['total']=250.;f['actual_total']=1.
+            self.assertEqual(revised,from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kwargs))
 
     def test_offense_faces_opposing_defense_in_points_per_100(self):
         f,_=forecast();a=deepcopy(f['away_rating']);h=deepcopy(f['home_rating']);h['offense']+=5
@@ -93,6 +142,40 @@ class ProjectionTests(unittest.TestCase):
 
 
 class PointGradeTests(unittest.TestCase):
+    def test_both_production_adapters_route_each_point_model_to_its_saved_score(self):
+        from builders.ncaam_matchup_live import capture_grade
+        from builders.ncaam_spread_grades import capture_spread_grade
+        for version in (LEGACY_POINT_MODEL_VERSION, MODEL_VERSION):
+            f,b=forecast(model_version=version)
+            policy=load_policy()
+            total=capture_grade(f,[b],[],policy=policy,published_at=LOCK)
+            spread=capture_spread_grade(f,[b],policy=policy,published_at=LOCK)
+            self.assertEqual(total,grades(f,b)['total'])
+            self.assertEqual(spread,grades(f,b)['spread'])
+            self.assertEqual(total['projection_model_version'],version)
+
+    def test_replay_keeps_game_ids_separate_from_pace_log_join_keys(self):
+        from research.evaluate_ncaam_tempo import evaluate
+        from tempfile import TemporaryDirectory
+        import csv
+        f,b=forecast();f.update(phase='pregame',matchup_total={'national_benchmark':b})
+        game={'Game ID':f['gameId'],'Date':'2026-11-14','Completed':'TRUE','Status':'STATUS_FINAL',
+            'Source':'ESPN NCAAM schedule; ScoresAndOdds market lines','Away Team':f['away_team'],
+            'Home Team':f['home_team'],'Game Time':f['tipoff'],'Result Updated':'2026-11-15T01:00:00Z',
+            'Away Score':'70','Home Score':'75'}
+        with TemporaryDirectory() as directory:
+            p=Path(directory)/'2026-11-14.json';logs=Path(directory)/'logs.csv'
+            p.write_text(json.dumps({'ncaamMarket':{'date':'2026-11-14','forecasts':[f],'games':[game]}}))
+            with logs.open('w') as handle:
+                writer=csv.writer(handle)
+                for team,opponent in (('Away','Home'),('Home','Away')):
+                    row=['']*31;row[0]='11/14/26';row[2]=team;row[4]=opponent
+                    row[22]='2027';row[23]='70.5';row[24]='synthetic-paired-game';writer.writerow(row)
+            result=evaluate([p],logs)
+            self.assertEqual(result['all']['games'],1)
+            self.assertEqual(result['pace']['all']['games'],1)
+            self.assertEqual(result['games'][0]['actual'],145)
+
     def test_saved_replay_is_reproducible_without_results_or_current_ratings(self):
         from research.replay_ncaam_point_model import replay
         f,b=forecast();g=grades(f,b);f.update(matchup_spread=g['spread'],matchup_total=g['total'],result='Win')
