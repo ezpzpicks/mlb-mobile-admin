@@ -16,9 +16,10 @@ import statistics
 
 from builders.cfb_sp_ratings import load_population, stamp, team_key
 from builders.cfb_selection_review import apply_selection_review, validate_review
+from builders.cfb_market_relative_matchups import FIELD as MARKET_RELATIVE_FIELD, comparison
 
 POLICY_PATH = Path(__file__).resolve().parents[1] / "config" / "ncaaf_matchup_grades.json"
-SLATE_FIELDS = ["Grading Policy Version", "Matchup Factors JSON", "Matchup Spread JSON", "Matchup Total JSON"]
+SLATE_FIELDS = ["Grading Policy Version", "Matchup Factors JSON", "Matchup Spread JSON", "Matchup Total JSON", MARKET_RELATIVE_FIELD]
 
 
 def number(value):
@@ -243,6 +244,20 @@ def install_matchup_grading(builder):
             p[f"matchup_{kind}"] = grade
         result["matchup_grades"] = grades
         result["grading_policy_version"] = policy["version"]
+        # Save all four research alternatives, including markets with no A/B
+        # grade. These descriptions never change a forecast, pick or grade.
+        try:
+            prices = {side: game[field] for side, field in (("home", "Home Spread Odds"),
+                ("away", "Away Spread Odds"), ("Over", "Total Over Odds"), ("Under", "Total Under Odds"))
+                if field in game and str(game[field]).strip()}
+            result["market_relative_matchup"] = comparison(result["matchup_factors"],
+                projected_margin=number(sim["home_mean"]) - number(sim["away_mean"]),
+                projected_total=number(sim["home_mean"]) + number(sim["away_mean"]),
+                home_line=game["Home Spread"], total_line=game["Total"],
+                as_of=grades["spread"]["as_of"], kickoff=game["Game Time"], odds=prices,
+                model_version=getattr(builder, "MODEL_VERSION", ""), policy_version=policy["version"])
+        except Exception as exc:
+            result["market_relative_matchup"] = {"status": "Unavailable", "reason": str(exc)}
         return result
 
     def wrapped_slate(result):
@@ -251,7 +266,8 @@ def install_matchup_grading(builder):
             values = {"Grading Policy Version": result.get("grading_policy_version", ""),
                 "Matchup Factors JSON": json.dumps(result.get("matchup_factors", {}), allow_nan=False),
                 "Matchup Spread JSON": json.dumps(result.get("matchup_grades", {}).get("spread", {}), allow_nan=False),
-                "Matchup Total JSON": json.dumps(result.get("matchup_grades", {}).get("total", {}), allow_nan=False)}
+                "Matchup Total JSON": json.dumps(result.get("matchup_grades", {}).get("total", {}), allow_nan=False),
+                MARKET_RELATIVE_FIELD: json.dumps(result.get("market_relative_matchup", {}), allow_nan=False)}
             for key, value in values.items():
                 frame.at[frame.index[0], key] = value
         return frame.reindex(columns=builder.SLATE_COLUMNS)
