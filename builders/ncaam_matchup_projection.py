@@ -10,9 +10,30 @@ from builders.ncaam_model import project as legacy_project, team_key
 from builders.ncaam_matchup_grades import number, policy_digest, population_benchmark, stamp
 
 LEGACY_POINT_MODEL_VERSION = "ncaam-v0.7-matchup-projection-2026-11-14"
-MODEL_VERSION = "ncaam-v0.8-adjusted-tempo-2026-11-15"
-POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, MODEL_VERSION)
+ADJUSTED_TEMPO_MODEL_VERSION = "ncaam-v0.8-adjusted-tempo-2026-11-15"
+MODEL_VERSION = "ncaam-v0.9-progressive-offense-2026-11-15"
+POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION, MODEL_VERSION)
 GRADE_POLICY = "ncaam-point-edge-2026-11-14-v1"
+OFFENSE_BONUS_POLICY = "ncaam-very-strong-offense-progressive-2026-11-15-v1"
+VERY_STRONG_OFFENSE_Z = 1.5
+OFFENSE_BONUS_POINTS = {'very_strong': 1., 'strong': 3., 'above_average': 5.,
+                        'below_average': 8., 'weak': 9., 'very_weak': 10.}
+
+
+def progressive_offense_bonus(offense_z, opponent_defense_z):
+    """User-selected trial points; lower adjusted defense means better defense.
+
+    Apply only to a very strong offense. Weak offenses receive no extra
+    deduction. These are final score points, not efficiency or pace changes.
+    """
+    offense_z, defense_z = number(offense_z), number(opponent_defense_z)
+    band = ('very_strong' if defense_z <= -1.5 else 'strong' if defense_z <= -1.
+            else 'above_average' if defense_z < 0. else 'below_average' if defense_z < 1.
+            else 'weak' if defense_z < 1.5 else 'very_weak')
+    qualified = offense_z >= VERY_STRONG_OFFENSE_Z
+    return {'qualified': qualified, 'offense_z': offense_z,
+            'opponent_defense_z': defense_z, 'opponent_defense_band': band,
+            'points': OFFENSE_BONUS_POINTS[band] if qualified else 0.}
 
 
 def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
@@ -67,7 +88,9 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         player_points = possessions*(offense_change+defense_change)/100
         venue_points = court/2*(1 if side == 'home' else -1)
         baseline = possessions*efficiency/100
-        points[side] = baseline+player_points+venue_points
+        bonus = progressive_offense_bonus(offense/number(metrics['offense']['sd']),
+            defense/number(metrics['defense']['sd'])) if model_version == MODEL_VERSION else None
+        points[side] = baseline+player_points+venue_points+(bonus['points'] if bonus else 0.)
         if not 0 < points[side] < 200:
             raise ValueError('Implausible expected team score.')
         pairings[side] = {'baseline_efficiency':center, 'offense_deviation':offense,
@@ -76,6 +99,8 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         adjustments[side] = {'player_offense_per_100':offense_change,
             'opponent_defense_per_100':defense_change, 'player_points':player_points,
             'home_court_points':venue_points}
+        if bonus is not None:
+            adjustments[side]['offense_bonus'] = bonus
     payload = {'model_version':model_version, 'status':'provisional', 'as_of':clock.isoformat(),
         'tipoff':start.isoformat(), 'season':season, 'ratings_source_url':source_url,
         'ratings_observed_at':observed.isoformat(), 'benchmark_sha256':policy_digest(benchmark),
@@ -85,11 +110,15 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         'away_points':points['away'], 'home_points':points['home'],
         'margin':points['home']-points['away'], 'total':points['home']+points['away'],
         'calibrated_probabilities':False}
-    if model_version == MODEL_VERSION:
+    if model_version != LEGACY_POINT_MODEL_VERSION:
         payload['tempo_model'] = {'method':'adjusted-tempo-ratios-v1',
             'national_tempo':national_tempo,
             'away_ratio':number(away['tempo'])/national_tempo,
             'home_ratio':number(home['tempo'])/national_tempo}
+    if model_version == MODEL_VERSION:
+        payload['offense_bonus_policy'] = {'version': OFFENSE_BONUS_POLICY, 'status': 'experimental',
+            'qualifying_offense_z': VERY_STRONG_OFFENSE_Z,
+            'points_by_opponent_defense': deepcopy(OFFENSE_BONUS_POINTS)}
     payload['sha256'] = policy_digest(payload)
     return payload
 

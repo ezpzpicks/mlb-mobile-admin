@@ -6,7 +6,8 @@ import math
 from pathlib import Path
 
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
-from builders.ncaam_matchup_projection import MODEL_VERSION, POINT_MODEL_VERSIONS, GRADE_POLICY
+from builders.ncaam_matchup_projection import (MODEL_VERSION, LEGACY_POINT_MODEL_VERSION,
+    POINT_MODEL_VERSIONS, GRADE_POLICY, from_captured_inputs)
 
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_point_edge_grades.json'
 
@@ -51,15 +52,24 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
         raise ValueError('The grade benchmark must match the captured score inputs.')
     away_tempo,home_tempo=(number(f[s+'_rating']['tempo']) for s in ('away','home'))
     national_tempo=number(benchmark['metrics']['tempo']['mean'])
-    pace=away_tempo*home_tempo/national_tempo if model==MODEL_VERSION else (away_tempo+home_tempo)/2
+    pace=(away_tempo+home_tempo)/2 if model==LEGACY_POINT_MODEL_VERSION else away_tempo*home_tempo/national_tempo
     if not 45<pace<95 or not math.isclose(number(p['possessions']),pace,abs_tol=1e-8,rel_tol=0):
         raise ValueError('Saved pace does not match its projection model.')
-    if model==MODEL_VERSION:
+    if model!=LEGACY_POINT_MODEL_VERSION:
         tempo=p.get('tempo_model',{})
         if (tempo.get('method')!='adjusted-tempo-ratios-v1' or tempo.get('national_tempo')!=national_tempo
             or not math.isclose(number(tempo.get('away_ratio')),away_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)
             or not math.isclose(number(tempo.get('home_ratio')),home_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)):
             raise ValueError('Saved adjusted-tempo proof is unavailable.')
+    if model==MODEL_VERSION:
+        # Reconstruct the complete new score, including court, players and the
+        # progressive bonus, so changing a bonus and rehashing cannot add it twice.
+        expected=from_captured_inputs(f['away_rating'],f['home_rating'],benchmark,
+            as_of=f['lockedAt'],tipoff=f['tipoff'],source_url=f['ratings_source_url'],
+            home_court_points=f['home_court_points'],neutral_site=f['neutral_site'],
+            lineup_adjustment=f.get('lineup_adjustment'),model_version=model)
+        if expected!=p:
+            raise ValueError('Saved progressive offense proof does not match the captured inputs.')
     market=f['market'];quote=stamp(market['as_of'])
     if not quote<=lock or (lock-quote).total_seconds()>60*t['max_market_age_minutes']:
         raise ValueError('Quote is stale or was unavailable before capture.')
