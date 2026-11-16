@@ -7,7 +7,7 @@
     "spread_b_points": 5.0,
     "total_a_points": 10.0,
     "total_b_points": 8.0,
-    "spread_max_market_line": 20.0,
+    "spread_max_market_line": null,
     "max_benchmark_age_hours": 30.0,
     "max_market_age_minutes": 90.0,
     "extreme_z": 1.0,

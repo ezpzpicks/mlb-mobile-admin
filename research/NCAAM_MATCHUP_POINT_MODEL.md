@@ -133,8 +133,9 @@ is roughly 10–15; qualifying plays are not added or removed to fill a fixed co
 Favorite/underdog and Over/Under use the same rules within each market. Matchup
 strength already drives expected scoring and receives no second grade bonus
 or veto. The former spread 1–under-4-point cap and factor-profile total grading
-remain available only for their original captures. The shared new policy keeps
-20+ point spreads projection-only. Numerical edge grades, eligibility and input
+remain available only for their original captures. On November 16, Ryan removed
+the 20-point spread exclusion. The active policy has no market-spread limit;
+archived policies retain their captured limits. Numerical edge grades, eligibility and input
 confidence flags are separate. NCAAM retains assumed -110 prices; a worse quote
 requires separate probability evidence instead of inventing a cover probability.
 

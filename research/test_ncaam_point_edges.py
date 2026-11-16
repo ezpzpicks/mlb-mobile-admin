@@ -278,11 +278,39 @@ class PointGradeTests(unittest.TestCase):
             first=grades(f,b)['total'];f.update(injury_verified=True,starters_confirmed=True)
             self.assertEqual((first['grade'],grades(f,b)['total']['grade']),('B','B'))
 
-    def test_projection_only_and_price_holds_preserve_the_numerical_grade(self):
-        f,b=forecast(home_line=-25.);g=grades(f,b)['spread']
-        self.assertEqual((g['edge_grade'],g['grade'],g['eligible']),('A','Research',False))
+    def test_large_spreads_use_the_existing_edge_tiers_and_keep_price_holds(self):
+        self.assertIsNone(load_policy()['thresholds']['spread_max_market_line'])
+        for line in (-35.5,-25.,-20.,20.,25.,35.5):
+            f,b=forecast(home_line=line);g=grades(f,b)['spread']
+            self.assertEqual((g['edge_grade'],g['grade'],g['eligible']),('A','A',True))
+            self.assertNotIn('projection-only',' '.join(g['confidence_flags']))
+        f,b=forecast(home_line=-25.);policy=load_policy()
+        policy['thresholds']['spread_max_market_line']=20.
+        legacy=grades(f,b,policy=policy)['spread']
+        self.assertEqual((legacy['edge_grade'],legacy['grade'],legacy['eligible']),('A','Research',False))
+        f['market']['odds']=-500
+        self.assertEqual(grades(f,b)['spread']['grade'],'Research')
         f,b=forecast();f['market']['total']=f['total']-10.;f['market']['odds']=-500
         g=grades(f,b)['total'];self.assertEqual((g['edge_grade'],g['grade']),('A','Research'))
+
+    def test_reviewed_refresh_regrades_only_latest_unstarted_point_captures(self):
+        from unittest.mock import patch
+        from scripts.refresh_ncaam_spread_grades import refresh
+        f,b=forecast(home_line=-25.);f['matchup_spread']={'national_benchmark':b}
+        original=deepcopy(f)
+        later={**f,'recordId':'later','lockedAt':'2026-11-14T12:01:00+00:00'}
+        later['matchup_projection']=deepcopy(f['matchup_projection'])
+        later['matchup_projection']['as_of']=later['lockedAt']
+        from builders.ncaam_matchup_grades import policy_digest
+        later['matchup_projection']['sha256']=policy_digest({k:v for k,v in later['matchup_projection'].items() if k!='sha256'})
+        closed={**f,'gameId':'closed','tipoff':'2026-11-14T11:00:00+00:00'}
+        legacy={**f,'gameId':'legacy','modelVersion':'legacy'}
+        rows=[{'Details JSON':json.dumps(x)} for x in (f,later,closed,legacy)]
+        with patch('scripts.refresh_ncaam_spread_grades.store.rows',return_value=rows),patch('scripts.refresh_ncaam_spread_grades.store.upsert_many') as save:
+            result=refresh(None,'2026-11-14',now='2026-11-14T12:02:00+00:00',point_model=True)
+            self.assertEqual((result['rows'],result['grades']),(1,{'A':1}))
+            save.assert_not_called()
+        self.assertEqual(f,original)
 
     def test_source_hash_benchmark_and_publication_clocks_fail_closed(self):
         f,b=forecast()
