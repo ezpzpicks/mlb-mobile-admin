@@ -12,13 +12,17 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from builders.ncaam_matchup_grades import policy_digest,stamp
 from builders.ncaam_spread_grades import load_spread_policy,capture_spread_grade,spread_storage_row
+from builders.ncaam_point_edges import load_policy as load_point_policy
+from builders.ncaam_matchup_projection import POINT_MODEL_VERSIONS
 from shared import ncaam_auto_storage as store
 
 
-def refresh(db,day,*,commit=False,now=None):
-    now=now or datetime.now(timezone.utc).isoformat();policy=load_spread_policy();latest={}
+def refresh(db,day,*,commit=False,now=None,point_model=False):
+    now=now or datetime.now(timezone.utc).isoformat()
+    policy=load_point_policy() if point_model else load_spread_policy();latest={}
     for row in store.rows(db,store.FORECASTS,day):
         f=json.loads(row['Details JSON'])
+        if point_model and f.get('modelVersion') not in POINT_MODEL_VERSIONS:continue
         if not stamp(f['lockedAt'])<=stamp(now)<stamp(f['tipoff']):continue
         key=str(f['gameId']);order=(stamp(f['lockedAt']),f['modelVersion']+'|'+f['recordId'])
         if key not in latest or order>latest[key][0]:latest[key]=(order,f)
@@ -43,10 +47,12 @@ def refresh(db,day,*,commit=False,now=None):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--date',default=datetime.now(ZoneInfo('America/New_York')).date().isoformat())
+    p.add_argument('--point-model',action='store_true',help='Use the current point-edge policy for saved point-model captures.')
     p.add_argument('--expected-policy-sha',required=True);p.add_argument('--commit',action='store_true');args=p.parse_args()
-    if policy_digest(load_spread_policy())!=args.expected_policy_sha:raise ValueError('Reviewed spread policy changed.')
+    policy=load_point_policy() if args.point_model else load_spread_policy()
+    if policy_digest(policy)!=args.expected_policy_sha:raise ValueError('Reviewed spread policy changed.')
     from shared import turso_storage as db
-    print(json.dumps(refresh(db,args.date,commit=args.commit)))
+    print(json.dumps(refresh(db,args.date,commit=args.commit,point_model=args.point_model)))
 
 
 if __name__=='__main__':main()

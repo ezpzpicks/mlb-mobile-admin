@@ -19,7 +19,7 @@ def load_policy(path=POLICY_PATH):
     for market in ('spread','total'):
         if not 0<number(t[market+'_b_points'])<number(t[market+'_a_points']):
             raise ValueError('Invalid point-edge cutoffs.')
-    if not 0<number(t['spread_max_market_line'])<=20:
+    if t['spread_max_market_line'] is not None and not 0<number(t['spread_max_market_line'])<=20:
         raise ValueError('Invalid projection-only spread limit.')
     return policy
 
@@ -86,7 +86,9 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
     for name,gap in (('spread',number(p['margin'])+number(market['home_spread'])),('total',number(p['total'])-number(market['total']))):
         edge=abs(gap);tier='A' if edge>=t[name+'_a_points'] else 'B' if edge>=t[name+'_b_points'] else 'Research'
         side=('home' if gap>0 else 'away' if gap<0 else None) if name=='spread' else ('Over' if gap>0 else 'Under' if gap<0 else None)
-        large=name=='spread' and abs(number(market['home_spread']))>=t['spread_max_market_line']
+        # Null disables the limit; numerical limits retain archived policy behavior.
+        limit=t['spread_max_market_line']
+        large=name=='spread' and limit is not None and abs(number(market['home_spread']))>=limit
         grade=tier if price_ok and not large else 'Research'
         reason=f"{edge:.2f}-point edge; A >= {t[name+'_a_points']:g}, B >= {t[name+'_b_points']:g}"
         if large:reason='20+ point spreads remain projection-only'
