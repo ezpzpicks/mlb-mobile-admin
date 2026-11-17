@@ -1,10 +1,88 @@
 # NCAAM matchup-led scores and point-edge grades
 
-Current model: `ncaam-v0.10-progressive-offense-2026-11-16`.
+Current model: `ncaam-v0.11-rebound-transfer-2026-11-16`.
+Archived pre-rebounding model: `ncaam-v0.10-progressive-offense-2026-11-16`.
 Archived offense-bonus model: `ncaam-v0.9-progressive-offense-2026-11-15`.
 Archived adjusted-tempo model: `ncaam-v0.8-adjusted-tempo-2026-11-15`.
 Archived point model: `ncaam-v0.7-matchup-projection-2026-11-14`.
 Grading policy: `ncaam-point-edge-2026-11-14-v1`.
+
+## November 16 total-neutral rebounding transfer
+
+The user-authorized experimental modifier applies across offense categories.
+It compares the two offensive-glass matchups and transfers points from the
+unfavorable side to the favorable side. It does not add total points.
+
+`away matchup = (away OR% + home OR% allowed) / 2`
+
+`home matchup = (home OR% + away OR% allowed) / 2`
+
+`home edge, pp = 100 * (home matchup - away matchup)`
+
+`capped home transfer = clamp(0.2 * home edge, -3, +3)`
+
+`sample weight = min(1, minimum prior D1 games of the two teams / 3)`
+
+`home score += capped home transfer * sample weight`
+
+`away score -= capped home transfer * sample weight`
+
+The coefficient and cap are conservative initial trial settings, not fitted
+or validated weights. Full-weight edges of 5/10/15 percentage points transfer
+1/2/3 points per team, changing the margin by 2/4/6 points. The cap is applied
+before sample attenuation: one prior game permits at most one transferred
+point per team; two games permit at most two. The rate score is not a
+calibrated rebound or win probability. No result-based outlier exclusions or
+offense-strength eligibility gates are used.
+
+The pre-transfer total is carried exactly, so over/under projections, point
+edges and grades are identical to v0.10 for the same other inputs. Home court,
+player effects and the existing progressive offense bonus are each applied
+once before the transfer. Spread grading then uses the revised margin and
+the existing unchanged thresholds.
+
+The existing verified D1 game-log download also supplies rebound counts;
+there is no additional provider request. Cache policy
+`ncaam-d1-completed-games-venues-rebounds-v3` refreshes older count-only caches.
+Only reciprocal, agreeing D1 boxscores from strictly earlier Eastern dates
+contribute. OR% is summed OR / (summed OR + summed opponent DR); allowance is
+summed opponent OR / (summed opponent OR + summed own DR). Official source
+team rebounds are treated consistently. Same-day outcomes, non-D1 opponents,
+unpaired boxes and conflicting source counts cannot supply a modifier.
+
+Both team profiles retain source URL, snapshot hash, season, observation
+clock, cutoff, latest game date, GP and raw rebound counts in the captured
+forecast. Profiles must be for the correct schools and season, share one
+snapshot, precede forecast lock, and be no more than 30 hours old. Missing,
+invalid or zero-game inputs leave the original margin intact with an explicit
+unavailable proof. The rule never invents a fallback rebound rate.
+
+Captured v0.11 scores include the transfer and its full input proof. Grade
+validation reconstructs all scoring adjustments, so rehashing a doubled,
+reversed or otherwise edited transfer cannot make it eligible. Archived
+v0.7–v0.10 calculations ignore the new modifier and remain reproducible.
+Existing started-game captures and official manual selections are retained.
+
+The frozen-input comparison covers 22 November 16 games. Twenty-one have
+usable rebound pairs; Missouri State has no prior D1 game. Every total and
+total grade is unchanged. For Maryland/Alcorn, v0.10's 106.688–64.126 becomes
+109.531–61.283; both total 170.814. Georgia/Jacksonville changes from
+90.989–67.850 to 92.501–66.338, with its two-game opponent reducing the weight.
+Kent State's one-game opponent limits its transfer to one point per team.
+
+Tarleton/Drake's rate edge favors Drake, so the transfer lowers Tarleton's
+projected score from 75.251 to 73.891 and raises Drake from 77.573 to 78.933.
+At the user's manual Tarleton +9.5 line, the projected spread edge falls from
+7.178 to 4.458 points. It weakens this selection; a good final result does not
+reverse the pregame rebound edge. The replay's paired saved quote was +8.5;
+the official +9.5 pick and its outcome are not rewritten.
+
+The read-only evaluator is `research/evaluate_ncaam_rebounding.py`; the
+comparison is `research/results/ncaam_rebound_transfer_replay_2026-11-16.json`.
+Features are retrospective reconstructions from strictly prior-date boxes,
+with the later actual download provenance retained separately. They are not
+claimed as forecasts issued at those historical pregame times. No target
+results choose the transfer coefficient, cap, sample weight or direction.
 
 ## November 16 defensive-tier bonus revision
 
@@ -13,7 +91,7 @@ score points, based on the opposing defense's captured national band. Lower
 adjusted defensive efficiency is better. These are user-selected trial amounts,
 not fitted coefficients or a claim of validated betting improvement.
 
-| Opposing defense | Archived v0.9 bonus | Current v0.10 bonus |
+| Opposing defense | Archived v0.9 bonus | v0.10 / v0.11 bonus |
 | --- | ---: | ---: |
 | Very strong (z <= -1.5) | +1 | +1 |
 | Strong (-1.5 < z <= -1) | +3 | +3 |
@@ -63,8 +141,9 @@ The captured home-court value adjusts the margin once, split equally between
 the two scores. Neutral courts use zero. Captured player offense and opposing
 defense changes are converted from points per 100 possessions to scoring points
 once. The earlier multiplicative baseline and opening-margin strength scaling
-remain comparison metadata. SOS, raw four factors and preference ratings do
-not create extra bonuses on top of opponent-adjusted efficiencies.
+remain comparison metadata. SOS, manual four-factor adjustments and preference
+ratings do not create generic bonuses on top of opponent-adjusted efficiencies.
+The separately captured v0.11 rebound transfer above changes only the margin.
 
 The [ratings glossary](https://kenpom.com/blog/ratings-glossary/) documents the
 standard per-100-possession efficiency and per-40-minute tempo units. Production

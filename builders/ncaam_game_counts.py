@@ -7,8 +7,9 @@ import io
 from zoneinfo import ZoneInfo
 from builders.ncaam_model import team_key, timestamp
 from builders.ncaam_home_court import parse_game_history, school_key
+from builders.ncaam_rebounding import parse_rebounding_inputs
 
-POLICY = 'ncaam-d1-completed-games-and-venues-v2'
+POLICY = 'ncaam-d1-completed-games-venues-rebounds-v3'
 
 
 def parse_game_counts(text, season, observed_at, teams):
@@ -33,4 +34,5 @@ def parse_game_counts(text, season, observed_at, teams):
     return {'season': season, 'observed_at': observed_at, 'policy': POLICY,
             'counts': {key: len(games) for key, games in counts.items()},
             'home_court_games': home_games, 'home_court_audit': home_audit,
+            'rebounding': parse_rebounding_inputs(text, season, observed_at, teams),
             'source_url': f'https://barttorvik.com/getgamestats.php?year={season}&csv=1'}

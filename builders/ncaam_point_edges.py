@@ -62,14 +62,14 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
             or not math.isclose(number(tempo.get('home_ratio')),home_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)):
             raise ValueError('Saved adjusted-tempo proof is unavailable.')
     if model in OFFENSE_BONUS_POLICIES:
-        # Reconstruct the complete new score, including court, players and the
-        # progressive bonus, so changing a bonus and rehashing cannot add it twice.
+        # Reconstruct court, players, progressive bonuses and the versioned
+        # rebound transfer. Rehashing cannot double or reverse an adjustment.
         expected=from_captured_inputs(f['away_rating'],f['home_rating'],benchmark,
             as_of=f['lockedAt'],tipoff=f['tipoff'],source_url=f['ratings_source_url'],
             home_court_points=f['home_court_points'],neutral_site=f['neutral_site'],
             lineup_adjustment=f.get('lineup_adjustment'),model_version=model)
         if expected!=p:
-            raise ValueError('Saved progressive offense proof does not match the captured inputs.')
+            raise ValueError('Saved scoring adjustments do not match the captured inputs.')
     market=f['market'];quote=stamp(market['as_of'])
     if not quote<=lock or (lock-quote).total_seconds()>60*t['max_market_age_minutes']:
         raise ValueError('Quote is stale or was unavailable before capture.')
@@ -80,6 +80,8 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
     if f.get('home_court',{}).get('fallback'):flags.append('Home court uses the league prior')
     if f.get('injury_verified') is not True:flags.append('Player availability unchecked')
     if f.get('starters_confirmed') is not True:flags.append('Starting fives unconfirmed')
+    if model == MODEL_VERSION and p.get('rebounding_adjustment', {}).get('status') != 'applied':
+        flags.append('Rebounding inputs unavailable; baseline margin retained')
     odds=number(market.get('odds',-110))
     price_ok=abs(odds)>=100 and (100/(odds+100) if odds>0 else -odds/(100-odds))<=110/210+1e-12
     output={}
