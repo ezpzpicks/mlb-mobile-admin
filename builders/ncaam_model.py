@@ -95,6 +95,9 @@ def prepare_season_ratings(current, previous, now, *, d1_games=None):
                     current_weight=1.0, prior_weight=0.0, opponent_adjusted=True, source_preseason_prior=True,
                     prior_season=previous['season'], prior_available=bool(prior))
         team['prior_record'] = prior['record'] if prior else ''
+        rebound_profile = (d1_games or {}).get('rebounding', {}).get('teams', {}).get(key)
+        if rebound_profile is not None:
+            team['rebounding'] = deepcopy(rebound_profile)
         team['prior_competition'] = {field: prior.get(field) for field in ('strength_of_schedule', 'opponent_offense', 'opponent_defense')} if prior else None
         for field in ('offense', 'defense', 'tempo'):
             value = team[field]; team['current_'+field] = value
