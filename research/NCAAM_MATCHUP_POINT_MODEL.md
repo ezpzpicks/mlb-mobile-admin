@@ -1,8 +1,41 @@
 # NCAAM matchup-led scores and point-edge grades
 
-Current model: `ncaam-v0.8-adjusted-tempo-2026-11-15`.
+Current model: `ncaam-v0.10-progressive-offense-2026-11-16`.
+Archived offense-bonus model: `ncaam-v0.9-progressive-offense-2026-11-15`.
+Archived adjusted-tempo model: `ncaam-v0.8-adjusted-tempo-2026-11-15`.
 Archived point model: `ncaam-v0.7-matchup-projection-2026-11-14`.
 Grading policy: `ncaam-point-edge-2026-11-14-v1`.
+
+## November 16 defensive-tier bonus revision
+
+Only very strong offenses (offensive z >= 1.5) receive these additional team
+score points, based on the opposing defense's captured national band. Lower
+adjusted defensive efficiency is better. These are user-selected trial amounts,
+not fitted coefficients or a claim of validated betting improvement.
+
+| Opposing defense | Archived v0.9 bonus | Current v0.10 bonus |
+| --- | ---: | ---: |
+| Very strong (z <= -1.5) | +1 | +1 |
+| Strong (-1.5 < z <= -1) | +3 | +3 |
+| Above average (-1 < z < 0) | +5 | +5 |
+| Below average (0 <= z < 1) | +8 | +5 |
+| Weak (1 <= z < 1.5) | +9 | +8 |
+| Very weak (z >= 1.5) | +10 | +15 |
+
+The bonus enters the qualifying team's score once, flowing to the total and
+spread before the existing point-edge grading thresholds are applied. Offenses
+below the qualifying threshold receive zero additional points or deductions.
+Pace, player adjustments, home court and grade thresholds retain their existing
+construction. Saved v0.9 forecasts reconstruct and validate with their original
+bonus schedule and policy identifier; v0.10 uses a distinct model and policy.
+The pregame builder appends the new model's captures for eligible unstarted
+games. Replays do not revise historical forecasts or create official picks.
+
+Using November 16's last saved pregame inputs as a comparison, Maryland's
+forecast against Alcorn changes from 101.688 to 106.688, with the total moving
+from 165.814 to 170.814. Ohio State against Prairie View changes from 98.300 to
+95.300, with the total moving from 164.397 to 161.397. These are comparisons
+under the revised settings, not forecasts issued before those games.
 
 The November 14 NCAAF workflow is now applied in basketball's own units. Each
 offense faces the opposing defense, matchup tempo determines possessions, and
