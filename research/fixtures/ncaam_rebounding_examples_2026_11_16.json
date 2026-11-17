@@ -488,7 +488,14 @@
           "opp_drb": 60
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "c467ef41497395a331f982ad6bab841dafa160a99fbca70ffb9aa01a201a7e14",
+        "away_points": 61.282975688006516,
+        "home_points": 109.53119425537042,
+        "total": 170.81416994337695,
+        "margin": 48.24821856736391
+      }
     },
     {
       "game_id": "401916317",
@@ -596,7 +603,14 @@
           "opp_drb": 84
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "52122462e54951674844303ede34f4f773240c62d57ece794a067107e57ab6e4",
+        "away_points": 63.31246035512902,
+        "home_points": 98.08496006755134,
+        "total": 161.39742042268034,
+        "margin": 34.77249971242232
+      }
     },
     {
       "game_id": "401906783",
@@ -1134,7 +1148,14 @@
           "opp_drb": 95
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "79ba434bc01fca7f23d39acb3340704023ebe87956c3aceb818b68ca73b3bf4c",
+        "away_points": 66.33782948600933,
+        "home_points": 92.5011751103802,
+        "total": 158.83900459638954,
+        "margin": 26.163345624370876
+      }
     },
     {
       "game_id": "401927364",
@@ -1242,7 +1263,14 @@
           "opp_drb": 46
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "1df3781824f74209f80c166b5b86cc5e3e7fa20ddcd30ba9bb33e55d55818bb5",
+        "away_points": 73.89114987789019,
+        "home_points": 78.93280231478406,
+        "total": 152.82395219267426,
+        "margin": 5.0416524368938695
+      }
     },
     {
       "game_id": "401928841",
@@ -1350,7 +1378,14 @@
           "opp_drb": 56
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "ed77da37dcf05432ffd77d9511c812f0e899c5f95b3ee2f159f9cbd89f89843b",
+        "away_points": 72.08899944719052,
+        "home_points": 82.0964598616346,
+        "total": 154.1854593088251,
+        "margin": 10.007460414444083
+      }
     },
     {
       "game_id": "401916307",
@@ -1458,7 +1493,14 @@
           "opp_drb": 83
         }
       },
-      "expected_status": "applied"
+      "expected_status": "applied",
+      "legacy_v11_expected": {
+        "sha256": "3b92f406834e1936b10593a1ef1add17d456d1eb548bca38b3af8b4e4af92070",
+        "away_points": 52.571001881218365,
+        "home_points": 82.15822663245147,
+        "total": 134.72922851366985,
+        "margin": 29.58722475123311
+      }
     },
     {
       "game_id": "401917964",
@@ -1566,7 +1608,14 @@
           "opp_drb": 0
         }
       },
-      "expected_status": "unavailable"
+      "expected_status": "unavailable",
+      "legacy_v11_expected": {
+        "sha256": "252ece9557605bf119b7984844f184b31ddd2a1764fd06a8c6a60aba3800a76b",
+        "away_points": 69.71532790943441,
+        "home_points": 72.02345226128007,
+        "total": 141.73878017071448,
+        "margin": 2.308124351845663
+      }
     }
   ]
 }

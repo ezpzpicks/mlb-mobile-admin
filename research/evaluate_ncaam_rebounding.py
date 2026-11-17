@@ -13,11 +13,14 @@ from zoneinfo import ZoneInfo
 
 from builders.ncaam_model import team_key, timestamp
 from builders.ncaam_rebounding import parse_rebounding_inputs
-from builders.ncaam_matchup_projection import from_captured_inputs, MODEL_VERSION, PRE_REBOUND_MODEL_VERSION
+from builders.ncaam_matchup_projection import (from_captured_inputs, MODEL_VERSION,
+    PRE_REBOUND_MODEL_VERSION, CAPPED_REBOUND_MODEL_VERSION)
 from builders.ncaam_point_edges import capture_grades
 
 
-def replay(snapshot, game_log_text, members, *, source_provenance=None):
+def replay(snapshot, game_log_text, members, *, source_provenance=None, model_version=MODEL_VERSION):
+    if model_version not in (CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION):
+        raise ValueError('Unsupported rebound replay model version.')
     data = snapshot.get('ncaamMarket', snapshot); latest = {}
     for f in data['forecasts']:
         if not timestamp(f['lockedAt']) < timestamp(f['tipoff']): continue
@@ -37,9 +40,9 @@ def replay(snapshot, game_log_text, members, *, source_provenance=None):
             'home_court_points': source['home_court_points'], 'neutral_site': source['neutral_site'],
             'lineup_adjustment': source.get('lineup_adjustment')}
         before = from_captured_inputs(a, h, benchmark, model_version=PRE_REBOUND_MODEL_VERSION, **kwargs)
-        after = from_captured_inputs(a, h, benchmark, model_version=MODEL_VERSION, **kwargs)
+        after = from_captured_inputs(a, h, benchmark, model_version=model_version, **kwargs)
         captures = []
-        for p, version in ((before, PRE_REBOUND_MODEL_VERSION), (after, MODEL_VERSION)):
+        for p, version in ((before, PRE_REBOUND_MODEL_VERSION), (after, model_version)):
             f = {**deepcopy(source), 'away_rating': a, 'home_rating': h,
                 'modelVersion': version, 'projection_engine': version, 'matchup_projection': p,
                 'away_score': round(p['away_points'], 1), 'home_score': round(p['home_points'], 1),
@@ -52,7 +55,7 @@ def replay(snapshot, game_log_text, members, *, source_provenance=None):
         games.append({'game_id': str(source['gameId']), 'away_team': source['away_team'], 'home_team': source['home_team'],
             'source_record_id': source['recordId'], 'source_model_version': source['modelVersion'],
             'source_projection': {k: source['matchup_projection'][k] for k in ('away_points', 'home_points', 'total', 'margin')},
-            'baseline_model': PRE_REBOUND_MODEL_VERSION, 'new_model': MODEL_VERSION,
+            'baseline_model': PRE_REBOUND_MODEL_VERSION, 'new_model': model_version,
             'before': {k: before[k] for k in ('away_points', 'home_points', 'total', 'margin')},
             'after': {k: after[k] for k in ('away_points', 'home_points', 'total', 'margin')},
             'rebounding_adjustment': after['rebounding_adjustment'],
@@ -74,9 +77,11 @@ if __name__ == '__main__':
     parser.add_argument('--snapshot', required=True); parser.add_argument('--game-logs', required=True)
     parser.add_argument('--members', required=True, help='JSON fixture with a dated members array')
     parser.add_argument('--output', required=True); parser.add_argument('--provenance')
+    parser.add_argument('--model-version', choices=(CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION), default=MODEL_VERSION)
     args = parser.parse_args()
     result = replay(json.loads(Path(args.snapshot).read_text()), Path(args.game_logs).read_text(),
         json.loads(Path(args.members).read_text())['members'],
-        source_provenance=json.loads(Path(args.provenance).read_text()) if args.provenance else None)
+        source_provenance=json.loads(Path(args.provenance).read_text()) if args.provenance else None,
+        model_version=args.model_version)
     Path(args.output).write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
     print(json.dumps({k: result[k] for k in ('games_count', 'total_changes', 'total_grade_changes', 'rebound_applied', 'unavailable')}, indent=2))

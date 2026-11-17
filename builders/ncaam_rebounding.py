@@ -1,4 +1,4 @@
-"""Pregame D1 offensive-glass inputs and a capped, total-neutral transfer.
+"""Pregame D1 glass inputs and versioned, total-neutral score transfers.
 
 Experimental user-authorized margin modifier. Rates are opportunity-weighted;
 the research coefficient is deliberately not represented as a fitted edge.
@@ -17,10 +17,14 @@ from zoneinfo import ZoneInfo
 from builders.ncaam_model import team_key, timestamp
 
 INPUT_POLICY = 'ncaam-d1-rebound-inputs-2026-11-16-v1'
+# Retained verbatim for archived v0.11 forecasts and their proof hashes.
 POLICY = 'ncaam-rebound-zero-sum-2026-11-16-v1'
 POINTS_PER_EDGE_PP = .2
 MAX_TRANSFER_POINTS = 3.
 FULL_WEIGHT_GAMES = 3
+# Current v0.12 curve: +20 edge percentage points gives a 15% boost.
+PERCENTAGE_POLICY = 'ncaam-rebound-percentage-zero-sum-2026-11-17-v2'
+BOOST_FRACTION_PER_EDGE_PP = .15 / 20
 ET = ZoneInfo('America/New_York')
 
 
@@ -137,7 +141,7 @@ def _profile(rating, season, clock):
 
 
 def matchup_transfer(away, home, season, as_of):
-    """A rate edge transfers points symmetrically; low GP attenuates the cap."""
+    """Frozen v0.11 rule: a capped point transfer attenuated by prior GP."""
     payload = {'policy': POLICY, 'status': 'unavailable', 'experimental': True,
         'points_per_edge_pp': POINTS_PER_EDGE_PP, 'max_transfer_points': MAX_TRANSFER_POINTS,
         'full_weight_games': FULL_WEIGHT_GAMES, 'away_points': 0., 'home_points': 0.,
@@ -158,6 +162,59 @@ def matchup_transfer(away, home, season, as_of):
             away_matchup_score=away_score, home_matchup_score=home_score,
             home_edge_pp=edge, sample_weight=weight, uncapped_home_points=raw,
             capped_home_points=capped, away_points=-transfer, home_points=transfer)
+    except (ValueError, TypeError, KeyError, OverflowError) as exc:
+        payload['reason'] = str(exc)
+    return payload
+
+
+def percentage_matchup_transfer(away, home, season, as_of, *, away_points, home_points):
+    """The favored side gains 0.75% of its baseline per edge percentage point.
+
+    Transfer the identical scoring amount from the opponent. The curve has no
+    edge tiers, fixed point cap or sample-size attenuation. Its only boundary
+    is the opponent's available score, preserving nonnegative team scores.
+    """
+    payload = {'policy': PERCENTAGE_POLICY, 'status': 'unavailable', 'experimental': True,
+        'boost_fraction_per_edge_pp': BOOST_FRACTION_PER_EDGE_PP,
+        'away_points': 0., 'home_points': 0., 'sample_weight': 0.,
+        'home_edge_pp': None, 'inputs': None, 'favored_side': None,
+        'requested_boost_fraction': 0., 'requested_transfer_points': 0.,
+        'applied_transfer_points': 0., 'score_floor_applied': False}
+    try:
+        clock = timestamp(as_of)
+        a, h = _profile(away, season, clock), _profile(home, season, clock)
+        if any(a[k] != h[k] for k in ('source_sha256', 'observed_at', 'cutoff_date')):
+            raise ValueError('Opposing rebound profiles must share one captured snapshot')
+        baseline = {'away': away_points, 'home': home_points}
+        for side, value in baseline.items():
+            if isinstance(value, bool):
+                raise ValueError('Invalid baseline score for percentage rebounding')
+            baseline[side] = float(value)
+            if not math.isfinite(baseline[side]) or baseline[side] < 0:
+                raise ValueError('Invalid baseline score for percentage rebounding')
+        total = baseline['away']+baseline['home']
+        if not math.isfinite(total) or total <= 0:
+            raise ValueError('Percentage rebounding requires a positive game total')
+        away_score = (a['orb_pct']+h['allowed_pct'])/2
+        home_score = (h['orb_pct']+a['allowed_pct'])/2
+        edge = 100*(home_score-away_score)
+        favored = 'home' if edge > 0 else 'away' if edge < 0 else None
+        boost = abs(edge)*BOOST_FRACTION_PER_EDGE_PP
+        requested = applied = 0.
+        floor = False
+        if favored:
+            other = 'away' if favored == 'home' else 'home'
+            requested = baseline[favored]*boost
+            applied = min(requested, baseline[other])
+            floor = requested > baseline[other]
+        home_delta = applied if favored == 'home' else -applied if favored == 'away' else 0.
+        payload.update(status='applied', inputs={'away': a, 'home': h},
+            away_matchup_score=away_score, home_matchup_score=home_score,
+            home_edge_pp=edge, sample_weight=1., favored_side=favored,
+            favored_baseline_points=baseline[favored] if favored else None,
+            requested_boost_fraction=boost, requested_transfer_points=requested,
+            applied_transfer_points=applied, score_floor_applied=floor,
+            away_points=-home_delta, home_points=home_delta)
     except (ValueError, TypeError, KeyError, OverflowError) as exc:
         payload['reason'] = str(exc)
     return payload

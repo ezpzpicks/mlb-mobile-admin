@@ -1,0 +1,2372 @@
+{
+  "date": "2026-11-16",
+  "record_mode": "RETROSPECTIVE_PRIOR_DATE_FEATURE_RECONSTRUCTION",
+  "computed_at": "2026-11-17T05:17:02.096548+00:00",
+  "uses_target_results": false,
+  "source_provenance": {
+    "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+    "original_capture": {
+      "url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+      "captured_at": "2026-11-17T03:06:36.954158+00:00",
+      "sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+      "bytes": 639282
+    },
+    "cutoff_exclusive": "2026-11-16"
+  },
+  "reconstructed_feature_clock": "2026-11-16T18:37:39.848504+00:00",
+  "feature_clock_note": "Historical research availability clock; later raw download provenance is retained separately. Only earlier-date D1 boxscores contribute.",
+  "games": [
+    {
+      "game_id": "401929419",
+      "away_team": "Florida A&M Rattlers",
+      "home_team": "UTEP Miners",
+      "source_record_id": "401929419|ncaam-v0.9-progressive-offense-2026-11-15|pregame|3518e517a4b663fb",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 66.55329822646036,
+        "home_points": 79.65217840408508,
+        "total": 146.20547663054543,
+        "margin": 13.098880177624721
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 66.55329822646036,
+        "home_points": 79.65217840408508,
+        "total": 146.20547663054543,
+        "margin": 13.098880177624721
+      },
+      "after": {
+        "away_points": 63.10614068677148,
+        "home_points": 83.09933594377395,
+        "total": 146.20547663054543,
+        "margin": 19.99319525700247
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -3.4471575396888716,
+        "home_points": 3.4471575396888716,
+        "sample_weight": 1.0,
+        "home_edge_pp": 5.770350723619094,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Florida A&M",
+            "d1_games": 3,
+            "last_game_date": "2026-11-11",
+            "orb": 31,
+            "drb": 74,
+            "opp_orb": 42,
+            "opp_drb": 92,
+            "orb_pct": 0.25203252032520324,
+            "allowed_pct": 0.3620689655172414
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "UTEP",
+            "d1_games": 3,
+            "last_game_date": "2026-11-12",
+            "orb": 39,
+            "drb": 65,
+            "opp_orb": 33,
+            "opp_drb": 75,
+            "orb_pct": 0.34210526315789475,
+            "allowed_pct": 0.336734693877551
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.04327763042714321,
+        "requested_transfer_points": 3.4471575396888716,
+        "applied_transfer_points": 3.4471575396888716,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2943836071013771,
+        "home_matchup_score": 0.35208711433756806,
+        "favored_baseline_points": 79.65217840408508,
+        "before_away_points": 66.55329822646036,
+        "before_home_points": 79.65217840408508
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "A",
+        "edge": 7.4011198223752785,
+        "line": 20.5,
+        "selection_team": "Florida A&M Rattlers"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 0.5068047429975309,
+        "line": 20.5,
+        "selection_team": "Florida A&M Rattlers"
+      },
+      "total_grade": "Research",
+      "total_edge": 3.7054766305454336,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -20.5,
+        "total": 142.5,
+        "as_of": "2026-11-16T18:35:06.727000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401916298",
+      "away_team": "Alcorn State Braves",
+      "home_team": "Maryland Terrapins",
+      "source_record_id": "401916298|ncaam-v0.9-progressive-offense-2026-11-15|pregame|78ef1c138fd41320",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 64.12598591161375,
+        "home_points": 101.68818403176319,
+        "total": 165.81416994337695,
+        "margin": 37.56219812014943
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 64.12598591161375,
+        "home_points": 106.68818403176319,
+        "total": 170.81416994337695,
+        "margin": 42.56219812014943
+      },
+      "after": {
+        "away_points": 52.75165098884901,
+        "home_points": 118.06251895452793,
+        "total": 170.81416994337695,
+        "margin": 65.31086796567892
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -11.374334922764747,
+        "home_points": 11.374334922764747,
+        "sample_weight": 1.0,
+        "home_edge_pp": 14.215051118036193,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Alcorn St.",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 56,
+            "drb": 76,
+            "opp_orb": 58,
+            "opp_drb": 104,
+            "orb_pct": 0.35,
+            "allowed_pct": 0.43283582089552236
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Maryland",
+            "d1_games": 3,
+            "last_game_date": "2026-11-13",
+            "orb": 57,
+            "drb": 60,
+            "opp_orb": 24,
+            "opp_drb": 60,
+            "orb_pct": 0.48717948717948717,
+            "allowed_pct": 0.2857142857142857
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.10661288338527145,
+        "requested_transfer_points": 11.374334922764747,
+        "applied_transfer_points": 11.374334922764747,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.31785714285714284,
+        "home_matchup_score": 0.46000765403750477,
+        "favored_baseline_points": 106.68818403176319,
+        "before_away_points": 64.12598591161375,
+        "before_home_points": 106.68818403176319
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 8.062198120149432,
+        "line": -34.5,
+        "selection_team": "Maryland Terrapins"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 30.810867965678923,
+        "line": -34.5,
+        "selection_team": "Maryland Terrapins"
+      },
+      "total_grade": "A",
+      "total_edge": 17.314169943376953,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -34.5,
+        "total": 153.5,
+        "as_of": "2026-11-16T22:35:12.794000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401921087",
+      "away_team": "Iona Gaels",
+      "home_team": "UMBC Retrievers",
+      "source_record_id": "401921087|ncaam-v0.9-progressive-offense-2026-11-15|pregame|d4f42c5f5ebc0758",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 73.99657013439443,
+        "home_points": 70.97700558625814,
+        "total": 144.97357572065258,
+        "margin": -3.0195645481362874
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 73.99657013439443,
+        "home_points": 70.97700558625814,
+        "total": 144.97357572065258,
+        "margin": -3.0195645481362874
+      },
+      "after": {
+        "away_points": 75.36523687828004,
+        "home_points": 69.60833884237253,
+        "total": 144.97357572065258,
+        "margin": -5.756898035907511
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": 1.3686667438856155,
+        "home_points": -1.3686667438856155,
+        "sample_weight": 1.0,
+        "home_edge_pp": -2.4661805115197613,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Iona",
+            "d1_games": 5,
+            "last_game_date": "2026-11-13",
+            "orb": 63,
+            "drb": 126,
+            "opp_orb": 63,
+            "opp_drb": 117,
+            "orb_pct": 0.35,
+            "allowed_pct": 0.3333333333333333
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "UMBC",
+            "d1_games": 4,
+            "last_game_date": "2026-11-14",
+            "orb": 47,
+            "drb": 104,
+            "opp_orb": 48,
+            "opp_drb": 119,
+            "orb_pct": 0.28313253012048195,
+            "allowed_pct": 0.3157894736842105
+          }
+        },
+        "favored_side": "away",
+        "requested_boost_fraction": 0.018496353836398208,
+        "requested_transfer_points": 1.3686667438856155,
+        "applied_transfer_points": 1.3686667438856155,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.33289473684210524,
+        "home_matchup_score": 0.30823293172690763,
+        "favored_baseline_points": 73.99657013439443,
+        "before_away_points": 73.99657013439443,
+        "before_home_points": 70.97700558625814
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 0.5195645481362874,
+        "line": -2.5,
+        "selection_team": "Iona Gaels"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 3.2568980359075113,
+        "line": -2.5,
+        "selection_team": "Iona Gaels"
+      },
+      "total_grade": "Research",
+      "total_edge": 1.4735757206525761,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": 2.5,
+        "total": 143.5,
+        "as_of": "2026-11-16T21:35:06.889000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401916317",
+      "away_team": "Prairie View A&M Panthers",
+      "home_team": "Ohio State Buckeyes",
+      "source_record_id": "401916317|ncaam-v0.9-progressive-offense-2026-11-15|pregame|c805b2629ab49c07",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 66.0978955567326,
+        "home_points": 98.29952486594776,
+        "total": 164.39742042268034,
+        "margin": 32.201629309215164
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 66.0978955567326,
+        "home_points": 95.29952486594776,
+        "total": 161.39742042268034,
+        "margin": 29.201629309215164
+      },
+      "after": {
+        "away_points": 56.14349613456861,
+        "home_points": 105.25392428811175,
+        "total": 161.39742042268034,
+        "margin": 49.11042815354314
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -9.954399422163984,
+        "home_points": 9.954399422163984,
+        "sample_weight": 1.0,
+        "home_edge_pp": 13.927176008017883,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Prairie View A&M",
+            "d1_games": 3,
+            "last_game_date": "2026-11-13",
+            "orb": 26,
+            "drb": 56,
+            "opp_orb": 46,
+            "opp_drb": 83,
+            "orb_pct": 0.23853211009174313,
+            "allowed_pct": 0.45098039215686275
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Ohio St.",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 41,
+            "drb": 93,
+            "opp_orb": 33,
+            "opp_drb": 84,
+            "orb_pct": 0.328,
+            "allowed_pct": 0.2619047619047619
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.10445382006013411,
+        "requested_transfer_points": 9.954399422163984,
+        "applied_transfer_points": 9.954399422163984,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.25021843599825255,
+        "home_matchup_score": 0.3894901960784314,
+        "favored_baseline_points": 95.29952486594776,
+        "before_away_points": 66.0978955567326,
+        "before_home_points": 95.29952486594776
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 3.298370690784836,
+        "line": 32.5,
+        "selection_team": "Prairie View A&M Panthers"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 16.61042815354314,
+        "line": -32.5,
+        "selection_team": "Ohio State Buckeyes"
+      },
+      "total_grade": "Research",
+      "total_edge": 6.897420422680341,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -32.5,
+        "total": 154.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401906783",
+      "away_team": "Jacksonville Dolphins",
+      "home_team": "Georgia Bulldogs",
+      "source_record_id": "401906783|ncaam-v0.9-progressive-offense-2026-11-15|pregame|582330640af9820e",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 67.84951429295722,
+        "home_points": 93.9894903034323,
+        "total": 161.83900459638954,
+        "margin": 26.13997601047508
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 67.84951429295722,
+        "home_points": 90.9894903034323,
+        "total": 158.83900459638954,
+        "margin": 23.13997601047508
+      },
+      "after": {
+        "away_points": 60.11247135075294,
+        "home_points": 98.72653324563659,
+        "total": 158.83900459638954,
+        "margin": 38.61406189488365
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -7.737042942204283,
+        "home_points": 7.737042942204283,
+        "sample_weight": 1.0,
+        "home_edge_pp": 11.337636052109234,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Jacksonville",
+            "d1_games": 2,
+            "last_game_date": "2026-11-09",
+            "orb": 16,
+            "drb": 43,
+            "opp_orb": 28,
+            "opp_drb": 52,
+            "orb_pct": 0.23529411764705882,
+            "allowed_pct": 0.39436619718309857
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Georgia",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 59,
+            "drb": 102,
+            "opp_orb": 47,
+            "opp_drb": 95,
+            "orb_pct": 0.38311688311688313,
+            "allowed_pct": 0.31543624161073824
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.08503227039081926,
+        "requested_transfer_points": 7.737042942204283,
+        "applied_transfer_points": 7.737042942204283,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2753651796288985,
+        "home_matchup_score": 0.38874154014999085,
+        "favored_baseline_points": 90.9894903034323,
+        "before_away_points": 67.84951429295722,
+        "before_home_points": 90.9894903034323
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 1.6399760104750811,
+        "line": -21.5,
+        "selection_team": "Georgia Bulldogs"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 17.114061894883648,
+        "line": -21.5,
+        "selection_team": "Georgia Bulldogs"
+      },
+      "total_grade": "Research",
+      "total_edge": 5.339004596389543,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -21.5,
+        "total": 153.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401911240",
+      "away_team": "Richmond Spiders",
+      "home_team": "Virginia Tech Hokies",
+      "source_record_id": "401911240|ncaam-v0.9-progressive-offense-2026-11-15|pregame|c32febc8daf8896c",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 70.79665623041036,
+        "home_points": 87.03137472716013,
+        "total": 157.8280309575705,
+        "margin": 16.234718496749764
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 70.79665623041036,
+        "home_points": 87.03137472716013,
+        "total": 157.8280309575705,
+        "margin": 16.234718496749764
+      },
+      "after": {
+        "away_points": 70.9785685875466,
+        "home_points": 86.84946237002389,
+        "total": 157.8280309575705,
+        "margin": 15.870893782477282
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": 0.18191235713624454,
+        "home_points": -0.18191235713624454,
+        "sample_weight": 1.0,
+        "home_edge_pp": -0.3426006571914997,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Richmond",
+            "d1_games": 3,
+            "last_game_date": "2026-11-12",
+            "orb": 33,
+            "drb": 76,
+            "opp_orb": 28,
+            "opp_drb": 71,
+            "orb_pct": 0.3173076923076923,
+            "allowed_pct": 0.2692307692307692
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Virginia Tech",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 59,
+            "drb": 85,
+            "opp_orb": 49,
+            "opp_drb": 86,
+            "orb_pct": 0.4068965517241379,
+            "allowed_pct": 0.3656716417910448
+          }
+        },
+        "favored_side": "away",
+        "requested_boost_fraction": 0.0025695049289362476,
+        "requested_transfer_points": 0.18191235713624454,
+        "applied_transfer_points": 0.18191235713624454,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.34148966704936856,
+        "home_matchup_score": 0.33806366047745356,
+        "favored_baseline_points": 70.79665623041036,
+        "before_away_points": 70.79665623041036,
+        "before_home_points": 87.03137472716013
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 3.734718496749764,
+        "line": -12.5,
+        "selection_team": "Virginia Tech Hokies"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 3.3708937824772818,
+        "line": -12.5,
+        "selection_team": "Virginia Tech Hokies"
+      },
+      "total_grade": "Research",
+      "total_edge": 7.3280309575704905,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -12.5,
+        "total": 150.5,
+        "as_of": "2026-11-16T23:35:08.997000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401918075",
+      "away_team": "The Citadel Bulldogs",
+      "home_team": "Clemson Tigers",
+      "source_record_id": "401918075|ncaam-v0.9-progressive-offense-2026-11-15|pregame|e56db67404c8845d",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 60.0985119513366,
+        "home_points": 92.59680926129748,
+        "total": 152.69532121263407,
+        "margin": 32.49829730996088
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 60.0985119513366,
+        "home_points": 97.59680926129748,
+        "total": 157.69532121263407,
+        "margin": 37.49829730996088
+      },
+      "after": {
+        "away_points": 54.701291675436686,
+        "home_points": 102.99402953719739,
+        "total": 157.69532121263407,
+        "margin": 48.292737861760706
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -5.397220275899912,
+        "home_points": 5.397220275899912,
+        "sample_weight": 1.0,
+        "home_edge_pp": 7.373492797221609,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "The Citadel",
+            "d1_games": 2,
+            "last_game_date": "2026-11-14",
+            "orb": 22,
+            "drb": 42,
+            "opp_orb": 35,
+            "opp_drb": 38,
+            "orb_pct": 0.36666666666666664,
+            "allowed_pct": 0.45454545454545453
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Clemson",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 37,
+            "drb": 94,
+            "opp_orb": 32,
+            "opp_drb": 81,
+            "orb_pct": 0.3135593220338983,
+            "allowed_pct": 0.25396825396825395
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.05530119597916207,
+        "requested_transfer_points": 5.397220275899912,
+        "applied_transfer_points": 5.397220275899912,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.3103174603174603,
+        "home_matchup_score": 0.3840523882896764,
+        "favored_baseline_points": 97.59680926129748,
+        "before_away_points": 60.0985119513366,
+        "before_home_points": 97.59680926129748
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 12.998297309960883,
+        "line": -24.5,
+        "selection_team": "Clemson Tigers"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 23.792737861760706,
+        "line": -24.5,
+        "selection_team": "Clemson Tigers"
+      },
+      "total_grade": "A",
+      "total_edge": 15.19532121263407,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -24.5,
+        "total": 142.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401919807",
+      "away_team": "St. Thomas Tommies",
+      "home_team": "Long Island University Sharks",
+      "source_record_id": "401919807|ncaam-v0.9-progressive-offense-2026-11-15|pregame|d604a42554d9c9e8",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 73.95093635282139,
+        "home_points": 72.09885551303698,
+        "total": 146.04979186585837,
+        "margin": -1.8520808397844064
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 73.95093635282139,
+        "home_points": 72.09885551303698,
+        "total": 146.04979186585837,
+        "margin": -1.8520808397844064
+      },
+      "after": {
+        "away_points": 72.72161215345344,
+        "home_points": 73.32817971240493,
+        "total": 146.04979186585837,
+        "margin": 0.6065675589514967
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -1.2293241993679493,
+        "home_points": 1.2293241993679493,
+        "sample_weight": 1.0,
+        "home_edge_pp": 2.2734049255389577,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "St. Thomas",
+            "d1_games": 4,
+            "last_game_date": "2026-11-14",
+            "orb": 23,
+            "drb": 92,
+            "opp_orb": 50,
+            "opp_drb": 95,
+            "orb_pct": 0.19491525423728814,
+            "allowed_pct": 0.352112676056338
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "LIU",
+            "d1_games": 5,
+            "last_game_date": "2026-11-13",
+            "orb": 45,
+            "drb": 114,
+            "opp_orb": 61,
+            "opp_drb": 145,
+            "orb_pct": 0.23684210526315788,
+            "allowed_pct": 0.3485714285714286
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.017050536941542183,
+        "requested_transfer_points": 1.2293241993679493,
+        "applied_transfer_points": 1.2293241993679493,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.27174334140435835,
+        "home_matchup_score": 0.29447739065974793,
+        "favored_baseline_points": 72.09885551303698,
+        "before_away_points": 73.95093635282139,
+        "before_home_points": 72.09885551303698
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 0.3520808397844064,
+        "line": -1.5,
+        "selection_team": "St. Thomas Tommies"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 2.1065675589514967,
+        "line": 1.5,
+        "selection_team": "Long Island University Sharks"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.45020813414163285,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": 1.5,
+        "total": 146.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401921804",
+      "away_team": "Grambling Tigers",
+      "home_team": "Kentucky Wildcats",
+      "source_record_id": "401921804|ncaam-v0.9-progressive-offense-2026-11-15|pregame|27ded0991dc128ea",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 62.45719878531926,
+        "home_points": 96.16866486232959,
+        "total": 158.62586364764886,
+        "margin": 33.711466077010336
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 62.45719878531926,
+        "home_points": 93.16866486232959,
+        "total": 155.62586364764886,
+        "margin": 30.711466077010336
+      },
+      "after": {
+        "away_points": 60.835264243012496,
+        "home_points": 94.79059940463635,
+        "total": 155.62586364764886,
+        "margin": 33.95533516162386
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -1.6219345423067595,
+        "home_points": 1.6219345423067595,
+        "sample_weight": 1.0,
+        "home_edge_pp": 2.32114455320131,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Grambling St.",
+            "d1_games": 2,
+            "last_game_date": "2026-11-09",
+            "orb": 17,
+            "drb": 45,
+            "opp_orb": 23,
+            "opp_drb": 49,
+            "orb_pct": 0.25757575757575757,
+            "allowed_pct": 0.3382352941176471
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Kentucky",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 34,
+            "drb": 101,
+            "opp_orb": 46,
+            "opp_drb": 88,
+            "orb_pct": 0.2786885245901639,
+            "allowed_pct": 0.3129251700680272
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.017408584149009823,
+        "requested_transfer_points": 1.6219345423067595,
+        "applied_transfer_points": 1.6219345423067595,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2852504638218924,
+        "home_matchup_score": 0.3084619093539055,
+        "favored_baseline_points": 93.16866486232959,
+        "before_away_points": 62.45719878531926,
+        "before_home_points": 93.16866486232959
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 2.2114660770103356,
+        "line": -28.5,
+        "selection_team": "Kentucky Wildcats"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "B",
+        "edge": 5.455335161623857,
+        "line": -28.5,
+        "selection_team": "Kentucky Wildcats"
+      },
+      "total_grade": "Research",
+      "total_edge": 3.125863647648856,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -28.5,
+        "total": 152.5,
+        "as_of": "2026-11-16T23:07:14+00:00",
+        "source": "ESPN",
+        "source_url": "https://www.espn.com/mens-college-basketball/game/_/gameId/401921804",
+        "provider_id": "100",
+        "provider": "Draft Kings",
+        "quote_kind": "current_pregame",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401925864",
+      "away_team": "Western Kentucky Hilltoppers",
+      "home_team": "Tulsa Golden Hurricane",
+      "source_record_id": "401925864|ncaam-v0.9-progressive-offense-2026-11-15|pregame|c4027021b468b48c",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 75.24775603598174,
+        "home_points": 81.5575986650524,
+        "total": 156.80535470103413,
+        "margin": 6.309842629070658
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 75.24775603598174,
+        "home_points": 81.5575986650524,
+        "total": 156.80535470103413,
+        "margin": 6.309842629070658
+      },
+      "after": {
+        "away_points": 71.68198794798347,
+        "home_points": 85.12336675305066,
+        "total": 156.80535470103413,
+        "margin": 13.441378805067188
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -3.5657680879982707,
+        "home_points": 3.5657680879982707,
+        "sample_weight": 1.0,
+        "home_edge_pp": 5.829447566486056,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Western Kentucky",
+            "d1_games": 2,
+            "last_game_date": "2026-11-08",
+            "orb": 25,
+            "drb": 53,
+            "opp_orb": 19,
+            "opp_drb": 53,
+            "orb_pct": 0.32051282051282054,
+            "allowed_pct": 0.2638888888888889
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Tulsa",
+            "d1_games": 2,
+            "last_game_date": "2026-11-11",
+            "orb": 31,
+            "drb": 54,
+            "opp_orb": 22,
+            "opp_drb": 36,
+            "orb_pct": 0.4626865671641791,
+            "allowed_pct": 0.2894736842105263
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.04372085674864542,
+        "requested_transfer_points": 3.5657680879982707,
+        "applied_transfer_points": 3.5657680879982707,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.3049932523616734,
+        "home_matchup_score": 0.363287728026534,
+        "favored_baseline_points": 81.5575986650524,
+        "before_away_points": 75.24775603598174,
+        "before_home_points": 81.5575986650524
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 0.8098426290706584,
+        "line": -5.5,
+        "selection_team": "Tulsa Golden Hurricane"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 7.941378805067188,
+        "line": -5.5,
+        "selection_team": "Tulsa Golden Hurricane"
+      },
+      "total_grade": "Research",
+      "total_edge": 1.6946452989658667,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -5.5,
+        "total": 158.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401928841",
+      "away_team": "Eastern Kentucky Colonels",
+      "home_team": "Kent State Golden Flashes",
+      "source_record_id": "401928841|ncaam-v0.9-progressive-offense-2026-11-15|pregame|409b355e7c847c85",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 73.08899944719052,
+        "home_points": 81.0964598616346,
+        "total": 154.1854593088251,
+        "margin": 8.007460414444083
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 73.08899944719052,
+        "home_points": 81.0964598616346,
+        "total": 154.1854593088251,
+        "margin": 8.007460414444083
+      },
+      "after": {
+        "away_points": 63.47204669613072,
+        "home_points": 90.7134126126944,
+        "total": 154.1854593088251,
+        "margin": 27.24136591656368
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -9.616952751059797,
+        "home_points": 9.616952751059797,
+        "sample_weight": 1.0,
+        "home_edge_pp": 15.81154552240312,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Eastern Kentucky",
+            "d1_games": 1,
+            "last_game_date": "2026-11-10",
+            "orb": 6,
+            "drb": 24,
+            "opp_orb": 15,
+            "opp_drb": 35,
+            "orb_pct": 0.14634146341463414,
+            "allowed_pct": 0.38461538461538464
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Kent St.",
+            "d1_games": 2,
+            "last_game_date": "2026-11-11",
+            "orb": 40,
+            "drb": 41,
+            "opp_orb": 21,
+            "opp_drb": 56,
+            "orb_pct": 0.4166666666666667,
+            "allowed_pct": 0.3387096774193548
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.1185865914180234,
+        "requested_transfer_points": 9.616952751059797,
+        "applied_transfer_points": 9.616952751059797,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.24252557041699446,
+        "home_matchup_score": 0.40064102564102566,
+        "favored_baseline_points": 81.0964598616346,
+        "before_away_points": 73.08899944719052,
+        "before_home_points": 81.0964598616346
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 1.4925395855559174,
+        "line": 9.5,
+        "selection_team": "Eastern Kentucky Colonels"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 17.74136591656368,
+        "line": -9.5,
+        "selection_team": "Kent State Golden Flashes"
+      },
+      "total_grade": "Research",
+      "total_edge": 6.314540691174898,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -9.5,
+        "total": 160.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401927364",
+      "away_team": "Tarleton State Texans",
+      "home_team": "Drake Bulldogs",
+      "source_record_id": "401927364|ncaam-v0.9-progressive-offense-2026-11-15|pregame|f247d1f2913f3192",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 75.25104512667433,
+        "home_points": 77.57290706599991,
+        "total": 152.82395219267426,
+        "margin": 2.3218619393255864
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 75.25104512667433,
+        "home_points": 77.57290706599991,
+        "total": 152.82395219267426,
+        "margin": 2.3218619393255864
+      },
+      "after": {
+        "away_points": 69.31717481554408,
+        "home_points": 83.50677737713016,
+        "total": 152.82395219267426,
+        "margin": 14.189602561586085
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -5.933870311130254,
+        "home_points": 5.933870311130254,
+        "sample_weight": 1.0,
+        "home_edge_pp": 10.199214365881032,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Tarleton St.",
+            "d1_games": 2,
+            "last_game_date": "2026-11-13",
+            "orb": 23,
+            "drb": 49,
+            "opp_orb": 32,
+            "opp_drb": 43,
+            "orb_pct": 0.3484848484848485,
+            "allowed_pct": 0.3950617283950617
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Drake",
+            "d1_games": 2,
+            "last_game_date": "2026-11-13",
+            "orb": 26,
+            "drb": 43,
+            "opp_orb": 11,
+            "opp_drb": 46,
+            "orb_pct": 0.3611111111111111,
+            "allowed_pct": 0.2037037037037037
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.07649410774410774,
+        "requested_transfer_points": 5.933870311130254,
+        "applied_transfer_points": 5.933870311130254,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2760942760942761,
+        "home_matchup_score": 0.37808641975308643,
+        "favored_baseline_points": 77.57290706599991,
+        "before_away_points": 75.25104512667433,
+        "before_home_points": 77.57290706599991
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "B",
+        "edge": 6.178138060674414,
+        "line": 8.5,
+        "selection_team": "Tarleton State Texans"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "B",
+        "edge": 5.689602561586085,
+        "line": -8.5,
+        "selection_team": "Drake Bulldogs"
+      },
+      "total_grade": "Research",
+      "total_edge": 6.3239521926742555,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -8.5,
+        "total": 146.5,
+        "as_of": "2026-11-16T23:05:30.701000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401909798",
+      "away_team": "Montana Grizzlies",
+      "home_team": "Kansas State Wildcats",
+      "source_record_id": "401909798|ncaam-v0.9-progressive-offense-2026-11-15|pregame|e683c12e66ce119c",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 70.9554736783288,
+        "home_points": 83.8781970990507,
+        "total": 154.8336707773795,
+        "margin": 12.922723420721894
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 70.9554736783288,
+        "home_points": 83.8781970990507,
+        "total": 154.8336707773795,
+        "margin": 12.922723420721894
+      },
+      "after": {
+        "away_points": 73.36644147312454,
+        "home_points": 81.46722930425496,
+        "total": 154.8336707773795,
+        "margin": 8.100787831130418
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": 2.410967794795742,
+        "home_points": -2.410967794795742,
+        "sample_weight": 1.0,
+        "home_edge_pp": -4.530480257192804,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Montana",
+            "d1_games": 3,
+            "last_game_date": "2026-11-14",
+            "orb": 32,
+            "drb": 69,
+            "opp_orb": 25,
+            "opp_drb": 74,
+            "orb_pct": 0.3018867924528302,
+            "allowed_pct": 0.26595744680851063
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Kansas St.",
+            "d1_games": 3,
+            "last_game_date": "2026-11-10",
+            "orb": 21,
+            "drb": 81,
+            "opp_orb": 36,
+            "opp_drb": 62,
+            "orb_pct": 0.25301204819277107,
+            "allowed_pct": 0.3076923076923077
+          }
+        },
+        "favored_side": "away",
+        "requested_boost_fraction": 0.03397860192894603,
+        "requested_transfer_points": 2.410967794795742,
+        "applied_transfer_points": 2.410967794795742,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.3047895500725689,
+        "home_matchup_score": 0.2594847475006409,
+        "favored_baseline_points": 70.9554736783288,
+        "before_away_points": 70.9554736783288,
+        "before_home_points": 83.8781970990507
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 1.5772765792781058,
+        "line": 14.5,
+        "selection_team": "Montana Grizzlies"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "B",
+        "edge": 6.399212168869582,
+        "line": 14.5,
+        "selection_team": "Montana Grizzlies"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.3336707773794956,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -14.5,
+        "total": 154.5,
+        "as_of": "2026-11-16T23:35:08.997000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401916307",
+      "away_team": "Western Illinois Leathernecks",
+      "home_team": "Minnesota Golden Gophers",
+      "source_record_id": "401916307|ncaam-v0.9-progressive-offense-2026-11-15|pregame|bfcdc997c3b2153b",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 54.64557131762991,
+        "home_points": 80.08365719603994,
+        "total": 134.72922851366985,
+        "margin": 25.43808587841003
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 54.64557131762991,
+        "home_points": 80.08365719603994,
+        "total": 134.72922851366985,
+        "margin": 25.43808587841003
+      },
+      "after": {
+        "away_points": 48.41535478356877,
+        "home_points": 86.31387373010108,
+        "total": 134.72922851366985,
+        "margin": 37.898518946532306
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -6.230216534061136,
+        "home_points": 6.230216534061136,
+        "sample_weight": 1.0,
+        "home_edge_pp": 10.372847182057706,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Western Illinois",
+            "d1_games": 3,
+            "last_game_date": "2026-11-12",
+            "orb": 22,
+            "drb": 57,
+            "opp_orb": 23,
+            "opp_drb": 68,
+            "orb_pct": 0.24444444444444444,
+            "allowed_pct": 0.2875
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Minnesota",
+            "d1_games": 4,
+            "last_game_date": "2026-11-12",
+            "orb": 50,
+            "drb": 123,
+            "opp_orb": 33,
+            "opp_drb": 83,
+            "orb_pct": 0.37593984962406013,
+            "allowed_pct": 0.21153846153846154
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.0777963538654328,
+        "requested_transfer_points": 6.230216534061136,
+        "applied_transfer_points": 6.230216534061136,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.227991452991453,
+        "home_matchup_score": 0.33171992481203005,
+        "favored_baseline_points": 80.08365719603994,
+        "before_away_points": 54.64557131762991,
+        "before_home_points": 80.08365719603994
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "A",
+        "edge": 8.061914121589972,
+        "line": 33.5,
+        "selection_team": "Western Illinois Leathernecks"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 4.398518946532306,
+        "line": -33.5,
+        "selection_team": "Minnesota Golden Gophers"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.7707714863301476,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -33.5,
+        "total": 135.5,
+        "as_of": "2026-11-16T23:35:08.997000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401917917",
+      "away_team": "Central Arkansas Bears",
+      "home_team": "Oklahoma State Cowboys",
+      "source_record_id": "401917917|ncaam-v0.9-progressive-offense-2026-11-15|pregame|a914c102fbd197b7",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 70.84984047235359,
+        "home_points": 94.9986007252538,
+        "total": 165.84844119760737,
+        "margin": 24.148760252900203
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 70.84984047235359,
+        "home_points": 91.9986007252538,
+        "total": 162.84844119760737,
+        "margin": 21.148760252900203
+      },
+      "after": {
+        "away_points": 64.67084224637028,
+        "home_points": 98.1775989512371,
+        "total": 162.84844119760737,
+        "margin": 33.50675670486682
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -6.178998225983312,
+        "home_points": 6.178998225983312,
+        "sample_weight": 1.0,
+        "home_edge_pp": 8.955206097009205,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Central Arkansas",
+            "d1_games": 3,
+            "last_game_date": "2026-11-13",
+            "orb": 27,
+            "drb": 77,
+            "opp_orb": 34,
+            "opp_drb": 80,
+            "orb_pct": 0.2523364485981308,
+            "allowed_pct": 0.3063063063063063
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Oklahoma St.",
+            "d1_games": 3,
+            "last_game_date": "2026-11-12",
+            "orb": 48,
+            "drb": 69,
+            "opp_orb": 29,
+            "opp_drb": 66,
+            "orb_pct": 0.42105263157894735,
+            "allowed_pct": 0.29591836734693877
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.06716404572756904,
+        "requested_transfer_points": 6.178998225983312,
+        "applied_transfer_points": 6.178998225983312,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.27412740797253476,
+        "home_matchup_score": 0.3636794689426268,
+        "favored_baseline_points": 91.9986007252538,
+        "before_away_points": 70.84984047235359,
+        "before_home_points": 91.9986007252538
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 2.6487602529002032,
+        "line": -18.5,
+        "selection_team": "Oklahoma State Cowboys"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 15.006756704866817,
+        "line": -18.5,
+        "selection_team": "Oklahoma State Cowboys"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.3484411976073716,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -18.5,
+        "total": 162.5,
+        "as_of": "2026-11-16T23:35:08.997000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401917964",
+      "away_team": "Abilene Christian Wildcats",
+      "home_team": "Missouri State Bears",
+      "source_record_id": "401917964|ncaam-v0.9-progressive-offense-2026-11-15|pregame|99163d756aafe3ff",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 69.71532790943441,
+        "home_points": 72.02345226128007,
+        "total": 141.73878017071448,
+        "margin": 2.308124351845663
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 69.71532790943441,
+        "home_points": 72.02345226128007,
+        "total": 141.73878017071448,
+        "margin": 2.308124351845663
+      },
+      "after": {
+        "away_points": 69.71532790943441,
+        "home_points": 72.02345226128007,
+        "total": 141.73878017071448,
+        "margin": 2.308124351845663
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "unavailable",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": 0.0,
+        "home_points": 0.0,
+        "sample_weight": 0.0,
+        "home_edge_pp": null,
+        "inputs": null,
+        "favored_side": null,
+        "requested_boost_fraction": 0.0,
+        "requested_transfer_points": 0.0,
+        "applied_transfer_points": 0.0,
+        "score_floor_applied": false,
+        "reason": "No verified prior D1 rebound games",
+        "before_away_points": 69.71532790943441,
+        "before_home_points": 72.02345226128007
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 3.191875648154337,
+        "line": 5.5,
+        "selection_team": "Abilene Christian Wildcats"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 3.191875648154337,
+        "line": 5.5,
+        "selection_team": "Abilene Christian Wildcats"
+      },
+      "total_grade": "Research",
+      "total_edge": 2.2387801707144774,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -5.5,
+        "total": 139.5,
+        "as_of": "2026-11-17T00:35:10.461000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401920735",
+      "away_team": "Columbia Lions",
+      "home_team": "Northwestern Wildcats",
+      "source_record_id": "401920735|ncaam-v0.9-progressive-offense-2026-11-15|pregame|3be715f0cb6d92dd",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 63.56482789071168,
+        "home_points": 76.20541010868149,
+        "total": 139.77023799939317,
+        "margin": 12.640582217969808
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 63.56482789071168,
+        "home_points": 76.20541010868149,
+        "total": 139.77023799939317,
+        "margin": 12.640582217969808
+      },
+      "after": {
+        "away_points": 66.82324870091811,
+        "home_points": 72.94698929847506,
+        "total": 139.77023799939317,
+        "margin": 6.123740597556946
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": 3.258420810206436,
+        "home_points": -3.258420810206436,
+        "sample_weight": 1.0,
+        "home_edge_pp": -6.834850694073996,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Columbia",
+            "d1_games": 3,
+            "last_game_date": "2026-11-13",
+            "orb": 45,
+            "drb": 72,
+            "opp_orb": 31,
+            "opp_drb": 63,
+            "orb_pct": 0.4166666666666667,
+            "allowed_pct": 0.30097087378640774
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Northwestern",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 40,
+            "drb": 86,
+            "opp_orb": 44,
+            "opp_drb": 86,
+            "orb_pct": 0.31746031746031744,
+            "allowed_pct": 0.3384615384615385
+          }
+        },
+        "favored_side": "away",
+        "requested_boost_fraction": 0.051261380205554964,
+        "requested_transfer_points": 3.258420810206436,
+        "applied_transfer_points": 3.258420810206436,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.37756410256410255,
+        "home_matchup_score": 0.3092155956233626,
+        "favored_baseline_points": 63.56482789071168,
+        "before_away_points": 63.56482789071168,
+        "before_home_points": 76.20541010868149
+      },
+      "spread_before": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 0.14058221796980774,
+        "line": -12.5,
+        "selection_team": "Northwestern Wildcats"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "B",
+        "edge": 6.376259402443054,
+        "line": 12.5,
+        "selection_team": "Columbia Lions"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.2702379993931743,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -12.5,
+        "total": 139.5,
+        "as_of": "2026-11-17T00:35:10.461000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401920808",
+      "away_team": "SE Louisiana Lions",
+      "home_team": "Texas A&M Aggies",
+      "source_record_id": "401920808|ncaam-v0.9-progressive-offense-2026-11-15|pregame|c5316bcb12360387",
+      "source_model_version": "ncaam-v0.9-progressive-offense-2026-11-15",
+      "source_projection": {
+        "away_points": 66.93595985532365,
+        "home_points": 98.98530457479423,
+        "total": 165.92126443011787,
+        "margin": 32.04934471947058
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 66.93595985532365,
+        "home_points": 95.98530457479423,
+        "total": 162.92126443011787,
+        "margin": 29.049344719470582
+      },
+      "after": {
+        "away_points": 63.78901599290538,
+        "home_points": 99.1322484372125,
+        "total": 162.92126443011787,
+        "margin": 35.34323244430712
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -3.1469438624182704,
+        "home_points": 3.1469438624182704,
+        "sample_weight": 1.0,
+        "home_edge_pp": 4.371424530534728,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Southeastern Louisiana",
+            "d1_games": 3,
+            "last_game_date": "2026-11-10",
+            "orb": 38,
+            "drb": 59,
+            "opp_orb": 46,
+            "opp_drb": 75,
+            "orb_pct": 0.336283185840708,
+            "allowed_pct": 0.4380952380952381
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Texas A&M",
+            "d1_games": 4,
+            "last_game_date": "2026-11-12",
+            "orb": 49,
+            "drb": 117,
+            "opp_orb": 63,
+            "opp_drb": 97,
+            "orb_pct": 0.3356164383561644,
+            "allowed_pct": 0.35
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.03278568397901046,
+        "requested_transfer_points": 3.1469438624182704,
+        "applied_transfer_points": 3.1469438624182704,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.34314159292035395,
+        "home_matchup_score": 0.38685583822570124,
+        "favored_baseline_points": 95.98530457479423,
+        "before_away_points": 66.93595985532365,
+        "before_home_points": 95.98530457479423
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 4.450655280529418,
+        "line": 33.5,
+        "selection_team": "SE Louisiana Lions"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "Research",
+        "edge": 1.8432324443071195,
+        "line": -33.5,
+        "selection_team": "Texas A&M Aggies"
+      },
+      "total_grade": "Research",
+      "total_edge": 0.42126443011787273,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -33.5,
+        "total": 162.5,
+        "as_of": "2026-11-17T00:07:33+00:00",
+        "source": "ESPN",
+        "source_url": "https://www.espn.com/mens-college-basketball/game/_/gameId/401920808",
+        "provider_id": "100",
+        "provider": "Draft Kings",
+        "quote_kind": "current_pregame",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401929192",
+      "away_team": "East Texas A&M Lions",
+      "home_team": "Oregon State Beavers",
+      "source_record_id": "401929192|ncaam-v0.10-progressive-offense-2026-11-16|pregame|9a0f6111b06e5848",
+      "source_model_version": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "source_projection": {
+        "away_points": 71.38428710799441,
+        "home_points": 85.51166900061143,
+        "total": 156.89595610860584,
+        "margin": 14.127381892617024
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 71.38428710799441,
+        "home_points": 85.51166900061143,
+        "total": 156.89595610860584,
+        "margin": 14.127381892617024
+      },
+      "after": {
+        "away_points": 70.66043229199576,
+        "home_points": 86.23552381661008,
+        "total": 156.89595610860584,
+        "margin": 15.575091524614322
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -0.7238548159986563,
+        "home_points": 0.7238548159986563,
+        "sample_weight": 1.0,
+        "home_edge_pp": 1.1286643869130586,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "East Texas A&M",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 68,
+            "drb": 95,
+            "opp_orb": 64,
+            "opp_drb": 94,
+            "orb_pct": 0.41975308641975306,
+            "allowed_pct": 0.4025157232704403
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Oregon St.",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 39,
+            "drb": 123,
+            "opp_orb": 46,
+            "opp_drb": 86,
+            "orb_pct": 0.312,
+            "allowed_pct": 0.27218934911242604
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.00846498290184794,
+        "requested_transfer_points": 0.7238548159986563,
+        "applied_transfer_points": 0.7238548159986563,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.3459712177660895,
+        "home_matchup_score": 0.3572578616352201,
+        "favored_baseline_points": 85.51166900061143,
+        "before_away_points": 71.38428710799441,
+        "before_home_points": 85.51166900061143
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 2.3726181073829764,
+        "line": 16.5,
+        "selection_team": "East Texas A&M Lions"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 0.9249084753856778,
+        "line": 16.5,
+        "selection_team": "East Texas A&M Lions"
+      },
+      "total_grade": "Research",
+      "total_edge": 2.3959561086058443,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -16.5,
+        "total": 154.5,
+        "as_of": "2026-11-17T01:35:09.245000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401917532",
+      "away_team": "Portland State Vikings",
+      "home_team": "Saint Mary's Gaels",
+      "source_record_id": "401917532|ncaam-v0.10-progressive-offense-2026-11-16|pregame|d41d944c24ae7215",
+      "source_model_version": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "source_projection": {
+        "away_points": 68.0654990895992,
+        "home_points": 84.22662734276949,
+        "total": 152.2921264323687,
+        "margin": 16.16112825317029
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 68.0654990895992,
+        "home_points": 84.22662734276949,
+        "total": 152.2921264323687,
+        "margin": 16.16112825317029
+      },
+      "after": {
+        "away_points": 67.16976504759803,
+        "home_points": 85.12236138477066,
+        "total": 152.2921264323687,
+        "margin": 17.952596337172622
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -0.8957340420011649,
+        "home_points": 0.8957340420011649,
+        "sample_weight": 1.0,
+        "home_edge_pp": 1.4179744502188951,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Portland St.",
+            "d1_games": 3,
+            "last_game_date": "2026-11-14",
+            "orb": 35,
+            "drb": 74,
+            "opp_orb": 30,
+            "opp_drb": 71,
+            "orb_pct": 0.330188679245283,
+            "allowed_pct": 0.28846153846153844
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Saint Mary's",
+            "d1_games": 4,
+            "last_game_date": "2026-11-13",
+            "orb": 45,
+            "drb": 105,
+            "opp_orb": 38,
+            "opp_drb": 89,
+            "orb_pct": 0.3358208955223881,
+            "allowed_pct": 0.26573426573426573
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.010634808376641713,
+        "requested_transfer_points": 0.8957340420011649,
+        "applied_transfer_points": 0.8957340420011649,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.29796147248977434,
+        "home_matchup_score": 0.3121412169919633,
+        "favored_baseline_points": 84.22662734276949,
+        "before_away_points": 68.0654990895992,
+        "before_home_points": 84.22662734276949
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 2.33887174682971,
+        "line": 18.5,
+        "selection_team": "Portland State Vikings"
+      },
+      "spread_after": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 0.547403662827378,
+        "line": 18.5,
+        "selection_team": "Portland State Vikings"
+      },
+      "total_grade": "Research",
+      "total_edge": 1.7921264323686898,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -18.5,
+        "total": 150.5,
+        "as_of": "2026-11-17T01:35:09.245000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401920373",
+      "away_team": "Texas Southern Tigers",
+      "home_team": "UC San Diego Tritons",
+      "source_record_id": "401920373|ncaam-v0.10-progressive-offense-2026-11-16|pregame|b052600f6ce844b1",
+      "source_model_version": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "source_projection": {
+        "away_points": 72.39660905350465,
+        "home_points": 88.0296764963914,
+        "total": 160.42628554989605,
+        "margin": 15.633067442886755
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 72.39660905350465,
+        "home_points": 88.0296764963914,
+        "total": 160.42628554989605,
+        "margin": 15.633067442886755
+      },
+      "after": {
+        "away_points": 67.90861533744818,
+        "home_points": 92.51767021244787,
+        "total": 160.42628554989605,
+        "margin": 24.609054874999686
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -4.487993716056464,
+        "home_points": 4.487993716056464,
+        "sample_weight": 1.0,
+        "home_edge_pp": 6.797698071347474,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Texas Southern",
+            "d1_games": 3,
+            "last_game_date": "2026-11-13",
+            "orb": 30,
+            "drb": 64,
+            "opp_orb": 52,
+            "opp_drb": 103,
+            "orb_pct": 0.22556390977443608,
+            "allowed_pct": 0.4482758620689655
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "UC San Diego",
+            "d1_games": 2,
+            "last_game_date": "2026-11-13",
+            "orb": 18,
+            "drb": 46,
+            "opp_orb": 23,
+            "opp_drb": 55,
+            "orb_pct": 0.2465753424657534,
+            "allowed_pct": 0.3333333333333333
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.05098273553510605,
+        "requested_transfer_points": 4.487993716056464,
+        "applied_transfer_points": 4.487993716056464,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2794486215538847,
+        "home_matchup_score": 0.34742560226735947,
+        "favored_baseline_points": 88.0296764963914,
+        "before_away_points": 72.39660905350465,
+        "before_home_points": 88.0296764963914
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 2.8669325571132447,
+        "line": 18.5,
+        "selection_team": "Texas Southern Tigers"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "B",
+        "edge": 6.109054874999686,
+        "line": -18.5,
+        "selection_team": "UC San Diego Tritons"
+      },
+      "total_grade": "Research",
+      "total_edge": 2.9262855498960505,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -18.5,
+        "total": 157.5,
+        "as_of": "2026-11-17T01:35:09.245000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    },
+    {
+      "game_id": "401924265",
+      "away_team": "Long Beach State Beach",
+      "home_team": "UCLA Bruins",
+      "source_record_id": "401924265|ncaam-v0.10-progressive-offense-2026-11-16|pregame|5864f1c24b0f362e",
+      "source_model_version": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "source_projection": {
+        "away_points": 61.90901126294321,
+        "home_points": 91.00942226387788,
+        "total": 152.9184335268211,
+        "margin": 29.10041100093467
+      },
+      "baseline_model": "ncaam-v0.10-progressive-offense-2026-11-16",
+      "new_model": "ncaam-v0.12-rebound-percentage-2026-11-17",
+      "before": {
+        "away_points": 61.90901126294321,
+        "home_points": 91.00942226387788,
+        "total": 152.9184335268211,
+        "margin": 29.10041100093467
+      },
+      "after": {
+        "away_points": 50.87850923829727,
+        "home_points": 102.03992428852382,
+        "total": 152.9184335268211,
+        "margin": 51.16141505022655
+      },
+      "rebounding_adjustment": {
+        "policy": "ncaam-rebound-percentage-zero-sum-2026-11-17-v2",
+        "status": "applied",
+        "experimental": true,
+        "boost_fraction_per_edge_pp": 0.0075,
+        "away_points": -11.030502024645944,
+        "home_points": 11.030502024645944,
+        "sample_weight": 1.0,
+        "home_edge_pp": 16.160234475742495,
+        "inputs": {
+          "away": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "Long Beach St.",
+            "d1_games": 3,
+            "last_game_date": "2026-11-11",
+            "orb": 16,
+            "drb": 63,
+            "opp_orb": 35,
+            "opp_drb": 86,
+            "orb_pct": 0.1568627450980392,
+            "allowed_pct": 0.35714285714285715
+          },
+          "home": {
+            "policy": "ncaam-d1-rebound-inputs-2026-11-16-v1",
+            "season": 2027,
+            "observed_at": "2026-11-16T18:37:39.848504+00:00",
+            "cutoff_date": "2026-11-16",
+            "source_url": "https://barttorvik.com/getgamestats.php?year=2027&csv=1",
+            "source_sha256": "613b1e6113fe9d3b63d13cf023d1807bbddcf02b4d399769132c02299bc349a5",
+            "team": "UCLA",
+            "d1_games": 3,
+            "last_game_date": "2026-11-11",
+            "orb": 43,
+            "drb": 89,
+            "opp_orb": 32,
+            "opp_drb": 68,
+            "orb_pct": 0.38738738738738737,
+            "allowed_pct": 0.2644628099173554
+          }
+        },
+        "favored_side": "home",
+        "requested_boost_fraction": 0.12120175856806871,
+        "requested_transfer_points": 11.030502024645944,
+        "applied_transfer_points": 11.030502024645944,
+        "score_floor_applied": false,
+        "away_matchup_score": 0.2106627775076973,
+        "home_matchup_score": 0.37226512226512226,
+        "favored_baseline_points": 91.00942226387788,
+        "before_away_points": 61.90901126294321,
+        "before_home_points": 91.00942226387788
+      },
+      "spread_before": {
+        "projected_side": "away",
+        "grade": "Research",
+        "edge": 1.3995889990653296,
+        "line": 30.5,
+        "selection_team": "Long Beach State Beach"
+      },
+      "spread_after": {
+        "projected_side": "home",
+        "grade": "A",
+        "edge": 20.66141505022655,
+        "line": -30.5,
+        "selection_team": "UCLA Bruins"
+      },
+      "total_grade": "Research",
+      "total_edge": 7.418433526821104,
+      "total_unchanged": true,
+      "saved_market": {
+        "home_spread": -30.5,
+        "total": 145.5,
+        "as_of": "2026-11-17T02:35:06.769000+00:00",
+        "source": "ScoresAndOdds",
+        "source_url": "",
+        "odds": -110
+      }
+    }
+  ],
+  "games_count": 22,
+  "total_changes": 0,
+  "total_grade_changes": 0,
+  "rebound_applied": 21,
+  "unavailable": [
+    "401917964"
+  ]
+}

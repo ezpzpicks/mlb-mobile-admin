@@ -6,8 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from builders.ncaam_rebounding import INPUT_POLICY, parse_rebounding_inputs, matchup_transfer
-from builders.ncaam_matchup_projection import from_captured_inputs, PRE_REBOUND_MODEL_VERSION, MODEL_VERSION
+from builders.ncaam_rebounding import (INPUT_POLICY, parse_rebounding_inputs, matchup_transfer,
+    percentage_matchup_transfer)
+from builders.ncaam_matchup_projection import (from_captured_inputs, PRE_REBOUND_MODEL_VERSION,
+    CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION)
 from builders.ncaam_point_edges import capture_grades
 from builders.ncaam_matchup_grades import policy_digest
 from research.test_ncaam_point_edges import forecast, grades, LOCK
@@ -93,10 +95,10 @@ def test_wrong_date_tied_or_conflicting_final_boxes_are_unavailable(bad):
 
 
 @pytest.mark.parametrize('offense', [75., 105., 125.])
-def test_ten_pp_edge_transfers_two_points_for_every_offense_type(offense):
+def test_archived_v11_ten_pp_edge_transfers_two_points_for_every_offense_type(offense):
     a, h = ratings(offense=offense)
     old, _ = forecast(away=a, home=h, model_version=PRE_REBOUND_MODEL_VERSION)
-    new, _ = forecast(away=a, home=h)
+    new, _ = forecast(away=a, home=h, model_version=CAPPED_REBOUND_MODEL_VERSION)
     reb = new['matchup_projection']['rebounding_adjustment']
     assert reb['home_edge_pp'] == pytest.approx(10.)
     assert reb['home_points'] == pytest.approx(2.)
@@ -217,8 +219,10 @@ def test_frozen_real_games_keep_totals_and_the_tarleton_direction_honest():
         old = from_captured_inputs(game['away'], game['home'], game['benchmark'], model_version=PRE_REBOUND_MODEL_VERSION, **kwargs)
         new = from_captured_inputs(game['away'], game['home'], game['benchmark'], **kwargs)
         assert new['total'] == old['total']
-        assert abs(new['home_points']-old['home_points']) <= 3.
         assert new['rebounding_adjustment']['status'] == game['expected_status']
+        archived = from_captured_inputs(game['away'], game['home'], game['benchmark'],
+            model_version=CAPPED_REBOUND_MODEL_VERSION, **kwargs)
+        assert all(archived[k] == value for k, value in game['legacy_v11_expected'].items())
         if game['game_id'] == '401927364':
             assert new['home_points'] > old['home_points']  # Drake
             assert new['away_points'] < old['away_points']  # Tarleton
