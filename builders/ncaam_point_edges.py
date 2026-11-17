@@ -7,7 +7,7 @@ from pathlib import Path
 
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
 from builders.ncaam_matchup_projection import (MODEL_VERSION, LEGACY_POINT_MODEL_VERSION,
-    POINT_MODEL_VERSIONS, GRADE_POLICY, from_captured_inputs)
+    POINT_MODEL_VERSIONS, OFFENSE_BONUS_POLICIES, GRADE_POLICY, from_captured_inputs)
 
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_point_edge_grades.json'
 
@@ -61,7 +61,7 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
             or not math.isclose(number(tempo.get('away_ratio')),away_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)
             or not math.isclose(number(tempo.get('home_ratio')),home_tempo/national_tempo,abs_tol=1e-8,rel_tol=0)):
             raise ValueError('Saved adjusted-tempo proof is unavailable.')
-    if model==MODEL_VERSION:
+    if model in OFFENSE_BONUS_POLICIES:
         # Reconstruct the complete new score, including court, players and the
         # progressive bonus, so changing a bonus and rehashing cannot add it twice.
         expected=from_captured_inputs(f['away_rating'],f['home_rating'],benchmark,

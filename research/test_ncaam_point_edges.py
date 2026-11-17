@@ -5,7 +5,8 @@ from pathlib import Path
 import unittest
 
 from builders.ncaam_matchup_projection import (from_captured_inputs, project, MODEL_VERSION,
-    LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION, POINT_MODEL_VERSIONS)
+    LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
+    INITIAL_OFFENSE_BONUS_MODEL_VERSION, POINT_MODEL_VERSIONS)
 from builders.ncaam_point_edges import capture_grades, load_policy
 
 LOCK='2026-11-14T12:00:00+00:00'
@@ -48,7 +49,7 @@ class ProjectionTests(unittest.TestCase):
         market={'home_spread':-2.,'total':150.,'as_of':LOCK}
         f=project(game,bundle,market,LOCK)
         self.assertEqual(f['projection_engine'],MODEL_VERSION)
-        self.assertAlmostEqual(f['matchup_projection']['margin'],f['matchup_projection']['possessions']*.08+8.)
+        self.assertAlmostEqual(f['matchup_projection']['margin'],f['matchup_projection']['possessions']*.08+5.)
         changed=project(game,bundle,{**market,'home_spread':10.,'total':170.},LOCK)
         self.assertEqual(f['matchup_projection'],changed['matchup_projection'])
         self.assertIn('margin_calibration',f['legacy_forecast'])
@@ -112,7 +113,7 @@ class ProjectionTests(unittest.TestCase):
     def test_offense_faces_opposing_defense_in_points_per_100(self):
         f,_=forecast();a=deepcopy(f['away_rating']);h=deepcopy(f['home_rating']);h['offense']+=5
         changed,_=forecast(away=a,home=h)
-        self.assertAlmostEqual(changed['matchup_projection']['home_points']-f['matchup_projection']['home_points'],11.5)
+        self.assertAlmostEqual(changed['matchup_projection']['home_points']-f['matchup_projection']['home_points'],8.5)
         a['defense']-=20;suppressed,_=forecast(away=a,home=h)
         self.assertLess(suppressed['matchup_projection']['home_points'],73.5)
 
@@ -147,7 +148,7 @@ class ProjectionTests(unittest.TestCase):
     def test_progressive_bonus_matches_each_agreed_defensive_tier_and_boundary(self):
         # Inclusive extreme boundaries match the site's factor labels.
         for defense_z, points in ((-2,1),(-1.5,1),(-1.25,3),(-1,3),(-.5,5),
-                                   (0,8),(.5,8),(1,9),(1.25,9),(1.5,10),(2,10)):
+                                   (0,5),(.5,5),(1,8),(1.25,8),(1.5,15),(2,15)):
             with self.subTest(defense_z=defense_z):
                 a={'team':'Away','offense':100.,'defense':105.+8*defense_z,'tempo':70.}
                 h={'team':'Home','offense':117.,'defense':105.,'tempo':70.}
@@ -175,9 +176,9 @@ class ProjectionTests(unittest.TestCase):
         h={'team':'Home','offense':125.,'defense':110.,'tempo':70.}
         old,_=forecast(away=a,home=h,model_version=ADJUSTED_TEMPO_MODEL_VERSION)
         new,_=forecast(away=a,home=h)
-        self.assertEqual(new['matchup_projection']['adjustments']['away']['offense_bonus']['points'],8)
+        self.assertEqual(new['matchup_projection']['adjustments']['away']['offense_bonus']['points'],5)
         self.assertEqual(new['matchup_projection']['adjustments']['home']['offense_bonus']['points'],3)
-        self.assertAlmostEqual(new['total']-old['total'],11)
+        self.assertAlmostEqual(new['total']-old['total'],8)
         swapped,_=forecast(away={**h,'team':'Away'},home={**a,'team':'Home'})
         self.assertAlmostEqual(new['total'],swapped['total'])
         self.assertAlmostEqual(new['fair_home_spread'],-swapped['fair_home_spread'])
@@ -188,7 +189,8 @@ class ProjectionTests(unittest.TestCase):
             kw={k:f[k] for k in ('tipoff','home_court_points','neutral_site','lineup_adjustment')}
             kw.update(as_of=f['lockedAt'],source_url=f['ratings_source_url'])
             old=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],model_version=ADJUSTED_TEMPO_MODEL_VERSION,**kw)
-            new=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kw)
+            new=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],
+                model_version=INITIAL_OFFENSE_BONUS_MODEL_VERSION,**kw)
             for side in ('away','home'):
                 self.assertAlmostEqual(new[side+'_points'],f['expected'][side+'_points'],places=8)
                 self.assertEqual(new['adjustments'][side]['offense_bonus']['points'],f['expected'][side+'_bonus'])
@@ -198,21 +200,42 @@ class ProjectionTests(unittest.TestCase):
             self.assertNotIn('offense_bonus_policy',archived)
             self.assertNotIn('offense_bonus',archived['adjustments']['home'])
 
+    def test_revised_tiers_preserve_original_bonus_forecasts_and_replays(self):
+        from research.replay_ncaam_point_model import replay
+        for defense,original,revised in ((117.,10.,15.),(113.,9.,8.),(109.,8.,5.)):
+            a={'team':'Away','offense':100.,'defense':defense,'tempo':70.}
+            h={'team':'Home','offense':117.,'defense':105.,'tempo':70.}
+            old,b=forecast(away=a,home=h,model_version=INITIAL_OFFENSE_BONUS_MODEL_VERSION)
+            frozen=deepcopy(old)
+            new,_=forecast(away=a,home=h)
+            self.assertEqual(old['matchup_projection']['adjustments']['home']['offense_bonus']['points'],original)
+            self.assertAlmostEqual(new['total']-old['total'],revised-original)
+            self.assertAlmostEqual(old['fair_home_spread']-new['fair_home_spread'],revised-original)
+            self.assertEqual(new['matchup_projection']['away_points'],old['matchup_projection']['away_points'])
+            g=grades(old,b)
+            result=replay({'model_version':INITIAL_OFFENSE_BONUS_MODEL_VERSION,
+                'games':[{**old,'matchup_total':g['total'],'matchup_spread':g['spread']}]})
+            self.assertEqual(result['errors'],[])
+            self.assertEqual(result['games'][0]['matchup_projection'],frozen['matchup_projection'])
+            self.assertEqual(old,frozen)
+
 
 class PointGradeTests(unittest.TestCase):
     def test_missing_or_rehashed_progressive_bonus_changes_cannot_be_graded(self):
         from builders.ncaam_matchup_grades import policy_digest
-        f,b=forecast(home={'team':'Home','offense':117.,'defense':105.,'tempo':70.})
-        for change in ('missing','double','policy'):
-            bad=deepcopy(f);p=bad['matchup_projection']
-            if change=='missing':del p['adjustments']['home']['offense_bonus']
-            elif change=='double':
-                p['adjustments']['home']['offense_bonus']['points']*=2
-                for key in ('home_points','margin','total'):p[key]+=8
-                bad['total']+=8;bad['fair_home_spread']-=8
-            else:p['offense_bonus_policy']['points_by_opponent_defense']['below_average']=99
-            p['sha256']=policy_digest({k:v for k,v in p.items() if k!='sha256'})
-            with self.assertRaises(ValueError):grades(bad,b)
+        for version in (INITIAL_OFFENSE_BONUS_MODEL_VERSION,MODEL_VERSION):
+            f,b=forecast(home={'team':'Home','offense':117.,'defense':105.,'tempo':70.},model_version=version)
+            for change in ('missing','double','policy'):
+                bad=deepcopy(f);p=bad['matchup_projection']
+                if change=='missing':del p['adjustments']['home']['offense_bonus']
+                elif change=='double':
+                    bonus=p['adjustments']['home']['offense_bonus']['points']
+                    p['adjustments']['home']['offense_bonus']['points']*=2
+                    for key in ('home_points','margin','total'):p[key]+=bonus
+                    bad['total']+=bonus;bad['fair_home_spread']-=bonus
+                else:p['offense_bonus_policy']['points_by_opponent_defense']['below_average']=99
+                p['sha256']=policy_digest({k:v for k,v in p.items() if k!='sha256'})
+                with self.assertRaises(ValueError):grades(bad,b)
 
     def test_both_production_adapters_route_each_point_model_to_its_saved_score(self):
         from builders.ncaam_matchup_live import capture_grade
