@@ -8,15 +8,17 @@ import math
 
 from builders.ncaam_model import project as legacy_project, team_key
 from builders.ncaam_matchup_grades import number, policy_digest, population_benchmark, stamp
-from builders.ncaam_rebounding import matchup_transfer
+from builders.ncaam_rebounding import matchup_transfer, percentage_matchup_transfer
 
 LEGACY_POINT_MODEL_VERSION = "ncaam-v0.7-matchup-projection-2026-11-14"
 ADJUSTED_TEMPO_MODEL_VERSION = "ncaam-v0.8-adjusted-tempo-2026-11-15"
 INITIAL_OFFENSE_BONUS_MODEL_VERSION = "ncaam-v0.9-progressive-offense-2026-11-15"
 PRE_REBOUND_MODEL_VERSION = "ncaam-v0.10-progressive-offense-2026-11-16"
-MODEL_VERSION = "ncaam-v0.11-rebound-transfer-2026-11-16"
+CAPPED_REBOUND_MODEL_VERSION = "ncaam-v0.11-rebound-transfer-2026-11-16"
+MODEL_VERSION = "ncaam-v0.12-rebound-percentage-2026-11-17"
 POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
-                        INITIAL_OFFENSE_BONUS_MODEL_VERSION, PRE_REBOUND_MODEL_VERSION, MODEL_VERSION)
+                        INITIAL_OFFENSE_BONUS_MODEL_VERSION, PRE_REBOUND_MODEL_VERSION,
+                        CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION)
 GRADE_POLICY = "ncaam-point-edge-2026-11-14-v1"
 OFFENSE_BONUS_POLICY = "ncaam-very-strong-offense-progressive-2026-11-16-v2"
 VERY_STRONG_OFFENSE_Z = 1.5
@@ -29,6 +31,7 @@ OFFENSE_BONUS_POLICIES = {
         'points': {'very_strong': 1., 'strong': 3., 'above_average': 5.,
                    'below_average': 8., 'weak': 9., 'very_weak': 10.}},
     PRE_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
+    CAPPED_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
 }
 
@@ -120,14 +123,19 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
     # must never manufacture a total edge or change a total's grade.
     total = points['home']+points['away']
     rebounding = None
-    if model_version == MODEL_VERSION:
-        rebounding = matchup_transfer(away, home, season, as_of)
+    if model_version in (CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION):
+        rebounding = (matchup_transfer(away, home, season, as_of)
+            if model_version == CAPPED_REBOUND_MODEL_VERSION else
+            percentage_matchup_transfer(away, home, season, as_of,
+                away_points=points['away'], home_points=points['home']))
         rebounding['before_away_points'] = points['away']
         rebounding['before_home_points'] = points['home']
         for side in ('away', 'home'):
             points[side] += rebounding[side+'_points']
             adjustments[side]['rebounding_points'] = rebounding[side+'_points']
-            if not 0 < points[side] < 200:
+            supported = (0 < points[side] < 200 if model_version == CAPPED_REBOUND_MODEL_VERSION else
+                math.isfinite(points[side]) and 0 <= points[side] <= total+1e-10)
+            if not supported:
                 raise ValueError('Rebounding transfer produced an unsupported team score.')
         if not math.isclose(points['home']+points['away'], total, abs_tol=1e-10, rel_tol=0):
             raise ValueError('Rebounding transfer must preserve the game total.')

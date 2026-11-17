@@ -1,15 +1,83 @@
 # NCAAM matchup-led scores and point-edge grades
 
-Current model: `ncaam-v0.11-rebound-transfer-2026-11-16`.
+Current model: `ncaam-v0.12-rebound-percentage-2026-11-17`.
+Archived capped-rebounding model: `ncaam-v0.11-rebound-transfer-2026-11-16`.
 Archived pre-rebounding model: `ncaam-v0.10-progressive-offense-2026-11-16`.
 Archived offense-bonus model: `ncaam-v0.9-progressive-offense-2026-11-15`.
 Archived adjusted-tempo model: `ncaam-v0.8-adjusted-tempo-2026-11-15`.
 Archived point model: `ncaam-v0.7-matchup-projection-2026-11-14`.
 Grading policy: `ncaam-point-edge-2026-11-14-v1`.
 
-## November 16 total-neutral rebounding transfer
+## November 17 continuous percentage rebounding transfer
 
-The user-authorized experimental modifier applies across offense categories.
+Version 0.12 implements the user's percentage-based replacement for the
+capped rule. The two-way rebounding edge retains the same definition:
+
+`away matchup = (away OR% + home OR% allowed) / 2`
+
+`home matchup = (home OR% + away OR% allowed) / 2`
+
+`home edge, pp = 100 * (home matchup - away matchup)`
+
+The side with the positive edge receives a percentage of its own projection:
+
+`boost fraction = abs(edge, pp) * (0.15 / 20)`
+
+`requested transfer = favored pre-rebound score * boost fraction`
+
+`favored score += transfer; opposing score -= the identical transfer`
+
+The pre-rebound score includes the existing efficiency, pace, court, lineup
+and progressive-offense effects. The percentage replaces the v0.11 transfer;
+it is never stacked on its three-point cap. It applies to every offense
+category with verified rebound inputs, with no game-count attenuation, edge
+tiers, minimum positive edge or fixed point cap. Full precision is retained
+until display. A zero edge leaves both scores unchanged.
+
+| Rebounding edge, pp | Boost | Points added to 85 | Points added to 60 |
+|---|---:|---:|---:|
+| +0.1 | 0.075% | +0.06375 | +0.045 |
+| +2.5 | 1.875% | +1.59375 | +1.125 |
+| +10 | 7.5% | +6.375 | +4.5 |
+| +17.5 | 13.125% | +11.15625 | +7.875 |
+| +20 | 15% | +12.75 | +9 |
+| +100 | 75% | +63.75 | +45 |
+
+The examples assume sufficient opposing score for the transfer. The only
+post-transfer boundary is score validity: the applied transfer cannot exceed
+the opponent's projected points. When that boundary is reached the opponent
+finishes at zero, and the other team receives exactly those points. The proof
+records both requested and applied amounts and whether the floor limited the
+request. There is no substitute fixed point cap or arbitrary upper edge band.
+
+An 85–60 baseline with a +20 edge for the 85-point side becomes 97.75–47.25;
+the game total remains 145 and the projected margin becomes 50.5. If the
+60-point side has that edge instead, it gains 9 and the other team loses 9,
+producing 69–76 in that team's order. At +100, an 85–60 baseline would request
+63.75 but transfer 60, producing 145–0 and preserving the same total.
+
+Version 0.12 carries the pre-transfer total exactly, preserving full-game
+O/U point edges and grades for the same inputs. Missing, stale, future-dated
+or invalid rebound inputs remain neutral. A valid rate still requires at
+least one verified prior D1 game for each team; no invented default is used
+when a team has zero games. Source validation, strict prior-date filtering
+and the captured input provenance retain the v0.11 rules described below.
+
+The percentage policy has its own model and scoring-proof version. Archived
+v0.11 retains its original cap and GP discount. Seven frozen real-input cases
+store their v0.11 hashes and scores from before this change. Replays preserve
+all older versions; active percentage forecasts are reconstructed from their
+baseline inputs, preventing double application or rehashed transfer edits.
+
+The same read-only evaluator supports both rebound versions through
+`--model-version`. The new comparison is
+`research/results/ncaam_rebound_percentage_replay_2026-11-16.json`; the capped
+comparison below remains unchanged. These are retrospective prior-date input
+reconstructions, and no target outcome selects the percentage anchor.
+
+## November 16 archived total-neutral rebounding transfer
+
+The archived v0.11 experimental modifier applies across offense categories.
 It compares the two offensive-glass matchups and transfers points from the
 unfavorable side to the favorable side. It does not add total points.
 
@@ -91,7 +159,7 @@ score points, based on the opposing defense's captured national band. Lower
 adjusted defensive efficiency is better. These are user-selected trial amounts,
 not fitted coefficients or a claim of validated betting improvement.
 
-| Opposing defense | Archived v0.9 bonus | v0.10 / v0.11 bonus |
+| Opposing defense | Archived v0.9 bonus | v0.10–v0.12 bonus |
 | --- | ---: | ---: |
 | Very strong (z <= -1.5) | +1 | +1 |
 | Strong (-1.5 < z <= -1) | +3 | +3 |
@@ -143,7 +211,7 @@ defense changes are converted from points per 100 possessions to scoring points
 once. The earlier multiplicative baseline and opening-margin strength scaling
 remain comparison metadata. SOS, manual four-factor adjustments and preference
 ratings do not create generic bonuses on top of opponent-adjusted efficiencies.
-The separately captured v0.11 rebound transfer above changes only the margin.
+The separately captured v0.11/v0.12 rebound transfers above change only the margin.
 
 The [ratings glossary](https://kenpom.com/blog/ratings-glossary/) documents the
 standard per-100-possession efficiency and per-40-minute tempo units. Production
