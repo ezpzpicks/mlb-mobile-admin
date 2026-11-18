@@ -104,9 +104,10 @@ class ProjectionTests(unittest.TestCase):
                 self.assertLess(revised['total']-f['market']['total'],8)
                 self.assertGreater(revised['total'],f['market']['total'])
             else:
-                self.assertAlmostEqual(revised['total'],153.65,places=2)
+                self.assertAlmostEqual(revised['total'],148.65,places=2)
                 self.assertEqual(revised['adjustments']['home']['offense_bonus']['points'],5)
                 self.assertEqual(revised['adjustments']['away']['offense_bonus']['points'],0)
+                self.assertEqual(revised['adjustments']['away']['opponent_defense_deduction']['points'],5)
             f['market']['total']=250.;f['actual_total']=1.
             self.assertEqual(revised,from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kwargs))
 
@@ -155,10 +156,12 @@ class ProjectionTests(unittest.TestCase):
                 impact={'away':{'offense_change_per_100':2.},'home':{'defense_improvement_per_100':1.}}
                 old,_=forecast(away=a,home=h,court=3.2,impact=impact,model_version=ADJUSTED_TEMPO_MODEL_VERSION)
                 new,b=forecast(away=a,home=h,court=3.2,impact=impact)
-                self.assertAlmostEqual(new['matchup_projection']['home_points']-old['matchup_projection']['home_points'],points)
+                deduction=new['matchup_projection']['adjustments']['home']['opponent_defense_deduction']['points']
+                self.assertEqual(new['matchup_projection']['adjustments']['home']['offense_bonus']['points'],points)
+                self.assertAlmostEqual(new['matchup_projection']['home_points']-old['matchup_projection']['home_points'],points-deduction)
                 self.assertEqual(new['matchup_projection']['away_points'],old['matchup_projection']['away_points'])
-                self.assertAlmostEqual(new['total']-old['total'],points)
-                self.assertAlmostEqual(old['fair_home_spread']-new['fair_home_spread'],points)
+                self.assertAlmostEqual(new['total']-old['total'],points-deduction)
+                self.assertAlmostEqual(old['fair_home_spread']-new['fair_home_spread'],points-deduction)
                 self.assertEqual(new['matchup_projection']['possessions'],old['matchup_projection']['possessions'])
                 self.assertEqual(grades(new,b)['total']['projected_total'],new['total'])
 

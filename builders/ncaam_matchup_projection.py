@@ -16,15 +16,20 @@ INITIAL_OFFENSE_BONUS_MODEL_VERSION = "ncaam-v0.9-progressive-offense-2026-11-15
 PRE_REBOUND_MODEL_VERSION = "ncaam-v0.10-progressive-offense-2026-11-16"
 CAPPED_REBOUND_MODEL_VERSION = "ncaam-v0.11-rebound-transfer-2026-11-16"
 PERCENTAGE_REBOUND_MODEL_VERSION = "ncaam-v0.12-rebound-percentage-2026-11-17"
-MODEL_VERSION = "ncaam-v0.13-offense-only-2026-11-17"
+OFFENSE_ONLY_MODEL_VERSION = "ncaam-v0.13-offense-only-2026-11-17"
+MODEL_VERSION = "ncaam-v0.14-mirrored-defense-2026-11-18"
 POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
                         INITIAL_OFFENSE_BONUS_MODEL_VERSION, PRE_REBOUND_MODEL_VERSION,
-                        CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION, MODEL_VERSION)
+                        CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION,
+                        OFFENSE_ONLY_MODEL_VERSION, MODEL_VERSION)
 GRADE_POLICY = "ncaam-point-edge-2026-11-14-v1"
 OFFENSE_BONUS_POLICY = "ncaam-very-strong-offense-progressive-2026-11-16-v2"
 VERY_STRONG_OFFENSE_Z = 1.5
 OFFENSE_BONUS_POINTS = {'very_strong': 1., 'strong': 3., 'above_average': 5.,
                         'below_average': 5., 'weak': 8., 'very_weak': 15.}
+DEFENSE_DEDUCTION_POLICY = "ncaam-very-strong-defense-mirrored-2026-11-18-v1"
+VERY_STRONG_DEFENSE_Z = -1.5
+DEFENSE_DEDUCTION_POINTS = dict(OFFENSE_BONUS_POINTS)
 # Keep the original construction available for saved forecasts and replays.
 OFFENSE_BONUS_POLICIES = {
     INITIAL_OFFENSE_BONUS_MODEL_VERSION: {
@@ -34,6 +39,7 @@ OFFENSE_BONUS_POLICIES = {
     PRE_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     CAPPED_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     PERCENTAGE_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
+    OFFENSE_ONLY_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
 }
 
@@ -53,6 +59,23 @@ def progressive_offense_bonus(offense_z, opponent_defense_z, *, model_version=MO
     return {'qualified': qualified, 'offense_z': offense_z,
             'opponent_defense_z': defense_z, 'opponent_defense_band': band,
             'points': points[band] if qualified else 0.}
+
+
+def mirrored_defense_deduction(defense_z, opponent_offense_z):
+    """Extra points prevented by an elite defense, beyond baseline ratings.
+
+    These experimental final-score deductions mirror the offense bonus scale.
+    Lower defensive ratings are better; stronger opposing offenses get smaller
+    deductions. No points are transferred to the defending team's score.
+    """
+    defense_z, offense_z = number(defense_z), number(opponent_offense_z)
+    band = ('very_strong' if offense_z >= 1.5 else 'strong' if offense_z >= 1.
+            else 'above_average' if offense_z > 0. else 'below_average' if offense_z > -1.
+            else 'weak' if offense_z > -1.5 else 'very_weak')
+    qualified = defense_z <= VERY_STRONG_DEFENSE_Z
+    return {'qualified': qualified, 'defense_z': defense_z,
+            'opponent_offense_z': offense_z, 'opponent_offense_band': band,
+            'points': DEFENSE_DEDUCTION_POINTS[band] if qualified else 0.}
 
 
 def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
@@ -110,7 +133,10 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         baseline = possessions*efficiency/100
         bonus = progressive_offense_bonus(offense/number(metrics['offense']['sd']),
             defense/number(metrics['defense']['sd']), model_version=model_version) if bonus_policy else None
-        points[side] = baseline+player_points+venue_points+(bonus['points'] if bonus else 0.)
+        deduction = (mirrored_defense_deduction(defense/number(metrics['defense']['sd']),
+            offense/number(metrics['offense']['sd'])) if model_version == MODEL_VERSION else None)
+        points[side] = (baseline+player_points+venue_points+(bonus['points'] if bonus else 0.)
+                        -(deduction['points'] if deduction else 0.))
         if not 0 < points[side] < 200:
             raise ValueError('Implausible expected team score.')
         pairings[side] = {'baseline_efficiency':center, 'offense_deviation':offense,
@@ -121,6 +147,9 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
             'home_court_points':venue_points}
         if bonus is not None:
             adjustments[side]['offense_bonus'] = bonus
+        if deduction is not None:
+            # Stored on the scoring side: this is suppression by its opponent.
+            adjustments[side]['opponent_defense_deduction'] = deduction
     # Carry the pre-transfer total exactly. Equal-and-opposite score changes
     # must never manufacture a total edge or change a total's grade.
     total = points['home']+points['away']
@@ -159,6 +188,10 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
         payload['offense_bonus_policy'] = {'version': bonus_policy['version'], 'status': 'experimental',
             'qualifying_offense_z': VERY_STRONG_OFFENSE_Z,
             'points_by_opponent_defense': deepcopy(bonus_policy['points'])}
+    if model_version == MODEL_VERSION:
+        payload['defense_deduction_policy'] = {'version': DEFENSE_DEDUCTION_POLICY,
+            'status': 'experimental', 'qualifying_defense_z': VERY_STRONG_DEFENSE_Z,
+            'points_by_opponent_offense': deepcopy(DEFENSE_DEDUCTION_POINTS)}
     if rebounding is not None:
         payload['rebounding_adjustment'] = rebounding
     payload['sha256'] = policy_digest(payload)

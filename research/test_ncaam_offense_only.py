@@ -3,7 +3,7 @@ from copy import deepcopy
 import pytest
 
 from builders.ncaam_matchup_projection import (
-    MODEL_VERSION, PRE_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION,
+    MODEL_VERSION, OFFENSE_ONLY_MODEL_VERSION, PRE_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION,
 )
 from builders.ncaam_matchup_grades import policy_digest
 from research.test_ncaam_point_edges import forecast, grades
@@ -12,15 +12,15 @@ from research.test_ncaam_rebound_percentage import edge_ratings
 
 @pytest.mark.parametrize('home_line', [-41.5, -15.5, 1.5, 32.5])
 @pytest.mark.parametrize('rebound_edge', [-20., 20.])
-def test_live_scores_keep_offense_players_court_and_totals_without_rebounds(home_line, rebound_edge):
+def test_archived_offense_only_scores_keep_players_court_and_totals_without_rebounds(home_line, rebound_edge):
     away, home = edge_ratings(rebound_edge)
     home['offense'] = 125.
     impact = {'away': {'offense_change_per_100': 2.}, 'home': {'defense_improvement_per_100': 1.}}
     args = dict(away=away, home=home, court=3.2, impact=impact, home_line=home_line)
-    current, benchmark = forecast(**args)
+    current, benchmark = forecast(**args, model_version=OFFENSE_ONLY_MODEL_VERSION)
     baseline, _ = forecast(**args, model_version=PRE_REBOUND_MODEL_VERSION)
     archived, _ = forecast(**args, model_version=PERCENTAGE_REBOUND_MODEL_VERSION)
-    assert current['modelVersion'] == MODEL_VERSION == 'ncaam-v0.13-offense-only-2026-11-17'
+    assert current['modelVersion'] == OFFENSE_ONLY_MODEL_VERSION == 'ncaam-v0.13-offense-only-2026-11-17'
     p = current['matchup_projection']
     assert 'rebounding_adjustment' not in p
     assert p['adjustments']['home']['offense_bonus']['points'] == 5.
