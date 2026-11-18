@@ -22,7 +22,7 @@ POLICY = 'ncaam-rebound-zero-sum-2026-11-16-v1'
 POINTS_PER_EDGE_PP = .2
 MAX_TRANSFER_POINTS = 3.
 FULL_WEIGHT_GAMES = 3
-# Current v0.12 curve: +20 edge percentage points gives a 15% boost.
+# Archived v0.12 curve: +20 edge percentage points gives a 15% boost.
 PERCENTAGE_POLICY = 'ncaam-rebound-percentage-zero-sum-2026-11-17-v2'
 BOOST_FRACTION_PER_EDGE_PP = .15 / 20
 ET = ZoneInfo('America/New_York')

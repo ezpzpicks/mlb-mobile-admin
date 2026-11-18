@@ -1,6 +1,7 @@
 # NCAAM matchup-led scores and point-edge grades
 
-Current model: `ncaam-v0.12-rebound-percentage-2026-11-17`.
+Current model: `ncaam-v0.13-offense-only-2026-11-17`.
+Archived percentage-rebounding model: `ncaam-v0.12-rebound-percentage-2026-11-17`.
 Archived capped-rebounding model: `ncaam-v0.11-rebound-transfer-2026-11-16`.
 Archived pre-rebounding model: `ncaam-v0.10-progressive-offense-2026-11-16`.
 Archived offense-bonus model: `ncaam-v0.9-progressive-offense-2026-11-15`.
@@ -8,7 +9,22 @@ Archived adjusted-tempo model: `ncaam-v0.8-adjusted-tempo-2026-11-15`.
 Archived point model: `ncaam-v0.7-matchup-projection-2026-11-14`.
 Grading policy: `ncaam-point-edge-2026-11-14-v1`.
 
-## November 17 continuous percentage rebounding transfer
+## November 17 rebound adjustment removed; offense adjustment retained
+
+Version 0.13 removes the rebound transfer for all spread sizes. Adjusted
+offense, opposing defense, combined tempo, home court, personnel effects and
+the revised progressive-offense bonus remain unchanged. Rebound inputs may
+still be captured as historical research data but do not change live scores
+or add missing-rebound confidence flags.
+
+For identical captured inputs, v0.13 reproduces the pre-rebound v0.10 scores
+under a new version. Because both archived rebound rules transfer equal and
+opposite points, removing them leaves the projected total, O/U direction,
+total edge and A/B total grade unchanged at the same quote. The spread can
+change side, grade or qualification. Previously frozen forecasts retain
+their versioned proofs and original grades; they are not rewritten.
+
+## November 17 archived continuous percentage rebounding transfer
 
 Version 0.12 implements the user's percentage-based replacement for the
 capped rule. The two-way rebounding edge retains the same definition:

@@ -13,13 +13,13 @@ from zoneinfo import ZoneInfo
 
 from builders.ncaam_model import team_key, timestamp
 from builders.ncaam_rebounding import parse_rebounding_inputs
-from builders.ncaam_matchup_projection import (from_captured_inputs, MODEL_VERSION,
+from builders.ncaam_matchup_projection import (from_captured_inputs, PERCENTAGE_REBOUND_MODEL_VERSION,
     PRE_REBOUND_MODEL_VERSION, CAPPED_REBOUND_MODEL_VERSION)
 from builders.ncaam_point_edges import capture_grades
 
 
-def replay(snapshot, game_log_text, members, *, source_provenance=None, model_version=MODEL_VERSION):
-    if model_version not in (CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION):
+def replay(snapshot, game_log_text, members, *, source_provenance=None, model_version=PERCENTAGE_REBOUND_MODEL_VERSION):
+    if model_version not in (CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION):
         raise ValueError('Unsupported rebound replay model version.')
     data = snapshot.get('ncaamMarket', snapshot); latest = {}
     for f in data['forecasts']:
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     parser.add_argument('--snapshot', required=True); parser.add_argument('--game-logs', required=True)
     parser.add_argument('--members', required=True, help='JSON fixture with a dated members array')
     parser.add_argument('--output', required=True); parser.add_argument('--provenance')
-    parser.add_argument('--model-version', choices=(CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION), default=MODEL_VERSION)
+    parser.add_argument('--model-version', choices=(CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION), default=PERCENTAGE_REBOUND_MODEL_VERSION)
     args = parser.parse_args()
     result = replay(json.loads(Path(args.snapshot).read_text()), Path(args.game_logs).read_text(),
         json.loads(Path(args.members).read_text())['members'],

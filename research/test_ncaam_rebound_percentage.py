@@ -2,8 +2,8 @@ import pytest
 
 from builders.ncaam_rebounding import percentage_matchup_transfer
 from builders.ncaam_matchup_projection import PRE_REBOUND_MODEL_VERSION
-from research.test_ncaam_rebounding import profile
-from research.test_ncaam_point_edges import forecast, LOCK
+from research.test_ncaam_rebounding import profile, forecast
+from research.test_ncaam_point_edges import LOCK
 
 
 def edge_ratings(edge, gp=3):

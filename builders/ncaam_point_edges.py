@@ -6,7 +6,8 @@ import math
 from pathlib import Path
 
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
-from builders.ncaam_matchup_projection import (MODEL_VERSION, LEGACY_POINT_MODEL_VERSION, CAPPED_REBOUND_MODEL_VERSION,
+from builders.ncaam_matchup_projection import (LEGACY_POINT_MODEL_VERSION, CAPPED_REBOUND_MODEL_VERSION,
+    PERCENTAGE_REBOUND_MODEL_VERSION,
     POINT_MODEL_VERSIONS, OFFENSE_BONUS_POLICIES, GRADE_POLICY, from_captured_inputs)
 
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_point_edge_grades.json'
@@ -80,7 +81,7 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
     if f.get('home_court',{}).get('fallback'):flags.append('Home court uses the league prior')
     if f.get('injury_verified') is not True:flags.append('Player availability unchecked')
     if f.get('starters_confirmed') is not True:flags.append('Starting fives unconfirmed')
-    if model in (CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION) and p.get('rebounding_adjustment', {}).get('status') != 'applied':
+    if model in (CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION) and p.get('rebounding_adjustment', {}).get('status') != 'applied':
         flags.append('Rebounding inputs unavailable; baseline margin retained')
     odds=number(market.get('odds',-110))
     price_ok=abs(odds)>=100 and (100/(odds+100) if odds>0 else -odds/(100-odds))<=110/210+1e-12

@@ -9,10 +9,15 @@ import pytest
 from builders.ncaam_rebounding import (INPUT_POLICY, parse_rebounding_inputs, matchup_transfer,
     percentage_matchup_transfer)
 from builders.ncaam_matchup_projection import (from_captured_inputs, PRE_REBOUND_MODEL_VERSION,
-    CAPPED_REBOUND_MODEL_VERSION, MODEL_VERSION)
+    CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION)
 from builders.ncaam_point_edges import capture_grades
 from builders.ncaam_matchup_grades import policy_digest
-from research.test_ncaam_point_edges import forecast, grades, LOCK
+from research.test_ncaam_point_edges import forecast as current_forecast, grades, LOCK
+
+
+def forecast(**kwargs):
+    """Exercise archived rebound proofs without changing the live default."""
+    return current_forecast(**{'model_version': PERCENTAGE_REBOUND_MODEL_VERSION, **kwargs})
 
 
 def profile(team, *, orb=30, drb=70, opp_orb=30, opp_drb=70, gp=3):
@@ -188,7 +193,7 @@ def test_old_v10_scores_proofs_and_replay_remain_unchanged():
     assert result['games'][0]['matchup_projection'] == old['matchup_projection']
 
 
-def test_builder_preparation_propagates_dated_rebound_profiles_to_the_live_projector():
+def test_builder_preparation_retains_dated_profiles_without_applying_a_live_rebound_bonus():
     from builders.ncaam_game_counts import parse_game_counts
     from builders.ncaam_model import prepare_season_ratings
     from builders.ncaam_matchup_projection import project
@@ -206,7 +211,7 @@ def test_builder_preparation_propagates_dated_rebound_profiles_to_the_live_proje
     game = {'away': 'Away', 'home': 'Home', 'away_aliases': ['Away'], 'home_aliases': ['Home'],
         'season': 2027, 'tipoff': '2026-11-14T23:00:00+00:00', 'neutral_site': True}
     f = project(game, bundle, {'home_spread': 0., 'total': 150., 'as_of': LOCK}, LOCK)
-    assert f['matchup_projection']['rebounding_adjustment']['status'] == 'applied'
+    assert 'rebounding_adjustment' not in f['matchup_projection']
     assert f['away_rating']['rebounding']['d1_games'] == 3
     assert current['teams']['away'].get('rebounding') is None
 
@@ -217,7 +222,8 @@ def test_frozen_real_games_keep_totals_and_the_tarleton_direction_honest():
     for game in data['games']:
         kwargs = {k: game[k] for k in ['as_of', 'tipoff', 'source_url', 'home_court_points', 'neutral_site', 'lineup_adjustment']}
         old = from_captured_inputs(game['away'], game['home'], game['benchmark'], model_version=PRE_REBOUND_MODEL_VERSION, **kwargs)
-        new = from_captured_inputs(game['away'], game['home'], game['benchmark'], **kwargs)
+        new = from_captured_inputs(game['away'], game['home'], game['benchmark'],
+            model_version=PERCENTAGE_REBOUND_MODEL_VERSION, **kwargs)
         assert new['total'] == old['total']
         assert new['rebounding_adjustment']['status'] == game['expected_status']
         archived = from_captured_inputs(game['away'], game['home'], game['benchmark'],
@@ -228,11 +234,11 @@ def test_frozen_real_games_keep_totals_and_the_tarleton_direction_honest():
             assert new['away_points'] < old['away_points']  # Tarleton
 
 
-def test_active_rebound_forecast_replays_twice_without_applying_the_transfer_twice():
+def test_archived_rebound_forecast_replays_twice_without_applying_the_transfer_twice():
     from research.replay_ncaam_point_model import replay
     a, h = ratings(); f, b = forecast(away=a, home=h)
     g = grades(f, b); f.update(matchup_total=g['total'], matchup_spread=g['spread'])
-    first = replay({'model_version': MODEL_VERSION, 'games': [f]})
+    first = replay({'model_version': PERCENTAGE_REBOUND_MODEL_VERSION, 'games': [f]})
     second = replay(first)
     assert first['errors'] == second['errors'] == []
     assert first['games'][0]['matchup_projection'] == f['matchup_projection']
