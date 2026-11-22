@@ -41,7 +41,7 @@ def normalize_game(row):
     return game
 
 
-def phase_for_game(game, now, previous):
+def phase_for_game(game, now, previous, *, game_preview_ready=True):
     kickoff = timestamp(game["Game Time"])
     minutes = (kickoff - now).total_seconds() / 60
     local = now.astimezone(ET)
@@ -58,6 +58,10 @@ def phase_for_game(game, now, previous):
         return "late"
     if minutes > PREGAME_WINDOW_MINUTES and (gid, "early") not in previous and (gid, "pregame") not in previous:
         return "early"
+    if (minutes > PREGAME_WINDOW_MINUTES and not game_preview_ready
+            and (gid, "early") in previous and (gid, "early_models") not in previous
+            and (gid, "pregame") not in previous):
+        return "early_models"
     return None
 
 

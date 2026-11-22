@@ -106,6 +106,16 @@ def test_phase_windows_cover_normal_international_and_dst_kickoffs():
         assert phase_for_game(g, current - timedelta(hours=1), {}) is None
 
 
+def test_missing_current_game_preview_gets_one_early_refresh_without_locking():
+    g = game()
+    previous = {(g["Game ID"], "early"): {}}
+    assert phase_for_game(g, NOW, previous, game_preview_ready=False) == "early_models"
+    assert phase_for_game(g, NOW, previous, game_preview_ready=True) is None
+    previous[(g["Game ID"], "early_models")] = {}
+    assert phase_for_game(g, NOW, previous, game_preview_ready=False) is None
+    assert phase_for_game(g, NOW + timedelta(hours=4), previous, game_preview_ready=False) == "pregame"
+
+
 @pytest.mark.parametrize("kickoff,run", [
     ("2026-11-15T13:00:00-05:00", "2026-11-15T11:37:00-05:00"),
     ("2026-11-15T16:05:00-05:00", "2026-11-15T14:37:00-05:00"),
@@ -200,6 +210,8 @@ def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     assert len(db.rows("prop_previews")) == 1
     assert db.rows("prop_previews")[0]["Build Phase"] == "early"
     assert db.rows("prop_previews")[0]["Quote Observed At"] == NOW.isoformat()
+    assert db.rows("game_previews")[0]["Spread Grade"] == "A Spread"
+    assert db.rows("game_previews")[0]["Quote Observed At"] == NOW.isoformat()
     preview = db.rows("daily_slate")[0]
     assert preview["Spread Grade"] == "No Play (pending pregame)"
     assert preview["Total Grade"] == "No Play (pending pregame)"
@@ -211,6 +223,46 @@ def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     before = conn.total_changes
     assert not save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
     assert conn.total_changes == before
+
+
+def test_current_game_preview_refresh_preserves_the_original_archive_and_prop_preview(database):
+    db, _ = database
+    b, result = sample_result()
+    assert not save_run(db, b, copy.deepcopy(result), game(), "early_models", NOW)
+    assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
+    original = db.run_payload(game()["Game ID"], "early")
+    prop_preview = db.rows("prop_previews")
+    result["slate"].update({"Spread Grade": "B Spread", "Total Grade": "Under", "Projected Total": 40})
+    assert save_run(db, b, copy.deepcopy(result), game(), "early_models", NOW + timedelta(minutes=5))
+    assert db.run_payload(game()["Game ID"], "early") == original
+    assert db.rows("prop_previews") == prop_preview
+    assert not db.rows("bet_tracker") and not db.rows("prop_tracker")
+    assert not db.rows("builder_completed")
+    assert db.rows("daily_slate")[0]["Spread Grade"] == "No Play (pending pregame)"
+    preview = db.rows("game_previews")[0]
+    assert preview["Spread Grade"] == "B Spread" and preview["Total Grade"] == "Under"
+    assert preview["Build Phase"] == "early" and preview["Projected Total"] == "40"
+    assert not save_run(db, b, copy.deepcopy(result), game(), "early_models", NOW + timedelta(minutes=6))
+    assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW + timedelta(minutes=6))
+    assert db.rows("daily_slate")[0]["Spread Grade"] == "B Spread"
+
+
+@pytest.mark.parametrize("blocked_by", ["started", "pregame", "manual"])
+def test_current_game_preview_refresh_never_overwrites_started_or_locked_games(database, blocked_by):
+    db, _ = database
+    b, result = sample_result()
+    assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
+    if blocked_by == "pregame":
+        assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
+    elif blocked_by == "manual":
+        with db.writes(): upsert_results(db, "daily_slate", [{**result["slate"], "Notes": "Manual", "Build Policy": "", "Build Phase": "manual"}], b.SLATE_COLUMNS, NOW)
+    before = db.rows("game_previews")
+    when = NOW + timedelta(hours=6) if blocked_by == "started" else NOW
+    if blocked_by == "started":
+        for field in ["depth_observed_at", "game_market_observed_at"]: result["provenance"][field] = when.isoformat()
+        result["provenance"]["props"]["observed_at"] = when.isoformat()
+    assert not save_run(db, b, copy.deepcopy(result), game(), "early_models", when)
+    assert db.rows("game_previews") == before
 
 
 def test_archived_morning_props_become_visible_without_rerunning_or_tracking(database):

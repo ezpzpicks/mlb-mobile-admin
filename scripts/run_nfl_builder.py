@@ -22,6 +22,8 @@ from builders.nfl_automation import ET, checked_depth, compute, environment, fet
 from builders.nfl_rotowire_props import SourceError, apply_quotes, fetch_inactives, fetch_props
 from shared.ncaaf_auto_builder import timestamp
 from shared.nfl_auto_storage import NflDatabase, POLICY, records, save_run, upsert_results, publish_saved_early_props
+from builders.nfl_independent_spread import VERSION as SPREAD_VERSION
+from builders.nfl_independent_total import VERSION as TOTAL_VERSION
 
 
 def clock():
@@ -128,7 +130,10 @@ def run(args):
             if not games:
                 raise SourceError("No upcoming NFL schedule matchup was available for the deployment trial.")
         previous = db.runs(str(local.date()))
-        plan = [(g, "early" if args.next_game else phase_for_game(g, now, previous)) for g in games]
+        preview_ready = {str(r.get("Game ID")) for r in db.rows("game_previews", str(local.date()))
+                         if r.get("Spread Model Version") == SPREAD_VERSION and r.get("Total Model Version") == TOTAL_VERSION}
+        plan = [(g, "early" if args.next_game else phase_for_game(g, now, previous,
+                 game_preview_ready=str(g["Game ID"]) in preview_ready)) for g in games]
         plan = [(g, phase) for g, phase in plan if phase]
         emit("plan", mode="evaluate" if args.evaluate else "commit" if args.commit else "plan", games=[{"game_id": g["Game ID"], "game": f"{g['Away Team']} @ {g['Home Team']}", "kickoff": g["Game Time"], "phase": phase} for g, phase in plan])
         if not (args.evaluate or args.commit):
@@ -157,7 +162,7 @@ def run(args):
             emit("no_complete_markets")
             return 1 if args.next_game else 0
         props = fetch_props(on_event=emit)
-        inactives = fetch_inactives(on_event=emit) if args.next_game or any(phase != "early" for _, phase, _ in ready) else None
+        inactives = fetch_inactives(on_event=emit) if args.next_game or any(phase not in {"early", "early_models"} for _, phase, _ in ready) else None
         teams = {g[side] for g, _, _ in ready for side in ("Away Team", "Home Team")}
         seasons = {g["Season"] for g, _, _ in ready}
         if len(seasons) != 1:
@@ -184,7 +189,7 @@ def run(args):
                 builder._AUTO_SEASON = game["Season"]
                 if key not in weekly_cache:
                     weekly_cache[key] = weekly_inputs(builder, db, *key, now=clock(), commit=args.commit, on_event=emit)
-                result = compute(builder, game, market, weekly_cache[key], depth, props, now=clock(), phase=phase, depth_at=depth_at, inactives=inactives)
+                result = compute(builder, game, market, weekly_cache[key], depth, props, now=clock(), phase="early" if phase == "early_models" else phase, depth_at=depth_at, inactives=inactives)
                 changed = not baseline or baseline["input_hash"] != result["input_hash"]
                 # Recheck the schedule and kickoff after cold input preparation.
                 check = next((normalize_game(r) for r in db.schedule(game["Date"]) if str(r.get("Game ID")) == game["Game ID"]), None)
