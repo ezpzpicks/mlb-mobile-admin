@@ -49,7 +49,8 @@ class ProjectionTests(unittest.TestCase):
         market={'home_spread':-2.,'total':150.,'as_of':LOCK}
         f=project(game,bundle,market,LOCK)
         self.assertEqual(f['projection_engine'],MODEL_VERSION)
-        self.assertAlmostEqual(f['matchup_projection']['margin'],f['matchup_projection']['possessions']*.08+5.)
+        from builders.ncaam_spread_calibration import PARAMETERS
+        self.assertAlmostEqual(f['matchup_projection']['margin'],PARAMETERS['scale']*(f['matchup_projection']['possessions']*.08+5.))
         changed=project(game,bundle,{**market,'home_spread':10.,'total':170.},LOCK)
         self.assertEqual(f['matchup_projection'],changed['matchup_projection'])
         self.assertIn('margin_calibration',f['legacy_forecast'])

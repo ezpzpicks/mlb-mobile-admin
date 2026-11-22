@@ -1,0 +1,7 @@
+{
+  "version": "ncaam-spread-prior-calibration-b-2026-11-22-v1",
+  "scale": 0.8308142655650089,
+  "training_games": 5714,
+  "training_through": "2025-11-30",
+  "frozen_at": "2026-11-22T04:19:41.409352+00:00"
+}

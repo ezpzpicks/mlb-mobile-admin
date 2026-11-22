@@ -8,7 +8,8 @@ from pathlib import Path
 from builders.ncaam_matchup_grades import number, policy_digest, select_benchmark, stamp
 from builders.ncaam_matchup_projection import (LEGACY_POINT_MODEL_VERSION, CAPPED_REBOUND_MODEL_VERSION,
     PERCENTAGE_REBOUND_MODEL_VERSION,
-    POINT_MODEL_VERSIONS, OFFENSE_BONUS_POLICIES, GRADE_POLICY, from_captured_inputs)
+    POINT_MODEL_VERSIONS, OFFENSE_BONUS_POLICIES, GRADE_POLICY, MODEL_VERSION, from_captured_inputs)
+from builders.ncaam_spread_calibration import B_ONLY_SELECTION
 
 POLICY_PATH = Path(__file__).resolve().parents[1]/'config/ncaam_point_edge_grades.json'
 
@@ -36,6 +37,12 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
         raise ValueError('Grade publication must respect its live/replay clock.')
     p=f['matchup_projection']
     model=f['modelVersion']
+    if model == MODEL_VERSION:
+        if policy.get('spread_selection', B_ONLY_SELECTION) != B_ONLY_SELECTION or t['spread_b_points'] != 5 or t['spread_a_points'] != 7:
+            raise ValueError('The calibrated spread model requires the frozen B-only selection policy.')
+        policy['spread_selection'] = deepcopy(B_ONLY_SELECTION)
+    elif 'spread_selection' in policy:
+        raise ValueError('An archived projection cannot inherit the calibrated spread selection policy.')
     if (model not in POINT_MODEL_VERSIONS or f.get('projection_engine')!=model
         or p['model_version']!=model or p['sha256']!=policy_digest({k:v for k,v in p.items() if k!='sha256'})
         or stamp(p['as_of'])!=lock or stamp(p['tipoff'])!=tip
@@ -87,15 +94,21 @@ def capture_grades(f, benchmarks, *, mode='live', policy=None, published_at=None
     price_ok=abs(odds)>=100 and (100/(odds+100) if odds>0 else -odds/(100-odds))<=110/210+1e-12
     output={}
     for name,gap in (('spread',number(p['margin'])+number(market['home_spread'])),('total',number(p['total'])-number(market['total']))):
-        edge=abs(gap);tier='A' if edge>=t[name+'_a_points'] else 'B' if edge>=t[name+'_b_points'] else 'Research'
+        edge=abs(gap)
+        # Ignore sub-nanopoint cancellation when a quote lands on a cutoff.
+        tier_edge=round(edge,8) if name=='spread' and model==MODEL_VERSION else edge
+        tier='A' if tier_edge>=t[name+'_a_points'] else 'B' if tier_edge>=t[name+'_b_points'] else 'Research'
         side=('home' if gap>0 else 'away' if gap<0 else None) if name=='spread' else ('Over' if gap>0 else 'Under' if gap<0 else None)
         # Null disables the limit; numerical limits retain archived policy behavior.
         limit=t['spread_max_market_line']
         large=name=='spread' and limit is not None and abs(number(market['home_spread']))>=limit
-        grade=tier if price_ok and not large else 'Research'
+        outside_band=name=='spread' and model==MODEL_VERSION and not 5.<=tier_edge<7.
+        grade=tier if price_ok and not large and not outside_band else 'Research'
         reason=f"{edge:.2f}-point edge; A >= {t[name+'_a_points']:g}, B >= {t[name+'_b_points']:g}"
         if large:reason='20+ point spreads remain projection-only'
         elif not price_ok:reason='This quote needs separate probability evidence at its price'
+        elif name=='spread' and model==MODEL_VERSION:
+            reason=f"{edge:.2f}-point edge; {'outside ' if outside_band else ''}B-only spread range 5 to under 7"
         common={'policy_version':policy['version'],'policy_sha256':policy_digest(policy),'policy':deepcopy(policy),
             'grading_basis':'market_point_edge','grade':grade,'edge_grade':tier,'eligible':grade in ('A','B'),
             'side':side if grade in ('A','B') else None,'projected_side':side,'edge':edge,'reason':reason,
