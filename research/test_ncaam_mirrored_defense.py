@@ -3,7 +3,7 @@ from copy import deepcopy
 import pytest
 
 from builders.ncaam_matchup_projection import (
-    MODEL_VERSION, OFFENSE_ONLY_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
+    MIRRORED_DEFENSE_MODEL_VERSION as MODEL_VERSION, OFFENSE_ONLY_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
 )
 from builders.ncaam_matchup_grades import policy_digest
 from research.test_ncaam_point_edges import forecast, grades

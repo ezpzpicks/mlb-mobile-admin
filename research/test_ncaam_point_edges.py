@@ -6,14 +6,14 @@ import unittest
 
 from builders.ncaam_matchup_projection import (from_captured_inputs, project, MODEL_VERSION,
     LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
-    INITIAL_OFFENSE_BONUS_MODEL_VERSION, POINT_MODEL_VERSIONS)
+    INITIAL_OFFENSE_BONUS_MODEL_VERSION, POINT_MODEL_VERSIONS, MIRRORED_DEFENSE_MODEL_VERSION)
 from builders.ncaam_point_edges import capture_grades, load_policy
 
 LOCK='2026-11-14T12:00:00+00:00'
 TIP='2026-11-14T23:00:00+00:00'
 
 
-def forecast(*,court=0.,away=None,home=None,impact=None,home_line=0.,total_line=150.,model_version=MODEL_VERSION):
+def forecast(*,court=0.,away=None,home=None,impact=None,home_line=0.,total_line=150.,model_version=MIRRORED_DEFENSE_MODEL_VERSION):
     b={'season':2027,'team_count':365,'observed_at':'2026-11-14T11:00:00+00:00',
        'metrics':{m:{'mean':70. if m=='tempo' else 105.,'sd':3. if m=='tempo' else 8.} for m in ('offense','defense','tempo')}}
     a=away or {'team':'Away','offense':110.,'defense':108.,'tempo':70.}
@@ -95,7 +95,8 @@ class ProjectionTests(unittest.TestCase):
             kwargs={'as_of':f['lockedAt'],'tipoff':f['tipoff'],'source_url':f['ratings_source_url'],
                 'home_court_points':f['home_court_points'],'neutral_site':f['neutral_site'],'lineup_adjustment':f['lineup_adjustment']}
             old=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],model_version=LEGACY_POINT_MODEL_VERSION,**kwargs)
-            revised=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kwargs)
+            revised=from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],
+                model_version=MIRRORED_DEFENSE_MODEL_VERSION,**kwargs)
             self.assertAlmostEqual(old['total'],f['total'])
             for side in ('away','home'):
                 self.assertEqual(old['pairings'][side]['expected_efficiency'],revised['pairings'][side]['expected_efficiency'])
@@ -109,7 +110,8 @@ class ProjectionTests(unittest.TestCase):
                 self.assertEqual(revised['adjustments']['away']['offense_bonus']['points'],0)
                 self.assertEqual(revised['adjustments']['away']['opponent_defense_deduction']['points'],5)
             f['market']['total']=250.;f['actual_total']=1.
-            self.assertEqual(revised,from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],**kwargs))
+            self.assertEqual(revised,from_captured_inputs(f['away_rating'],f['home_rating'],f['benchmark'],
+                model_version=MIRRORED_DEFENSE_MODEL_VERSION,**kwargs))
 
     def test_offense_faces_opposing_defense_in_points_per_100(self):
         f,_=forecast();a=deepcopy(f['away_rating']);h=deepcopy(f['home_rating']);h['offense']+=5
