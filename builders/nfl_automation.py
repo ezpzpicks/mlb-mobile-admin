@@ -15,6 +15,8 @@ import requests
 from builders.nfl_rotowire_props import SourceError, apply_quotes, name_key, team_key
 from shared.ncaaf_auto_builder import MarketGame, number, timestamp
 from shared.nfl_auto_storage import POLICY, clean, records
+from builders.nfl_independent_spread import VERSION as SPREAD_VERSION, grade_projection, storage_fields, storage_version
+from builders.nfl_independent_total import grade_projection as total_grade_projection, storage_fields as total_storage_fields, storage_version as total_storage_version
 
 ET = ZoneInfo("America/New_York")
 # Include the first half-hour tick after the game-day inactive lists arrive.
@@ -208,7 +210,7 @@ def checked_depth(depth, game, inactives, now):
 
 def weekly_inputs(builder, db, season, week, *, now, commit, on_event):
     from builders import nfl_slot_matchups as slots
-    key = f"weekly:{builder.MODEL_VERSION}:{season}:{week}"
+    key = f"weekly:{builder.MODEL_VERSION}:{SPREAD_VERSION}:{season}:{week}"
     cached = db.cached(key)
     if cached and timedelta(0) <= now - datetime.fromisoformat(cached[0]) <= timedelta(hours=36):
         data = cached[1]
@@ -303,31 +305,39 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
     hfa = builder._automatic_home_field_advantage(game["Season"], game["Week"], game["Home Team"], pd.Series(game))
     projection = builder._project_matchup(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"],
         {"home_field": hfa["value"], "weather_total_adjustment": weather_adjustment,
-         "home_rest_edge": 0.0, "manual_home_margin_adjustment": 0.0, "manual_total_adjustment": 0.0})
+         "home_rest_edge": 0.0, "manual_home_margin_adjustment": 0.0, "manual_total_adjustment": 0.0,
+         "spread_market_ready": True, "market_home_spread": market.home_spread, "market_total": market.total,
+         "home_rest": game.get("Home Rest"), "away_rest": game.get("Away Rest"),
+         "neutral_site": builder._is_neutral_schedule_row(game),
+         "season": game["Season"], "week": game["Week"], "game_date": game["Date"]})
     seed = builder._simulation_seed(game["Game ID"], game["Away Team"], game["Home Team"], game["Season"], game["Week"])
     simulation = builder._simulate_game(projection, market.home_spread, market.total, reliability, seed)
     selections = {}
     for kind in ("Spread", "Total"):
         home_prob = simulation["home_cover"] if kind == "Spread" else simulation["over"]
         positive = home_prob >= 0.5
+        if kind == "Spread" and projection.get("spread_component"):
+            positive = projection["margin"] + market.home_spread >= 0
+        if kind == "Total" and projection.get("total_component"):
+            positive = projection["total"] - market.total >= 0
         probability = home_prob if positive else 1 - home_prob
         if kind == "Spread":
             pick = f"{game['Home Team']} {market.home_spread:+.1f}" if positive else f"{game['Away Team']} {-market.home_spread:+.1f}"
             edge = (projection["margin"] + market.home_spread) * (1 if positive else -1)
             confluence, _ = builder._spread_confluence(positive, edge, ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], reliability)
-            grade = builder._grade_spread(probability, edge, reliability, confluence)
+            grade = grade_projection(projection) if projection.get("spread_component") else builder._grade_spread(probability, edge, reliability, confluence)
         else:
             pick = f"{'Over' if positive else 'Under'} {market.total:.1f}"
             edge = (projection["total"] - market.total) * (1 if positive else -1)
             confluence, _ = builder._total_confluence(positive, edge, projection, ratings["Away"], ratings["Home"], weather_adjustment, reliability)
-            grade = builder._grade_total_direction(pick, probability, edge, reliability, confluence)
+            grade = total_grade_projection(projection) if projection.get("total_component") else builder._grade_total_direction(pick, probability, edge, reliability, confluence)
         from shared.modeling import expected_value_per_unit
         if probability <= 0.5 or expected_value_per_unit(probability, -110) <= 0:
             grade = f"Non-Edge {kind}"
         selections[kind] = {"Pick": pick, "Probability": probability, "Edge": round(edge, 2), "Grade": grade, "Confluence": confluence}
     label = f"{game['Away Team']} at {game['Home Team']}"
     note = f"{POLICY}; {phase}; ScoresAndOdds game lines, assumed -110 game prices; RotoWire actual prop prices; {weather['source']}; availability observed, workload conditional."
-    version = f"{builder.MODEL_VERSION}|{POLICY}"
+    version = f"{total_storage_version(storage_version(builder.MODEL_VERSION, projection), projection)}|{POLICY}"
     slate = {"Date": game["Date"], "Season": game["Season"], "Week": game["Week"], "Game ID": game["Game ID"], "Game": label,
         "Away Team": game["Away Team"], "Home Team": game["Home Team"], "Game Time": game["Game Time"],
         "Projected Away": round(projection["away_score"], 1), "Projected Home": round(projection["home_score"], 1),
@@ -338,6 +348,8 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         "Previous Season Weight": ratings["Away"].get("Previous Season Weight", ""), "Current Season Weight": ratings["Away"].get("Current Season Weight", ""),
         "Weather Adjustment": weather_adjustment, "Roof": weather["roof"], "Temperature": weather["temperature"], "Wind": weather["wind"],
         "ML Grade": "No market line", "Model Version": version, "Notes": note}
+    slate.update(storage_fields(projection))
+    slate.update(total_storage_fields(projection))
     for side in ("Away", "Home"):
         for label_part, field in (("Low", "low"), ("High", "high")):
             slate[f"{side} Score {label_part}"] = round(simulation[f"{side.lower()}_{field}"], 1)
@@ -363,8 +375,10 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         for row in records(lineup):
             row.update({"Date": game["Date"], "Season": game["Season"], "Week": game["Week"], "Game ID": game["Game ID"], "Team": game[f"{side} Team"]})
             l_rows.append(row)
-    for row in [*p_rows, *p_tracker, *g_tracker, *l_rows]:
-        row.update({"Model Version": version, "Game Time": game["Game Time"]})
+    for row in [*p_rows, *p_tracker, *l_rows]:
+        row.update({"Model Version": f"{builder.MODEL_VERSION}|{POLICY}", "Game Time": game["Game Time"]})
+    for row in g_tracker:
+        row.update({"Model Version": version, "Game Time": game["Game Time"], **storage_fields(projection), **total_storage_fields(projection)})
     fingerprint = input_identity(game, market, matched, depth, weather, inactives)
     result = clean({"slate": slate, "props": p_rows, "prop_tracker": p_tracker, "game_tracker": g_tracker, "lineups": l_rows,
         "input_hash": fingerprint, "provenance": {"props": {k: props[k] for k in ("source", "source_sha256", "observed_at", "week")},

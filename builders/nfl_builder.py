@@ -22,6 +22,8 @@ import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
+from builders.nfl_independent_spread import grade_projection as independent_spread_grade, storage_fields as independent_spread_fields, storage_version as independent_model_version
+from builders.nfl_independent_total import grade_projection as independent_total_grade, storage_fields as independent_total_fields, storage_version as independent_total_version
 
 try:
     import polars as pl
@@ -5462,6 +5464,9 @@ def _render_build() -> None:
             "weather_total_adjustment": weather_total_adjustment,
             "manual_total_adjustment": manual_total_adjustment,
             "manual_home_margin_adjustment": manual_home_margin_adjustment,
+            "spread_market_ready": game_markets_ready, "market_home_spread": home_spread, "market_total": market_total,
+            "home_rest": home_rest, "away_rest": away_rest, "neutral_site": _is_neutral_schedule_row(selected_schedule_row),
+            "season": season, "week": week, "game_date": slate_date_str,
         },
     )
     simulation = _simulate_game(
@@ -5479,7 +5484,7 @@ def _render_build() -> None:
     away_spread_novig = raw_away_spread_implied / spread_market_sum
     home_spread_ev = expected_value_per_unit(home_cover, home_spread_odds)
     away_spread_ev = expected_value_per_unit(away_cover, away_spread_odds)
-    if home_spread_ev >= away_spread_ev:
+    if (spread_edge_home >= 0 if projection.get("spread_component") else home_spread_ev >= away_spread_ev):
         spread_pick = f"{home_team} {home_spread:+.1f}"
         spread_probability, spread_edge, spread_pick_home = home_cover, spread_edge_home, True
         spread_pick_odds, spread_implied = home_spread_odds, home_spread_novig
@@ -5493,7 +5498,7 @@ def _render_build() -> None:
     spread_confluence, spread_reasons = _spread_confluence(
         spread_pick_home, spread_edge, away_rating, home_rating, away_lineup_summary, home_lineup_summary, reliability
     )
-    spread_grade = _grade_spread(spread_probability, spread_edge, reliability, spread_confluence)
+    spread_grade = independent_spread_grade(projection) if projection.get("spread_component") else _grade_spread(spread_probability, spread_edge, reliability, spread_confluence)
     if spread_price_edge <= 0 or spread_ev <= 0:
         spread_grade = "Non-Edge Spread"
     if not spread_market_ready:
@@ -5508,7 +5513,7 @@ def _render_build() -> None:
     under_novig = raw_under_implied / total_market_sum
     over_ev = expected_value_per_unit(over_probability, total_over_odds)
     under_ev = expected_value_per_unit(under_probability, total_under_odds)
-    if over_ev >= under_ev:
+    if (projection["total"] - market_total >= 0 if projection.get("total_component") else over_ev >= under_ev):
         total_pick = f"Over {market_total:.1f}"
         total_probability, total_edge, over_pick = over_probability, projection["total"] - market_total, True
         total_pick_odds, total_implied, total_ev = total_over_odds, over_novig, over_ev
@@ -5520,7 +5525,7 @@ def _render_build() -> None:
     total_confluence, total_reasons = _total_confluence(
         over_pick, total_edge, projection, away_rating, home_rating, weather_total_adjustment, reliability
     )
-    total_grade = _grade_total_direction(total_pick, total_probability, total_edge, reliability, total_confluence)
+    total_grade = independent_total_grade(projection) if projection.get("total_component") else _grade_total_direction(total_pick, total_probability, total_edge, reliability, total_confluence)
     if total_price_edge <= 0 or total_ev <= 0:
         total_grade = "Non-Edge Total"
     if not total_market_ready:
@@ -5564,7 +5569,9 @@ def _render_build() -> None:
         "Away Offensive Absence": away_lineup_summary["offense_absence"], "Away Defensive Absence": away_lineup_summary["defense_absence"],
         "Home Offensive Absence": home_lineup_summary["offense_absence"], "Home Defensive Absence": home_lineup_summary["defense_absence"],
         "Weather Adjustment": weather_total_adjustment, "Roof": roof, "Temperature": temperature, "Wind": wind,
-        "Model Version": MODEL_VERSION, "Notes": notes,
+        "Model Version": independent_total_version(independent_model_version(MODEL_VERSION, projection), projection), "Notes": notes,
+        **independent_spread_fields(projection),
+        **independent_total_fields(projection),
     }
 
     st.markdown("### Manual player prop lines")
@@ -5742,6 +5749,8 @@ def _render_build() -> None:
             reliability, data_confidence, personnel_confidence,
             projection["away_score"], projection["home_score"], notes,
         )
+        for tracked in game_tracker_rows:
+            tracked.update({"Model Version": independent_total_version(independent_model_version(MODEL_VERSION, projection), projection), **independent_spread_fields(projection), **independent_total_fields(projection)})
         prop_tracker_rows = _graded_prop_tracker_rows(
             evaluated_props, slate_date_str, season, week, game_id, game, notes
         )

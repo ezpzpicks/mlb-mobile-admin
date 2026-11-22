@@ -12,9 +12,13 @@ def load_production_builder():
     from builders.nfl_skill_prop_regression import install_skill_prop_regression
     from builders.nfl_skill_prop_consistency import install_skill_prop_consistency
     from builders.nfl_slot_matchups import install_slot_matchup_layer
+    from builders.nfl_independent_spread import install_independent_spread_layer
+    from builders.nfl_independent_total import install_independent_total_layer
     install_regression_layer(nfl_builder)
     install_skill_prop_regression(nfl_builder)
     install_skill_prop_consistency(nfl_builder)
     install_slot_matchup_layer(nfl_builder)
     install_covers_weather(nfl_builder)
+    install_independent_spread_layer(nfl_builder)
+    install_independent_total_layer(nfl_builder)
     return nfl_builder
