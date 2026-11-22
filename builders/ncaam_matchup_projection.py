@@ -10,6 +10,7 @@ from builders.ncaam_model import project as legacy_project, team_key
 from builders.ncaam_matchup_grades import number, policy_digest, population_benchmark, stamp
 from builders.ncaam_rebounding import matchup_transfer, percentage_matchup_transfer
 from builders.ncaam_overtime import overtime_allowance
+from builders.ncaam_spread_calibration import calibrated_spread, SPREAD_MODEL_VERSION
 
 LEGACY_POINT_MODEL_VERSION = "ncaam-v0.7-matchup-projection-2026-11-14"
 ADJUSTED_TEMPO_MODEL_VERSION = "ncaam-v0.8-adjusted-tempo-2026-11-15"
@@ -19,13 +20,14 @@ CAPPED_REBOUND_MODEL_VERSION = "ncaam-v0.11-rebound-transfer-2026-11-16"
 PERCENTAGE_REBOUND_MODEL_VERSION = "ncaam-v0.12-rebound-percentage-2026-11-17"
 OFFENSE_ONLY_MODEL_VERSION = "ncaam-v0.13-offense-only-2026-11-17"
 MIRRORED_DEFENSE_MODEL_VERSION = "ncaam-v0.14-mirrored-defense-2026-11-18"
-MODEL_VERSION = "ncaam-v0.15-independent-markets-2026-11-21"
+INDEPENDENT_MODEL_VERSION = "ncaam-v0.15-independent-markets-2026-11-21"
+MODEL_VERSION = "ncaam-v0.16-calibrated-b-spreads-2026-11-22"
 INDEPENDENT_MARKET_POLICY = "ncaam-independent-total-spread-2026-11-21-v1"
 TOTAL_MODEL_VERSION = "ncaam-total-core-overtime-2026-11-21-v1"
 POINT_MODEL_VERSIONS = (LEGACY_POINT_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
                         INITIAL_OFFENSE_BONUS_MODEL_VERSION, PRE_REBOUND_MODEL_VERSION,
                         CAPPED_REBOUND_MODEL_VERSION, PERCENTAGE_REBOUND_MODEL_VERSION,
-                        OFFENSE_ONLY_MODEL_VERSION, MIRRORED_DEFENSE_MODEL_VERSION, MODEL_VERSION)
+                        OFFENSE_ONLY_MODEL_VERSION, MIRRORED_DEFENSE_MODEL_VERSION, INDEPENDENT_MODEL_VERSION, MODEL_VERSION)
 GRADE_POLICY = "ncaam-point-edge-2026-11-14-v1"
 OFFENSE_BONUS_POLICY = "ncaam-very-strong-offense-progressive-2026-11-16-v2"
 VERY_STRONG_OFFENSE_Z = 1.5
@@ -45,6 +47,7 @@ OFFENSE_BONUS_POLICIES = {
     PERCENTAGE_REBOUND_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     OFFENSE_ONLY_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     MIRRORED_DEFENSE_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
+    INDEPENDENT_MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
     MODEL_VERSION: {'version': OFFENSE_BONUS_POLICY, 'points': OFFENSE_BONUS_POINTS},
 }
 
@@ -88,10 +91,10 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
                          model_version=MODEL_VERSION):
     if model_version not in POINT_MODEL_VERSIONS:
         raise ValueError('Unknown captured point model.')
-    if model_version == MODEL_VERSION:
+    if model_version in (INDEPENDENT_MODEL_VERSION, MODEL_VERSION):
         return independent_market_projection(away,home,benchmark,as_of=as_of,tipoff=tipoff,
             source_url=source_url,home_court_points=home_court_points,neutral_site=neutral_site,
-            lineup_adjustment=lineup_adjustment)
+            lineup_adjustment=lineup_adjustment, model_version=model_version)
     observed, clock, start = map(stamp, (benchmark['observed_at'], as_of, tipoff))
     season = int(benchmark['season'])
     if (not observed <= clock < start or (clock-observed).total_seconds() > 30*3600
@@ -208,21 +211,24 @@ def from_captured_inputs(away, home, benchmark, *, as_of, tipoff, source_url,
 
 
 def independent_market_projection(away, home, benchmark, *, as_of, tipoff, source_url,
-                                  home_court_points, neutral_site, lineup_adjustment=None):
-    """Keep the spread margin while selecting the total with its own formula."""
+                                  home_court_points, neutral_site, lineup_adjustment=None,
+                                  model_version=MODEL_VERSION):
+    """Version each margin independently of the unchanged core-plus-OT total."""
     kwargs=dict(as_of=as_of,tipoff=tipoff,source_url=source_url,
         home_court_points=home_court_points,neutral_site=neutral_site,lineup_adjustment=lineup_adjustment)
     spread=from_captured_inputs(away,home,benchmark,model_version=MIRRORED_DEFENSE_MODEL_VERSION,**kwargs)
     core=from_captured_inputs(away,home,benchmark,model_version=ADJUSTED_TEMPO_MODEL_VERSION,**kwargs)
     overtime=overtime_allowance(core['total'],core['margin'],home_court=home_court_points,neutral_site=neutral_site)
     total=overtime['total_including_expected_overtime']
-    margin=spread['margin']
+    spread_component=(calibrated_spread(spread) if model_version == MODEL_VERSION else
+        {'model_version':MIRRORED_DEFENSE_MODEL_VERSION,'margin':spread['margin'],
+         'away_points':spread['away_points'],'home_points':spread['home_points']})
+    margin=spread_component['margin']
     payload=deepcopy(spread)
-    payload.update(model_version=MODEL_VERSION,total=total,margin=margin,
+    payload.update(model_version=model_version,total=total,margin=margin,
         away_points=(total-margin)/2,home_points=(total+margin)/2,
         market_models={'policy':INDEPENDENT_MARKET_POLICY,
-            'spread':{'model_version':MIRRORED_DEFENSE_MODEL_VERSION,'margin':margin,
-                'away_points':spread['away_points'],'home_points':spread['home_points']},
+            'spread':spread_component,
             'total':{'model_version':TOTAL_MODEL_VERSION,'regulation_total':core['total'],
                 'base_home_margin':core['margin'],'offense_extras_applied':False,
                 'defense_extras_applied':False,'overtime':overtime,'total':total}})
@@ -263,8 +269,9 @@ def project(game, bundle, market, now, *, lineup_adjustment=None, home_court=Non
         projection_engine=MODEL_VERSION,matchup_projection=p,
         baseline_away_score=baseline['away_points'],baseline_home_score=baseline['home_points'],
         lineup_margin_change=p['margin']-baseline['margin'],lineup_total_change=p['total']-baseline['total'],
-        margin_calibration={'policy':'direct-matchup-points-v1','active':False,'neutral_margin_scale':1.,
+        margin_calibration={'policy':SPREAD_MODEL_VERSION,'active':True,
+            'neutral_margin_scale':p['market_models']['spread']['calibration']['parameters']['scale'],
             'home_court_points':legacy['home_court_points'],'calibrated_home_margin':margin,
-            'reason':'Independent spread margin plus the captured home-court adjustment'},
-        model_status='Independent spread margin and core-plus-overtime total; provisional point-edge grades')
+            'reason':'Prior-calibrated strength margin; captured court and personnel effects preserved'},
+        model_status='Prior-calibrated B-only spreads; core-plus-overtime totals')
     return result

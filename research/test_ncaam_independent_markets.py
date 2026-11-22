@@ -4,7 +4,7 @@ import math
 import pytest
 
 from builders.ncaam_matchup_projection import (
-    MODEL_VERSION, MIRRORED_DEFENSE_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
+    INDEPENDENT_MODEL_VERSION as MODEL_VERSION, MIRRORED_DEFENSE_MODEL_VERSION, ADJUSTED_TEMPO_MODEL_VERSION,
     from_captured_inputs, project,
 )
 from builders.ncaam_overtime import overtime_allowance
