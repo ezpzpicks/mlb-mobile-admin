@@ -93,6 +93,7 @@ def _dataset_requests(db, dataset, rows, columns, now, *, gate="1", update=False
     output = []
     keys = {"daily_slate": ["Date", "Away Team", "Home Team"], "prop_projections": ["Game ID", "Player", "Market"],
         "prop_previews": ["Game ID", "Player", "Market"],
+        "game_previews": ["Game ID"],
         "prop_tracker": ["Game ID", "Player", "Market", "Pick", "Market Line"],
         "bet_tracker": ["Game ID", "Bet Type", "Selection"],
         "lineup_snapshots": ["Game ID", "Team", "Unit", "Slot"],
@@ -145,6 +146,9 @@ def _dataset_requests(db, dataset, rows, columns, now, *, gate="1", update=False
 
 
 def save_run(db, builder, result, game, phase, now):
+    if phase not in {"early", "early_models", "pregame", "late"}:
+        raise ValueError("Unknown NFL build phase.")
+    early = phase in {"early", "early_models"}
     q = db.turso._sql_text
     gid, day = str(game["Game ID"]), str(game["Date"])
     # Use the real database clock in production as well as the evaluated clock.
@@ -166,7 +170,10 @@ def save_run(db, builder, result, game, phase, now):
     guard += f" AND NOT EXISTS(SELECT 1 FROM nfl_auto_runs WHERE game_id={q(gid)} AND phase={q(phase)} AND policy={q(POLICY)})"
     if phase == "late":
         guard += f" AND EXISTS(SELECT 1 FROM nfl_auto_runs WHERE game_id={q(gid)} AND phase='pregame' AND policy={q(POLICY)})"
-    if phase in {"early", "pregame"}:
+    if phase == "early_models":
+        guard += f" AND EXISTS(SELECT 1 FROM nfl_auto_runs WHERE game_id={q(gid)} AND phase='early' AND policy={q(POLICY)})"
+        guard += f" AND NOT EXISTS(SELECT 1 FROM nfl_auto_runs WHERE game_id={q(gid)} AND phase='pregame' AND policy={q(POLICY)})"
+    if early or phase == "pregame":
         guard += f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND game_key={q(gid)} AND dataset IN ('bet_tracker','prop_tracker','lineup_snapshots'))"
         pair = f"date_key={q(day)} AND lower(json_extract(payload_json,'$.\"Away Team\"'))=lower({q(game['Away Team'])}) AND lower(json_extract(payload_json,'$.\"Home Team\"'))=lower({q(game['Home Team'])})"
         model_present = "(COALESCE(json_extract(payload_json,'$.\"Model Version\"'),'')<>'' OR COALESCE(json_extract(payload_json,'$.\"Projected Away\"'),'')<>'' OR COALESCE(json_extract(payload_json,'$.\"Projected Home\"'),'')<>'')"
@@ -181,11 +188,13 @@ def save_run(db, builder, result, game, phase, now):
     gate = "EXISTS(SELECT 1 FROM nfl_save_gate)"
     if phase != "late":
         slate = dict(result["slate"])
-        if phase == "early":
+        if early:
             # Public football selectors explicitly exclude "No Play". An
             # arbitrary nonempty status such as "Pending pregame" qualifies.
             slate.update({"Spread Grade": "No Play (pending pregame)", "Total Grade": "No Play (pending pregame)"})
         specs = [(builder.SLATE_TAB, [slate], builder.SLATE_COLUMNS)]
+        if early:
+            specs.append(("game_previews", [dict(result["slate"])], builder.SLATE_COLUMNS))
         if phase == "early":
             # Visible morning research stays separate from locked projections
             # and trackers, so publishing it cannot create official selections.
@@ -199,11 +208,13 @@ def save_run(db, builder, result, game, phase, now):
                         "Away Team": game["Away Team"], "Home Team": game["Home Team"], "Game Label": result["slate"]["Game"], "Saved At": now.isoformat()}], builder.BUILDER_COMPLETION_COLUMNS)]
         for dataset, rows, columns in specs:
             for row in rows:
-                row.update({"Build Policy": POLICY, "Build Phase": phase, "Build At": now.isoformat()})
+                row.update({"Build Policy": POLICY, "Build Phase": "early" if early else phase, "Build At": now.isoformat(), "Game Time": game["Game Time"]})
                 if dataset in {"prop_previews", builder.PROP_SLATE_TAB}:
                     row["Quote Observed At"] = provenance.get("props", {}).get("observed_at", "")
+                if dataset == "game_previews":
+                    row["Quote Observed At"] = provenance.get("game_market_observed_at", "")
             extra = ["Build Policy", "Build Phase", "Build At", "Game Time", "Quote Observed At"]
-            requests += _dataset_requests(db, dataset, rows, [*columns, *extra], now, gate=gate, update=dataset == "daily_slate")
+            requests += _dataset_requests(db, dataset, rows, [*columns, *extra], now, gate=gate, update=dataset in {"daily_slate", "game_previews"})
     if phase == "pregame":
         from shared.nfl_research_storage import capture_requests
         requests += capture_requests(db, result, game, now, gate=gate)
