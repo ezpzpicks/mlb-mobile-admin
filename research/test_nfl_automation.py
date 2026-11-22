@@ -11,7 +11,7 @@ import pytest
 from builders.nfl_automation import checked_depth, fetch_depth, game_market, normalize_game, phase_for_game, withhold_unavailable_quotes
 from builders.nfl_rotowire_props import SourceError, apply_quotes, parse_props_html
 from shared import turso_storage as turso
-from shared.nfl_auto_storage import NflDatabase, POLICY, save_run, upsert_results
+from shared.nfl_auto_storage import NflDatabase, POLICY, save_run, upsert_results, publish_saved_early_props
 
 NOW = datetime(2035, 10, 21, 12, 7, tzinfo=timezone.utc)
 
@@ -197,6 +197,9 @@ def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     b, result = sample_result()
     assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
     assert not db.rows("prop_tracker") and not db.rows("prop_projections")
+    assert len(db.rows("prop_previews")) == 1
+    assert db.rows("prop_previews")[0]["Build Phase"] == "early"
+    assert db.rows("prop_previews")[0]["Quote Observed At"] == NOW.isoformat()
     preview = db.rows("daily_slate")[0]
     assert preview["Spread Grade"] == "No Play (pending pregame)"
     assert preview["Total Grade"] == "No Play (pending pregame)"
@@ -204,9 +207,44 @@ def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
     assert len(db.rows("daily_slate")) == 1 and db.rows("daily_slate")[0]["Spread Grade"] == "A Spread"
     assert len(db.rows("prop_tracker")) == 1 and len(db.runs(game()["Date"])) == 2
+    assert db.rows("prop_projections")[0]["Build Phase"] == "pregame"
     before = conn.total_changes
     assert not save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
     assert conn.total_changes == before
+
+
+def test_archived_morning_props_become_visible_without_rerunning_or_tracking(database):
+    db, _ = database
+    b, result = sample_result()
+    assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
+    # Simulate the earlier deployment, whose archives contained props but did
+    # not publish a preview dataset. Preserve original model and quote times.
+    with db.writes():
+        db.query("DELETE FROM dataset_rows WHERE dataset='prop_previews'")
+        db.query("DELETE FROM dataset_manifest WHERE dataset='prop_previews'")
+    later = NOW + timedelta(hours=1)
+    assert publish_saved_early_props(db, b, [game()], db.runs(game()["Date"]), later) == 1
+    row = db.rows("prop_previews")[0]
+    assert row["Build At"] == row["Quote Observed At"] == NOW.isoformat()
+    assert row["Market Line"] == "200" and row["Game Time"] == game()["Game Time"]
+    assert not db.rows("prop_tracker") and not db.rows("prop_projections")
+    assert len(db.runs(game()["Date"])) == 1
+    assert publish_saved_early_props(db, b, [game()], db.runs(game()["Date"]), later) == 0
+
+
+@pytest.mark.parametrize("blocked_by", ["started", "pregame", "manual"])
+def test_archive_publication_never_changes_started_or_locked_games(database, blocked_by):
+    db, _ = database
+    b, result = sample_result()
+    assert save_run(db, b, copy.deepcopy(result), game(), "early", NOW)
+    with db.writes(): db.query("DELETE FROM dataset_rows WHERE dataset='prop_previews'")
+    if blocked_by == "pregame":
+        assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
+    elif blocked_by == "manual":
+        with db.writes(): upsert_results(db, "prop_projections", result["props"], b.PROP_PROJECTION_COLUMNS, NOW)
+    now = NOW + timedelta(hours=6 if blocked_by == "started" else 1)
+    assert publish_saved_early_props(db, b, [game()], db.runs(game()["Date"]), now) == 0
+    assert not db.rows("prop_previews")
 
 
 def test_manual_games_and_elapsed_kickoffs_are_protected(database):

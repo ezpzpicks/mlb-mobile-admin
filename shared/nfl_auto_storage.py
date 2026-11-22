@@ -92,6 +92,7 @@ def _dataset_requests(db, dataset, rows, columns, now, *, gate="1", update=False
     q = db.turso._sql_text
     output = []
     keys = {"daily_slate": ["Date", "Away Team", "Home Team"], "prop_projections": ["Game ID", "Player", "Market"],
+        "prop_previews": ["Game ID", "Player", "Market"],
         "prop_tracker": ["Game ID", "Player", "Market", "Pick", "Market Line"],
         "bet_tracker": ["Game ID", "Bet Type", "Selection"],
         "lineup_snapshots": ["Game ID", "Team", "Unit", "Slot"],
@@ -185,6 +186,10 @@ def save_run(db, builder, result, game, phase, now):
             # arbitrary nonempty status such as "Pending pregame" qualifies.
             slate.update({"Spread Grade": "No Play (pending pregame)", "Total Grade": "No Play (pending pregame)"})
         specs = [(builder.SLATE_TAB, [slate], builder.SLATE_COLUMNS)]
+        if phase == "early":
+            # Visible morning research stays separate from locked projections
+            # and trackers, so publishing it cannot create official selections.
+            specs.append(("prop_previews", result["props"], builder.PROP_PROJECTION_COLUMNS))
         if phase == "pregame":
             specs += [(builder.PROP_SLATE_TAB, result["props"], builder.PROP_PROJECTION_COLUMNS),
                       (builder.TRACKER_TAB, result["game_tracker"], builder.TRACKER_COLUMNS),
@@ -195,7 +200,9 @@ def save_run(db, builder, result, game, phase, now):
         for dataset, rows, columns in specs:
             for row in rows:
                 row.update({"Build Policy": POLICY, "Build Phase": phase, "Build At": now.isoformat()})
-            extra = ["Build Policy", "Build Phase", "Build At", "Game Time"]
+                if dataset in {"prop_previews", builder.PROP_SLATE_TAB}:
+                    row["Quote Observed At"] = provenance.get("props", {}).get("observed_at", "")
+            extra = ["Build Policy", "Build Phase", "Build At", "Game Time", "Quote Observed At"]
             requests += _dataset_requests(db, dataset, rows, [*columns, *extra], now, gate=gate, update=dataset == "daily_slate")
     if phase == "pregame":
         from shared.nfl_research_storage import capture_requests
@@ -205,6 +212,57 @@ def save_run(db, builder, result, game, phase, now):
     with db.writes():
         responses = db.pipeline(requests, max_attempts=1)
     return bool(int(db.turso._result_rows(responses[len(requests) - 3])[0]["saved"]))
+
+
+def publish_saved_early_props(db, builder, games, previous, now):
+    """Expose already-computed morning props without rerunning or locking them.
+
+    Original model/quote times survive this one-time catch-up. Completed,
+    manually saved and pregame-locked games are never changed.
+    """
+    q = db.turso._sql_text
+    wanted = [g for g in games if (str(g["Game ID"]), "early") in previous
+              and (str(g["Game ID"]), "pregame") not in previous]
+    if not wanted:
+        return 0
+    day = str(wanted[0]["Date"])
+    existing = {str(r.get("Game ID")) for dataset in ("prop_previews", builder.PROP_SLATE_TAB)
+                for r in db.rows(dataset, day)}
+    count = 0
+    for game in wanted:
+        gid = str(game["Game ID"])
+        if gid in existing or datetime.fromisoformat(game["Game Time"]) <= now:
+            continue
+        archived = db.run_payload(gid, "early")
+        if not archived or not archived.get("props"):
+            continue
+        stamp = previous[(gid, "early")]["observed_at"]
+        if datetime.fromisoformat(stamp) > now:
+            continue
+        rows = []
+        for raw in archived["props"]:
+            if str(raw.get("Game ID")) != gid or str(raw.get("Date")) != str(game["Date"]):
+                raise ValueError("Archived NFL prop identity does not match its scheduled game.")
+            rows.append({**raw, "Build Policy": POLICY, "Build Phase": "early", "Build At": stamp,
+                         "Game Time": game["Game Time"],
+                         "Quote Observed At": archived.get("provenance", {}).get("props", {}).get("observed_at", "")})
+        guard = (f"datetime('now')<datetime({q(game['Game Time'])}) AND datetime({q(now.isoformat())})<datetime({q(game['Game Time'])})"
+                 f" AND NOT EXISTS(SELECT 1 FROM nfl_auto_runs WHERE game_id={q(gid)} AND phase='pregame' AND policy={q(POLICY)})"
+                 f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND game_key={q(gid)}"
+                 " AND dataset IN ('prop_previews','prop_projections','prop_tracker','bet_tracker','lineup_snapshots'))"
+                 f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE sport='NFL' AND dataset='builder_completed' AND date_key={q(day)}"
+                 f" AND lower(json_extract(payload_json,'$.\"Away Team\"'))=lower({q(game['Away Team'])})"
+                 f" AND lower(json_extract(payload_json,'$.\"Home Team\"'))=lower({q(game['Home Team'])}))")
+        def req(sql): return {"type": "execute", "stmt": {"sql": sql, "args": []}}
+        requests = [req("BEGIN IMMEDIATE"), req(f"CREATE TEMP TABLE nfl_preview_gate AS SELECT 1 AS allowed WHERE {guard}")]
+        requests += _dataset_requests(db, "prop_previews", rows,
+            [*builder.PROP_PROJECTION_COLUMNS, "Build Policy", "Build Phase", "Build At", "Game Time", "Quote Observed At"],
+            now, gate="EXISTS(SELECT 1 FROM nfl_preview_gate)")
+        requests += [req("SELECT COUNT(*) AS saved FROM nfl_preview_gate"), req("DROP TABLE nfl_preview_gate"), req("COMMIT")]
+        with db.writes():
+            responses = db.pipeline(requests, max_attempts=1)
+        count += int(db.turso._result_rows(responses[len(requests) - 3])[0]["saved"])
+    return count
 
 
 def upsert_results(db, dataset, rows, columns, now):

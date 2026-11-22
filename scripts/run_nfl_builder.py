@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from builders.nfl_automation import ET, checked_depth, compute, environment, fetch_depth, game_market, input_identity, normalize_game, phase_for_game, weekly_inputs
 from builders.nfl_rotowire_props import SourceError, apply_quotes, fetch_inactives, fetch_props
 from shared.ncaaf_auto_builder import timestamp
-from shared.nfl_auto_storage import NflDatabase, POLICY, records, save_run, upsert_results
+from shared.nfl_auto_storage import NflDatabase, POLICY, records, save_run, upsert_results, publish_saved_early_props
 
 
 def clock():
@@ -135,6 +135,7 @@ def run(args):
             return 0
         builder = prepare_builder(db)
         if args.commit:
+            emit("early_props_published", games=publish_saved_early_props(db, builder, games, previous, clock()))
             settle_recent(db, builder, now)
             from shared.nfl_research_storage import settle_recent as settle_research
             try:
