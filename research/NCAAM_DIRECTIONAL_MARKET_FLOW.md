@@ -1,5 +1,7 @@
 # NCAAM split strength and line confirmation — v3, November 22, 2026
 
+This document preserves the research screen. The approved forward rollout, with grades deferred, is described in [NCAAM_MARKET_TRACKING_LIVE.md](NCAAM_MARKET_TRACKING_LIVE.md).
+
 The research updater now gives an ordinary split change only one quarter of its usual weight while the line is flat. Supporting line response progressively restores the full split weight. Money moving against tickets retains a separate, stronger starting weight to preserve the eight previously approved interpretations. Independent line movement continues to count at full weight.
 
 This changes UConn–Arizona's final balanced research projection from 152.2 to **148.1**, below the 149.1 baseline. The late Over-money rebound reduces earlier Under pressure without creating an automatic strong Over adjustment. All 54 targeted tests pass. The revised historical returns still underperform the current baseline, so this is a draft research candidate with no live activation.

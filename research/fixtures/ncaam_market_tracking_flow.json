@@ -1,0 +1,4846 @@
+{
+  "policy": "ncaam-directional-market-flow-2026-11-22-v3",
+  "parameters": {
+    "model_version": "ncaam-v0.17-market-tracking-2026-11-22",
+    "flow_policy": "ncaam-directional-market-flow-2026-11-22-v3",
+    "profile": "balanced",
+    "grade_policy": "ncaam-market-tracking-ungraded-2026-11-22-v1",
+    "grade": "Ungraded",
+    "activation": "First successful deployed collector tick; immutable activation record; forward only",
+    "feature_order": [
+      "line_movement",
+      "money_movement",
+      "money_ticket_divergence",
+      "ticket_only_movement",
+      "same_window_confirmation",
+      "lagged_confirmation"
+    ],
+    "weights": [
+      1,
+      2,
+      1,
+      0.5,
+      0.5,
+      0.25
+    ],
+    "minimum_adjustment": 1,
+    "spread_cap": 4,
+    "total_cap": 6,
+    "half_life_minutes": 120,
+    "confirmation_lookback_minutes": 60,
+    "unconfirmed_split_multiplier": 0.25,
+    "divergence_split_multiplier": 0.75,
+    "full_confirmation_points": 2,
+    "opposing_price_damping_per_point": 0.25,
+    "maximum_market_age_minutes": 90,
+    "baseline_model": "ncaam-v0.16-calibrated-b-spreads-2026-11-22",
+    "official_pick_eligible": false,
+    "regrade_history": false
+  },
+  "cases": [
+    {
+      "name": "Spread-states--1--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.625,
+          0.0,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.75,
+        "projection": 0.25,
+        "rawAdjustment": -2.75,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          -0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          -0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.6,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.625,
+          0.0,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.75,
+        "projection": 0.25,
+        "rawAdjustment": -2.75,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          -0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          -0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.6,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.875,
+          -0.875,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -4.0,
+        "projection": -1.0,
+        "rawAdjustment": -4.125,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.75,
+          "money_ticket_divergence": -0.875,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.875
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          -0.75,
+          -0.75,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.25,
+        "projection": 0.75,
+        "rawAdjustment": -2.25,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -1.5,
+          "money_ticket_divergence": -0.75,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Spread-states--1-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          -0.6000000000000001,
+          -0.6000000000000001,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.8000000000000003,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -1.2000000000000002,
+          "money_ticket_divergence": -0.6000000000000001,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          0.2,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.9,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.1,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.25,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.125,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          0.625,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.3125,
+        "projection": 4.3125,
+        "rawAdjustment": 1.3125,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.3125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -1.0,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "observed_unchanged",
+        "adjustment": 0.0,
+        "projection": 3.0,
+        "rawAdjustment": 0.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 1.0,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          -0.625,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.3125,
+        "projection": 1.6875,
+        "rawAdjustment": -1.3125,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.3125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          -0.25,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.125,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-0-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          -0.2,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.9,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.1,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.6000000000000001,
+          0.6000000000000001,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.8000000000000003,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 1.2000000000000002,
+          "money_ticket_divergence": 0.6000000000000001,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.75,
+          0.75,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.25,
+        "projection": 5.25,
+        "rawAdjustment": 2.25,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 1.5,
+          "money_ticket_divergence": 0.75,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.875,
+          0.875,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 4.0,
+        "projection": 7.0,
+        "rawAdjustment": 4.125,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.75,
+          "money_ticket_divergence": 0.875,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.875
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.6,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.625,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.75,
+        "projection": 5.75,
+        "rawAdjustment": 2.75,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": -2
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          -1.0,
+          0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 2.0,
+        "rawAdjustment": -0.6,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": -3
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          0.0,
+          0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 4.0,
+        "rawAdjustment": 0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Spread-states-1-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": -3
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": -4
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 3,
+      "expected": {
+        "features": [
+          1.0,
+          0.625,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.75,
+        "projection": 5.75,
+        "rawAdjustment": 2.75,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.625,
+          0.0,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.75,
+        "projection": 147.25,
+        "rawAdjustment": -2.75,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          -0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 40,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          -0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.6,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.625,
+          0.0,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.75,
+        "projection": 147.25,
+        "rawAdjustment": -2.75,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          -0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 40,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          -0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.6,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.875,
+          -0.875,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -4.125,
+        "projection": 145.875,
+        "rawAdjustment": -4.125,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.75,
+          "money_ticket_divergence": -0.875,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.875
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          -0.75,
+          -0.75,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.25,
+        "projection": 147.75,
+        "rawAdjustment": -2.25,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -1.5,
+          "money_ticket_divergence": -0.75,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Total-states--1-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 40,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          -0.6000000000000001,
+          -0.6000000000000001,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.8000000000000003,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": -1.2000000000000002,
+          "money_ticket_divergence": -0.6000000000000001,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          0.2,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.9,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.1,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.25,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.125,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          0.625,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.3125,
+        "projection": 151.3125,
+        "rawAdjustment": 1.3125,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.3125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -1.0,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "observed_unchanged",
+        "adjustment": 0.0,
+        "projection": 150.0,
+        "rawAdjustment": 0.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 1.0,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.0,
+          0.0,
+          -0.625,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.3125,
+        "projection": 148.6875,
+        "rawAdjustment": -1.3125,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.3125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          -0.25,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.125,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.125,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-0-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 50,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.0,
+          0.0,
+          -0.2,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.9,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": -0.1,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1--1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.6000000000000001,
+          0.6000000000000001,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.8000000000000003,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 1.2000000000000002,
+          "money_ticket_divergence": 0.6000000000000001,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1--1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.75,
+          0.75,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.25,
+        "projection": 152.25,
+        "rawAdjustment": 2.25,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 1.5,
+          "money_ticket_divergence": 0.75,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1--1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 60,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.875,
+          0.875,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 4.125,
+        "projection": 154.125,
+        "rawAdjustment": 4.125,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.75,
+          "money_ticket_divergence": 0.875,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.875
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-0--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.6,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-0-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-0-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 60,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.625,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.75,
+        "projection": 152.75,
+        "rawAdjustment": 2.75,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-1--1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": 149
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -1.0,
+          0.2,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 149.0,
+        "rawAdjustment": -0.6,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": 0.4,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-1-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.25,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.5,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "Total-states-1-1-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 60,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          0.625,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.75,
+        "projection": 152.75,
+        "rawAdjustment": 2.75,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 1.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "approved-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 151.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 26,
+          "moneyPct": 66,
+          "line": 149.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -2.0,
+          0.8,
+          0.8,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 0.40000000000000013,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": 1.6,
+          "money_ticket_divergence": 0.8,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "approved-2",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 12,
+          "moneyPct": 95,
+          "line": 151.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 26,
+          "moneyPct": 66,
+          "line": 149.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -2.0,
+          -2.9,
+          -1.4,
+          0.0,
+          -2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -6.0,
+        "projection": 144.0,
+        "rawAdjustment": -10.2,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": -5.8,
+          "money_ticket_divergence": -1.4,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "approved-3",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 45,
+          "moneyPct": 50,
+          "line": 149.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 75,
+          "line": 152.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          3.0,
+          2.5,
+          0.0,
+          0.0,
+          2.5,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 6.0,
+        "projection": 156.0,
+        "rawAdjustment": 9.25,
+        "contributions": {
+          "line_movement": 3.0,
+          "money_movement": 5.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 1.25,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "approved-4",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 70,
+          "moneyPct": 80,
+          "line": 152.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 60,
+          "line": 149.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -3.0,
+          -2.0,
+          0.0,
+          0.0,
+          -2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -6.0,
+        "projection": 144.0,
+        "rawAdjustment": -8.0,
+        "contributions": {
+          "line_movement": -3.0,
+          "money_movement": -4.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "approved-5",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 70,
+          "line": 150.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 45,
+          "line": 150.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          -1.875,
+          -1.5,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -5.25,
+        "projection": 144.75,
+        "rawAdjustment": -5.25,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -3.75,
+          "money_ticket_divergence": -1.5,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "approved-6",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 20,
+          "moneyPct": 80,
+          "line": 150.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 20,
+          "moneyPct": 80,
+          "line": 150.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "observed_unchanged",
+        "adjustment": 0.0,
+        "projection": 150.0,
+        "rawAdjustment": 0.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "approved-7",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 45,
+          "moneyPct": 50,
+          "line": 6.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 35,
+          "moneyPct": 75,
+          "line": 4.5
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          2.5,
+          1.0,
+          0.0,
+          2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 4.0,
+        "projection": 154.0,
+        "rawAdjustment": 9.0,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 5.0,
+          "money_ticket_divergence": 1.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "approved-8",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 20,
+          "moneyPct": 90,
+          "line": -6.5
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 65,
+          "line": -4.5
+        }
+      ],
+      "market": "Spread",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -2.0,
+          -2.5,
+          -2.0,
+          0.0,
+          -2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -4.0,
+        "projection": 146.0,
+        "rawAdjustment": -10.0,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": -5.0,
+          "money_ticket_divergence": -2.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "confirmation-0",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 151.0,
+        "rawAdjustment": 1.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 1.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "confirmation-0.5",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 150.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.5,
+          0.875,
+          0.0,
+          0.0,
+          0.5,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.5,
+        "projection": 152.5,
+        "rawAdjustment": 2.5,
+        "contributions": {
+          "line_movement": 0.5,
+          "money_movement": 1.75,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.25,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.4375
+        ]
+      }
+    },
+    {
+      "name": "confirmation-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 151
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.0,
+          1.25,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 4.0,
+        "projection": 154.0,
+        "rawAdjustment": 4.0,
+        "contributions": {
+          "line_movement": 1.0,
+          "money_movement": 2.5,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.625
+        ]
+      }
+    },
+    {
+      "name": "confirmation-1.5",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 151.5
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          1.5,
+          1.625,
+          0.0,
+          0.0,
+          1.5,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 5.5,
+        "projection": 155.5,
+        "rawAdjustment": 5.5,
+        "contributions": {
+          "line_movement": 1.5,
+          "money_movement": 3.25,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.75,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.8125
+        ]
+      }
+    },
+    {
+      "name": "confirmation-2",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 152
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          2.0,
+          0.0,
+          0.0,
+          2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 6.0,
+        "projection": 156.0,
+        "rawAdjustment": 7.0,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 4.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "confirmation-3",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 153
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          3.0,
+          2.0,
+          0.0,
+          0.0,
+          2.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 6.0,
+        "projection": 156.0,
+        "rawAdjustment": 8.0,
+        "contributions": {
+          "line_movement": 3.0,
+          "money_movement": 4.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 1.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "later-confirmation",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T14:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 152
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T14:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "status": "ready",
+        "adjustment": 6.0,
+        "projection": 156.0,
+        "rawAdjustment": 6.5,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 4.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.5
+        },
+        "multipliers": [
+          1.0,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "earlier-price",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 152
+        },
+        {
+          "snapshotTime": "2026-11-17T14:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 152
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T14:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          0.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 3.0,
+        "projection": 153.0,
+        "rawAdjustment": 3.0,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 1.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "new-splits-end-attribution",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 55,
+          "moneyPct": 70,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T14:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 80,
+          "line": 152
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T14:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          1.3535533905932737,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 5.207106781186548,
+        "projection": 155.20710678118655,
+        "rawAdjustment": 5.207106781186548,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 2.7071067811865475,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.5,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "late-flat-reversal",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 45,
+          "moneyPct": 31,
+          "line": 148
+        },
+        {
+          "snapshotTime": "2026-11-17T14:00:00Z",
+          "betsPct": 49,
+          "moneyPct": 66,
+          "line": 148
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T14:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          -2.0,
+          -0.4685028842544403,
+          0.0,
+          0.0,
+          -1.3435028842544403,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -3.6087572106361008,
+        "projection": 146.3912427893639,
+        "rawAdjustment": -3.6087572106361008,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": -0.9370057685088806,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.6717514421272202,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "equal-endpoints",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": 50,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 60,
+          "moneyPct": 80,
+          "line": 153
+        },
+        {
+          "snapshotTime": "2026-11-17T14:00:00Z",
+          "betsPct": 40,
+          "moneyPct": 50,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T14:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          -0.8786796564403572,
+          0.0,
+          0.0,
+          -0.8786796564403572,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.196699141100893,
+        "projection": 147.80330085889912,
+        "rawAdjustment": -2.196699141100893,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -1.7573593128807143,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": -0.4393398282201786,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "missing-money",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": 50,
+          "moneyPct": null,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": 70,
+          "moneyPct": null,
+          "line": 150
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "observed_unchanged",
+        "adjustment": 0.0,
+        "projection": 150.0,
+        "rawAdjustment": 0.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "missing-splits-line-only",
+      "history": [
+        {
+          "snapshotTime": "2026-11-17T12:00:00Z",
+          "betsPct": null,
+          "moneyPct": null,
+          "line": 150
+        },
+        {
+          "snapshotTime": "2026-11-17T13:00:00Z",
+          "betsPct": null,
+          "moneyPct": null,
+          "line": 152
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-17T13:00:00Z",
+      "tipoff": "2026-11-17T15:00:00Z",
+      "baseline": 150,
+      "expected": {
+        "features": [
+          2.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 2.0,
+        "projection": 152.0,
+        "rawAdjustment": 2.0,
+        "contributions": {
+          "line_movement": 2.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-1",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T11:40:06.545Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "insufficient_history",
+        "adjustment": 0.0,
+        "projection": 148.9885665790251,
+        "rawAdjustment": 0.0,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.0,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": []
+      }
+    },
+    {
+      "name": "uconn-update-2",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T12:40:06.590Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          0.0,
+          0.025,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 149.9885665790251,
+        "rawAdjustment": 0.05,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.05,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.0,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-3",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T13:40:06.557Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          0.0,
+          0.017677725690375703,
+          0.0,
+          0.05,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": 1.0,
+        "projection": 149.9885665790251,
+        "rawAdjustment": 0.06035545138075141,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": 0.035355451380751406,
+          "money_ticket_divergence": 0.0,
+          "ticket_only_movement": 0.025,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-4",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T14:40:06.521Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          0.0,
+          -0.06249991696646823,
+          -0.07500000000000001,
+          0.03535546159180764,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 147.9885665790251,
+        "rawAdjustment": -0.18232210313703265,
+        "contributions": {
+          "line_movement": 0.0,
+          "money_movement": -0.12499983393293645,
+          "money_ticket_divergence": -0.07500000000000001,
+          "ticket_only_movement": 0.01767773079590382,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-5",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T15:55:06.670Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.06249991696646823,
+          -0.07500000000000001,
+          0.03535546159180764,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.1823221031370326,
+        "projection": 147.80624447588806,
+        "rawAdjustment": -1.1823221031370326,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -0.12499983393293645,
+          "money_ticket_divergence": -0.07500000000000001,
+          "ticket_only_movement": 0.01767773079590382,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-6",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T16:40:07.135Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.9885665790251,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.5312481113511798,
+          -0.03749778343859001,
+          0.017676685895213203,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.091155663193343,
+        "projection": 146.89741091583176,
+        "rawAdjustment": -2.091155663193343,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.0624962227023595,
+          "money_ticket_divergence": -0.03749778343859001,
+          "ticket_only_movement": 0.008838342947606602,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-7",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T17:40:06.891Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.3756579661263618,
+          -0.026515559791751936,
+          -0.012500401922632472,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.784081693005792,
+        "projection": 147.2044848847832,
+        "rawAdjustment": -1.784081693005792,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -0.7513159322527236,
+          "money_ticket_divergence": -0.026515559791751936,
+          "ticket_only_movement": -0.006250200961316236,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-8",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T18:40:06.738Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.11563420785242912,
+          0.05625039169626844,
+          -0.008839249162730427,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.179437648589955,
+        "projection": 147.80912892919903,
+        "rawAdjustment": -1.179437648589955,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -0.23126841570485823,
+          "money_ticket_divergence": 0.05625039169626844,
+          "ticket_only_movement": -0.004419624581365213,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-9",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T19:40:06.905Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.031764417959082025,
+          0.03977439394824509,
+          -0.006250192537387406,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0268795382386127,
+        "projection": 147.96168703955038,
+        "rawAdjustment": -1.0268795382386127,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -0.06352883591816405,
+          "money_ticket_divergence": 0.03977439394824509,
+          "ticket_only_movement": -0.003125096268693703,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-10",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T20:40:07.025Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.5474605758630647,
+          0.028124418770486277,
+          -0.004419502470518662,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.0690064841909024,
+        "projection": 146.91956009359808,
+        "rawAdjustment": -2.0690064841909024,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.0949211517261295,
+          "money_ticket_divergence": 0.028124418770486277,
+          "ticket_only_movement": -0.002209751235259331,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-11",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        },
+        {
+          "snapshotTime": "2026-11-18T21:40:07.086Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 36
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T21:40:07.086Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.6871108123113272,
+          0.019886850443729658,
+          -0.0031250418145220456,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.355897295086186,
+        "projection": 146.6326692827028,
+        "rawAdjustment": -2.355897295086186,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.3742216246226544,
+          "money_ticket_divergence": 0.019886850443729658,
+          "ticket_only_movement": -0.0015625209072610228,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-12",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        },
+        {
+          "snapshotTime": "2026-11-18T21:40:07.086Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 36
+        },
+        {
+          "snapshotTime": "2026-11-18T22:40:31.161Z",
+          "line": 147.5,
+          "betsPct": 21,
+          "moneyPct": 33
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T22:40:31.161Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 148.988566577789,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.5597359341063731,
+          0.014029572601030833,
+          -0.00220462265466063,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.1065446069390457,
+        "projection": 146.88202197084993,
+        "rawAdjustment": -2.1065446069390457,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.1194718682127462,
+          "money_ticket_divergence": 0.014029572601030833,
+          "ticket_only_movement": -0.001102311327330315,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-13",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        },
+        {
+          "snapshotTime": "2026-11-18T21:40:07.086Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 36
+        },
+        {
+          "snapshotTime": "2026-11-18T22:40:31.161Z",
+          "line": 147.5,
+          "betsPct": 21,
+          "moneyPct": 33
+        },
+        {
+          "snapshotTime": "2026-11-18T23:40:31.772Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 31
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-18T23:40:31.772Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 149.05137374727326,
+      "expected": {
+        "features": [
+          -1.0,
+          -0.5457697943257005,
+          -0.06508017759007724,
+          -0.0015588119351204646,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -2.1573991722090384,
+        "projection": 146.89397457506422,
+        "rawAdjustment": -2.1573991722090384,
+        "contributions": {
+          "line_movement": -1.0,
+          "money_movement": -1.091539588651401,
+          "money_ticket_divergence": -0.06508017759007724,
+          "ticket_only_movement": -0.0007794059675602323,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.75
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-14",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        },
+        {
+          "snapshotTime": "2026-11-18T21:40:07.086Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 36
+        },
+        {
+          "snapshotTime": "2026-11-18T22:40:31.161Z",
+          "line": 147.5,
+          "betsPct": 21,
+          "moneyPct": 33
+        },
+        {
+          "snapshotTime": "2026-11-18T23:40:31.772Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 31
+        },
+        {
+          "snapshotTime": "2026-11-19T01:15:26.212Z",
+          "line": 146.5,
+          "betsPct": 22,
+          "moneyPct": 31
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-19T01:15:26.212Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 149.05137374727326,
+      "expected": {
+        "features": [
+          -2.0,
+          -0.5457697943257005,
+          -0.06508017759007724,
+          -0.0015588119351204646,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -3.1573991722090384,
+        "projection": 145.89397457506422,
+        "rawAdjustment": -3.1573991722090384,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": -1.091539588651401,
+          "money_ticket_divergence": -0.06508017759007724,
+          "ticket_only_movement": -0.0007794059675602323,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "uconn-update-15",
+      "history": [
+        {
+          "snapshotTime": "2026-11-18T11:40:06.545Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T12:40:06.590Z",
+          "line": 148.5,
+          "betsPct": 84,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T13:40:06.557Z",
+          "line": 148.5,
+          "betsPct": 82,
+          "moneyPct": 86
+        },
+        {
+          "snapshotTime": "2026-11-18T14:40:06.521Z",
+          "line": 148.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T15:55:06.670Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 85
+        },
+        {
+          "snapshotTime": "2026-11-18T16:40:07.135Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T17:40:06.891Z",
+          "line": 147.5,
+          "betsPct": 83,
+          "moneyPct": 65
+        },
+        {
+          "snapshotTime": "2026-11-18T18:40:06.738Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 67
+        },
+        {
+          "snapshotTime": "2026-11-18T19:40:06.905Z",
+          "line": 147.5,
+          "betsPct": 82,
+          "moneyPct": 69
+        },
+        {
+          "snapshotTime": "2026-11-18T20:40:07.025Z",
+          "line": 147.5,
+          "betsPct": 28,
+          "moneyPct": 48
+        },
+        {
+          "snapshotTime": "2026-11-18T21:40:07.086Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 36
+        },
+        {
+          "snapshotTime": "2026-11-18T22:40:31.161Z",
+          "line": 147.5,
+          "betsPct": 21,
+          "moneyPct": 33
+        },
+        {
+          "snapshotTime": "2026-11-18T23:40:31.772Z",
+          "line": 147.5,
+          "betsPct": 22,
+          "moneyPct": 31
+        },
+        {
+          "snapshotTime": "2026-11-19T01:15:26.212Z",
+          "line": 146.5,
+          "betsPct": 22,
+          "moneyPct": 31
+        },
+        {
+          "snapshotTime": "2026-11-19T01:40:09.791Z",
+          "line": 146.5,
+          "betsPct": 26,
+          "moneyPct": 66
+        }
+      ],
+      "market": "Total",
+      "asOf": "2026-11-19T01:40:09.791Z",
+      "tipoff": "2026-11-19T02:00:00Z",
+      "baseline": 149.05137374727326,
+      "expected": {
+        "features": [
+          -2.0,
+          0.6015370340744082,
+          -0.03260902045474137,
+          -0.0007810570308767646,
+          0.0,
+          0.0
+        ],
+        "status": "ready",
+        "adjustment": -1.0,
+        "projection": 148.05137374727326,
+        "rawAdjustment": -0.8299254808213634,
+        "contributions": {
+          "line_movement": -2.0,
+          "money_movement": 1.2030740681488163,
+          "money_ticket_divergence": -0.03260902045474137,
+          "ticket_only_movement": -0.0003905285154383823,
+          "same_window_confirmation": 0.0,
+          "lagged_confirmation": 0.0
+        },
+        "multipliers": [
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.75,
+          0.25,
+          0.25
+        ]
+      }
+    }
+  ]
+}
