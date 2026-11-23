@@ -1,0 +1,101 @@
+{
+  "policy": "ncaam-directional-market-flow-2026-11-22-v3",
+  "status": "Research candidate; no live activation",
+  "baseline_commit": "ddae33559a352fb1161460ea3fff7d50cddfa333",
+  "semantics": {
+    "line": "Independent signed line points, even with flat/missing money. Rising totals favor Over; improving a team's handicap favors that team.",
+    "money": "Recent ordered share changes, no opening-to-current direction clamp.",
+    "divergence": "Growing money against declining ticket share strengthens that money-side interpretation.",
+    "ticket_only": "Observed flat money plus growing tickets weakens relative money backing for that side; this contrarian interpretation is a declared research prior.",
+    "degree": "Line points and ten-percentage-point split changes enter continuously before the declared floor/caps.",
+    "reversals": "Recent intervals can supersede the opening-to-current direction, including histories ending at their opening money share.",
+    "timing": "Independent price evidence; split strength uses same-window and already-visible later net price response within 60 minutes, ending at the next observed split change. Earlier price cannot confirm later cash.",
+    "updates": "Recompute from unadjusted baseline on each paired snapshot; never compound a previous full correction.",
+    "persistence": "Unchanged shares preserve the split evidence until a new split change arrives; price-only moves remain independent and cannot change the split clock.",
+    "line_confirmation": "Ordinary unconfirmed money/ticket pressure starts at 25% weight. Opposing money/ticket divergence starts at 75% to retain approved reverse-line interpretations. Both rise continuously to full weight with two aligned line points. Opposing net price further damps split strength.",
+    "buyback": "A later price reversal withdraws confirmation; a new split change starts its own response window. No confirmation uses future snapshots."
+  },
+  "recency_half_life_minutes": 120,
+  "confirmation_lookback_minutes": 60,
+  "sizing": {
+    "minimum_nonzero_adjustment_points": 1,
+    "feature_order": [
+      "line_movement",
+      "money_movement",
+      "money_ticket_divergence",
+      "ticket_only_movement",
+      "same_window_confirmation",
+      "lagged_confirmation"
+    ],
+    "profiles": {
+      "balanced": {
+        "weights": [
+          1,
+          2,
+          1,
+          0.5,
+          0.5,
+          0.25
+        ],
+        "spread_cap": 4,
+        "total_cap": 6
+      },
+      "strong": {
+        "weights": [
+          2,
+          4,
+          2,
+          1,
+          1,
+          0.5
+        ],
+        "spread_cap": 5,
+        "total_cap": 8
+      },
+      "divergence": {
+        "weights": [
+          1,
+          2,
+          2,
+          0.5,
+          1,
+          0.5
+        ],
+        "spread_cap": 4,
+        "total_cap": 6
+      }
+    },
+    "calibration": "Select a declared profile separately by market using earlier-date net units; require 150 earlier games and 20 earlier qualifying bets, otherwise balanced. Conservative declared-order ties. No new presets or thresholds after viewing this screen.",
+    "note": "The floor, caps, profiles, confirmation multipliers and timing windows are declared design priors, not established optimal weights or true betting edges.",
+    "profile_change_from_v2": "The strong preset now doubles all balanced channel weights, including divergence (1 to 2), so confirmation damping preserves the eight approved direction examples under every preset."
+  },
+  "evaluation": {
+    "source": "Restored saved original market-study inputs and paired histories, with independently verified finals.",
+    "matched_history_minutes": 30,
+    "candidate_minimum_observations": 2,
+    "training": "Earlier ET dates; additional six-hour post-tipoff outcome availability proxy; cutoff uses earliest evaluated update that date.",
+    "spread_rule": "5 <= absolute edge < 7",
+    "total_rule": "absolute edge >=8; A >=10",
+    "price": "Assumed -110; one unit risked",
+    "additional_day": "November 22 reported separately",
+    "scope": "Compare every fixed profile and chronological profile selection. No official record writes."
+  },
+  "initial_profiles_declared_before_first_v2_screen": true,
+  "correctness_fix_after_initial_screen": "Advance split recency only on an observed share change so flat-share, price-only updates cannot fade existing split evidence. This is a behavior fix; no weights, caps, floor or profile search changed after viewing returns.",
+  "confirmation": {
+    "unconfirmed_split_multiplier": 0.25,
+    "divergence_split_multiplier": 0.75,
+    "full_confirmation_points": 2,
+    "opposing_price_damping_per_point": 0.25,
+    "lookback_minutes": 60,
+    "formula": "base + (1-base) * clip(aligned_net_line_response / 2, 0, 1), then opposing-price damping 1 / (1 + 0.25 * opposing_points)",
+    "at_one_confirming_point": {
+      "ordinary": 0.625,
+      "divergence": 0.875
+    },
+    "scope": "The multiplier applies to the split channels. Independent signed price is never reduced. Same/later price-confirmation bonuses remain separate, with no duplicated line tick."
+  },
+  "initial_confirmation_policy_declared_before_first_v3_screen": true,
+  "v3_evaluation_commitment": "Replay this one declared confirmation formula across the three declared profiles on the identical saved cohort and quotes. Preserve v2 results separately. Do not search alternative multipliers based on this replay.",
+  "prior_version": "v2 at bd3877913cec88203243ffcb2f636eabb460d70e; v2 aggregate preserved separately."
+}

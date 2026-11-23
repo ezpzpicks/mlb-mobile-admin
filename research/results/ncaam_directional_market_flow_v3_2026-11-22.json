@@ -1,0 +1,1722 @@
+{
+  "policy": "ncaam-directional-market-flow-2026-11-22-v3",
+  "status": "research_only_not_live",
+  "specification": {
+    "policy": "ncaam-directional-market-flow-2026-11-22-v3",
+    "status": "Research candidate; no live activation",
+    "baseline_commit": "ddae33559a352fb1161460ea3fff7d50cddfa333",
+    "semantics": {
+      "line": "Independent signed line points, even with flat/missing money. Rising totals favor Over; improving a team's handicap favors that team.",
+      "money": "Recent ordered share changes, no opening-to-current direction clamp.",
+      "divergence": "Growing money against declining ticket share strengthens that money-side interpretation.",
+      "ticket_only": "Observed flat money plus growing tickets weakens relative money backing for that side; this contrarian interpretation is a declared research prior.",
+      "degree": "Line points and ten-percentage-point split changes enter continuously before the declared floor/caps.",
+      "reversals": "Recent intervals can supersede the opening-to-current direction, including histories ending at their opening money share.",
+      "timing": "Independent price evidence; split strength uses same-window and already-visible later net price response within 60 minutes, ending at the next observed split change. Earlier price cannot confirm later cash.",
+      "updates": "Recompute from unadjusted baseline on each paired snapshot; never compound a previous full correction.",
+      "persistence": "Unchanged shares preserve the split evidence until a new split change arrives; price-only moves remain independent and cannot change the split clock.",
+      "line_confirmation": "Ordinary unconfirmed money/ticket pressure starts at 25% weight. Opposing money/ticket divergence starts at 75% to retain approved reverse-line interpretations. Both rise continuously to full weight with two aligned line points. Opposing net price further damps split strength.",
+      "buyback": "A later price reversal withdraws confirmation; a new split change starts its own response window. No confirmation uses future snapshots."
+    },
+    "recency_half_life_minutes": 120,
+    "confirmation_lookback_minutes": 60,
+    "sizing": {
+      "minimum_nonzero_adjustment_points": 1,
+      "feature_order": [
+        "line_movement",
+        "money_movement",
+        "money_ticket_divergence",
+        "ticket_only_movement",
+        "same_window_confirmation",
+        "lagged_confirmation"
+      ],
+      "profiles": {
+        "balanced": {
+          "weights": [
+            1,
+            2,
+            1,
+            0.5,
+            0.5,
+            0.25
+          ],
+          "spread_cap": 4,
+          "total_cap": 6
+        },
+        "strong": {
+          "weights": [
+            2,
+            4,
+            2,
+            1,
+            1,
+            0.5
+          ],
+          "spread_cap": 5,
+          "total_cap": 8
+        },
+        "divergence": {
+          "weights": [
+            1,
+            2,
+            2,
+            0.5,
+            1,
+            0.5
+          ],
+          "spread_cap": 4,
+          "total_cap": 6
+        }
+      },
+      "calibration": "Select a declared profile separately by market using earlier-date net units; require 150 earlier games and 20 earlier qualifying bets, otherwise balanced. Conservative declared-order ties. No new presets or thresholds after viewing this screen.",
+      "note": "The floor, caps, profiles, confirmation multipliers and timing windows are declared design priors, not established optimal weights or true betting edges.",
+      "profile_change_from_v2": "The strong preset now doubles all balanced channel weights, including divergence (1 to 2), so confirmation damping preserves the eight approved direction examples under every preset."
+    },
+    "evaluation": {
+      "source": "Restored saved original market-study inputs and paired histories, with independently verified finals.",
+      "matched_history_minutes": 30,
+      "candidate_minimum_observations": 2,
+      "training": "Earlier ET dates; additional six-hour post-tipoff outcome availability proxy; cutoff uses earliest evaluated update that date.",
+      "spread_rule": "5 <= absolute edge < 7",
+      "total_rule": "absolute edge >=8; A >=10",
+      "price": "Assumed -110; one unit risked",
+      "additional_day": "November 22 reported separately",
+      "scope": "Compare every fixed profile and chronological profile selection. No official record writes."
+    },
+    "initial_profiles_declared_before_first_v2_screen": true,
+    "correctness_fix_after_initial_screen": "Advance split recency only on an observed share change so flat-share, price-only updates cannot fade existing split evidence. This is a behavior fix; no weights, caps, floor or profile search changed after viewing returns.",
+    "confirmation": {
+      "unconfirmed_split_multiplier": 0.25,
+      "divergence_split_multiplier": 0.75,
+      "full_confirmation_points": 2,
+      "opposing_price_damping_per_point": 0.25,
+      "lookback_minutes": 60,
+      "formula": "base + (1-base) * clip(aligned_net_line_response / 2, 0, 1), then opposing-price damping 1 / (1 + 0.25 * opposing_points)",
+      "at_one_confirming_point": {
+        "ordinary": 0.625,
+        "divergence": 0.875
+      },
+      "scope": "The multiplier applies to the split channels. Independent signed price is never reduced. Same/later price-confirmation bonuses remain separate, with no duplicated line tick."
+    },
+    "initial_confirmation_policy_declared_before_first_v3_screen": true,
+    "v3_evaluation_commitment": "Replay this one declared confirmation formula across the three declared profiles on the identical saved cohort and quotes. Preserve v2 results separately. Do not search alternative multipliers based on this replay.",
+    "prior_version": "v2 at bd3877913cec88203243ffcb2f636eabb460d70e; v2 aggregate preserved separately."
+  },
+  "specificationSha256": "c079e9cc731ce84ef3e0b6e419269b47151f4eb518d4ce5e7dd76090ca2670ca",
+  "cohort": {
+    "uniqueEligibleGames": 458,
+    "marketObservations": 916,
+    "dates": [
+      "2026-11-08",
+      "2026-11-09",
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13",
+      "2026-11-14",
+      "2026-11-15",
+      "2026-11-16",
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22"
+    ]
+  },
+  "evaluationDates": [
+    "2026-11-14",
+    "2026-11-15",
+    "2026-11-16",
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22"
+  ],
+  "results": {
+    "historical": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 268,
+          "bets": 38,
+          "record": "26-12-0",
+          "wins": 26,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 11.636363636363635,
+          "roiPct": 30.622009569377987,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 268,
+          "bets": 31,
+          "record": "17-14-0",
+          "wins": 17,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 1.4545454545454541,
+          "roiPct": 4.692082111436949,
+          "meanAbsoluteAdjustment": 1.3020609400106942,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "strong": {
+          "opportunities": 268,
+          "bets": 28,
+          "record": "13-15-0",
+          "wins": 13,
+          "losses": 15,
+          "pushes": 0,
+          "netUnits": -3.181818181818182,
+          "roiPct": -11.363636363636363,
+          "meanAbsoluteAdjustment": 2.0033726116121353,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 268,
+          "bets": 30,
+          "record": "17-13-0",
+          "wins": 17,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 2.454545454545454,
+          "roiPct": 8.18181818181818,
+          "meanAbsoluteAdjustment": 1.32467158762239,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "selected": {
+          "opportunities": 268,
+          "bets": 29,
+          "record": "15-14-0",
+          "wins": 15,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": -0.3636363636363641,
+          "roiPct": -1.2539184952978073,
+          "meanAbsoluteAdjustment": 1.8114893617207777,
+          "maxAbsoluteAdjustment": 5.0
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 209,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 209,
+          "bets": 24,
+          "record": "15-9-0",
+          "wins": 15,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 4.636363636363636,
+          "roiPct": 19.318181818181817,
+          "meanAbsoluteAdjustment": 1.1947189755307426,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "strong": {
+          "opportunities": 209,
+          "bets": 17,
+          "record": "9-8-0",
+          "wins": 9,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 0.18181818181818155,
+          "roiPct": 1.0695187165775386,
+          "meanAbsoluteAdjustment": 1.7966423155460036,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 209,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 1.215566342202466,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "selected": {
+          "opportunities": 209,
+          "bets": 20,
+          "record": "12-8-0",
+          "wins": 12,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 2.9090909090909087,
+          "roiPct": 14.545454545454543,
+          "meanAbsoluteAdjustment": 1.61451639923647,
+          "maxAbsoluteAdjustment": 5.0
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 268,
+          "bets": 14,
+          "record": "9-5-0",
+          "wins": 9,
+          "losses": 5,
+          "pushes": 0,
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 268,
+          "bets": 16,
+          "record": "9-7-0",
+          "wins": 9,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 1.1818181818181817,
+          "roiPct": 7.386363636363635,
+          "meanAbsoluteAdjustment": 1.5399505313490838,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 268,
+          "bets": 26,
+          "record": "14-12-0",
+          "wins": 14,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 0.7272727272727273,
+          "roiPct": 2.7972027972027975,
+          "meanAbsoluteAdjustment": 2.5633271568480276,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 268,
+          "bets": 16,
+          "record": "9-7-0",
+          "wins": 9,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 1.1818181818181817,
+          "roiPct": 7.386363636363635,
+          "meanAbsoluteAdjustment": 1.5700230082889086,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "selected": {
+          "opportunities": 268,
+          "bets": 19,
+          "record": "10-9-0",
+          "wins": 10,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 0.09090909090909083,
+          "roiPct": 0.47846889952153066,
+          "meanAbsoluteAdjustment": 1.8096502236358623,
+          "maxAbsoluteAdjustment": 8.0
+        }
+      }
+    },
+    "additional_day": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.2516180010320308,
+          "maxAbsoluteAdjustment": 3.2691946969794046
+        },
+        "strong": {
+          "opportunities": 7,
+          "bets": 1,
+          "record": "1-0-0",
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0.9090909090909091,
+          "roiPct": 90.9090909090909,
+          "meanAbsoluteAdjustment": 1.8548946600699465,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.2884747507354892,
+          "maxAbsoluteAdjustment": 3.5191946969794046
+        },
+        "selected": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.2884747507354892,
+          "maxAbsoluteAdjustment": 3.5191946969794046
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        },
+        "strong": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        },
+        "divergence": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        },
+        "selected": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.0828403848351107,
+          "maxAbsoluteAdjustment": 1.579882693845775
+        },
+        "strong": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.5390941316624986,
+          "maxAbsoluteAdjustment": 3.1597653876915217
+        },
+        "divergence": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.0828403848351107,
+          "maxAbsoluteAdjustment": 1.579882693845775
+        },
+        "selected": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.5390941316624986,
+          "maxAbsoluteAdjustment": 3.1597653876915217
+        }
+      }
+    },
+    "all": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 275,
+          "bets": 38,
+          "record": "26-12-0",
+          "wins": 26,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 11.636363636363635,
+          "roiPct": 30.622009569377987,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 275,
+          "bets": 31,
+          "record": "17-14-0",
+          "wins": 17,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 1.4545454545454541,
+          "roiPct": 4.692082111436949,
+          "meanAbsoluteAdjustment": 1.300776937927601,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "strong": {
+          "opportunities": 275,
+          "bets": 29,
+          "record": "14-15-0",
+          "wins": 14,
+          "losses": 15,
+          "pushes": 0,
+          "netUnits": -2.2727272727272734,
+          "roiPct": -7.8369905956112875,
+          "meanAbsoluteAdjustment": 1.9995931728456067,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 275,
+          "bets": 30,
+          "record": "17-13-0",
+          "wins": 17,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 2.454545454545454,
+          "roiPct": 8.18181818181818,
+          "meanAbsoluteAdjustment": 1.3237502135925416,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "selected": {
+          "opportunities": 275,
+          "bets": 29,
+          "record": "15-14-0",
+          "wins": 15,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": -0.3636363636363641,
+          "roiPct": -1.2539184952978073,
+          "meanAbsoluteAdjustment": 1.7981762625320614,
+          "maxAbsoluteAdjustment": 5.0
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 213,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 213,
+          "bets": 24,
+          "record": "15-9-0",
+          "wins": 15,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 4.636363636363636,
+          "roiPct": 19.318181818181817,
+          "meanAbsoluteAdjustment": 1.186367445473827,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "strong": {
+          "opportunities": 213,
+          "bets": 17,
+          "record": "9-8-0",
+          "wins": 9,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 0.18181818181818155,
+          "roiPct": 1.0695187165775386,
+          "meanAbsoluteAdjustment": 1.776987060793966,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 213,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 1.20682331230195,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "selected": {
+          "opportunities": 213,
+          "bets": 20,
+          "record": "12-8-0",
+          "wins": 12,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 2.9090909090909087,
+          "roiPct": 14.545454545454543,
+          "meanAbsoluteAdjustment": 1.5982813494855503,
+          "maxAbsoluteAdjustment": 5.0
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 275,
+          "bets": 14,
+          "record": "9-5-0",
+          "wins": 9,
+          "losses": 5,
+          "pushes": 0,
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 275,
+          "bets": 16,
+          "record": "9-7-0",
+          "wins": 9,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 1.1818181818181817,
+          "roiPct": 7.386363636363635,
+          "meanAbsoluteAdjustment": 1.52831500034691,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 275,
+          "bets": 26,
+          "record": "14-12-0",
+          "wins": 14,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 0.7272727272727273,
+          "roiPct": 2.7972027972027975,
+          "meanAbsoluteAdjustment": 2.537255770752396,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 275,
+          "bets": 16,
+          "record": "9-7-0",
+          "wins": 9,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 1.1818181818181817,
+          "roiPct": 7.386363636363635,
+          "meanAbsoluteAdjustment": 1.5576219960555393,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "selected": {
+          "opportunities": 275,
+          "bets": 19,
+          "record": "10-9-0",
+          "wins": 10,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 0.09090909090909083,
+          "roiPct": 0.47846889952153066,
+          "meanAbsoluteAdjustment": 1.802763341294722,
+          "maxAbsoluteAdjustment": 8.0
+        }
+      }
+    }
+  },
+  "latestProfilesThroughNov21": {
+    "Spread": {
+      "profile": "divergence",
+      "parameters": {
+        "weights": [
+          1.0,
+          2.0,
+          2.0,
+          0.5,
+          1.0,
+          0.5
+        ],
+        "spread_cap": 4.0,
+        "total_cap": 6.0,
+        "minimum_adjustment": 1.0
+      },
+      "trainingGames": 451,
+      "trainingThrough": "2026-11-21",
+      "selectionReason": "prior_net_units",
+      "priorProfileResults": {
+        "balanced": {
+          "opportunities": 451,
+          "bets": 54,
+          "record": "30-24-0",
+          "wins": 30,
+          "losses": 24,
+          "pushes": 0,
+          "netUnits": 3.2727272727272716,
+          "roiPct": 6.060606060606058,
+          "meanAbsoluteAdjustment": 1.3827234571198368,
+          "maxAbsoluteAdjustment": 4.0
+        },
+        "strong": {
+          "opportunities": 451,
+          "bets": 52,
+          "record": "29-23-0",
+          "wins": 29,
+          "losses": 23,
+          "pushes": 0,
+          "netUnits": 3.363636363636363,
+          "roiPct": 6.4685314685314665,
+          "meanAbsoluteAdjustment": 2.1381651000772117,
+          "maxAbsoluteAdjustment": 5.000000000000002
+        },
+        "divergence": {
+          "opportunities": 451,
+          "bets": 52,
+          "record": "31-21-0",
+          "wins": 31,
+          "losses": 21,
+          "pushes": 0,
+          "netUnits": 7.181818181818181,
+          "roiPct": 13.81118881118881,
+          "meanAbsoluteAdjustment": 1.4113928727573506,
+          "maxAbsoluteAdjustment": 4.0
+        }
+      }
+    },
+    "Total": {
+      "profile": "strong",
+      "parameters": {
+        "weights": [
+          2.0,
+          4.0,
+          2.0,
+          1.0,
+          1.0,
+          0.5
+        ],
+        "spread_cap": 5.0,
+        "total_cap": 8.0,
+        "minimum_adjustment": 1.0
+      },
+      "trainingGames": 451,
+      "trainingThrough": "2026-11-21",
+      "selectionReason": "prior_net_units",
+      "priorProfileResults": {
+        "balanced": {
+          "opportunities": 451,
+          "bets": 40,
+          "record": "21-19-0",
+          "wins": 21,
+          "losses": 19,
+          "pushes": 0,
+          "netUnits": 0.09090909090909116,
+          "roiPct": 0.2272727272727279,
+          "meanAbsoluteAdjustment": 1.6634255059662635,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 451,
+          "bets": 59,
+          "record": "32-27-0",
+          "wins": 32,
+          "losses": 27,
+          "pushes": 0,
+          "netUnits": 2.09090909090909,
+          "roiPct": 3.5439137134052374,
+          "meanAbsoluteAdjustment": 2.7997354228282054,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 451,
+          "bets": 41,
+          "record": "22-19-0",
+          "wins": 22,
+          "losses": 19,
+          "pushes": 0,
+          "netUnits": 0.9999999999999996,
+          "roiPct": 2.4390243902439015,
+          "meanAbsoluteAdjustment": 1.6976208246050488,
+          "maxAbsoluteAdjustment": 6.0
+        }
+      }
+    }
+  },
+  "validation": {
+    "matchedMarketComparisons": 550,
+    "predictionRows": 2750,
+    "visibleSnapshotProjections": 749,
+    "sameQuotesAcrossVariants": true,
+    "earlierDateSizingOnly": true,
+    "futureHistoryExcluded": true,
+    "allConfirmationEvidenceVisibleByDecision": true,
+    "independentPriceEqualsObservedNetMove": true,
+    "allNonzeroAdjustmentsAtLeastOnePoint": true,
+    "originalInputHashesVerified": true,
+    "officialRecordsOrProductionWritten": false,
+    "targetedUnitTests": 54,
+    "approvedExamplesPerProfile": 8,
+    "basicMovementStatesPerProfile": 27,
+    "baselineMatchesOriginalFixedStudy": true,
+    "uconnFlatReboundReducesUnderWithoutOverFlip": true
+  },
+  "previousV2Aggregate": "research/results/ncaam_directional_market_flow_v2_2026-11-22.json",
+  "previousV2MainResults": {
+    "Spread": {
+      "baseline": {
+        "opportunities": 268,
+        "bets": 38,
+        "record": "26-12-0",
+        "wins": 26,
+        "losses": 12,
+        "pushes": 0,
+        "netUnits": 11.636363636363635,
+        "roiPct": 30.622009569377987,
+        "meanAbsoluteAdjustment": 0.0,
+        "maxAbsoluteAdjustment": 0.0
+      },
+      "balanced": {
+        "opportunities": 268,
+        "bets": 31,
+        "record": "18-13-0",
+        "wins": 18,
+        "losses": 13,
+        "pushes": 0,
+        "netUnits": 3.363636363636363,
+        "roiPct": 10.850439882697945,
+        "meanAbsoluteAdjustment": 1.6477123889056244,
+        "maxAbsoluteAdjustment": 4.0000000000000036
+      },
+      "strong": {
+        "opportunities": 268,
+        "bets": 33,
+        "record": "19-14-0",
+        "wins": 19,
+        "losses": 14,
+        "pushes": 0,
+        "netUnits": 3.272727272727272,
+        "roiPct": 9.917355371900824,
+        "meanAbsoluteAdjustment": 2.704228530930093,
+        "maxAbsoluteAdjustment": 5.0000000000000036
+      },
+      "divergence": {
+        "opportunities": 268,
+        "bets": 31,
+        "record": "17-14-0",
+        "wins": 17,
+        "losses": 14,
+        "pushes": 0,
+        "netUnits": 1.4545454545454541,
+        "roiPct": 4.692082111436949,
+        "meanAbsoluteAdjustment": 1.678157334695009,
+        "maxAbsoluteAdjustment": 4.0000000000000036
+      },
+      "selected": {
+        "opportunities": 268,
+        "bets": 31,
+        "record": "18-13-0",
+        "wins": 18,
+        "losses": 13,
+        "pushes": 0,
+        "netUnits": 3.363636363636363,
+        "roiPct": 10.850439882697945,
+        "meanAbsoluteAdjustment": 1.6477123889056244,
+        "maxAbsoluteAdjustment": 4.0000000000000036
+      }
+    },
+    "SpreadBelow20": {
+      "baseline": {
+        "opportunities": 209,
+        "bets": 23,
+        "record": "15-8-0",
+        "wins": 15,
+        "losses": 8,
+        "pushes": 0,
+        "netUnits": 5.636363636363636,
+        "roiPct": 24.50592885375494,
+        "meanAbsoluteAdjustment": 0.0,
+        "maxAbsoluteAdjustment": 0.0
+      },
+      "balanced": {
+        "opportunities": 209,
+        "bets": 21,
+        "record": "12-9-0",
+        "wins": 12,
+        "losses": 9,
+        "pushes": 0,
+        "netUnits": 1.909090909090909,
+        "roiPct": 9.09090909090909,
+        "meanAbsoluteAdjustment": 1.6024101794069117,
+        "maxAbsoluteAdjustment": 4.000000000000001
+      },
+      "strong": {
+        "opportunities": 209,
+        "bets": 23,
+        "record": "14-9-0",
+        "wins": 14,
+        "losses": 9,
+        "pushes": 0,
+        "netUnits": 3.7272727272727266,
+        "roiPct": 16.20553359683794,
+        "meanAbsoluteAdjustment": 2.612470821962667,
+        "maxAbsoluteAdjustment": 5.000000000000001
+      },
+      "divergence": {
+        "opportunities": 209,
+        "bets": 21,
+        "record": "11-10-0",
+        "wins": 11,
+        "losses": 10,
+        "pushes": 0,
+        "netUnits": -1.1102230246251565e-16,
+        "roiPct": -5.286776307738841e-16,
+        "meanAbsoluteAdjustment": 1.6350826254854263,
+        "maxAbsoluteAdjustment": 4.000000000000001
+      },
+      "selected": {
+        "opportunities": 209,
+        "bets": 21,
+        "record": "12-9-0",
+        "wins": 12,
+        "losses": 9,
+        "pushes": 0,
+        "netUnits": 1.909090909090909,
+        "roiPct": 9.09090909090909,
+        "meanAbsoluteAdjustment": 1.6024101794069117,
+        "maxAbsoluteAdjustment": 4.000000000000001
+      }
+    },
+    "Total": {
+      "baseline": {
+        "opportunities": 268,
+        "bets": 14,
+        "record": "9-5-0",
+        "wins": 9,
+        "losses": 5,
+        "pushes": 0,
+        "netUnits": 3.1818181818181817,
+        "roiPct": 22.727272727272727,
+        "meanAbsoluteAdjustment": 0.0,
+        "maxAbsoluteAdjustment": 0.0
+      },
+      "balanced": {
+        "opportunities": 268,
+        "bets": 19,
+        "record": "12-7-0",
+        "wins": 12,
+        "losses": 7,
+        "pushes": 0,
+        "netUnits": 3.9090909090909087,
+        "roiPct": 20.574162679425836,
+        "meanAbsoluteAdjustment": 2.0850696827104422,
+        "maxAbsoluteAdjustment": 6.0
+      },
+      "strong": {
+        "opportunities": 268,
+        "bets": 43,
+        "record": "23-20-0",
+        "wins": 23,
+        "losses": 20,
+        "pushes": 0,
+        "netUnits": 0.9090909090909087,
+        "roiPct": 2.1141649048625784,
+        "meanAbsoluteAdjustment": 3.572228036773805,
+        "maxAbsoluteAdjustment": 8.0
+      },
+      "divergence": {
+        "opportunities": 268,
+        "bets": 19,
+        "record": "12-7-0",
+        "wins": 12,
+        "losses": 7,
+        "pushes": 0,
+        "netUnits": 3.9090909090909087,
+        "roiPct": 20.574162679425836,
+        "meanAbsoluteAdjustment": 2.1105899853813717,
+        "maxAbsoluteAdjustment": 6.0
+      },
+      "selected": {
+        "opportunities": 268,
+        "bets": 19,
+        "record": "12-7-0",
+        "wins": 12,
+        "losses": 7,
+        "pushes": 0,
+        "netUnits": 3.9090909090909087,
+        "roiPct": 20.574162679425836,
+        "meanAbsoluteAdjustment": 2.0850696827104422,
+        "maxAbsoluteAdjustment": 6.0
+      }
+    }
+  },
+  "uconnArizonaFixedBalancedTimeline": [
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T11:40:06.545Z",
+      "timeET": "Nov 18 06:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1185420854ac93df",
+      "baselineCapturedAt": "2026-11-18T11:07:35.733447+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 82,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 148.9885665790251,
+      "adjustment": 0.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.0,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.0,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": null
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T12:40:06.590Z",
+      "timeET": "Nov 18 07:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 84,
+      "moneyPct": 86,
+      "baseline": 148.9885665790251,
+      "projection": 149.9885665790251,
+      "adjustment": 1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.05,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.0,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T11:40:06.545000+00:00",
+        "end": "2026-11-18T12:40:06.590000+00:00",
+        "money_share_change": 1.0,
+        "ticket_share_change": 2.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": 0.1,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T12:40:06.590000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          0.025,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T13:40:06.557Z",
+      "timeET": "Nov 18 08:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 82,
+      "moneyPct": 86,
+      "baseline": 148.9885665790251,
+      "projection": 149.9885665790251,
+      "adjustment": 1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.035355451380751406,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.025,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T12:40:06.590000+00:00",
+        "end": "2026-11-18T13:40:06.557000+00:00",
+        "money_share_change": 0.0,
+        "ticket_share_change": -2.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": 0.2,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T13:40:06.557000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          0.05,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T14:40:06.521Z",
+      "timeET": "Nov 18 09:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 83,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 147.9885665790251,
+      "adjustment": -1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": -0.12499983393293645,
+        "money_ticket_divergence": -0.07500000000000001,
+        "ticket_only_movement": 0.01767773079590382,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T13:40:06.557000+00:00",
+        "end": "2026-11-18T14:40:06.521000+00:00",
+        "money_share_change": -1.0,
+        "ticket_share_change": 1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.1,
+        "money_ticket_divergence": true,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T14:40:06.521000+00:00",
+        "split_strength_multiplier": 0.75,
+        "effective_split_multiplier": 0.75,
+        "features": [
+          0.0,
+          -0.07500000000000001,
+          -0.07500000000000001,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T15:55:06.670Z",
+      "timeET": "Nov 18 10:55 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 83,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 147.80624447588806,
+      "adjustment": -1.1823221031370326,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.12499983393293645,
+        "money_ticket_divergence": -0.07500000000000001,
+        "ticket_only_movement": 0.01767773079590382,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T13:40:06.557000+00:00",
+        "end": "2026-11-18T14:40:06.521000+00:00",
+        "money_share_change": -1.0,
+        "ticket_share_change": 1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.1,
+        "money_ticket_divergence": true,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T14:40:06.521000+00:00",
+        "split_strength_multiplier": 0.75,
+        "effective_split_multiplier": 0.75,
+        "features": [
+          0.0,
+          -0.07500000000000001,
+          -0.07500000000000001,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T16:40:07.135Z",
+      "timeET": "Nov 18 11:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|d4fd5290a341ab37",
+      "baselineCapturedAt": "2026-11-18T16:37:44.092849+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 65,
+      "baseline": 148.9885665790251,
+      "projection": 146.89741091583176,
+      "adjustment": -2.091155663193343,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.0624962227023595,
+        "money_ticket_divergence": -0.03749778343859001,
+        "ticket_only_movement": 0.008838342947606602,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T15:55:06.670000+00:00",
+        "end": "2026-11-18T16:40:07.135000+00:00",
+        "money_share_change": -20.0,
+        "ticket_share_change": -1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -2.0,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T16:40:07.135000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          -0.5,
+          0.0,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T17:40:06.891Z",
+      "timeET": "Nov 18 12:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 83,
+      "moneyPct": 65,
+      "baseline": 148.988566577789,
+      "projection": 147.2044848847832,
+      "adjustment": -1.784081693005792,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.7513159322527236,
+        "money_ticket_divergence": -0.026515559791751936,
+        "ticket_only_movement": -0.006250200961316236,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T16:40:07.135000+00:00",
+        "end": "2026-11-18T17:40:06.891000+00:00",
+        "money_share_change": 0.0,
+        "ticket_share_change": 1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.1,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T17:40:06.891000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          0.0,
+          0.0,
+          -0.025,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T18:40:06.738Z",
+      "timeET": "Nov 18 01:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 67,
+      "baseline": 148.988566577789,
+      "projection": 147.80912892919903,
+      "adjustment": -1.179437648589955,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.23126841570485823,
+        "money_ticket_divergence": 0.05625039169626844,
+        "ticket_only_movement": -0.004419624581365213,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T17:40:06.891000+00:00",
+        "end": "2026-11-18T18:40:06.738000+00:00",
+        "money_share_change": 2.0,
+        "ticket_share_change": -1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": 0.2,
+        "money_ticket_divergence": true,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T18:40:06.738000+00:00",
+        "split_strength_multiplier": 0.75,
+        "effective_split_multiplier": 0.75,
+        "features": [
+          0.0,
+          0.15000000000000002,
+          0.07500000000000001,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T19:40:06.905Z",
+      "timeET": "Nov 18 02:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 69,
+      "baseline": 148.988566577789,
+      "projection": 147.96168703955038,
+      "adjustment": -1.0268795382386127,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.06352883591816405,
+        "money_ticket_divergence": 0.03977439394824509,
+        "ticket_only_movement": -0.003125096268693703,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T18:40:06.738000+00:00",
+        "end": "2026-11-18T19:40:06.905000+00:00",
+        "money_share_change": 2.0,
+        "ticket_share_change": 0.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": 0.2,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T19:40:06.905000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          0.05,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T20:40:07.025Z",
+      "timeET": "Nov 18 03:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 28,
+      "moneyPct": 48,
+      "baseline": 148.988566577789,
+      "projection": 146.91956009359808,
+      "adjustment": -2.0690064841909024,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.0949211517261295,
+        "money_ticket_divergence": 0.028124418770486277,
+        "ticket_only_movement": -0.002209751235259331,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T19:40:06.905000+00:00",
+        "end": "2026-11-18T20:40:07.025000+00:00",
+        "money_share_change": -21.0,
+        "ticket_share_change": -54.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -2.1,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T20:40:07.025000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          -0.525,
+          0.0,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T21:40:07.086Z",
+      "timeET": "Nov 18 04:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 22,
+      "moneyPct": 36,
+      "baseline": 148.988566577789,
+      "projection": 146.6326692827028,
+      "adjustment": -2.355897295086186,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.3742216246226544,
+        "money_ticket_divergence": 0.019886850443729658,
+        "ticket_only_movement": -0.0015625209072610228,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T20:40:07.025000+00:00",
+        "end": "2026-11-18T21:40:07.086000+00:00",
+        "money_share_change": -12.0,
+        "ticket_share_change": -6.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -1.2,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T21:40:07.086000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          -0.3,
+          0.0,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T22:40:31.161Z",
+      "timeET": "Nov 18 05:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 21,
+      "moneyPct": 33,
+      "baseline": 148.988566577789,
+      "projection": 146.88202197084993,
+      "adjustment": -2.1065446069390457,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.1194718682127462,
+        "money_ticket_divergence": 0.014029572601030833,
+        "ticket_only_movement": -0.001102311327330315,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T21:40:07.086000+00:00",
+        "end": "2026-11-18T22:40:31.161000+00:00",
+        "money_share_change": -3.0,
+        "ticket_share_change": -1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.3,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T22:40:31.161000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          -0.075,
+          0.0,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T23:40:31.772Z",
+      "timeET": "Nov 18 06:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|db8a6941b01d83f7",
+      "baselineCapturedAt": "2026-11-18T23:07:37.150976+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 22,
+      "moneyPct": 31,
+      "baseline": 149.05137374727326,
+      "projection": 146.89397457506422,
+      "adjustment": -2.1573991722090384,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.091539588651401,
+        "money_ticket_divergence": -0.06508017759007724,
+        "ticket_only_movement": -0.0007794059675602323,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T22:40:31.161000+00:00",
+        "end": "2026-11-18T23:40:31.772000+00:00",
+        "money_share_change": -2.0,
+        "ticket_share_change": 1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.2,
+        "money_ticket_divergence": true,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T23:40:31.772000+00:00",
+        "split_strength_multiplier": 0.75,
+        "effective_split_multiplier": 0.75,
+        "features": [
+          0.0,
+          -0.15000000000000002,
+          -0.07500000000000001,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-19T01:15:26.212Z",
+      "timeET": "Nov 18 08:15 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|pregame|db8a6941b01d83f7",
+      "baselineCapturedAt": "2026-11-19T00:37:53.012583+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 146.5,
+      "betsPct": 22,
+      "moneyPct": 31,
+      "baseline": 149.05137374727326,
+      "projection": 145.89397457506422,
+      "adjustment": -3.1573991722090384,
+      "contributions": {
+        "line_movement": -2.0,
+        "money_movement": -1.091539588651401,
+        "money_ticket_divergence": -0.06508017759007724,
+        "ticket_only_movement": -0.0007794059675602323,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-18T22:40:31.161000+00:00",
+        "end": "2026-11-18T23:40:31.772000+00:00",
+        "money_share_change": -2.0,
+        "ticket_share_change": 1.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": -0.2,
+        "money_ticket_divergence": true,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-18T23:40:31.772000+00:00",
+        "split_strength_multiplier": 0.75,
+        "effective_split_multiplier": 0.75,
+        "features": [
+          0.0,
+          -0.15000000000000002,
+          -0.07500000000000001,
+          0.0,
+          -0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-19T01:40:09.791Z",
+      "timeET": "Nov 18 08:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|pregame|6f118416e9168a5f",
+      "baselineCapturedAt": "2026-11-19T01:37:28.700222+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 146.5,
+      "betsPct": 26,
+      "moneyPct": 66,
+      "baseline": 149.05137374727326,
+      "projection": 148.05137374727326,
+      "adjustment": -1.0,
+      "contributions": {
+        "line_movement": -2.0,
+        "money_movement": 1.2030740681488163,
+        "money_ticket_divergence": -0.03260902045474137,
+        "ticket_only_movement": -0.0003905285154383823,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      },
+      "latestSplitWindow": {
+        "start": "2026-11-19T01:15:26.212000+00:00",
+        "end": "2026-11-19T01:40:09.791000+00:00",
+        "money_share_change": 35.0,
+        "ticket_share_change": 4.0,
+        "signed_market_move": 0.0,
+        "recency_weight": 1.0,
+        "price_opposition_damping": 1.0,
+        "directional_split_pressure": 3.5,
+        "money_ticket_divergence": false,
+        "signed_confirmation_response": 0.0,
+        "confirmation_observed_through": "2026-11-19T01:40:09.791000+00:00",
+        "split_strength_multiplier": 0.25,
+        "effective_split_multiplier": 0.25,
+        "features": [
+          0.0,
+          0.875,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "limits": [
+    "The baseline and multiple research revisions use overlapping historical games.",
+    "Confirmation multipliers and the one-point floor are design priors, not measured true edges.",
+    "This v3 formula and all profile weights were declared before its first betting-return screen.",
+    "The strong divergence weight doubles balanced in v3; it was 1 in v2 and is 2 here.",
+    "Earlier-data sizing is a bounded preset comparison, not established optimal weights.",
+    "Assumed -110 prices and a six-hour post-tipoff settlement availability proxy.",
+    "Hourly and irregular saved observations cannot establish the exact causal order within a snapshot window.",
+    "Every v3 fixed profile and earlier-data selection underperforms the current baseline in both markets."
+  ]
+}

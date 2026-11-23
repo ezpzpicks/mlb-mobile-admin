@@ -1,0 +1,190 @@
+{
+  "study": "NCAAM directional market-flow model",
+  "status": "research_only_not_live",
+  "baselineCommit": "ddae33559a352fb1161460ea3fff7d50cddfa333",
+  "data": {
+    "dates": "2026-11-08 through 2026-11-22",
+    "independentlyVerifiedCompletedGames": 641,
+    "eligibleUniqueGames": 432,
+    "eligibleMarketObservations": 864,
+    "warmupGames": 160,
+    "mainEvaluationGames": 265,
+    "additionalDayGames": 7,
+    "originalReplayMainGames": 268,
+    "coverageNote": "Saved public inputs were recaptured; strict captured-benchmark and paired-market checks produce a different cohort from the previous replay."
+  },
+  "results": {
+    "historical": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 265,
+          "bets": 38,
+          "record": "26-12-0",
+          "netUnits": 11.636363636363635,
+          "roiPct": 30.622009569377987
+        },
+        "directional": {
+          "opportunities": 265,
+          "bets": 37,
+          "record": "26-11-0",
+          "netUnits": 12.636363636363635,
+          "roiPct": 34.15233415233415
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 205,
+          "bets": 23,
+          "record": "15-8-0",
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494
+        },
+        "directional": {
+          "opportunities": 205,
+          "bets": 22,
+          "record": "15-7-0",
+          "netUnits": 6.636363636363636,
+          "roiPct": 30.165289256198346
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 265,
+          "bets": 14,
+          "record": "9-5-0",
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727
+        },
+        "directional": {
+          "opportunities": 265,
+          "bets": 14,
+          "record": "9-5-0",
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727
+        }
+      }
+    },
+    "additional_day": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        },
+        "directional": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        },
+        "directional": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        },
+        "directional": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "netUnits": 0,
+          "roiPct": null
+        }
+      }
+    }
+  },
+  "validation": {
+    "matchedMarketComparisons": 544,
+    "predictionRows": 1088,
+    "sourceOutcomesIndependentlyMatched": true,
+    "nonnegativeWeights": true,
+    "directionViolations": 0,
+    "sameQuotesAndDecisions": true,
+    "earlierDateTrainingOnly": true,
+    "productionWrites": false,
+    "approvedPatternCases": 8,
+    "unitTestsPassed": 19,
+    "nativeV16ForecastsReproduced": 12,
+    "maximumNativeComponentDifference": 0
+  },
+  "frozenResearchWeightsThroughNov21": {
+    "Spread": {
+      "policy": "ncaam-directional-market-flow-2026-11-22-v1",
+      "alpha": 100,
+      "coefficients": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "training_games": 425,
+      "status": "research_only_not_live",
+      "trainingThrough": "2026-11-21"
+    },
+    "Total": {
+      "policy": "ncaam-directional-market-flow-2026-11-22-v1",
+      "alpha": 100,
+      "coefficients": [
+        0,
+        0,
+        1.496354644433116,
+        3.8785978019504292
+      ],
+      "training_games": 425,
+      "status": "research_only_not_live",
+      "trainingThrough": "2026-11-21"
+    }
+  },
+  "onlyBetChange": {
+    "date": "2026-11-17",
+    "game": "Hofstra Pride @ Murray State Racers",
+    "market": "Spread",
+    "selectedSide": "Hofstra +11.5",
+    "baselineHomeMargin": 5.03994424872852,
+    "adjustedHomeMargin": 4.425210233281825,
+    "oldAbsoluteEdge": 6.46005575127148,
+    "newAbsoluteEdge": 7.074789766718176,
+    "change": "B to Research because the unchanged spread policy excludes edges >=7",
+    "baselineBetResult": "L",
+    "incrementalUnits": 1
+  },
+  "example": {
+    "game": "UConn @ Arizona",
+    "date": "2026-11-18",
+    "market": "Total",
+    "originalResearchTotal": 155.460475364293,
+    "baselineTotal": 149.05137374727326,
+    "revisedTotal": 148.78726206204445,
+    "savedTotal": 146.5,
+    "newQualifiedBet": false
+  },
+  "limitations": [
+    "Exploratory replay; baseline and B-band selection used overlapping history.",
+    "The one-unit spread improvement comes from crossing the existing upper eligibility boundary, not an additional winning bet.",
+    "Latest spread coefficients are zero; unsupported patterns do not receive forced positive weights.",
+    "Assumed -110, one unit risked.",
+    "Research code only; no production activation."
+  ]
+}

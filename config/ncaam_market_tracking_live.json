@@ -1,0 +1,37 @@
+{
+  "model_version": "ncaam-v0.17-market-tracking-2026-11-22",
+  "flow_policy": "ncaam-directional-market-flow-2026-11-22-v3",
+  "profile": "balanced",
+  "grade_policy": "ncaam-market-tracking-ungraded-2026-11-22-v1",
+  "grade": "Ungraded",
+  "activation": "First successful deployed collector tick; immutable activation record; forward only",
+  "feature_order": [
+    "line_movement",
+    "money_movement",
+    "money_ticket_divergence",
+    "ticket_only_movement",
+    "same_window_confirmation",
+    "lagged_confirmation"
+  ],
+  "weights": [
+    1,
+    2,
+    1,
+    0.5,
+    0.5,
+    0.25
+  ],
+  "minimum_adjustment": 1,
+  "spread_cap": 4,
+  "total_cap": 6,
+  "half_life_minutes": 120,
+  "confirmation_lookback_minutes": 60,
+  "unconfirmed_split_multiplier": 0.25,
+  "divergence_split_multiplier": 0.75,
+  "full_confirmation_points": 2,
+  "opposing_price_damping_per_point": 0.25,
+  "maximum_market_age_minutes": 90,
+  "baseline_model": "ncaam-v0.16-calibrated-b-spreads-2026-11-22",
+  "official_pick_eligible": false,
+  "regrade_history": false
+}
