@@ -1,17 +1,18 @@
-"""Directional NCAAM market corrections from synchronized pregame snapshots.
-
-Shares describe the provider's reported sample, not absolute dollar inflows.
-This module has no database, network, grading-policy or deployment side effects.
-"""
-from datetime import datetime
+"""Research projections updated from prices and reported betting shares."""
+from copy import deepcopy
+from datetime import datetime, timedelta
 import math
-import statistics
 
-POLICY = "ncaam-directional-market-flow-2026-11-22-v1"
-FEATURE_NAMES = ("money_only_flow", "money_and_tickets_aligned",
-                 "money_against_tickets", "same_window_line_confirmation")
-DEFAULT_HALF_LIFE_MINUTES = 180.0
-MINIMUM_HISTORY_MINUTES = 30.0
+POLICY = "ncaam-directional-market-flow-2026-11-22-v2"
+FEATURE_NAMES = ("line_movement", "money_movement", "money_ticket_divergence",
+                 "ticket_only_movement", "same_window_confirmation", "lagged_confirmation")
+HALF_LIFE_MINUTES = 120.0
+CONFIRMATION_LOOKBACK_MINUTES = 60.0
+PROFILES = {
+    "balanced": {"weights": [1., 2., 1., .5, .5, .25], "spread_cap": 4., "total_cap": 6., "minimum_adjustment": 1.},
+    "strong": {"weights": [2., 4., 1., 1., 1., .5], "spread_cap": 5., "total_cap": 8., "minimum_adjustment": 1.},
+    "divergence": {"weights": [1., 2., 2., .5, 1., .5], "spread_cap": 4., "total_cap": 6., "minimum_adjustment": 1.},
+}
 
 def stamp(value):
     value = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -21,177 +22,186 @@ def stamp(value):
 
 def number(value):
     if value is None or isinstance(value, bool) or str(value).strip() == "":
-        raise ValueError("A reported finite number is required.")
+        raise ValueError("A finite reported number is required.")
     value = float(value)
     if not math.isfinite(value):
-        raise ValueError("A reported finite number is required.")
+        raise ValueError("A finite reported number is required.")
+    return value
+
+def share(value):
+    if value is None:
+        return None
+    value = number(value)
+    if not 0 <= value <= 100:
+        raise ValueError("Shares must be between zero and 100.")
     return value
 
 def sign(value):
     return 1 if value > 0 else -1 if value < 0 else 0
 
-def flow_features(history, *, as_of, tipoff, market, half_life_minutes=DEFAULT_HALF_LIFE_MINUTES):
-    """Home-positive for spreads, Over-positive for totals.
+def flow_features(history, *, as_of, tipoff, market, half_life_minutes=HALF_LIFE_MINUTES):
+    """Home-oriented spread quotes; Over-oriented total quotes.
 
-    Each adjacent pair supplies money, tickets and price changes from the SAME
-    interval. An earlier price move cannot confirm a later money-share change.
-    Features are clipped to the sign of the first-to-current money-share change;
-    counterflow can reduce/cancel a correction but cannot reverse that approved
-    overall direction. A static ending money-ticket gap is never a feature.
+    Line evidence is independent of money movement. Money/ticket channels use
+    recent adjacent windows, without an opening-to-current direction clamp.
+    Missing shares remain unknown. Earlier price is not attributed to later money.
     """
     clock, start = stamp(as_of), stamp(tipoff)
     if not clock < start:
-        raise ValueError("A market correction must precede tipoff.")
-    if market not in ("Spread", "Total"):
-        raise ValueError("Choose Spread or Total.")
-    if number(half_life_minutes) <= 0:
-        raise ValueError("A positive recency half-life is required.")
+        raise ValueError("Market updates must precede tipoff.")
+    if market not in ("Spread", "Total") or number(half_life_minutes) <= 0:
+        raise ValueError("Unsupported market or recency half-life.")
     points = {}
-    for point in history:
-        t = stamp(point["snapshotTime"])
+    for raw in history:
+        t = stamp(raw["snapshotTime"])
         if t > clock or t >= start:
             continue
-        item = {k: number(point[k]) for k in ("line", "betsPct", "moneyPct")}
-        if not all(0 <= item[k] <= 100 for k in ("betsPct", "moneyPct")):
-            raise ValueError("Shares must lie between zero and 100.")
-        if t in points and points[t] != item:
+        point = {"line": number(raw["line"]), "betsPct": share(raw.get("betsPct")),
+                 "moneyPct": share(raw.get("moneyPct"))}
+        if t in points and points[t] != point:
             raise ValueError("Conflicting observations at the same timestamp.")
-        points[t] = item
+        points[t] = point
     timeline = sorted(points.items())
-    basic = {"policy": POLICY, "feature_names": list(FEATURE_NAMES),
-             "as_of": clock.isoformat(), "market": market,
-             "features": [0.0] * len(FEATURE_NAMES), "direction": 0,
-             "observations": len(timeline), "intervals": []}
+    out = {"policy": POLICY, "market": market, "as_of": clock.isoformat(),
+           "feature_names": list(FEATURE_NAMES), "features": [0.] * 6,
+           "observations": len(timeline), "intervals": []}
+    if timeline:
+        out.update(first_observed_at=timeline[0][0].isoformat(),
+                   last_observed_at=timeline[-1][0].isoformat())
     if len(timeline) < 2:
-        return {**basic, "status": "insufficient_history"}
-    duration = (timeline[-1][0] - timeline[0][0]).total_seconds() / 60
-    basic.update(history_minutes=duration, first_observed_at=timeline[0][0].isoformat(),
-                 last_observed_at=timeline[-1][0].isoformat())
-    if duration < MINIMUM_HISTORY_MINUTES:
-        return {**basic, "status": "insufficient_history"}
-    first, last = timeline[0][1], timeline[-1][1]
-    money_change = last["moneyPct"] - first["moneyPct"]
-    direction = sign(money_change)
-    basic.update(money_share_change=money_change,
-                 ticket_share_change=last["betsPct"] - first["betsPct"],
-                 direction=direction)
-    if direction == 0:
-        return {**basic, "status": "no_net_money_share_change"}
-    accumulated = [0.0] * len(FEATURE_NAMES)
-    intervals = []
+        return {**out, "status": "insufficient_history"}
+    # A price-only or unchanged refresh must not erase existing split evidence
+    # through clock decay. Advance the split clock only on an observed share
+    # change; the next genuine split update then reweights the prior intervals.
+    split_updates = [t1 for (_, before), (t1, after) in zip(timeline, timeline[1:])
+                     if any(before[k] is not None and after[k] is not None and before[k] != after[k]
+                            for k in ("moneyPct", "betsPct"))]
+    anchor = max(split_updates, default=timeline[0][0])
+    features, prior_money, intervals = [0.] * 6, [], []
     for (t0, before), (t1, after) in zip(timeline, timeline[1:]):
-        money = (after["moneyPct"] - before["moneyPct"]) / 10.0
-        tickets = (after["betsPct"] - before["betsPct"]) / 10.0
-        price = after["line"] - before["line"]
-        if market == "Spread":
-            price = -price
-        side = sign(money)
-        age = (clock - t1).total_seconds() / 60.0
-        recency = 2.0 ** (-age / half_life_minutes)
-        row = {"start": t0.isoformat(), "end": t1.isoformat(),
-               "money_share_change": money * 10, "ticket_share_change": tickets * 10,
-               "signed_market_move": price, "recency_weight": recency}
-        if side == 0:
-            row.update(features=[0.0] * len(FEATURE_NAMES), price_confirms_money=False)
-            intervals.append(row)
-            continue
-        amplitude = abs(money)
-        denominator = amplitude + abs(tickets)
-        quiet = amplitude / denominator
-        aligned = max(side * tickets, 0.0) / denominator
-        divergent = max(-side * tickets, 0.0) / denominator
-        price_amount = math.log1p(abs(price))
-        damping = 1.0 / (1.0 + price_amount) if side * price < 0 else 1.0
-        core = recency * side * amplitude * damping
-        vector = [core * quiet, core * aligned, core * divergent,
-                  recency * side * amplitude * price_amount if side * price > 0 else 0.0]
+        price = (after["line"] - before["line"]) * (-1 if market == "Spread" else 1)
+        money_known = before["moneyPct"] is not None and after["moneyPct"] is not None
+        bets_known = before["betsPct"] is not None and after["betsPct"] is not None
+        money = (after["moneyPct"] - before["moneyPct"]) / 10 if money_known else None
+        bets = (after["betsPct"] - before["betsPct"]) / 10 if bets_known else None
+        recency = .5 ** (max(0., (anchor - t1).total_seconds() / 60) / half_life_minutes)
+        vector, lagged = [price, 0., 0., 0., 0., 0.], 0.
+        damping = 1 / (1 + .25 * abs(price)) if money is not None and money * price < 0 else 1.
+        if money is not None:
+            vector[1] = recency * money * damping
+            if bets is not None and money * bets < 0:
+                vector[2] = recency * sign(money) * min(abs(money), abs(bets)) * damping
+            if money == 0 and bets is not None:
+                # Declared prior: more tickets without more money share weakens
+                # relative dollar backing for that side.
+                vector[3] = -recency * bets
+            if money * price > 0:
+                vector[4] = recency * sign(money) * min(abs(money), abs(price))
+        if money == 0 and price != 0:
+            cutoff = t1 - timedelta(minutes=CONFIRMATION_LOOKBACK_MINUTES)
+            lagged = sum(m * .5 ** ((t1 - t).total_seconds() / 60 / half_life_minutes)
+                         for t, m in prior_money if cutoff <= t <= t0)
+            if lagged * price > 0:
+                vector[5] = recency * sign(price) * min(abs(lagged), abs(price))
         for i, value in enumerate(vector):
-            accumulated[i] += value
-        row.update(features=vector, price_confirms_money=side * price > 0,
-                   opposing_price_damping=damping)
-        intervals.append(row)
-    features = [direction * max(0.0, direction * value) for value in accumulated]
-    assert all(direction * x >= 0 for x in features)
-    return {**basic, "status": "ready", "features": features,
-            "unclipped_interval_features": accumulated, "intervals": intervals}
+            features[i] += value
+        if money is not None and money != 0:
+            prior_money.append((t1, money))
+        intervals.append({"start": t0.isoformat(), "end": t1.isoformat(),
+                          "money_share_change": None if money is None else money * 10,
+                          "ticket_share_change": None if bets is None else bets * 10,
+                          "signed_market_move": price, "recency_weight": recency,
+                          "price_opposition_damping": damping,
+                          "prior_money_in_lag_window": lagged, "features": vector})
+    first, last = timeline[0][1], timeline[-1][1]
+    out.update(features=features, intervals=intervals,
+               history_minutes=(timeline[-1][0] - timeline[0][0]).total_seconds() / 60,
+               split_information_as_of=anchor.isoformat(),
+               net_money_share_change=None if first["moneyPct"] is None or last["moneyPct"] is None else last["moneyPct"] - first["moneyPct"],
+               recent_money_share_flow=features[1] * 10,
+               status="ready" if any(abs(x) > 1e-12 for x in features) else "observed_unchanged")
+    assert all(math.isfinite(x) for x in features)
+    return out
 
-def adjust_component(baseline, flow, coefficients):
-    """Nonnegative magnitudes preserve the user-approved movement directions."""
-    baseline = number(baseline)
-    weights = [number(x) for x in coefficients]
-    if len(weights) != len(FEATURE_NAMES) or any(x < 0 for x in weights):
-        raise ValueError("Four nonnegative fitted coefficients are required.")
-    if flow.get("policy") != POLICY:
-        raise ValueError("Mismatched market-flow policy.")
+def adjustment(baseline, flow, profile="balanced"):
+    if flow.get("policy") != POLICY or profile not in PROFILES:
+        raise ValueError("Mismatched flow policy or sizing profile.")
+    parameters = PROFILES[profile]
     features = [number(x) for x in flow["features"]]
-    direction = int(flow["direction"])
-    if len(features) != len(weights) or direction not in (-1, 0, 1):
-        raise ValueError("Invalid signed flow features.")
-    if (direction == 0 and any(features)) or any(direction * x < -1e-12 for x in features):
-        raise ValueError("Features reverse the approved money-share direction.")
-    correction = sum(w * x for w, x in zip(weights, features))
-    if not math.isfinite(correction):
-        raise ValueError("Nonfinite market correction.")
-    return {"policy": POLICY, "baseline": baseline, "adjustment": correction,
-            "projection": baseline + correction, "direction": direction,
-            "coefficients": weights, "features": features, "flow_status": flow["status"]}
+    if len(features) != 6:
+        raise ValueError("Incomplete movement features.")
+    contributions = [v * w for v, w in zip(features, parameters["weights"])]
+    raw = sum(contributions)
+    cap = parameters["spread_cap"] if flow["market"] == "Spread" else parameters["total_cap"]
+    minimum = parameters["minimum_adjustment"]
+    # Requested nonzero minimum is a design prior, not a proven true edge.
+    value = 0. if abs(raw) < 1e-9 else sign(raw) * min(cap, max(minimum, abs(raw)))
+    baseline = number(baseline)
+    return {"policy": POLICY, "profile": profile, "baseline": baseline,
+            "raw_adjustment": raw, "adjustment": value, "projection": baseline + value,
+            "contributions": dict(zip(FEATURE_NAMES, contributions)),
+            "parameters": deepcopy(parameters), "flow_status": flow["status"]}
 
 def combine_components(margin, total):
     margin, total = number(margin), number(total)
-    home, away = (total + margin) / 2.0, (total - margin) / 2.0
+    home, away = (total + margin) / 2, (total - margin) / 2
     if min(home, away) <= 0:
         raise ValueError("Combined team scores must be positive.")
     return {"home": home, "away": away, "margin": margin, "total": total}
 
-def fit_nonnegative_ridge(rows, *, alpha=100.0):
-    """Four-variable nonnegative ridge; training rows only, no intercept/search."""
-    if not rows or number(alpha) <= 0:
-        raise ValueError("Training rows and a positive fixed penalty are required.")
-    size = len(FEATURE_NAMES)
-    scales = [statistics.pstdev([number(r["features"][j]) for r in rows])
-              for j in range(size)]
-    scales = [x if x >= 1e-9 else 1.0 for x in scales]
-    design = [[number(v) / s for v, s in zip(r["features"], scales)] for r in rows]
-    target = [number(r["actual"]) - number(r["baseline"]) for r in rows]
-    h = [[sum(x[i] * x[j] for x in design) + (alpha if i == j else 0.0)
-          for j in range(size)] for i in range(size)]
-    c = [sum(x[j] * y for x, y in zip(design, target)) for j in range(size)]
-    weights = [0.0] * size
-    for iteration in range(10000):
-        change = 0.0
-        for i in range(size):
-            fresh = max(0.0, (c[i] - sum(h[i][j] * weights[j] for j in range(size) if j != i)) / h[i][i])
-            change = max(change, abs(fresh - weights[i]))
-            weights[i] = fresh
-        if change < 1e-11:
-            break
-    else:
-        raise ValueError("Constrained ridge did not converge.")
-    gradient = [sum(h[i][j] * weights[j] for j in range(size)) - c[i] for i in range(size)]
-    assert all(abs(g) < 1e-6 if w > 1e-8 else g >= -1e-6 for w, g in zip(weights, gradient))
-    raw = [w / s for w, s in zip(weights, scales)]
-    return {"policy": POLICY, "alpha": alpha, "coefficients": raw,
-            "standardized_coefficients": weights, "feature_scales": scales,
-            "training_games": len(rows), "iterations": iteration + 1,
-            "feature_names": list(FEATURE_NAMES), "intercept": 0.0}
-
-
 def project_with_market_history(*, baseline_margin, baseline_total, spread_history,
-                                total_history, coefficients_by_market, as_of, tipoff):
-    """Construct coherent research team scores from the independent components.
-
-    The baseline total already includes its existing overtime allowance; this
-    function adds the market correction once and does not recalculate overtime.
-    Research output carries no live-grade or official-pick eligibility.
-    """
-    flows = {market: flow_features(history, as_of=as_of, tipoff=tipoff, market=market)
-             for market, history in (("Spread", spread_history), ("Total", total_history))}
+                                total_history, profiles_by_market, as_of, tipoff):
+    flows = {m: flow_features(h, as_of=as_of, tipoff=tipoff, market=m)
+             for m, h in (("Spread", spread_history), ("Total", total_history))}
     latest = {f["last_observed_at"] for f in flows.values() if "last_observed_at" in f}
     if len(latest) > 1:
-        raise ValueError("Spread and total need the same captured market timestamp.")
-    spread = adjust_component(baseline_margin, flows["Spread"], coefficients_by_market["Spread"])
-    total = adjust_component(baseline_total, flows["Total"], coefficients_by_market["Total"])
+        raise ValueError("Both markets need the same captured timestamp.")
+    spread = adjustment(baseline_margin, flows["Spread"], profiles_by_market["Spread"])
+    total = adjustment(baseline_total, flows["Total"], profiles_by_market["Total"])
     scores = combine_components(spread["projection"], total["projection"])
     return {"policy": POLICY, "status": "research_only", "official_pick_eligible": False,
-            "baseline_margin": number(baseline_margin), "baseline_total": number(baseline_total),
-            "market_models": {"spread": spread, "total": total}, "flows": flows, **scores}
+            "as_of": stamp(as_of).isoformat(), "market_models": {"spread": spread, "total": total},
+            "flows": flows, **scores}
+
+class MarketProjectionState:
+    """Recompute from the unadjusted baseline on every paired market snapshot."""
+    def __init__(self, *, baseline_margin, baseline_total, tipoff, profiles_by_market=None):
+        self.baseline_margin = number(baseline_margin)
+        self.baseline_total = number(baseline_total)
+        self.tipoff = tipoff
+        self.profiles = dict(profiles_by_market or {"Spread": "balanced", "Total": "balanced"})
+        self._points = {}
+        self._baseline_at = None
+
+    def update(self, snapshot, *, baseline_margin=None, baseline_total=None):
+        t = stamp(snapshot["snapshotTime"])
+        if t >= stamp(self.tipoff):
+            raise ValueError("Market updates must precede tipoff.")
+        point = {"snapshotTime": t.isoformat(), "home_spread": number(snapshot["home_spread"]),
+                 "total": number(snapshot["total"]),
+                 "home_bets_pct": share(snapshot.get("home_bets_pct")),
+                 "home_money_pct": share(snapshot.get("home_money_pct")),
+                 "over_bets_pct": share(snapshot.get("over_bets_pct")),
+                 "over_money_pct": share(snapshot.get("over_money_pct"))}
+        if t in self._points and self._points[t] != point:
+            raise ValueError("Conflicting observations at the same timestamp.")
+        baseline_update = baseline_margin is not None or baseline_total is not None
+        if baseline_update and self._baseline_at is not None and t < self._baseline_at:
+            raise ValueError("Baseline updates cannot move backward in time.")
+        fresh_margin = self.baseline_margin if baseline_margin is None else number(baseline_margin)
+        fresh_total = self.baseline_total if baseline_total is None else number(baseline_total)
+        combine_components(fresh_margin, fresh_total)
+        self._points[t] = point
+        self.baseline_margin, self.baseline_total = fresh_margin, fresh_total
+        if baseline_update:
+            self._baseline_at = t
+        points = [p for _, p in sorted(self._points.items())]
+        histories = {m: [{"snapshotTime": p["snapshotTime"], "line": p[line],
+                          "betsPct": p[bets], "moneyPct": p[money]} for p in points]
+                     for m, line, bets, money in (
+                         ("Spread", "home_spread", "home_bets_pct", "home_money_pct"),
+                         ("Total", "total", "over_bets_pct", "over_money_pct"))}
+        return project_with_market_history(baseline_margin=self.baseline_margin,
+            baseline_total=self.baseline_total, spread_history=histories["Spread"],
+            total_history=histories["Total"], profiles_by_market=self.profiles,
+            as_of=points[-1]["snapshotTime"], tipoff=self.tipoff)

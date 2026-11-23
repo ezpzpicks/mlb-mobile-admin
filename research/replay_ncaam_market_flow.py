@@ -1,243 +1,251 @@
-"""Chronological replay of the approved directional market-flow model.
+"""Replay the v2 NCAAM updater against the restored, fixed market-study inputs.
 
-Raw inputs are read-only public saved boards and independent ESPN scoreboards.
-No production model, database, historical pick or scheduled task is mutated.
+Inputs are the user's original NCAAM_Market_Adjustment_Data_2026-11-22.zip,
+extracted without changing its internal paths. No model/database writes occur.
 """
 from pathlib import Path
 from datetime import timedelta
-from collections import Counter, defaultdict
-import hashlib
-import json
-import math
+from collections import defaultdict, Counter
+import argparse
 import csv
+import hashlib
+import itertools
+import json
 import sys
-import os
-import urllib.request
-import concurrent.futures
+from zoneinfo import ZoneInfo
+
 REPO=Path(__file__).resolve().parents[1]
-ROOT=Path(os.environ.get('NCAAM_MARKET_FLOW_WORKSPACE',str(REPO/'research/results/ncaam_market_flow')))
-ROOT.mkdir(parents=True,exist_ok=True)
-SOURCE=ROOT/'production' if (ROOT/'production/builders').exists() else REPO
-sys.path.insert(0,str(SOURCE))
-SPEC=REPO/'config/ncaam_market_flow_research.json'
-if not SPEC.exists():SPEC=ROOT/'approved_specification.json'
+sys.path.insert(0,str(REPO))
 from builders.ncaam_model import team_key
 from builders.ncaam_matchup_projection import from_captured_inputs
-from builders.ncaam_market_flow import flow_features,adjust_component,fit_nonnegative_ridge,stamp,number,combine_components
+from builders.ncaam_market_flow import (
+    POLICY, PROFILES, FEATURE_NAMES, flow_features, adjustment, MarketProjectionState, stamp, number)
 
-def read(p):return json.loads(p.read_text())
-def write(name,obj):(ROOT/name).write_text(json.dumps(obj,indent=2)+'\n')
-def benchmark(f):
- for key in ['matchup_projection','matchup_total','matchup_spread']:
-  p=f.get(key)
-  if isinstance(p,dict) and isinstance(p.get('national_benchmark'),dict):return p['national_benchmark']
- return None
+read=lambda p:json.loads(p.read_text())
 
-def paired(s,market,rows):
- rows=[r for r in rows if r.get('Market')==market]
- if market=='Spread':
-  a=[r for r in rows if team_key(r.get('Selection',''))==team_key(s['Home Team'])]
-  b=[r for r in rows if team_key(r.get('Selection',''))==team_key(s['Away Team'])]
- else:
-  a=[r for r in rows if (r.get('Side') or r.get('Selection','')).lower()=='over']
-  b=[r for r in rows if (r.get('Side') or r.get('Selection','')).lower()=='under']
- if len(a)!=1 or len(b)!=1:raise ValueError('missing paired sides')
- a,b=a[0],b[0]
- for r in [a,b]:
-  if r.get('Snapshot Status')!='FINAL_PREGAME':raise ValueError('not a frozen pregame market')
-  if team_key(r['Home Team'])!=team_key(s['Home Team']) or team_key(r['Away Team'])!=team_key(s['Away Team']):raise ValueError('team orientation mismatch')
-  if abs((stamp(r['Game Time'])-stamp(s['Game Time'])).total_seconds())>60:raise ValueError('tipoff mismatch')
- def hist(r):
-  out={}
-  for p in json.loads(r.get('Details JSON') or '{}').get('movementHistory',[]):
-   t=stamp(p['snapshotTime']);v={k:number(p[k]) for k in ['line','moneyPct','betsPct']}
-   if t in out and out[t]!=v:raise ValueError('conflicting market observation')
-   out[t]=v
-  return out
- ah,bh=hist(a),hist(b)
- frozen=min(stamp(a['Frozen At']),stamp(b['Frozen At']))
- tip=stamp(s['Game Time']);out=[]
- for t in sorted(ah.keys()&bh.keys()):
-  if t>frozen or t>=tip:continue
-  x,y=ah[t],bh[t]
-  diff=x['line']+y['line'] if market=='Spread' else x['line']-y['line']
-  if abs(diff)>1e-7 or abs(x['moneyPct']+y['moneyPct']-100)>1.01 or abs(x['betsPct']+y['betsPct']-100)>1.01:raise ValueError('inconsistent paired market')
-  out.append({'snapshotTime':t.isoformat(),**x})
- if not out or abs((stamp(out[-1]['snapshotTime'])-frozen).total_seconds())>1:raise ValueError('missing exact frozen pair')
- if not 0<(tip-frozen).total_seconds()/60<=90:raise ValueError('not within 90 minutes of tipoff')
- return out,frozen
+def dump(root,name,value):
+    (root/name).write_text(json.dumps(value,indent=2)+'\n')
 
-def build():
- pool={};conflicts=set();source_manifest=[]
- files=sorted((ROOT/'raw').glob('2026-11-*.json'))
- for path in files:
-  b=path.read_bytes();source_manifest.append({'path':'raw/'+path.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
-  m=json.loads(b)['ncaamMarket']
-  for f in m['forecasts']:
-   bench=benchmark(f)
-   if not bench:continue
-   key=stamp(bench['observed_at']);shape={k:bench[k] for k in ['metrics','team_count','season']}
-   if key in pool and {k:pool[key][k] for k in shape}!=shape:conflicts.add(key)
-   else:pool[key]=bench
- for k in conflicts:pool.pop(k,None)
- exclusions=Counter();rows=[];verified_games=set();eligible=set();baseline_diffs=[]
- for path in files:
-  m=read(path)['ncaamMarket'];day=m['date'];espn=read(ROOT/'raw'/('espn_'+day+'.json'));finals={}
-  for e in espn['events']:
-   c=e['competitions'][0]
-   if c.get('status',{}).get('type',{}).get('completed'):finals[str(e['id'])]={x['homeAway']:x for x in c['competitors']}
-  grouped=defaultdict(list);forecasts=defaultdict(list)
-  for r in m['splits']:grouped[str(r['Game ID'])].append(r)
-  for f in m['forecasts']:forecasts[str(f['gameId'])].append(f)
-  for s in m['games']:
-   gid=str(s['Game ID']);key=(day,gid)
-   if s.get('Completed')!='TRUE':continue
-   final=finals.get(gid)
-   if not final or any(str(final[k]['team']['id'])!=str(s[k.title()+' Team ID']) or float(final[k]['score'])!=number(s[k.title()+' Score']) for k in ['home','away']):
-    exclusions['independent final missing or disagrees']+=1;continue
-   verified_games.add(key)
-   for market in ['Spread','Total']:
-    try:
-     history,decision=paired(s,market,grouped[gid])
-     flow=flow_features(history,as_of=decision.isoformat(),tipoff=s['Game Time'],market=market)
-     if flow['status']=='insufficient_history':raise ValueError('insufficient timed movement history')
-     possible=sorted([f for f in forecasts[gid] if stamp(f['lockedAt'])<=decision and abs((stamp(f['tipoff'])-stamp(s['Game Time'])).total_seconds())<=60],
-                     key=lambda f:(stamp(f['lockedAt']),str(f['recordId'])),reverse=True)
-     p=None;chosen=None
-     for f in possible:
-      bench=benchmark(f) or pool.get(stamp(f.get('ratings_observed_at','1900-01-01T00:00:00Z')))
-      if not bench:continue
-      if stamp(bench['observed_at'])>stamp(f['lockedAt']) or (decision-stamp(bench['observed_at'])).total_seconds()>30*3600:continue
-      direct=team_key(f['home_team'])==team_key(s['Home Team']) and team_key(f['away_team'])==team_key(s['Away Team'])
-      reverse=team_key(f['home_team'])==team_key(s['Away Team']) and team_key(f['away_team'])==team_key(s['Home Team'])
-      if not direct and not(reverse and f.get('neutral_site') is True):continue
-      try:
-       p=from_captured_inputs(f['away_rating'],f['home_rating'],bench,as_of=f['lockedAt'],tipoff=f['tipoff'],
-           source_url=f.get('ratings_source_url','Captured Torvik export'),home_court_points=f['home_court_points'],
-           neutral_site=f['neutral_site'],lineup_adjustment=f.get('lineup_adjustment'))
-       if reverse:p['margin']=-p['margin']
-       chosen=f;break
-      except (KeyError,TypeError,ValueError):continue
-     if p is None:raise ValueError('no reconstructible captured baseline benchmark before decision')
-     assert stamp(bench['observed_at'])<=stamp(chosen['lockedAt'])<=decision<stamp(s['Game Time'])
-     if chosen.get('modelVersion')=='ncaam-v0.16-calibrated-b-spreads-2026-11-22':
-      old=chosen['matchup_projection'];baseline_diffs.append(max(abs(old['margin']-p['margin']),abs(old['total']-p['total'])))
-     hs,aws=number(s['Home Score']),number(s['Away Score']);quote=history[-1]['line']
-     row={'date':day,'gameId':gid,'game':s['Game'],'market':market,'homeTeam':s['Home Team'],'awayTeam':s['Away Team'],
-          'tipoff':s['Game Time'],'decision':decision.isoformat(),'baselineRecordId':chosen['recordId'],
-          'baselineCapturedAt':chosen['lockedAt'],'ratingsObservedAt':bench['observed_at'],'homeScore':hs,'awayScore':aws,
-          'baselineMargin':p['margin'],'baselineTotal':p['total'],'baseline':p['margin'] if market=='Spread' else p['total'],
-          'actual':hs-aws if market=='Spread' else hs+aws,'quote':quote,'marketValue':-quote if market=='Spread' else quote,
-          'features':flow['features'],'flow':flow,'history':history}
-     rows.append(row);eligible.add(key)
-    except (KeyError,ValueError,TypeError) as e:exclusions[str(e)]+=1
- assert len(rows)==len(set((r['date'],r['gameId'],r['market']) for r in rows))
- assert not baseline_diffs or max(baseline_diffs)<1e-8
- write('observations.json',rows)
- write('coverage.json',{'independently_verified_completed_games':len(verified_games),'eligible_unique_games':len(eligible),
-       'eligible_market_observations':len(rows),'by_date_market':dict(Counter(r['date']+'|'+r['market'] for r in rows)),
-       'active_net_money_change':dict(Counter(r['market'] for r in rows if r['flow']['direction'])),
-       'exclusions':dict(exclusions),'exact_native_v16_checks':len(baseline_diffs),'maximum_native_v16_difference':max(baseline_diffs,default=None),
-       'benchmark_pool_observations':len(pool),'conflicting_benchmarks_excluded':len(conflicts),'source_manifest':source_manifest})
- return rows
+def pair_history(r,split_rows):
+    rows=[x for x in split_rows if str(x['Game ID'])==r['gameId'] and x['Market']==r['market']]
+    if r['market']=='Spread':
+        primary=[x for x in rows if team_key(x['Selection'])==team_key(r['homeTeam'])]
+        other=[x for x in rows if team_key(x['Selection'])==team_key(r['awayTeam'])]
+    else:
+        primary=[x for x in rows if (x.get('Side') or x['Selection']).lower()=='over']
+        other=[x for x in rows if (x.get('Side') or x['Selection']).lower()=='under']
+    if len(primary)!=1 or len(other)!=1:
+        raise ValueError('Saved paired history no longer matches the fixed observation.')
+    def decode(x):
+        return {stamp(p['snapshotTime']):p for p in json.loads(x['Details JSON'])['movementHistory']}
+    a,b=decode(primary[0]),decode(other[0]);end=stamp(r['decision']);tip=stamp(r['tipoff'])
+    history=[]
+    for t in sorted(a.keys()&b.keys()):
+        if t>end or t>=tip:continue
+        x,y=a[t],b[t]
+        diff=number(x['line'])+number(y['line']) if r['market']=='Spread' else number(x['line'])-number(y['line'])
+        assert abs(diff)<1e-7
+        assert abs(number(x['betsPct'])+number(y['betsPct'])-100)<=1.01
+        assert abs(number(x['moneyPct'])+number(y['moneyPct'])-100)<=1.01
+        history.append({k:x[k] for k in ['snapshotTime','line','betsPct','moneyPct']})
+    assert history and stamp(history[-1]['snapshotTime'])==end
+    assert abs(number(history[-1]['line'])-r['quote'])<1e-9
+    assert (end-stamp(history[0]['snapshotTime'])).total_seconds()>=30*60
+    return history
 
-def predict(r,projection):
- gap=projection-r['marketValue'];edge=abs(gap);qual=5<=edge<7 if r['market']=='Spread' else edge>=8
- side=('home' if gap>0 else 'away') if r['market']=='Spread' else ('Over' if gap>0 else 'Under')
- cover=(r['actual']-r['marketValue'])*(1 if gap>0 else -1);result='W' if cover>1e-8 else 'L' if cover< -1e-8 else 'P'
- profit=10/11 if result=='W' else -1 if result=='L' else 0
- pick=(r[side+'Team']+' '+format(r['quote']*(1 if side=='home' else -1),'+g')) if r['market']=='Spread' else side+' '+format(r['quote'],'g')
- return {'projection':projection,'adjustment':projection-r['baseline'],'edge':edge,'selected':qual,'side':side,'pick':pick,'result':result,'profit':profit if qual else 0.0}
+def load_rows(input_root):
+    original=read(input_root/'market_study/observations.json')['observations']
+    audit=read(input_root/'market_study/audit.json')
+    boards={}
+    for source in audit['sources']:
+        path=input_root/source['path'];data=path.read_bytes()
+        assert hashlib.sha256(data).hexdigest()==source['sha256'],str(path)
+        m=json.loads(data)['ncaamMarket'];boards[m['date']]=m['splits']
+    rows=[]
+    for old in original:
+        r=dict(old);history=pair_history(r,boards[r['date']])
+        f=flow_features(history,as_of=r['decision'],tipoff=r['tipoff'],market=r['market'])
+        available=[p['snapshotTime'] for p in history if stamp(p['snapshotTime'])>=stamp(r['baselineCapturedAt'])]
+        assert available and stamp(r['ratingsObservedAt'])<=stamp(r['baselineCapturedAt'])<=stamp(r['decision'])<stamp(r['tipoff'])
+        r.update(features=f['features'],flow=f,history=history,firstVisibleUpdateAt=min(available,key=stamp))
+        rows.append(r)
+    keys=[(r['date'],r['gameId'],r['market']) for r in rows]
+    assert len(keys)==len(set(keys))
+    return rows
+
+def bet(r,projection):
+    gap=projection-r['marketValue'];edge=abs(gap)
+    eligible=5<=edge<7 if r['market']=='Spread' else edge>=8
+    side=('home' if gap>0 else 'away') if r['market']=='Spread' else ('Over' if gap>0 else 'Under')
+    cover=(r['actual']-r['marketValue'])*(1 if gap>0 else -1)
+    result='W' if cover>1e-8 else 'L' if cover< -1e-8 else 'P'
+    profit=10/11 if result=='W' else -1 if result=='L' else 0.
+    pick=(r[side+'Team']+' '+format(r['quote']*(1 if side=='home' else -1),'+g')) if r['market']=='Spread' else side+' '+format(r['quote'],'g')
+    return {'projection':projection,'adjustment':projection-r['baseline'],'edge':edge,'selected':eligible,
+            'pick':pick,'side':side,'result':result,'profit':profit if eligible else 0.}
 
 def stats(rows):
- bets=[r for r in rows if r['selected']];w=sum(r['result']=='W' for r in bets);l=sum(r['result']=='L' for r in bets);p=len(bets)-w-l;units=sum(r['profit'] for r in bets)
- assert abs(units-(w*10/11-l))<1e-7
- return {'opportunities':len(rows),'bets':len(bets),'record':str(w)+'-'+str(l)+'-'+str(p),'wins':w,'losses':l,'pushes':p,'netUnits':units,'roiPct':100*units/len(bets) if bets else None,
-         'meanAbsoluteAdjustment':sum(abs(r['adjustment']) for r in rows)/len(rows) if rows else None}
+    bets=[r for r in rows if r['selected']]
+    w=sum(r['result']=='W' for r in bets);l=sum(r['result']=='L' for r in bets);p=len(bets)-w-l
+    units=sum(r['profit'] for r in bets)
+    assert abs(units-(w*10/11-l))<1e-8
+    return {'opportunities':len(rows),'bets':len(bets),'record':f'{w}-{l}-{p}',
+            'wins':w,'losses':l,'pushes':p,'netUnits':units,
+            'roiPct':100*units/len(bets) if bets else None,
+            'meanAbsoluteAdjustment':sum(abs(r['adjustment']) for r in rows)/len(rows) if rows else None,
+            'maxAbsoluteAdjustment':max((abs(r['adjustment']) for r in rows),default=None)}
 
-def evaluate(rows):
- predictions=[];fits=[];warmup=[]
- for market in ['Spread','Total']:
-  available=[r for r in rows if r['market']==market]
-  for day in sorted(set(r['date'] for r in available)):
-   test=[r for r in available if r['date']==day];cutoff=min(stamp(r['decision']) for r in test)
-   train=[r for r in available if r['date']<day and stamp(r['tipoff'])+timedelta(hours=6)<=cutoff]
-   if len(train)<150:warmup.append({'date':day,'market':market,'trainingGames':len(train),'skippedGames':len(test)});continue
-   assert all(stamp(r['decision'])<cutoff for r in train)
-   fitted=fit_nonnegative_ridge(train,alpha=100.0)
-   fit={**fitted,'date':day,'market':market,'trainingThrough':max(r['date'] for r in train),'evaluationStarts':cutoff.isoformat()};fits.append(fit)
-   for r in test:
-    for variant in ['baseline','directional']:
-     value=r['baseline'] if variant=='baseline' else adjust_component(r['baseline'],r['flow'],fit['coefficients'])['projection']
-     pred={k:v for k,v in r.items() if k not in ['flow','history']};pred.update(variant=variant,trainingGames=len(train),**predict(r,value))
-     if variant=='directional':assert r['flow']['direction']*pred['adjustment']>=-1e-8
-     predictions.append(pred)
- write('predictions.json',predictions);write('daily_fits.json',fits)
- periods={'historical':lambda r:r['date']<='2026-11-21','additional_day':lambda r:r['date']=='2026-11-22','all':lambda r:True}
- out={'specificationSha256':hashlib.sha256(SPEC.read_bytes()).hexdigest(),
-      'evaluationDates':sorted(set(r['date'] for r in predictions)),'results':{},'diagnostics':{},'warmup':warmup}
- for name,condition in periods.items():
-  out['results'][name]={}
-  for market in ['Spread','Total']:
-   selected=[r for r in predictions if r['market']==market and condition(r)]
-   out['results'][name][market]={v:stats([r for r in selected if r['variant']==v]) for v in ['baseline','directional']}
-   if market=='Spread':out['results'][name]['SpreadBelow20']={v:stats([r for r in selected if r['variant']==v and abs(r['quote'])<20]) for v in ['baseline','directional']}
- for market in ['Spread','Total']:
-  selected=[r for r in predictions if r['market']==market and r['date']<='2026-11-21']
-  dates=sorted(set(r['date'] for r in selected));half=dates[len(dates)//2] if dates else ''
-  out['diagnostics'][market]={'daily':{d:{v:stats([r for r in selected if r['variant']==v and r['date']==d]) for v in ['baseline','directional']} for d in dates},
-    'blocks':{label:{v:stats([r for r in selected if r['variant']==v and (r['date']<half if label=='earlier' else r['date']>=half)]) for v in ['baseline','directional']} for label in ['earlier','later']}}
- slim=[{k:v for k,v in r.items() if not isinstance(v,(list,dict))} for r in predictions]
- if slim:
-  with (ROOT/'predictions.csv').open('w',newline='') as f:
-   writer=csv.DictWriter(f,fieldnames=list(slim[0]));writer.writeheader();writer.writerows(slim)
-  with (ROOT/'bets.csv').open('w',newline='') as f:
-   writer=csv.DictWriter(f,fieldnames=list(slim[0]));writer.writeheader();writer.writerows(r for r in slim if r['selected'])
- examples=[]
- for gid in ['401909742','401911020','401911251','401921756','401909494']:
-  for r in rows:
-   if r['gameId']!=gid:continue
-   relevant='Total' if gid in ['401909742','401909494'] else 'Spread'
-   if r['market']!=relevant:continue
-   pred=[p for p in predictions if p['gameId']==gid and p['market']==relevant]
-   if pred:
-    examples.append({'game':r['game'],'date':r['date'],'market':relevant,'opening':r['history'][0],'final':r['history'][-1],
-      'moneyShareDirection':r['flow']['direction'],'baseline':r['baseline'],'actual':r['actual'],'quote':r['quote'],
-      'predictions':[{k:p[k] for k in ['variant','projection','adjustment','selected','pick','result']} for p in pred]})
- write('examples.json',examples)
- for market in ['Spread','Total']:
-  train=[r for r in rows if r['market']==market and r['date']<='2026-11-21']
-  if len(train)>=150:write('frozen_'+market.lower()+'_weights_through_2026-11-21.json',{**fit_nonnegative_ridge(train),'status':'research_only_not_live','trainingThrough':'2026-11-21'})
- write('results.json',out)
- # Every counterpart has an identical saved quote and timestamp.
- indexed=defaultdict(dict)
- for p in predictions:indexed[(p['date'],p['gameId'],p['market'])][p['variant']]=p
- for pair in indexed.values():
-  assert set(pair)=={'baseline','directional'}
-  assert pair['baseline']['quote']==pair['directional']['quote'] and pair['baseline']['decision']==pair['directional']['decision']
- validate={'matchedMarketComparisons':len(indexed),'predictionRows':len(predictions),'sourceOutcomesIndependentlyMatched':True,
-  'nonnegativeWeights':all(all(v>=0 for v in f['coefficients']) for f in fits),'directionViolations':0,
-  'sameQuotesAndDecisions':True,'earlierDateTrainingOnly':True,'productionWrites':False}
- write('validation.json',validate)
- print(json.dumps({'coverage':{k:v for k,v in read(ROOT/'coverage.json').items() if k not in ['source_manifest','by_date_market']},
-   'evaluationDates':out['evaluationDates'],'results':out['results'],'validation':validate,'examples':examples},indent=2))
+def select_profile(train,minimum_bets=20):
+    reports={}
+    for profile in PROFILES:
+        reports[profile]=stats([bet(r,adjustment(r['baseline'],r['flow'],profile)['projection']) for r in train])
+    qualifying=[p for p in PROFILES if reports[p]['bets']>=minimum_bets]
+    chosen=max(qualifying,key=lambda p:reports[p]['netUnits']) if qualifying else 'balanced'
+    return chosen,reports,'prior_net_units' if qualifying else 'insufficient_qualifying_bets_balanced_fallback'
 
+def write_csv(path,rows):
+    if not rows:return
+    slim=[{k:v for k,v in r.items() if not isinstance(v,(list,dict))} for r in rows]
+    with path.open('w',newline='') as f:
+        writer=csv.DictWriter(f,fieldnames=list(slim[0]));writer.writeheader();writer.writerows(slim)
 
-def fetch_public_inputs():
- """Read saved snapshots only; these GETs do not run the builder or place picks."""
- (ROOT/'raw').mkdir(parents=True,exist_ok=True)
- def one(day):
-  targets=[(day+'.json','https://ezpzpicks.com/api/public-data-v2?sport=NCAAM&compact=1&date='+day),
-    ('espn_'+day+'.json','https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates='+day.replace('-','')+'&groups=50&limit=1000')]
-  for name,url in targets:
-   target=ROOT/'raw'/name
-   if target.exists():continue
-   with urllib.request.urlopen(url,timeout=60) as response:payload=response.read()
-   json.loads(payload);target.write_bytes(payload)
- with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-  list(pool.map(one,['2026-11-'+str(d).zfill(2) for d in range(8,23)]))
+def fresh_baseline_case(input_root,rows):
+    """Illustrate the full UConn path using baseline inputs known at each tick.
+
+    Balanced sizing is declared and fixed for this illustration. It is not a
+    claim that a profile chosen later in the day was available at earlier ticks.
+    """
+    market=next(r for r in rows if r['gameId']=='401909742' and r['market']=='Total')
+    board=read(input_root/'analysis_inputs/analysis/ncaam_2026-11-18_final.json')['ncaamMarket']
+    forecasts=[f for f in board['forecasts'] if str(f['gameId'])=='401909742']
+    result=[]
+    for i,point in enumerate(market['history']):
+        clock=stamp(point['snapshotTime'])
+        candidates=sorted([f for f in forecasts if stamp(f['lockedAt'])<=clock],key=lambda f:stamp(f['lockedAt']),reverse=True)
+        projection=None
+        for f in candidates:
+            bench=next((f[k]['national_benchmark'] for k in ['matchup_projection','matchup_total','matchup_spread']
+                        if isinstance(f.get(k),dict) and isinstance(f[k].get('national_benchmark'),dict)),None)
+            if not bench:continue
+            try:
+                projection=from_captured_inputs(f['away_rating'],f['home_rating'],bench,
+                    as_of=f['lockedAt'],tipoff=f['tipoff'],source_url=f.get('ratings_source_url','Captured Torvik export'),
+                    home_court_points=f['home_court_points'],neutral_site=f['neutral_site'],lineup_adjustment=f.get('lineup_adjustment'))
+                if (clock-stamp(bench['observed_at'])).total_seconds()>30*3600:projection=None;continue
+                break
+            except (KeyError,ValueError,TypeError):projection=None
+        if projection is None:continue
+        assert stamp(bench['observed_at'])<=stamp(f['lockedAt'])<=clock<stamp(market['tipoff'])
+        features=flow_features(market['history'][:i+1],as_of=point['snapshotTime'],tipoff=market['tipoff'],market='Total')
+        adjusted=adjustment(projection['total'],features,'balanced')
+        result.append({'game':'UConn @ Arizona','snapshotTime':point['snapshotTime'],
+            'timeET':clock.astimezone(ZoneInfo('America/New_York')).strftime('%b %d %I:%M %p ET'),
+            'baselineRecordId':f['recordId'],'baselineCapturedAt':f['lockedAt'],
+            'ratingsObservedAt':bench['observed_at'],'profile':'balanced',
+            'sizing':'Declared fixed profile for this timeline illustration',
+            'line':point['line'],'betsPct':point['betsPct'],'moneyPct':point['moneyPct'],
+            'baseline':projection['total'],'projection':adjusted['projection'],
+            'adjustment':adjusted['adjustment'],'contributions':adjusted['contributions']})
+    return result
 
 def main():
- if '--fetch' in sys.argv:fetch_public_inputs()
- rows=build();evaluate(rows)
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--input-root',type=Path,default=REPO.parent)
+    parser.add_argument('--output-root',type=Path,default=REPO/'research/results/ncaam_market_flow_v2')
+    args=parser.parse_args();out=args.output_root;out.mkdir(parents=True,exist_ok=True)
+    spec_path=REPO/'config/ncaam_market_flow_research.json';spec_hash=hashlib.sha256(spec_path.read_bytes()).hexdigest()
+    rows=load_rows(args.input_root)
+    variants=['baseline']+list(PROFILES)+['selected']
+    predictions=[];fits=[];warmup=[]
+    for market in ['Spread','Total']:
+        available=[r for r in rows if r['market']==market]
+        for day in sorted(set(r['date'] for r in available)):
+            test=[r for r in available if r['date']==day]
+            cutoff=min(stamp(r['firstVisibleUpdateAt']) for r in test)
+            train=[r for r in available if r['date']<day and stamp(r['tipoff'])+timedelta(hours=6)<=cutoff]
+            assert all(stamp(r['decision'])<cutoff for r in train)
+            if len(train)<150:
+                warmup.append({'date':day,'market':market,'trainingGames':len(train),'evaluationGamesSkipped':len(test)})
+                continue
+            chosen,scores,reason=select_profile(train)
+            fits.append({'date':day,'market':market,'profile':chosen,'trainingGames':len(train),
+                         'trainingThrough':max(r['date'] for r in train),'cutoff':cutoff.isoformat(),
+                         'selectionReason':reason,'priorProfileResults':scores})
+            for r in test:
+                for variant in variants:
+                    profile=chosen if variant=='selected' else variant
+                    detail=None if variant=='baseline' else adjustment(r['baseline'],r['flow'],profile)
+                    projection=r['baseline'] if detail is None else detail['projection']
+                    p={k:v for k,v in r.items() if k not in ['flow','history']}
+                    p.update(variant=variant,profile=profile,trainingGames=len(train),**bet(r,projection))
+                    if detail:
+                        assert p['adjustment']==0 or abs(p['adjustment'])>=1-1e-9
+                    predictions.append(p)
+    periods={'historical':lambda r:r['date']<='2026-11-21','additional_day':lambda r:r['date']=='2026-11-22','all':lambda r:True}
+    result={'policy':POLICY,'specificationSha256':spec_hash,
+            'cohort':{'uniqueEligibleGames':len(set((r['date'],r['gameId']) for r in rows)),
+                      'marketObservations':len(rows),'dates':sorted(set(r['date'] for r in rows))},
+            'evaluationDates':sorted(set(r['date'] for r in predictions)),'results':{},'diagnostics':{},'warmup':warmup}
+    for period,keep in periods.items():
+        result['results'][period]={}
+        for market in ['Spread','Total']:
+            selected=[r for r in predictions if r['market']==market and keep(r)]
+            result['results'][period][market]={v:stats([r for r in selected if r['variant']==v]) for v in variants}
+            if market=='Spread':
+                result['results'][period]['SpreadBelow20']={v:stats([r for r in selected if r['variant']==v and abs(r['quote'])<20]) for v in variants}
+    for market in ['Spread','Total']:
+        selected=[r for r in predictions if r['market']==market and r['date']<='2026-11-21']
+        dates=sorted(set(r['date'] for r in selected));half=dates[len(dates)//2]
+        result['diagnostics'][market]={'daily':{d:{v:stats([r for r in selected if r['date']==d and r['variant']==v]) for v in variants} for d in dates},
+            'blocks':{label:{v:stats([r for r in selected if r['variant']==v and (r['date']<half if label=='earlier' else r['date']>=half)]) for v in variants} for label in ['earlier','later']}}
+    indexed=defaultdict(dict)
+    for r in predictions:indexed[(r['date'],r['gameId'],r['market'])][r['variant']]=r
+    changes=[]
+    for key,pair in indexed.items():
+        assert set(pair)==set(variants)
+        b,n=pair['baseline'],pair['selected']
+        assert b['quote']==n['quote'] and b['decision']==n['decision']
+        if b['selected']!=n['selected'] or (b['selected'] and b['side']!=n['side']):
+            changes.append({k:b[k] for k in ['date','gameId','game','market','quote']}|
+                 {'baseline':{k:b[k] for k in ['projection','edge','selected','pick','result','profit']},
+                  'selected':{k:n[k] for k in ['profile','projection','adjustment','edge','selected','pick','result','profit']}})
+    fits_by={(f['date'],f['market']):f['profile'] for f in fits}
+    # Store visible updates only after each captured baseline was available.
+    trajectories=[]
+    for r in rows:
+        profile=fits_by.get((r['date'],r['market']))
+        if profile is None:continue
+        for i,p in enumerate(r['history']):
+            if stamp(p['snapshotTime'])<stamp(r['baselineCapturedAt']):continue
+            f=flow_features(r['history'][:i+1],as_of=p['snapshotTime'],tipoff=r['tipoff'],market=r['market'])
+            a=adjustment(r['baseline'],f,profile)
+            trajectories.append({'date':r['date'],'gameId':r['gameId'],'game':r['game'],'market':r['market'],
+                'snapshotTime':p['snapshotTime'],'profile':profile,'baseline':r['baseline'],
+                'line':p['line'],'betsPct':p['betsPct'],'moneyPct':p['moneyPct'],
+                'projection':a['projection'],'adjustment':a['adjustment'],'contributions':a['contributions']})
+    examples=[r for r in trajectories if r['gameId']=='401909742' and r['market']=='Total']
+    fresh_case=fresh_baseline_case(args.input_root,rows)
+    latest={}
+    for market in ['Spread','Total']:
+        train=[r for r in rows if r['market']==market and r['date']<='2026-11-21']
+        profile,scores,reason=select_profile(train)
+        latest[market]={'profile':profile,'parameters':PROFILES[profile],'trainingGames':len(train),
+                        'trainingThrough':'2026-11-21','selectionReason':reason,'priorProfileResults':scores}
+    validation={'matchedMarketComparisons':len(indexed),'predictionRows':len(predictions),'visibleSnapshotProjections':len(trajectories),
+        'sameQuotesAcrossVariants':True,'earlierDateSizingOnly':True,'futureHistoryExcluded':True,
+        'allNonzeroAdjustmentsAtLeastOnePoint':all(r['adjustment']==0 or abs(r['adjustment'])>=1-1e-9 for r in predictions),
+        'originalInputHashesVerified':True,'officialRecordsOrProductionWritten':False}
+    assert hashlib.sha256(spec_path.read_bytes()).hexdigest()==spec_hash
+    for name,value in [('results.json',result),('daily_calibration.json',fits),('predictions.json',predictions),
+        ('bet_changes.json',changes),('snapshot_trajectories.json',trajectories),('uconn_arizona_updates.json',examples),
+        ('uconn_arizona_fresh_baseline_updates.json',fresh_case),
+        ('latest_profiles_through_2026-11-21.json',latest),('validation.json',validation)]:
+        dump(out,name,value)
+    write_csv(out/'bets.csv',[r for r in predictions if r['selected']])
+    write_csv(out/'snapshot_trajectories.csv',trajectories)
+    compact={period:{m:{v:{k:x[k] for k in ['opportunities','bets','record','netUnits','roiPct','meanAbsoluteAdjustment']} for v,x in z.items()} for m,z in data.items()} for period,data in result['results'].items() if period!='all'}
+    print(json.dumps({'evaluationDates':result['evaluationDates'],'results':compact,'validation':validation,
+          'latestProfiles':{m:{k:v for k,v in x.items() if k!='priorProfileResults'} for m,x in latest.items()},
+          'uconnArizonaUpdates':examples},indent=2))
+
 if __name__=='__main__':main()

@@ -1,0 +1,1212 @@
+{
+  "policy": "ncaam-directional-market-flow-2026-11-22-v2",
+  "status": "research_only_not_live",
+  "specification": {
+    "policy": "ncaam-directional-market-flow-2026-11-22-v2",
+    "status": "Research candidate; no live activation",
+    "baseline_commit": "ddae33559a352fb1161460ea3fff7d50cddfa333",
+    "semantics": {
+      "line": "Independent signed line points, even with flat/missing money. Rising totals favor Over; improving a team's handicap favors that team.",
+      "money": "Recent ordered share changes, no opening-to-current direction clamp.",
+      "divergence": "Growing money against declining ticket share strengthens that money-side interpretation.",
+      "ticket_only": "Observed flat money plus growing tickets weakens relative money backing for that side; this contrarian interpretation is a declared research prior.",
+      "degree": "Line points and ten-percentage-point split changes enter continuously before the declared floor/caps.",
+      "reversals": "Recent intervals can supersede the opening-to-current direction, including histories ending at their opening money share.",
+      "timing": "Independent price evidence; separate same-window and later-price-confirming-earlier-money channels.",
+      "updates": "Recompute from unadjusted baseline on each paired snapshot; never compound a previous full correction.",
+      "persistence": "Unchanged shares preserve the split evidence until a new split change arrives; price-only moves remain independent and cannot change the split clock."
+    },
+    "recency_half_life_minutes": 120,
+    "confirmation_lookback_minutes": 60,
+    "sizing": {
+      "minimum_nonzero_adjustment_points": 1,
+      "feature_order": [
+        "line_movement",
+        "money_movement",
+        "money_ticket_divergence",
+        "ticket_only_movement",
+        "same_window_confirmation",
+        "lagged_confirmation"
+      ],
+      "profiles": {
+        "balanced": {
+          "weights": [
+            1,
+            2,
+            1,
+            0.5,
+            0.5,
+            0.25
+          ],
+          "spread_cap": 4,
+          "total_cap": 6
+        },
+        "strong": {
+          "weights": [
+            2,
+            4,
+            1,
+            1,
+            1,
+            0.5
+          ],
+          "spread_cap": 5,
+          "total_cap": 8
+        },
+        "divergence": {
+          "weights": [
+            1,
+            2,
+            2,
+            0.5,
+            1,
+            0.5
+          ],
+          "spread_cap": 4,
+          "total_cap": 6
+        }
+      },
+      "calibration": "Select a declared profile separately by market using earlier-date net units; require 150 earlier games and 20 earlier qualifying bets, otherwise balanced. Conservative declared-order ties. No new presets or thresholds after viewing this screen.",
+      "note": "The floor, caps, profiles and timing windows are design priors, not established optimal weights or true betting edges."
+    },
+    "evaluation": {
+      "source": "Restored saved original market-study inputs and paired histories, with independently verified finals.",
+      "matched_history_minutes": 30,
+      "candidate_minimum_observations": 2,
+      "training": "Earlier ET dates; additional six-hour post-tipoff outcome availability proxy; cutoff uses earliest evaluated update that date.",
+      "spread_rule": "5 <= absolute edge < 7",
+      "total_rule": "absolute edge >=8; A >=10",
+      "price": "Assumed -110; one unit risked",
+      "additional_day": "November 22 reported separately",
+      "scope": "Compare every fixed profile and chronological profile selection. No official record writes."
+    },
+    "initial_profiles_declared_before_first_v2_screen": true,
+    "correctness_fix_after_initial_screen": "Advance split recency only on an observed share change so flat-share, price-only updates cannot fade existing split evidence. This is a behavior fix; no weights, caps, floor or profile search changed after viewing returns."
+  },
+  "specificationSha256": "8ea2ada5a0acb8c044dda12d0bb4e2ad43659285e4ea3c838e76ff24de051401",
+  "cohort": {
+    "uniqueEligibleGames": 458,
+    "marketObservations": 916,
+    "dates": [
+      "2026-11-08",
+      "2026-11-09",
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13",
+      "2026-11-14",
+      "2026-11-15",
+      "2026-11-16",
+      "2026-11-17",
+      "2026-11-18",
+      "2026-11-19",
+      "2026-11-20",
+      "2026-11-21",
+      "2026-11-22"
+    ]
+  },
+  "evaluationDates": [
+    "2026-11-14",
+    "2026-11-15",
+    "2026-11-16",
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22"
+  ],
+  "results": {
+    "historical": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 268,
+          "bets": 38,
+          "record": "26-12-0",
+          "wins": 26,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 11.636363636363635,
+          "roiPct": 30.622009569377987,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 268,
+          "bets": 31,
+          "record": "18-13-0",
+          "wins": 18,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 3.363636363636363,
+          "roiPct": 10.850439882697945,
+          "meanAbsoluteAdjustment": 1.6477123889056244,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        },
+        "strong": {
+          "opportunities": 268,
+          "bets": 33,
+          "record": "19-14-0",
+          "wins": 19,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 3.272727272727272,
+          "roiPct": 9.917355371900824,
+          "meanAbsoluteAdjustment": 2.704228530930093,
+          "maxAbsoluteAdjustment": 5.0000000000000036
+        },
+        "divergence": {
+          "opportunities": 268,
+          "bets": 31,
+          "record": "17-14-0",
+          "wins": 17,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 1.4545454545454541,
+          "roiPct": 4.692082111436949,
+          "meanAbsoluteAdjustment": 1.678157334695009,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        },
+        "selected": {
+          "opportunities": 268,
+          "bets": 31,
+          "record": "18-13-0",
+          "wins": 18,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 3.363636363636363,
+          "roiPct": 10.850439882697945,
+          "meanAbsoluteAdjustment": 1.6477123889056244,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 209,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 209,
+          "bets": 21,
+          "record": "12-9-0",
+          "wins": 12,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 1.909090909090909,
+          "roiPct": 9.09090909090909,
+          "meanAbsoluteAdjustment": 1.6024101794069117,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        },
+        "strong": {
+          "opportunities": 209,
+          "bets": 23,
+          "record": "14-9-0",
+          "wins": 14,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 3.7272727272727266,
+          "roiPct": 16.20553359683794,
+          "meanAbsoluteAdjustment": 2.612470821962667,
+          "maxAbsoluteAdjustment": 5.000000000000001
+        },
+        "divergence": {
+          "opportunities": 209,
+          "bets": 21,
+          "record": "11-10-0",
+          "wins": 11,
+          "losses": 10,
+          "pushes": 0,
+          "netUnits": -1.1102230246251565e-16,
+          "roiPct": -5.286776307738841e-16,
+          "meanAbsoluteAdjustment": 1.6350826254854263,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        },
+        "selected": {
+          "opportunities": 209,
+          "bets": 21,
+          "record": "12-9-0",
+          "wins": 12,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 1.909090909090909,
+          "roiPct": 9.09090909090909,
+          "meanAbsoluteAdjustment": 1.6024101794069117,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 268,
+          "bets": 14,
+          "record": "9-5-0",
+          "wins": 9,
+          "losses": 5,
+          "pushes": 0,
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 268,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.0850696827104422,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 268,
+          "bets": 43,
+          "record": "23-20-0",
+          "wins": 23,
+          "losses": 20,
+          "pushes": 0,
+          "netUnits": 0.9090909090909087,
+          "roiPct": 2.1141649048625784,
+          "meanAbsoluteAdjustment": 3.572228036773805,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 268,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.1105899853813717,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "selected": {
+          "opportunities": 268,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.0850696827104422,
+          "maxAbsoluteAdjustment": 6.0
+        }
+      }
+    },
+    "additional_day": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 7,
+          "bets": 1,
+          "record": "1-0-0",
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0.9090909090909091,
+          "roiPct": 90.9090909090909,
+          "meanAbsoluteAdjustment": 1.5881545245969662,
+          "maxAbsoluteAdjustment": 3.326778787917622
+        },
+        "strong": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 2.4528489673271436,
+          "maxAbsoluteAdjustment": 5.0
+        },
+        "divergence": {
+          "opportunities": 7,
+          "bets": 1,
+          "record": "1-0-0",
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0.9090909090909091,
+          "roiPct": 90.9090909090909,
+          "meanAbsoluteAdjustment": 1.673124639049396,
+          "maxAbsoluteAdjustment": 3.576778787917622
+        },
+        "selected": {
+          "opportunities": 7,
+          "bets": 1,
+          "record": "1-0-0",
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0.9090909090909091,
+          "roiPct": 90.9090909090909,
+          "meanAbsoluteAdjustment": 1.5881545245969662,
+          "maxAbsoluteAdjustment": 3.326778787917622
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        },
+        "strong": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.8,
+          "maxAbsoluteAdjustment": 1.2
+        },
+        "divergence": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        },
+        "selected": {
+          "opportunities": 4,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.75,
+          "maxAbsoluteAdjustment": 1.0
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.4566220212822552,
+          "maxAbsoluteAdjustment": 3.3195307753830434
+        },
+        "strong": {
+          "opportunities": 7,
+          "bets": 1,
+          "record": "1-0-0",
+          "wins": 1,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0.9090909090909091,
+          "roiPct": 90.9090909090909,
+          "meanAbsoluteAdjustment": 2.670386899707369,
+          "maxAbsoluteAdjustment": 6.639061550766115
+        },
+        "divergence": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.475783136130072,
+          "maxAbsoluteAdjustment": 3.3195307753830434
+        },
+        "selected": {
+          "opportunities": 7,
+          "bets": 0,
+          "record": "0-0-0",
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "netUnits": 0,
+          "roiPct": null,
+          "meanAbsoluteAdjustment": 1.4566220212822552,
+          "maxAbsoluteAdjustment": 3.3195307753830434
+        }
+      }
+    },
+    "all": {
+      "Spread": {
+        "baseline": {
+          "opportunities": 275,
+          "bets": 38,
+          "record": "26-12-0",
+          "wins": 26,
+          "losses": 12,
+          "pushes": 0,
+          "netUnits": 11.636363636363635,
+          "roiPct": 30.622009569377987,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 275,
+          "bets": 32,
+          "record": "19-13-0",
+          "wins": 19,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 4.272727272727272,
+          "roiPct": 13.352272727272723,
+          "meanAbsoluteAdjustment": 1.6461963705414042,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        },
+        "strong": {
+          "opportunities": 275,
+          "bets": 33,
+          "record": "19-14-0",
+          "wins": 19,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 3.272727272727272,
+          "roiPct": 9.917355371900824,
+          "meanAbsoluteAdjustment": 2.6978297784020175,
+          "maxAbsoluteAdjustment": 5.0000000000000036
+        },
+        "divergence": {
+          "opportunities": 275,
+          "bets": 32,
+          "record": "18-14-0",
+          "wins": 18,
+          "losses": 14,
+          "pushes": 0,
+          "netUnits": 2.3636363636363633,
+          "roiPct": 7.386363636363635,
+          "meanAbsoluteAdjustment": 1.6780292297149388,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        },
+        "selected": {
+          "opportunities": 275,
+          "bets": 32,
+          "record": "19-13-0",
+          "wins": 19,
+          "losses": 13,
+          "pushes": 0,
+          "netUnits": 4.272727272727272,
+          "roiPct": 13.352272727272723,
+          "meanAbsoluteAdjustment": 1.6461963705414042,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        }
+      },
+      "SpreadBelow20": {
+        "baseline": {
+          "opportunities": 213,
+          "bets": 23,
+          "record": "15-8-0",
+          "wins": 15,
+          "losses": 8,
+          "pushes": 0,
+          "netUnits": 5.636363636363636,
+          "roiPct": 24.50592885375494,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 213,
+          "bets": 21,
+          "record": "12-9-0",
+          "wins": 12,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 1.909090909090909,
+          "roiPct": 9.09090909090909,
+          "meanAbsoluteAdjustment": 1.5864024765072515,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        },
+        "strong": {
+          "opportunities": 213,
+          "bets": 23,
+          "record": "14-9-0",
+          "wins": 14,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 3.7272727272727266,
+          "roiPct": 16.20553359683794,
+          "meanAbsoluteAdjustment": 2.5784338112215837,
+          "maxAbsoluteAdjustment": 5.000000000000001
+        },
+        "divergence": {
+          "opportunities": 213,
+          "bets": 21,
+          "record": "11-10-0",
+          "wins": 11,
+          "losses": 10,
+          "pushes": 0,
+          "netUnits": -1.1102230246251565e-16,
+          "roiPct": -5.286776307738841e-16,
+          "meanAbsoluteAdjustment": 1.6184613555232588,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        },
+        "selected": {
+          "opportunities": 213,
+          "bets": 21,
+          "record": "12-9-0",
+          "wins": 12,
+          "losses": 9,
+          "pushes": 0,
+          "netUnits": 1.909090909090909,
+          "roiPct": 9.09090909090909,
+          "meanAbsoluteAdjustment": 1.5864024765072515,
+          "maxAbsoluteAdjustment": 4.000000000000001
+        }
+      },
+      "Total": {
+        "baseline": {
+          "opportunities": 275,
+          "bets": 14,
+          "record": "9-5-0",
+          "wins": 9,
+          "losses": 5,
+          "pushes": 0,
+          "netUnits": 3.1818181818181817,
+          "roiPct": 22.727272727272727,
+          "meanAbsoluteAdjustment": 0.0,
+          "maxAbsoluteAdjustment": 0.0
+        },
+        "balanced": {
+          "opportunities": 275,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.069072833146816,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 275,
+          "bets": 44,
+          "record": "24-20-0",
+          "wins": 24,
+          "losses": 20,
+          "pushes": 0,
+          "netUnits": 1.818181818181818,
+          "roiPct": 4.132231404958677,
+          "meanAbsoluteAdjustment": 3.5492720805575684,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 275,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.0944312655822475,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "selected": {
+          "opportunities": 275,
+          "bets": 19,
+          "record": "12-7-0",
+          "wins": 12,
+          "losses": 7,
+          "pushes": 0,
+          "netUnits": 3.9090909090909087,
+          "roiPct": 20.574162679425836,
+          "meanAbsoluteAdjustment": 2.069072833146816,
+          "maxAbsoluteAdjustment": 6.0
+        }
+      }
+    }
+  },
+  "latestProfilesThroughNov21": {
+    "Spread": {
+      "profile": "balanced",
+      "parameters": {
+        "weights": [
+          1.0,
+          2.0,
+          1.0,
+          0.5,
+          0.5,
+          0.25
+        ],
+        "spread_cap": 4.0,
+        "total_cap": 6.0,
+        "minimum_adjustment": 1.0
+      },
+      "trainingGames": 451,
+      "trainingThrough": "2026-11-21",
+      "selectionReason": "prior_net_units",
+      "priorProfileResults": {
+        "balanced": {
+          "opportunities": 451,
+          "bets": 62,
+          "record": "39-23-0",
+          "wins": 39,
+          "losses": 23,
+          "pushes": 0,
+          "netUnits": 12.454545454545453,
+          "roiPct": 20.08797653958944,
+          "meanAbsoluteAdjustment": 1.7534197573371963,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        },
+        "strong": {
+          "opportunities": 451,
+          "bets": 59,
+          "record": "34-25-0",
+          "wins": 34,
+          "losses": 25,
+          "pushes": 0,
+          "netUnits": 5.909090909090908,
+          "roiPct": 10.015408320493066,
+          "meanAbsoluteAdjustment": 2.8203644384059836,
+          "maxAbsoluteAdjustment": 5.0000000000000036
+        },
+        "divergence": {
+          "opportunities": 451,
+          "bets": 62,
+          "record": "38-24-0",
+          "wins": 38,
+          "losses": 24,
+          "pushes": 0,
+          "netUnits": 10.545454545454545,
+          "roiPct": 17.008797653958943,
+          "meanAbsoluteAdjustment": 1.7883763819643808,
+          "maxAbsoluteAdjustment": 4.0000000000000036
+        }
+      }
+    },
+    "Total": {
+      "profile": "balanced",
+      "parameters": {
+        "weights": [
+          1.0,
+          2.0,
+          1.0,
+          0.5,
+          0.5,
+          0.25
+        ],
+        "spread_cap": 4.0,
+        "total_cap": 6.0,
+        "minimum_adjustment": 1.0
+      },
+      "trainingGames": 451,
+      "trainingThrough": "2026-11-21",
+      "selectionReason": "prior_net_units",
+      "priorProfileResults": {
+        "balanced": {
+          "opportunities": 451,
+          "bets": 42,
+          "record": "25-17-0",
+          "wins": 25,
+          "losses": 17,
+          "pushes": 0,
+          "netUnits": 5.727272727272727,
+          "roiPct": 13.636363636363635,
+          "meanAbsoluteAdjustment": 2.2185271067107206,
+          "maxAbsoluteAdjustment": 6.0
+        },
+        "strong": {
+          "opportunities": 451,
+          "bets": 79,
+          "record": "41-38-0",
+          "wins": 41,
+          "losses": 38,
+          "pushes": 0,
+          "netUnits": -0.7272727272727276,
+          "roiPct": -0.9205983889528198,
+          "meanAbsoluteAdjustment": 3.762134454768401,
+          "maxAbsoluteAdjustment": 8.0
+        },
+        "divergence": {
+          "opportunities": 451,
+          "bets": 42,
+          "record": "25-17-0",
+          "wins": 25,
+          "losses": 17,
+          "pushes": 0,
+          "netUnits": 5.727272727272727,
+          "roiPct": 13.636363636363635,
+          "meanAbsoluteAdjustment": 2.252142671388869,
+          "maxAbsoluteAdjustment": 6.0
+        }
+      }
+    }
+  },
+  "validation": {
+    "matchedMarketComparisons": 550,
+    "predictionRows": 2750,
+    "visibleSnapshotProjections": 749,
+    "sameQuotesAcrossVariants": true,
+    "earlierDateSizingOnly": true,
+    "futureHistoryExcluded": true,
+    "allNonzeroAdjustmentsAtLeastOnePoint": true,
+    "originalInputHashesVerified": true,
+    "officialRecordsOrProductionWritten": false,
+    "targetedUnitTests": 40,
+    "approvedExamplesPerProfile": 8,
+    "basicMovementStatesPerProfile": 27,
+    "baselineMatchesOriginalFixedStudy": true
+  },
+  "selectedBetChanges": {
+    "Spread": {
+      "added": {
+        "games": 20,
+        "baselineUnits": 0.0,
+        "newUnits": 0.9999999999999999
+      },
+      "removed": {
+        "games": 27,
+        "baselineUnits": 9.272727272727272,
+        "newUnits": 0.0
+      }
+    },
+    "Total": {
+      "added": {
+        "games": 10,
+        "baselineUnits": 0.0,
+        "newUnits": 3.3636363636363633
+      },
+      "removed": {
+        "games": 5,
+        "baselineUnits": 2.6363636363636362,
+        "newUnits": 0.0
+      }
+    }
+  },
+  "uconnArizonaFixedBalancedTimeline": [
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T11:40:06.545Z",
+      "timeET": "Nov 18 06:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1185420854ac93df",
+      "baselineCapturedAt": "2026-11-18T11:07:35.733447+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 82,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 148.9885665790251,
+      "adjustment": 0.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.0,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.0,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T12:40:06.590Z",
+      "timeET": "Nov 18 07:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 84,
+      "moneyPct": 86,
+      "baseline": 148.9885665790251,
+      "projection": 149.9885665790251,
+      "adjustment": 1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.2,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.0,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T13:40:06.557Z",
+      "timeET": "Nov 18 08:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 82,
+      "moneyPct": 86,
+      "baseline": 148.9885665790251,
+      "projection": 149.9885665790251,
+      "adjustment": 1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": 0.14142180552300562,
+        "money_ticket_divergence": 0.0,
+        "ticket_only_movement": 0.1,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T14:40:06.521Z",
+      "timeET": "Nov 18 09:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 148.5,
+      "betsPct": 83,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 147.9885665790251,
+      "adjustment": -1.0,
+      "contributions": {
+        "line_movement": 0.0,
+        "money_movement": -0.09999933573174571,
+        "money_ticket_divergence": -0.1,
+        "ticket_only_movement": 0.07071092318361528,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T15:55:06.670Z",
+      "timeET": "Nov 18 10:55 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.13-offense-only-2026-11-17|early|1d24a72178180ac1",
+      "baselineCapturedAt": "2026-11-18T12:07:28.943683+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 83,
+      "moneyPct": 85,
+      "baseline": 148.9885665790251,
+      "projection": 147.85927816647697,
+      "adjustment": -1.1292884125481304,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.09999933573174571,
+        "money_ticket_divergence": -0.1,
+        "ticket_only_movement": 0.07071092318361528,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T16:40:07.135Z",
+      "timeET": "Nov 18 11:40 AM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|d4fd5290a341ab37",
+      "baselineCapturedAt": "2026-11-18T16:37:44.092849+00:00",
+      "ratingsObservedAt": "2026-11-18T11:07:11+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 65,
+      "baseline": 148.9885665790251,
+      "projection": 143.92392619376045,
+      "adjustment": -5.064640385264652,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -4.049996712470292,
+        "money_ticket_divergence": -0.04999704458478668,
+        "ticket_only_movement": 0.035353371790426406,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T17:40:06.891Z",
+      "timeET": "Nov 18 12:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 83,
+      "moneyPct": 65,
+      "baseline": 148.988566577789,
+      "projection": 145.06436428409984,
+      "adjustment": -3.9242022936891514,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -2.8638474101215508,
+        "money_ticket_divergence": -0.03535407972233592,
+        "ticket_only_movement": -0.025000803845264943,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T18:40:06.738Z",
+      "timeET": "Nov 18 01:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 67,
+      "baseline": 148.988566577789,
+      "projection": 146.42081284985903,
+      "adjustment": -2.5677537279299676,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -1.625075751866198,
+        "money_ticket_divergence": 0.07500052226169125,
+        "ticket_only_movement": -0.017678498325460854,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T19:40:06.905Z",
+      "timeET": "Nov 18 02:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 82,
+      "moneyPct": 69,
+      "baseline": 148.988566577789,
+      "projection": 147.280015108046,
+      "adjustment": -1.7085514697429744,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -0.7490836099325263,
+        "money_ticket_divergence": 0.05303252526432679,
+        "ticket_only_movement": -0.012500385074774812,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T20:40:07.025Z",
+      "timeET": "Nov 18 03:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 28,
+      "moneyPct": 48,
+      "baseline": 148.988566577789,
+      "projection": 143.28755081670852,
+      "adjustment": -5.701015761080483,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -4.729675981166761,
+        "money_ticket_divergence": 0.037499225027315036,
+        "ticket_only_movement": -0.008839004941037324,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T21:40:07.086Z",
+      "timeET": "Nov 18 04:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 22,
+      "moneyPct": 36,
+      "baseline": 148.988566577789,
+      "projection": 142.988566577789,
+      "adjustment": -6.0,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -5.744366319259489,
+        "money_ticket_divergence": 0.026515800591639545,
+        "ticket_only_movement": -0.006250083629044091,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T22:40:31.161Z",
+      "timeET": "Nov 18 05:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|9fc5129dda5d4bd6",
+      "baselineCapturedAt": "2026-11-18T17:07:50.036155+00:00",
+      "ratingsObservedAt": "2026-11-18T17:06:13+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 21,
+      "moneyPct": 33,
+      "baseline": 148.988566577789,
+      "projection": 143.3503864143308,
+      "adjustment": -5.638180163458179,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -4.652477014950232,
+        "money_ticket_divergence": 0.018706096801374444,
+        "ticket_only_movement": -0.00440924530932126,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-18T23:40:31.772Z",
+      "timeET": "Nov 18 06:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|early|db8a6941b01d83f7",
+      "baselineCapturedAt": "2026-11-18T23:07:37.150976+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 147.5,
+      "betsPct": 22,
+      "moneyPct": 31,
+      "baseline": 149.05137374727326,
+      "projection": 144.27187801100607,
+      "adjustment": -4.779495736267197,
+      "contributions": {
+        "line_movement": -1.0,
+        "money_movement": -3.6896045422768533,
+        "money_ticket_divergence": -0.08677357012010298,
+        "ticket_only_movement": -0.003117623870240929,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-19T01:15:26.212Z",
+      "timeET": "Nov 18 08:15 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|pregame|db8a6941b01d83f7",
+      "baselineCapturedAt": "2026-11-19T00:37:53.012583+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 146.5,
+      "betsPct": 22,
+      "moneyPct": 31,
+      "baseline": 149.05137374727326,
+      "projection": 143.27187801100607,
+      "adjustment": -5.779495736267197,
+      "contributions": {
+        "line_movement": -2.0,
+        "money_movement": -3.6896045422768533,
+        "money_ticket_divergence": -0.08677357012010298,
+        "ticket_only_movement": -0.003117623870240929,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    },
+    {
+      "game": "UConn @ Arizona",
+      "snapshotTime": "2026-11-19T01:40:09.791Z",
+      "timeET": "Nov 18 08:40 PM ET",
+      "baselineRecordId": "401909742|ncaam-v0.14-mirrored-defense-2026-11-18|pregame|6f118416e9168a5f",
+      "baselineCapturedAt": "2026-11-19T01:37:28.700222+00:00",
+      "ratingsObservedAt": "2026-11-18T23:02:59+00:00",
+      "profile": "balanced",
+      "sizing": "Declared fixed profile for this timeline illustration",
+      "line": 146.5,
+      "betsPct": 26,
+      "moneyPct": 66,
+      "baseline": 149.05137374727326,
+      "projection": 152.1576227106852,
+      "adjustment": 3.106248963411924,
+      "contributions": {
+        "line_movement": -2.0,
+        "money_movement": 5.1512897714133326,
+        "money_ticket_divergence": -0.04347869393965516,
+        "ticket_only_movement": -0.0015621140617535292,
+        "same_window_confirmation": 0.0,
+        "lagged_confirmation": 0.0
+      }
+    }
+  ],
+  "limits": [
+    "Earlier baseline/selection policy and several experiments use overlapping history.",
+    "Profile selection is a bounded three-preset comparison, not established optimal weights.",
+    "The one-point floor and caps are requested design priors, not proven true edges.",
+    "A timing-persistence correctness fix followed the initial screen; no sizing presets changed.",
+    "Assumed -110 prices; exact settlement availability uses a six-hour post-tipoff proxy.",
+    "The stronger spread overlays did not outperform the current baseline."
+  ]
+}

@@ -1,44 +1,82 @@
 {
-  "policy": "ncaam-directional-market-flow-2026-11-22-v1",
-  "status": "User-approved pattern definitions; research implementation, no live activation",
-  "baseline": "ncaam-v0.16-calibrated-b-spreads-2026-11-22",
-  "primaryDesign": "Frozen before any new returns computed",
-  "rules": "All eight explicitly approved examples are executable unit-test cases.",
-  "direction": "First-to-current money-share change fixes allowed direction. Window counterflow can damp or cancel but cannot reverse it. No static money-ticket-gap feature.",
-  "timing": "Money, tickets and signed price are compared on each same pair of adjacent, synchronized snapshots strictly before tipoff. A price move in an earlier interval does not confirm money arriving in a later interval.",
-  "features": [
-    "money_only_flow",
-    "money_and_tickets_aligned",
-    "money_against_tickets",
-    "same_window_line_confirmation"
-  ],
-  "progression": "Continuous share-change magnitudes and relative ticket changes; log1p line confirmation; opposing price damped by 1/(1+log1p(abs(move))).",
-  "recencyHalfLifeMinutes": 180,
-  "minimumObservedHistoryMinutes": 30,
-  "fitting": {
-    "algorithm": "nonnegative ridge, four features, no intercept",
-    "alpha": 100,
-    "minimumEarlierGames": 150,
-    "hyperparameterSearch": false,
-    "chronology": "Earlier ET slate dates only; additionally require training tipoff+6 hours before earliest evaluation decision. Exact settlement times are unavailable."
+  "policy": "ncaam-directional-market-flow-2026-11-22-v2",
+  "status": "Research candidate; no live activation",
+  "baseline_commit": "ddae33559a352fb1161460ea3fff7d50cddfa333",
+  "semantics": {
+    "line": "Independent signed line points, even with flat/missing money. Rising totals favor Over; improving a team's handicap favors that team.",
+    "money": "Recent ordered share changes, no opening-to-current direction clamp.",
+    "divergence": "Growing money against declining ticket share strengthens that money-side interpretation.",
+    "ticket_only": "Observed flat money plus growing tickets weakens relative money backing for that side; this contrarian interpretation is a declared research prior.",
+    "degree": "Line points and ten-percentage-point split changes enter continuously before the declared floor/caps.",
+    "reversals": "Recent intervals can supersede the opening-to-current direction, including histories ending at their opening money share.",
+    "timing": "Independent price evidence; separate same-window and later-price-confirming-earlier-money channels.",
+    "updates": "Recompute from unadjusted baseline on each paired snapshot; never compound a previous full correction.",
+    "persistence": "Unchanged shares preserve the split evidence until a new split change arrives; price-only moves remain independent and cannot change the split clock."
   },
-  "eligibility": {
-    "spread": "5 <= absolute edge < 7",
-    "total": "absolute edge >= 8; A >=10",
-    "odds": "Assumed -110, one unit risked",
-    "changedThresholds": false
+  "recency_half_life_minutes": 120,
+  "confirmation_lookback_minutes": 60,
+  "sizing": {
+    "minimum_nonzero_adjustment_points": 1,
+    "feature_order": [
+      "line_movement",
+      "money_movement",
+      "money_ticket_divergence",
+      "ticket_only_movement",
+      "same_window_confirmation",
+      "lagged_confirmation"
+    ],
+    "profiles": {
+      "balanced": {
+        "weights": [
+          1,
+          2,
+          1,
+          0.5,
+          0.5,
+          0.25
+        ],
+        "spread_cap": 4,
+        "total_cap": 6
+      },
+      "strong": {
+        "weights": [
+          2,
+          4,
+          1,
+          1,
+          1,
+          0.5
+        ],
+        "spread_cap": 5,
+        "total_cap": 8
+      },
+      "divergence": {
+        "weights": [
+          1,
+          2,
+          2,
+          0.5,
+          1,
+          0.5
+        ],
+        "spread_cap": 4,
+        "total_cap": 6
+      }
+    },
+    "calibration": "Select a declared profile separately by market using earlier-date net units; require 150 earlier games and 20 earlier qualifying bets, otherwise balanced. Conservative declared-order ties. No new presets or thresholds after viewing this screen.",
+    "note": "The floor, caps, profiles and timing windows are design priors, not established optimal weights or true betting edges."
   },
-  "cohort": "Recaptured saved public boards and independently matching ESPN finals, Nov 8-22. Use reconstructible, captured baseline benchmarks available by each saved pregame market decision. Original workspace archive is inaccessible; report any coverage difference rather than substituting a different benchmark.",
-  "evaluation": [
-    "same games and quotes for baseline and correction",
-    "all spreads and totals separately",
-    "below-20 spread diagnostic",
-    "examples and complete bet changes",
-    "no outcome-directed rule changes"
-  ],
-  "limitations": [
-    "Baseline and B-band were selected using overlapping earlier research; replay remains exploratory.",
-    "Shares are provider sample percentages, not absolute dollar inflows.",
-    "Same-interval observations establish timing alignment, not a causal explanation of a price move."
-  ]
+  "evaluation": {
+    "source": "Restored saved original market-study inputs and paired histories, with independently verified finals.",
+    "matched_history_minutes": 30,
+    "candidate_minimum_observations": 2,
+    "training": "Earlier ET dates; additional six-hour post-tipoff outcome availability proxy; cutoff uses earliest evaluated update that date.",
+    "spread_rule": "5 <= absolute edge < 7",
+    "total_rule": "absolute edge >=8; A >=10",
+    "price": "Assumed -110; one unit risked",
+    "additional_day": "November 22 reported separately",
+    "scope": "Compare every fixed profile and chronological profile selection. No official record writes."
+  },
+  "initial_profiles_declared_before_first_v2_screen": true,
+  "correctness_fix_after_initial_screen": "Advance split recency only on an observed share change so flat-share, price-only updates cannot fade existing split evidence. This is a behavior fix; no weights, caps, floor or profile search changed after viewing returns."
 }

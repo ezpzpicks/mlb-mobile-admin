@@ -1,70 +1,90 @@
-# NCAAM directional market-flow candidate — November 22, 2026
+# NCAAM market updates and stronger sizing — v2, November 22, 2026
 
-This candidate implements the eight movement interpretations approved by Ryan. It is research code and is not imported by the scheduled builder or site reader. Live projections and official records retain their current formula.
+The research candidate now updates on independent line movement and ordered betting-share changes, including flat-money cases, ticket-only changes, later price confirmation and late reversals. Every new paired snapshot recomputes the correction from the unadjusted baseline. The live builder and site reader are unchanged.
 
-An ending money-versus-ticket gap can describe opposite market paths. This candidate compares money, tickets and signed line changes within adjacent, synchronized pregame observations. First-to-current money-share change fixes the allowed overall correction direction. Counterflow can damp or cancel support. A static ending gap adds no correction. Nonnegative fitted magnitudes cannot reverse an approved interpretation.
+The stronger totals overlay adds a small amount of historical profit while reducing ROI; the stronger spread overlays underperform the current baseline. Larger projection changes are implemented and tested, but the replay does not justify promoting the spread layer.
 
-## Approved examples
+## Movement coverage
 
-Shares refer to Over for totals and Team A for spreads.
+Forty targeted tests cover all eight approved examples under every sizing profile and all 27 up/down/flat combinations of line, money and tickets. The 26 canonical combinations with activity produce an adjustment; the all-flat case remains unchanged. Other tests cover degree, recent reversals with equal opening/final shares, lead/lag timing, missing data, duplicate and future observations, stale baseline arrivals and recomputation without compounding prior corrections.
 
-| Market | Tickets | Money | Line | Direction |
-|---|---|---|---|---|
-| Total | 50 → 26 | 50 → 66 | 151.5 → 149.5 | Up, with opposing-price damping |
-| Total | 12 → 26 | 95 → 66 | 151.5 → 149.5 | Down, with line confirmation |
-| Total | 45 → 60 | 50 → 75 | 149.5 → 152.5 | Up, with line confirmation |
-| Total | 70 → 55 | 80 → 60 | 152.5 → 149.5 | Down, with line confirmation |
-| Total | 40 → 60 | 70 → 45 | Unchanged | Down, without line confirmation |
-| Total | 20 → 20 | 80 → 80 | Unchanged | No new correction |
-| Spread | 45 → 35 | 50 → 75 | +6.5 → +4.5 | Improve A's margin |
-| Spread | 20 → 40 | 90 → 65 | −6.5 → −4.5 | Reduce A's margin |
+Line points are independent evidence. A total rising one point contributes upward pressure; a team moving from +6.5 to +4.5 gains spread support. This works with flat or missing splits. Share changes remain provider proportions rather than inferred dollar inflows. Ticket-only movement with observed flat money is treated as weakening relative money backing for the popular side; that is a declared research interpretation.
 
-All eight examples are executable unit-test cases. Further tests check timing, future observations, duplicate snapshots, mirrored sides, invalid data, constrained fitting and coherent team scores.
+There is no opening-to-current money-direction clamp. The most recent share changes can reverse earlier support. Earlier price remains independent information; price following earlier money within 60 minutes has a distinct corroboration channel. Current quote and both teams' captured inputs remain separate from the interpretation of who caused a price move.
 
-## Implementation
+Split evidence has a two-hour recency weighting that advances only when an observed share changes. A price-only refresh therefore cannot fade existing split evidence and inadvertently raise a total merely because time passed while the line fell. That persistence fix was made after the first implementation screen; the three weight presets, floor and caps were unchanged. This remains exploratory research.
 
-The pure module is builders/ncaam_market_flow.py. Four continuously sized channels represent money-only flow, money/ticket alignment, money/ticket divergence and same-window line confirmation. Share changes use 10-percentage-point units. Channel proportions depend continuously on relative ticket movement. Opposing price damps that interval by 1/(1+log1p(abs(price move))); confirming price adds a nonnegative confirmation feature. A fixed three-hour half-life weights recent intervals.
+## Explicit sizing
 
-Counterflow accumulates before each channel is clipped to the approved overall money-share direction. First and current money shares being equal produces no new correction. Missing data is distinct from observed unchanged percentages. At least two observations spanning 30 minutes are needed. An earlier price move cannot confirm a later share change. Postdecision and post-tipoff observations cannot enter the features.
+These are declared starting presets. Earlier-date net betting units select among them separately for spreads and totals after at least 150 available games and 20 qualifying prior bets; otherwise the candidate uses balanced sizing. This is a bounded preset comparison, not a claim that the weights are globally optimal.
 
-Separate spread/total magnitudes use nonnegative ridge, alpha 100, no intercept, training-only scales and no hyperparameter search. Unsupported channels can receive zero weight. The candidate constructor applies both corrections once and combines the independent margin and total into coherent team scores. It does not duplicate the baseline overtime allowance. It returns research-only output with no official-pick eligibility.
+| Input contribution | Balanced | Strong | Divergence |
+|---|---:|---:|---:|
+| Per line point | 1.0 | 2.0 | 1.0 |
+| Per 10 percentage points of money-share change | 2.0 | 4.0 | 2.0 |
+| Additional opposing-ticket divergence, per matched 10 points | 1.0 | 1.0 | 2.0 |
+| Ticket-only change, per 10 points, opposite direction | 0.5 | 1.0 | 0.5 |
+| Same-window price confirmation | 0.5 | 1.0 | 1.0 |
+| Later-price confirmation | 0.25 | 0.5 | 0.5 |
+| Maximum spread correction | 4 | 5 | 4 |
+| Maximum total correction | 6 | 8 | 6 |
 
-## Chronological replay
+Weights act on the recorded interval evidence before recency, price-opposition damping and caps. Confirmation uses the smaller normalized money/price movement. An active correction is at least one point; exactly neutral evidence stays at zero. This floor implements the requested larger movement and is not evidence that every small signal represents one point of true betting value. Each later snapshot can recalculate the direction and strength without adding the previous complete correction again.
 
-Recaptured saved boards and independently agreeing ESPN finals yielded 432 eligible physical games: 160 warm-up, 265 main evaluation games from Nov 14–21, and seven separately reported Nov 22 games. The previous replay had 268 main games; these are different matched cohorts.
+The latest calibration through Nov 21 selects **balanced for spreads** and **balanced for totals**, using 451 eligible earlier games per market. The selected profile's mean absolute change in the main replay is **1.65 spread points** and **2.09 total points**.
 
-Both formulas use identical saved lines and decision timestamps. Spread B remains 5 to below 7 points of edge. Totals qualify at 8; A starts at 10. Returns assume one unit risked at −110. Daily fits need at least 150 earlier-date games and exclude games within six hours after tipoff. Exact settlement timestamps are unavailable, so outcome availability uses that conservative proxy.
+## Matched historical comparison
 
-| Nov 14–21 replay | Baseline | Directional candidate |
-|---|---:|---:|
-| All spreads | 26–12; +11.64 units; +30.6% ROI | 26–11; +12.64 units; +34.2% ROI |
-| Market spreads below 20 | 15–8; +5.64 units; +24.5% ROI | 15–7; +6.64 units; +30.2% ROI |
-| Totals | 9–5; +3.18 units; +22.7% ROI | 9–5; +3.18 units; +22.7% ROI |
+The restored original input package supplies 458 physical games, including 183 initial warm-up games, 268 evaluation games on Nov 14–21 and seven Nov 22 games reported separately. Both markets use identical saved final quotes and captured baseline inputs across all variants. Source hashes match the saved package, and the baseline records reproduce the original market study.
 
-The sole bet change was Hofstra +11.5 against Murray State on Nov 17. Lowering Murray State's projection moved the Hofstra edge from 6.46 to 7.07, outside the existing B-only band. The baseline bet lost. The one-unit record improvement comes from that upper eligibility boundary; it is not an added winning bet or evidence of improved point accuracy.
+Daily sizing uses only earlier slate dates and excludes training games until a six-hour post-tipoff proxy has passed. Its cutoff precedes the earliest evaluated update for that date. Exact settlement timestamps are unavailable. Spread eligibility remains 5 to below 7 points of edge; totals qualify at 8, with A at 10. Prices are assumed −110, one unit risked. No official historical record is rewritten.
 
-The latest spread fit, using 425 eligible games through Nov 21, sets all four coefficients to zero. It leaves subsequent spread projections unchanged. The latest total fit retains divergence and same-window confirmation channels. Neither formula qualified a bet among the seven matched Nov 22 games.
+| Formula | Spread W–L–P | Spread units | Spread ROI | Total W–L–P | Total units | Total ROI |
+|---|---:|---:|---:|---:|---:|---:|
+| Current baseline | 26-12-0 | +11.64 | +30.6% | 9-5-0 | +3.18 | +22.7% |
+| Balanced fixed sizing | 18-13-0 | +3.36 | +10.9% | 12-7-0 | +3.91 | +20.6% |
+| Strong fixed sizing | 19-14-0 | +3.27 | +9.9% | 23-20-0 | +0.91 | +2.1% |
+| Divergence fixed sizing | 17-14-0 | +1.45 | +4.7% | 12-7-0 | +3.91 | +20.6% |
+| Earlier-data sizing selection | 18-13-0 | +3.36 | +10.9% | 12-7-0 | +3.91 | +20.6% |
 
-For UConn–Arizona, Over tickets fell 82 → 26 and Over money fell 85 → 66 while the total fell 148.5 → 146.5. The revised candidate lowers the baseline total from 149.0514 to 148.7873. The previous unconstrained research fit raised it to 155.4605. Neither the baseline nor the revised candidate qualifies at 146.5. The final score does not reverse the approved movement interpretation.
+Selected totals move from 14 bets at 9–5 and +3.18 units to 19 bets at 12–7 and +3.91 units: **+0.73 units**, with ROI decreasing from 22.7% to 20.6%. The added totals are 7–3, but five removed bets went 4–1, so the incremental gain is small.
 
-## Validation and limits
+Selected spreads fall from 26–12 and +11.64 units to 18–13 and +3.36 units: **−8.27 units**. The larger changes remove many profitable baseline qualifiers. The stronger spread adjustments therefore do not have support from this replay under the existing B-only selection rule.
 
-- 19 unit tests pass, including all eight approved cases.
-- Twelve native v0.16 forecasts reproduce both baseline components exactly.
-- All 544 game/market comparisons use identical quotes and timestamps; 1,088 prediction rows were checked.
-- All fitted coefficients are nonnegative; no correction reverses its approved money-share direction.
-- Source outcomes independently agree; training uses earlier dates only.
-- No official records, production model, deployment or scheduled task is changed.
+Below a 20-point market spread, the baseline is 15–8 and +5.64 units; the selected candidate is 12–9 and +1.91 units. The larger version does not preserve the earlier unconstrained research subgroup's apparent advantage. These are different methods, and the records should not be merged.
 
-Results are exploratory. The baseline and B-only policy were selected using overlapping earlier research. One changed bet does not establish a durable advantage. Current fitted sizing does not justify large automatic point changes.
+## Continuous UConn–Arizona example
 
-## Reproduce
+The full history shows Over money share falling from 85% to 31%, then rebounding from 31% to 66% in the final 25 minutes. Holding the model to the opening-to-final 85 → 66 comparison misses that reversal. The example below uses the declared fixed balanced profile and, at each snapshot, the latest baseline forecast inputs already captured by that time. It is an illustration, not a claim that a later calibration was available earlier.
 
-Run from the repository root:
+| Nov 18 observation | Total line | Over tickets | Over money | Baseline total | Updated total |
+|---|---:|---:|---:|---:|---:|
+| Nov 18 06:40 PM ET | 147.5 | 22% | 31% | 149.1 | 144.3 |
+| Nov 18 08:15 PM ET | 146.5 | 22% | 31% | 149.1 | 143.3 |
+| Nov 18 08:40 PM ET | 146.5 | 26% | 66% | 149.1 | 152.2 |
+
+At 8:15 PM, the line falls with unchanged splits and lowers the projection. At 8:40 PM, the large new Over-money share raises it again. The new final projection is 152.2, versus the 149.1 baseline. At the saved 146.5 line, that still does not reach the eight-point total eligibility threshold.
+
+The visible timeline checks every underlying baseline, rating and market timestamp against the current update. No later model inputs or final score are used in those projections. A fresh underlying baseline can replace the earlier baseline, while an out-of-order older baseline cannot replace a newer one.
+
+## Status and validation
+
+- 40 targeted tests passed, including the eight approved examples under all three profiles and the 27 basic movement states.
+- 550 game/market comparisons and 2,750 prediction rows use matching quotes and decisions.
+- 749 projections using the original fixed baselines are emitted only after those baseline inputs were available; a separate full UConn timeline uses fresh, earlier captured baselines at every tick.
+- Every active correction is at least one point, with the declared market-specific cap.
+- All source hashes and baseline summary parity checks passed.
+- No production import, official-pick eligibility, database write, deployment or scheduled task is added.
+
+The candidate is saved for review. Totals show a small exploratory gain in units, while stronger spreads underperform. The floor, three presets, timing windows and selection policy are design choices tested on overlapping historical research. A correctness fix followed the initial screen. None of these returns establishes a sustainable future edge.
+
+The preceding v1 implementation and its smaller corrections remain available at commit faf86895157c2ab3386179841d3af5974525519f. The dated v1 aggregate is preserved separately.
+
+## Reproduction
+
+Extract the original NCAAM_Market_Adjustment_Data_2026-11-22.zip with its internal paths intact. From this repository root:
 
     python3 -m unittest discover -s research -p 'test_ncaam_market_flow.py' -v
-    python3 research/replay_ncaam_market_flow.py --fetch
+    python3 research/replay_ncaam_market_flow.py --input-root /path/to/extracted-package
 
-The replay writes source captures and outputs under research/results/ncaam_market_flow. Set NCAAM_MARKET_FLOW_WORKSPACE for another directory. The fetch flag reads saved boards and ESPN, reuses existing captures, and never runs the builder or writes to Turso.
-
-The design is in config/ncaam_market_flow_research.json; aggregate results are in research/results/ncaam_directional_market_flow_2026-11-22.json. The baseline source revision is ddae33559a352fb1161460ea3fff7d50cddfa333.
+Private working rows and generated trajectories go under the ignored research/results/ncaam_market_flow_v2 directory. The compact review is research/results/ncaam_directional_market_flow_v2_2026-11-22.json. The design is config/ncaam_market_flow_research.json. The scoring module and MarketProjectionState updater are pure research calculations and do not poll a live service themselves.
