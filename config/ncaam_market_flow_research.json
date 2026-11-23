@@ -1,0 +1,44 @@
+{
+  "policy": "ncaam-directional-market-flow-2026-11-22-v1",
+  "status": "User-approved pattern definitions; research implementation, no live activation",
+  "baseline": "ncaam-v0.16-calibrated-b-spreads-2026-11-22",
+  "primaryDesign": "Frozen before any new returns computed",
+  "rules": "All eight explicitly approved examples are executable unit-test cases.",
+  "direction": "First-to-current money-share change fixes allowed direction. Window counterflow can damp or cancel but cannot reverse it. No static money-ticket-gap feature.",
+  "timing": "Money, tickets and signed price are compared on each same pair of adjacent, synchronized snapshots strictly before tipoff. A price move in an earlier interval does not confirm money arriving in a later interval.",
+  "features": [
+    "money_only_flow",
+    "money_and_tickets_aligned",
+    "money_against_tickets",
+    "same_window_line_confirmation"
+  ],
+  "progression": "Continuous share-change magnitudes and relative ticket changes; log1p line confirmation; opposing price damped by 1/(1+log1p(abs(move))).",
+  "recencyHalfLifeMinutes": 180,
+  "minimumObservedHistoryMinutes": 30,
+  "fitting": {
+    "algorithm": "nonnegative ridge, four features, no intercept",
+    "alpha": 100,
+    "minimumEarlierGames": 150,
+    "hyperparameterSearch": false,
+    "chronology": "Earlier ET slate dates only; additionally require training tipoff+6 hours before earliest evaluation decision. Exact settlement times are unavailable."
+  },
+  "eligibility": {
+    "spread": "5 <= absolute edge < 7",
+    "total": "absolute edge >= 8; A >=10",
+    "odds": "Assumed -110, one unit risked",
+    "changedThresholds": false
+  },
+  "cohort": "Recaptured saved public boards and independently matching ESPN finals, Nov 8-22. Use reconstructible, captured baseline benchmarks available by each saved pregame market decision. Original workspace archive is inaccessible; report any coverage difference rather than substituting a different benchmark.",
+  "evaluation": [
+    "same games and quotes for baseline and correction",
+    "all spreads and totals separately",
+    "below-20 spread diagnostic",
+    "examples and complete bet changes",
+    "no outcome-directed rule changes"
+  ],
+  "limitations": [
+    "Baseline and B-band were selected using overlapping earlier research; replay remains exploratory.",
+    "Shares are provider sample percentages, not absolute dollar inflows.",
+    "Same-interval observations establish timing alignment, not a causal explanation of a price move."
+  ]
+}
