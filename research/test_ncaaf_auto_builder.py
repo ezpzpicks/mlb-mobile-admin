@@ -192,6 +192,19 @@ def save_fixture():
     return Builder(), result, market
 
 
+def test_market_tracking_keeps_forecasts_and_personnel_without_new_game_grades(database):
+    from shared.market_projection_grading import POLICY as tracking_policy
+    db, connection, seen = database
+    activation = {"policy": tracking_policy, "modelVersion": "ncaaf-market-tracking-2026-11-23-v1", "gradingStatus": "ungraded"}
+    connection.execute("INSERT INTO dataset_rows(sport,dataset,row_index,date_key,payload_json) VALUES('NCAAF','market_projection_activation',1,'policy',?)",
+                       (json.dumps({"Details JSON": json.dumps(activation)}),))
+    builder, result, market = save_fixture()
+    assert save_once(db, builder, result, market, now=NOW)
+    assert connection.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='daily_slate'").fetchone()[0] == 1
+    assert connection.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='personnel_snapshots'").fetchone()[0] == 2
+    assert connection.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='bet_tracker'").fetchone()[0] == 0
+
+
 def insert_existing(connection, dataset, payload, game_key="123"):
     connection.execute("INSERT INTO dataset_rows(sport,dataset,row_index,payload_json,date_key,game_key) VALUES('NCAAF',?,1,?,'2026-11-22',?)",
                        (dataset, json.dumps(payload), game_key))

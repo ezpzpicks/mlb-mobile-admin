@@ -202,6 +202,28 @@ def sample_result():
         "lineups": [{**common, "Team": "PIT", "Unit": "Offense", "Slot": "QB", "Player": "Test"}]}
 
 
+def test_market_tracking_holds_new_game_bets_but_saves_props_and_settles_existing_bets(database):
+    from shared.market_projection_grading import POLICY as tracking_policy
+    db, conn = database
+    activation = {"policy": tracking_policy, "modelVersion": "nfl-market-tracking-2026-11-23-v1", "gradingStatus": "ungraded"}
+    conn.execute("INSERT INTO dataset_rows(sport,dataset,row_index,date_key,payload_json) VALUES('NFL','market_projection_activation',1,'policy',?)",
+                 (json.dumps({"Details JSON": json.dumps(activation)}),))
+    b, result = sample_result()
+    assert save_run(db, b, copy.deepcopy(result), game(), "pregame", NOW)
+    assert conn.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='daily_slate'").fetchone()[0] == 1
+    assert conn.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='bet_tracker'").fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM dataset_rows WHERE dataset='prop_tracker'").fetchone()[0] == 1
+    old = {**result["game_tracker"][0], "Game ID": "earlier-game", "Result": "Pending"}
+    conn.execute("INSERT INTO dataset_rows(sport,dataset,row_index,date_key,game_key,payload_json) VALUES('NFL','bet_tracker',1,?,?,?)",
+                 (old["Date"], old["Game ID"], json.dumps(old)))
+    settled = {**old, "Result": "Win"}
+    upsert_results(db, 'bet_tracker', [settled], b.TRACKER_COLUMNS, NOW)
+    saved = conn.execute("SELECT payload_json FROM dataset_rows WHERE dataset='bet_tracker'").fetchall()
+    assert len(saved) == 1
+    assert json.loads(saved[0][0])["Result"] == "Win"
+    assert json.loads(saved[0][0])["Selection"] == old["Selection"]
+
+
 def test_early_preview_then_final_save_are_atomic_and_idempotent(database):
     db, conn = database
     b, result = sample_result()

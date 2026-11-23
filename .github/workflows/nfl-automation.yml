@@ -4,6 +4,8 @@ on:
     paths:
       - 'builders/nfl_*.py'
       - 'shared/nfl_*.py'
+      - 'shared/market_projection_grading.py'
+      - 'shared/cfb_auto_persistence.py'
       - 'scripts/run_nfl_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'scripts/run_ncaaf_builder.py'
@@ -15,6 +17,8 @@ on:
     paths:
       - 'builders/nfl_*.py'
       - 'shared/nfl_*.py'
+      - 'shared/market_projection_grading.py'
+      - 'shared/cfb_auto_persistence.py'
       - 'scripts/run_nfl_builder.py'
       - 'scripts/run_scheduled_builders.py'
       - 'research/test_nfl_*.py'
