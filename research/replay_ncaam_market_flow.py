@@ -1,4 +1,4 @@
-"""Replay the v2 NCAAM updater against the restored, fixed market-study inputs.
+"""Replay the v3 NCAAM updater against the restored, fixed market-study inputs.
 
 Inputs are the user's original NCAAM_Market_Adjustment_Data_2026-11-22.zip,
 extracted without changing its internal paths. No model/database writes occur.
@@ -65,6 +65,9 @@ def load_rows(input_root):
     for old in original:
         r=dict(old);history=pair_history(r,boards[r['date']])
         f=flow_features(history,as_of=r['decision'],tipoff=r['tipoff'],market=r['market'])
+        assert all(stamp(w['confirmation_observed_through'])<=stamp(r['decision']) for w in f['intervals'])
+        net_price=(history[-1]['line']-history[0]['line'])*(-1 if r['market']=='Spread' else 1)
+        assert abs(f['features'][0]-net_price)<1e-8
         available=[p['snapshotTime'] for p in history if stamp(p['snapshotTime'])>=stamp(r['baselineCapturedAt'])]
         assert available and stamp(r['ratingsObservedAt'])<=stamp(r['baselineCapturedAt'])<=stamp(r['decision'])<stamp(r['tipoff'])
         r.update(features=f['features'],flow=f,history=history,firstVisibleUpdateAt=min(available,key=stamp))
@@ -138,6 +141,7 @@ def fresh_baseline_case(input_root,rows):
         assert stamp(bench['observed_at'])<=stamp(f['lockedAt'])<=clock<stamp(market['tipoff'])
         features=flow_features(market['history'][:i+1],as_of=point['snapshotTime'],tipoff=market['tipoff'],market='Total')
         adjusted=adjustment(projection['total'],features,'balanced')
+        split_windows=[w for w in features['intervals'] if w['directional_split_pressure']]
         result.append({'game':'UConn @ Arizona','snapshotTime':point['snapshotTime'],
             'timeET':clock.astimezone(ZoneInfo('America/New_York')).strftime('%b %d %I:%M %p ET'),
             'baselineRecordId':f['recordId'],'baselineCapturedAt':f['lockedAt'],
@@ -145,13 +149,14 @@ def fresh_baseline_case(input_root,rows):
             'sizing':'Declared fixed profile for this timeline illustration',
             'line':point['line'],'betsPct':point['betsPct'],'moneyPct':point['moneyPct'],
             'baseline':projection['total'],'projection':adjusted['projection'],
-            'adjustment':adjusted['adjustment'],'contributions':adjusted['contributions']})
+            'adjustment':adjusted['adjustment'],'contributions':adjusted['contributions'],
+            'latestSplitWindow':split_windows[-1] if split_windows else None})
     return result
 
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--input-root',type=Path,default=REPO.parent)
-    parser.add_argument('--output-root',type=Path,default=REPO/'research/results/ncaam_market_flow_v2')
+    parser.add_argument('--output-root',type=Path,default=REPO/'research/results/ncaam_market_flow_v3')
     args=parser.parse_args();out=args.output_root;out.mkdir(parents=True,exist_ok=True)
     spec_path=REPO/'config/ncaam_market_flow_research.json';spec_hash=hashlib.sha256(spec_path.read_bytes()).hexdigest()
     rows=load_rows(args.input_root)
@@ -233,6 +238,7 @@ def main():
                         'trainingThrough':'2026-11-21','selectionReason':reason,'priorProfileResults':scores}
     validation={'matchedMarketComparisons':len(indexed),'predictionRows':len(predictions),'visibleSnapshotProjections':len(trajectories),
         'sameQuotesAcrossVariants':True,'earlierDateSizingOnly':True,'futureHistoryExcluded':True,
+        'allConfirmationEvidenceVisibleByDecision':True,'independentPriceEqualsObservedNetMove':True,
         'allNonzeroAdjustmentsAtLeastOnePoint':all(r['adjustment']==0 or abs(r['adjustment'])>=1-1e-9 for r in predictions),
         'originalInputHashesVerified':True,'officialRecordsOrProductionWritten':False}
     assert hashlib.sha256(spec_path.read_bytes()).hexdigest()==spec_hash

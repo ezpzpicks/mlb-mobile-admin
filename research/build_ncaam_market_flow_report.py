@@ -1,145 +1,181 @@
-"""Create the compact review from the declared v2 replay outputs."""
+"""Build the v3 confirmation review without changing the saved v1/v2 results."""
 from pathlib import Path
+import argparse
+import hashlib
 import json
-import sys
 
-REPO=Path(__file__).resolve().parents[1]
-ROOT=REPO/'research/results/ncaam_market_flow_v2'
-read=lambda p:json.loads(p.read_text())
-results=read(ROOT/'results.json')
-latest=read(ROOT/'latest_profiles_through_2026-11-21.json')
-validation=read(ROOT/'validation.json')
-timeline=read(ROOT/'uconn_arizona_fresh_baseline_updates.json')
-spec=read(REPO/'config/ncaam_market_flow_research.json')
-original=read(REPO.parent/'market_study/overlay_results.json')
-for market in ['Spread','Total']:
-    old=original['results']['historical'][market]['baseline']
-    new=results['results']['historical'][market]['baseline']
-    assert all(old[k]==new[k] for k in ['opportunities','bets','record'])
-    assert abs(old['netUnits']-new['netUnits'])<1e-9
-validation.update(targetedUnitTests=40,approvedExamplesPerProfile=8,basicMovementStatesPerProfile=27,
-                  baselineMatchesOriginalFixedStudy=True)
-changes=read(ROOT/'bet_changes.json')
-impact={}
-for market in ['Spread','Total']:
-    rows=[r for r in changes if r['market']==market and r['date']<='2026-11-21']
-    impact[market]={}
-    for label,condition in [('added',lambda r:r['selected']['selected'] and not r['baseline']['selected']),
-                            ('removed',lambda r:r['baseline']['selected'] and not r['selected']['selected'])]:
-        picked=[r for r in rows if condition(r)]
-        impact[market][label]={'games':len(picked),'baselineUnits':sum(r['baseline']['profit'] for r in picked),
-                              'newUnits':sum(r['selected']['profit'] for r in picked)}
-aggregate={'policy':results['policy'],'status':'research_only_not_live','specification':spec,
-           'specificationSha256':results['specificationSha256'],'cohort':results['cohort'],
-           'evaluationDates':results['evaluationDates'],'results':results['results'],
-           'latestProfilesThroughNov21':latest,'validation':validation,
-           'selectedBetChanges':impact,'uconnArizonaFixedBalancedTimeline':timeline,
-           'limits':['Earlier baseline/selection policy and several experiments use overlapping history.',
-                     'Profile selection is a bounded three-preset comparison, not established optimal weights.',
-                     'The one-point floor and caps are requested design priors, not proven true edges.',
-                     'A timing-persistence correctness fix followed the initial screen; no sizing presets changed.',
-                     'Assumed -110 prices; exact settlement availability uses a six-hour post-tipoff proxy.',
-                     'The stronger spread overlays did not outperform the current baseline.']}
-path=REPO/'research/results/ncaam_directional_market_flow_v2_2026-11-22.json'
-path.write_text(json.dumps(aggregate,indent=2)+'\n')
+REPO = Path(__file__).resolve().parents[1]
+read = lambda p: json.loads(p.read_text())
 
-def pc(value):return '—' if value is None else f'{value:+.1f}%'
-def table(markets,variants):
-    out=['| Formula | Spread W–L–P | Spread units | Spread ROI | Total W–L–P | Total units | Total ROI |',
-         '|---|---:|---:|---:|---:|---:|---:|']
-    names={'baseline':'Current baseline','balanced':'Balanced fixed sizing','strong':'Strong fixed sizing',
-           'divergence':'Divergence fixed sizing','selected':'Earlier-data sizing selection'}
-    for v in variants:
-        s,t=markets['Spread'][v],markets['Total'][v]
-        out.append(f"| {names[v]} | {s['record']} | {s['netUnits']:+.2f} | {pc(s['roiPct'])} | {t['record']} | {t['netUnits']:+.2f} | {pc(t['roiPct'])} |")
-    return '\n'.join(out)
 
-main=results['results']['historical']
-late=timeline[-3:]
-case_table='\n'.join(['| Nov 18 observation | Total line | Over tickets | Over money | Baseline total | Updated total |',
-                      '|---|---:|---:|---:|---:|---:|']+
-    [f"| {r['timeET']} | {r['line']:.1f} | {r['betsPct']:g}% | {r['moneyPct']:g}% | {r['baseline']:.1f} | {r['projection']:.1f} |" for r in late])
-doc=f'''# NCAAM market updates and stronger sizing — v2, November 22, 2026
+def pct(value):
+    return '—' if value is None else f'{value:+.1f}%'
 
-The research candidate now updates on independent line movement and ordered betting-share changes, including flat-money cases, ticket-only changes, later price confirmation and late reversals. Every new paired snapshot recomputes the correction from the unadjusted baseline. The live builder and site reader are unchanged.
 
-The stronger totals overlay adds a small amount of historical profit while reducing ROI; the stronger spread overlays underperform the current baseline. Larger projection changes are implemented and tested, but the replay does not justify promoting the spread layer.
+def results_table(main, previous):
+    rows = ['| Formula | Spread W–L–P | Spread units | Spread ROI | Total W–L–P | Total units | Total ROI |',
+            '|---|---:|---:|---:|---:|---:|---:|']
+    variants = [('Current baseline', main, 'baseline'),
+                ('Previous v2 balanced', previous, 'balanced'),
+                ('v3 balanced', main, 'balanced'),
+                ('v3 strong', main, 'strong'),
+                ('v3 divergence', main, 'divergence'),
+                ('v3 earlier-data selection', main, 'selected')]
+    for label, source, variant in variants:
+        s, t = source['Spread'][variant], source['Total'][variant]
+        rows.append(f"| {label} | {s['record']} | {s['netUnits']:+.2f} | {pct(s['roiPct'])} | {t['record']} | {t['netUnits']:+.2f} | {pct(t['roiPct'])} |")
+    return '\n'.join(rows)
 
-## Movement coverage
 
-Forty targeted tests cover all eight approved examples under every sizing profile and all 27 up/down/flat combinations of line, money and tickets. The 26 canonical combinations with activity produce an adjustment; the all-flat case remains unchanged. Other tests cover degree, recent reversals with equal opening/final shares, lead/lag timing, missing data, duplicate and future observations, stale baseline arrivals and recomputation without compounding prior corrections.
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input-root', type=Path, default=REPO.parent)
+    parser.add_argument('--results-root', type=Path, default=REPO/'research/results/ncaam_market_flow_v3')
+    args = parser.parse_args()
+    root = args.results_root
+    results = read(root/'results.json')
+    latest = read(root/'latest_profiles_through_2026-11-21.json')
+    validation = read(root/'validation.json')
+    timeline = read(root/'uconn_arizona_fresh_baseline_updates.json')
+    spec_path = REPO/'config/ncaam_market_flow_research.json'
+    spec = read(spec_path)
+    previous = read(REPO/'research/results/ncaam_directional_market_flow_v2_2026-11-22.json')
+    original = read(args.input_root/'market_study/overlay_results.json')
+    assert results['policy'] == spec['policy']
+    assert results['specificationSha256'] == hashlib.sha256(spec_path.read_bytes()).hexdigest()
+    for market in ['Spread', 'Total']:
+        old = original['results']['historical'][market]['baseline']
+        new = results['results']['historical'][market]['baseline']
+        assert all(old[k] == new[k] for k in ['opportunities', 'bets', 'record'])
+        assert abs(old['netUnits'] - new['netUnits']) < 1e-9
+    final = timeline[-1]
+    window = final['latestSplitWindow']
+    assert window['money_share_change'] == 35 and window['ticket_share_change'] == 4
+    assert window['signed_confirmation_response'] == 0 and window['split_strength_multiplier'] == .25
+    assert timeline[-2]['projection'] < final['projection'] < final['baseline']
+    validation.update(targetedUnitTests=54, approvedExamplesPerProfile=8, basicMovementStatesPerProfile=27,
+                      baselineMatchesOriginalFixedStudy=True, uconnFlatReboundReducesUnderWithoutOverFlip=True)
+    aggregate = {
+        'policy': results['policy'], 'status': 'research_only_not_live', 'specification': spec,
+        'specificationSha256': results['specificationSha256'], 'cohort': results['cohort'],
+        'evaluationDates': results['evaluationDates'], 'results': results['results'],
+        'latestProfilesThroughNov21': latest, 'validation': validation,
+        'previousV2Aggregate': 'research/results/ncaam_directional_market_flow_v2_2026-11-22.json',
+        'previousV2MainResults': previous['results']['historical'],
+        'uconnArizonaFixedBalancedTimeline': timeline,
+        'limits': [
+            'The baseline and multiple research revisions use overlapping historical games.',
+            'Confirmation multipliers and the one-point floor are design priors, not measured true edges.',
+            'This v3 formula and all profile weights were declared before its first betting-return screen.',
+            'The strong divergence weight doubles balanced in v3; it was 1 in v2 and is 2 here.',
+            'Earlier-data sizing is a bounded preset comparison, not established optimal weights.',
+            'Assumed -110 prices and a six-hour post-tipoff settlement availability proxy.',
+            'Hourly and irregular saved observations cannot establish the exact causal order within a snapshot window.',
+            'Every v3 fixed profile and earlier-data selection underperforms the current baseline in both markets.',
+        ],
+    }
+    output = REPO/'research/results/ncaam_directional_market_flow_v3_2026-11-22.json'
+    output.write_text(json.dumps(aggregate, indent=2)+'\n')
+    historical = results['results']['historical']
+    prior_historical = previous['results']['historical']
+    previous_case = {r['snapshotTime']: r for r in previous['uconnArizonaFixedBalancedTimeline']}
+    case_table = ['| Nov 18 update | Total line | Over tickets | Over money | Baseline | Previous v2 | Revised v3 |',
+                  '|---|---:|---:|---:|---:|---:|---:|']
+    for row in timeline[-3:]:
+        old = previous_case[row['snapshotTime']]
+        case_table.append(f"| {row['timeET']} | {row['line']:.1f} | {row['betsPct']:g}% | {row['moneyPct']:g}% | {row['baseline']:.1f} | {old['projection']:.1f} | {row['projection']:.1f} |")
+    s, t = historical['Spread'], historical['Total']
+    warmup_games = results['cohort']['uniqueEligibleGames'] - historical['Spread']['baseline']['opportunities'] - results['results']['additional_day']['Spread']['baseline']['opportunities']
+    doc = f'''# NCAAM split strength and line confirmation — v3, November 22, 2026
 
-Line points are independent evidence. A total rising one point contributes upward pressure; a team moving from +6.5 to +4.5 gains spread support. This works with flat or missing splits. Share changes remain provider proportions rather than inferred dollar inflows. Ticket-only movement with observed flat money is treated as weakening relative money backing for the popular side; that is a declared research interpretation.
+The research updater now gives an ordinary split change only one quarter of its usual weight while the line is flat. Supporting line response progressively restores the full split weight. Money moving against tickets retains a separate, stronger starting weight to preserve the eight previously approved interpretations. Independent line movement continues to count at full weight.
 
-There is no opening-to-current money-direction clamp. The most recent share changes can reverse earlier support. Earlier price remains independent information; price following earlier money within 60 minutes has a distinct corroboration channel. Current quote and both teams' captured inputs remain separate from the interpretation of who caused a price move.
+This changes UConn–Arizona's final balanced research projection from {previous_case[final['snapshotTime']]['projection']:.1f} to **{final['projection']:.1f}**, below the {final['baseline']:.1f} baseline. The late Over-money rebound reduces earlier Under pressure without creating an automatic strong Over adjustment. All 54 targeted tests pass. The revised historical returns still underperform the current baseline, so this is a draft research candidate with no live activation.
 
-Split evidence has a two-hour recency weighting that advances only when an observed share changes. A price-only refresh therefore cannot fade existing split evidence and inadvertently raise a total merely because time passed while the line fell. That persistence fix was made after the first implementation screen; the three weight presets, floor and caps were unchanged. This remains exploratory research.
+## Confirmation sizing
 
-## Explicit sizing
+| Net supporting line response | Ordinary split multiplier | Money/ticket divergence multiplier |
+|---|---:|---:|
+| Flat | 25% | 75% |
+| 0.5 point | 43.75% | 81.25% |
+| 1 point | 62.5% | 87.5% |
+| 1.5 points | 81.25% | 93.75% |
+| 2+ points | 100% | 100% |
 
-These are declared starting presets. Earlier-date net betting units select among them separately for spreads and totals after at least 150 available games and 20 qualifying prior bets; otherwise the candidate uses balanced sizing. This is a bounded preset comparison, not a claim that the weights are globally optimal.
+Between those values the multiplier is linear: `base + (1 - base) × clip(supporting points / 2, 0, 1)`. Opposing net price response further reduces the split contribution by `1 / (1 + 0.25 × opposing points)`. The price contribution itself is independent and is never reduced by the confirmation multiplier. Divergence is defined as money-share and ticket-share changes with opposite signs; it retains stronger independent evidence as an explicitly declared interpretation, not a claim about bettor skill.
+
+Each split-change window uses its same-window price response plus later already-visible line-only changes for up to 60 minutes. A new observed split change ends that attribution window. Earlier price cannot confirm later cash, a future snapshot cannot confirm a current forecast, and multiple line ticks do not repeat the same confirmation. Net price response withdraws confirmation when a later price buyback reverses it. The next available snapshot recalculates those contributions from the underlying baseline without compounding the previous complete correction.
+
+## Declared base weights
+
+The confirmation multiplier acts on the split channels before the final floor and caps. Price-confirmation bonuses use the smaller of normalized share change and supporting line points; same-window and later confirmation divide that support rather than count it twice.
 
 | Input contribution | Balanced | Strong | Divergence |
 |---|---:|---:|---:|
-| Per line point | 1.0 | 2.0 | 1.0 |
-| Per 10 percentage points of money-share change | 2.0 | 4.0 | 2.0 |
-| Additional opposing-ticket divergence, per matched 10 points | 1.0 | 1.0 | 2.0 |
-| Ticket-only change, per 10 points, opposite direction | 0.5 | 1.0 | 0.5 |
-| Same-window price confirmation | 0.5 | 1.0 | 1.0 |
+| Per line point | 1 | 2 | 1 |
+| Per 10 percentage points of money-share change | 2 | 4 | 2 |
+| Additional opposing-ticket divergence, per matched 10 points | 1 | 2 | 2 |
+| Ticket-only change, per 10 points, opposite direction | 0.5 | 1 | 0.5 |
+| Same-window price confirmation | 0.5 | 1 | 1 |
 | Later-price confirmation | 0.25 | 0.5 | 0.5 |
 | Maximum spread correction | 4 | 5 | 4 |
 | Maximum total correction | 6 | 8 | 6 |
 
-Weights act on the recorded interval evidence before recency, price-opposition damping and caps. Confirmation uses the smaller normalized money/price movement. An active correction is at least one point; exactly neutral evidence stays at zero. This floor implements the requested larger movement and is not evidence that every small signal represents one point of true betting value. Each later snapshot can recalculate the direction and strength without adding the previous complete correction again.
+The strong preset now doubles all balanced channel weights, including divergence. That divergence weight changed from 1 in v2 to 2 in v3 before the first v3 outcome screen, keeping all approved directional examples valid under confirmation damping. No alternative confirmation multipliers were selected after viewing these returns.
 
-The latest calibration through Nov 21 selects **{latest['Spread']['profile']} for spreads** and **{latest['Total']['profile']} for totals**, using 451 eligible earlier games per market. The selected profile's mean absolute change in the main replay is **{main['Spread']['selected']['meanAbsoluteAdjustment']:.2f} spread points** and **{main['Total']['selected']['meanAbsoluteAdjustment']:.2f} total points**.
+Split evidence has a two-hour recency weighting whose clock advances only on observed split changes. A price-only refresh cannot fade split evidence merely because time passed. Missing shares stay unknown. Active corrections retain the requested one-point minimum; an exactly neutral weighted result stays zero. The floor, caps and multipliers are design priors, not measured true betting edges.
 
-## Matched historical comparison
+## UConn–Arizona: actual saved updates
 
-The restored original input package supplies 458 physical games, including 183 initial warm-up games, 268 evaluation games on Nov 14–21 and seven Nov 22 games reported separately. Both markets use identical saved final quotes and captured baseline inputs across all variants. Source hashes match the saved package, and the baseline records reproduce the original market study.
+The timeline below uses the same declared fixed balanced profile for v2 and v3, with the latest underlying baseline inputs already available at each tick. It does not use a profile chosen from later games or the final score.
 
-Daily sizing uses only earlier slate dates and excludes training games until a six-hour post-tipoff proxy has passed. Its cutoff precedes the earliest evaluated update for that date. Exact settlement timestamps are unavailable. Spread eligibility remains 5 to below 7 points of edge; totals qualify at 8, with A at 10. Prices are assumed −110, one unit risked. No official historical record is rewritten.
+{chr(10).join(case_table)}
 
-{table(main,['baseline','balanced','strong','divergence','selected'])}
+At 8:15 PM, the one-point line decline independently lowers v3's projection by one point. At 8:40 PM, money share rebounds from 31% to 66% while tickets rise from 22% to 26% and the line remains 146.5. Both shares move toward Over, so this is ordinary pressure with a 25% multiplier, rather than opposing-ticket divergence. The new cash interval contributes **1.75 points**, compared with 7 points at v2's full money weight, before the rest of the recorded history, recency and final floor are applied. The final result remains below baseline and below the eight-point total eligibility threshold.
 
-Selected totals move from 14 bets at 9–5 and +3.18 units to 19 bets at 12–7 and +3.91 units: **+0.73 units**, with ROI decreasing from 22.7% to 20.6%. The added totals are 7–3, but five removed bets went 4–1, so the incremental gain is small.
+Every underlying baseline, rating and market timestamp is checked against the update time. Every earned confirmation timestamp must already be visible. A fresh underlying baseline may replace an earlier one; an out-of-order older baseline cannot replace a newer one.
 
-Selected spreads fall from 26–12 and +11.64 units to 18–13 and +3.36 units: **−8.27 units**. The larger changes remove many profitable baseline qualifiers. The stronger spread adjustments therefore do not have support from this replay under the existing B-only selection rule.
+## Matched historical replay
 
-Below a 20-point market spread, the baseline is 15–8 and +5.64 units; the selected candidate is 12–9 and +1.91 units. The larger version does not preserve the earlier unconstrained research subgroup's apparent advantage. These are different methods, and the records should not be merged.
+The original saved input package contains {results['cohort']['uniqueEligibleGames']} physical games: {warmup_games} warm-up games, {s['baseline']['opportunities']} Nov 14–21 evaluation games and seven Nov 22 games reported separately. Source hashes match the original package. The baseline exactly reproduces the original study at identical saved quotes.
 
-## Continuous UConn–Arizona example
+Daily sizing chooses among the three declared profiles using only earlier slate dates after at least 150 earlier games and 20 qualifying prior bets. A six-hour post-tipoff proxy accounts for outcome availability, and the cutoff precedes the earliest evaluated update that date. Exact settlement timestamps are unavailable. Spread eligibility remains 5 to below 7 points of absolute edge; totals qualify at 8, with A at 10. Prices are assumed −110 with one unit risked.
 
-The full history shows Over money share falling from 85% to 31%, then rebounding from 31% to 66% in the final 25 minutes. Holding the model to the opening-to-final 85 → 66 comparison misses that reversal. The example below uses the declared fixed balanced profile and, at each snapshot, the latest baseline forecast inputs already captured by that time. It is an illustration, not a claim that a later calibration was available earlier.
+{results_table(historical, prior_historical)}
 
-{case_table}
+The fixed balanced version changes spread profit by **{s['balanced']['netUnits']-s['baseline']['netUnits']:+.2f} units** and total profit by **{t['balanced']['netUnits']-t['baseline']['netUnits']:+.2f} units** versus baseline. Earlier-data profile selection changes spread profit by **{s['selected']['netUnits']-s['baseline']['netUnits']:+.2f} units** and total profit by **{t['selected']['netUnits']-t['baseline']['netUnits']:+.2f} units**. No v3 preset outperforms baseline in either market. The better behavior in the selected example does not establish a profitable betting improvement.
 
-At 8:15 PM, the line falls with unchanged splits and lowers the projection. At 8:40 PM, the large new Over-money share raises it again. The new final projection is 152.2, versus the 149.1 baseline. At the saved 146.5 line, that still does not reach the eight-point total eligibility threshold.
+The latest calibration through Nov 21 selects `{latest['Spread']['profile']}` for spreads and `{latest['Total']['profile']}` for totals using {latest['Spread']['trainingGames']} earlier games per market. Those latest choices are not retroactively applied to earlier evaluation dates. Mean absolute balanced changes are {s['balanced']['meanAbsoluteAdjustment']:.2f} spread points and {t['balanced']['meanAbsoluteAdjustment']:.2f} total points; chronological-selection changes average {s['selected']['meanAbsoluteAdjustment']:.2f} and {t['selected']['meanAbsoluteAdjustment']:.2f}, respectively.
 
-The visible timeline checks every underlying baseline, rating and market timestamp against the current update. No later model inputs or final score are used in those projections. A fresh underlying baseline can replace the earlier baseline, while an out-of-order older baseline cannot replace a newer one.
+These are overlapping exploratory samples after several model revisions, not a fresh untouched holdout. The current baseline and its selection thresholds were also researched on historical data. Small betting samples, assumed prices and sparse snapshot timing limit what can be inferred.
 
-## Status and validation
+## Validation and status
 
-- 40 targeted tests passed, including the eight approved examples under all three profiles and the 27 basic movement states.
-- 550 game/market comparisons and 2,750 prediction rows use matching quotes and decisions.
-- 749 projections using the original fixed baselines are emitted only after those baseline inputs were available; a separate full UConn timeline uses fresh, earlier captured baselines at every tick.
-- Every active correction is at least one point, with the declared market-specific cap.
-- All source hashes and baseline summary parity checks passed.
-- No production import, official-pick eligibility, database write, deployment or scheduled task is added.
+- 54 targeted tests pass, including all eight approved examples under all three presets and all 27 basic up/down/flat movement states.
+- Tests cover gradual confirmation, flat-line rebounds, later confirmation, earlier-line exclusion, price buybacks, expired windows, duplicate ticks, missing data, symmetry and stream/batch parity.
+- {validation['matchedMarketComparisons']:,} matched market comparisons and {validation['predictionRows']:,} prediction rows use identical quotes across variants.
+- {validation['visibleSnapshotProjections']:,} visible fixed-baseline updates plus the separate fresh-baseline UConn timeline are saved for inspection.
+- Original source hashes, baseline parity, independent net price and already-visible confirmation checks pass.
+- The production builder, site reader, official-pick eligibility, schedule and database are unchanged. The research updater does not poll a live service by itself.
 
-The candidate is saved for review. Totals show a small exploratory gain in units, while stronger spreads underperform. The floor, three presets, timing windows and selection policy are design choices tested on overlapping historical research. A correctness fix followed the initial screen. None of these returns establishes a sustainable future edge.
-
-The preceding v1 implementation and its smaller corrections remain available at commit faf86895157c2ab3386179841d3af5974525519f. The dated v1 aggregate is preserved separately.
+The preceding v2 source is preserved at commit bd3877913cec88203243ffcb2f636eabb460d70e and its dated compact aggregate remains unchanged. The v1 aggregate is also preserved. Current review: https://github.com/ezpzpicks/mlb-mobile-admin/pull/69.
 
 ## Reproduction
 
-Extract the original NCAAM_Market_Adjustment_Data_2026-11-22.zip with its internal paths intact. From this repository root:
+Extract NCAAM_Market_Adjustment_Data_2026-11-22.zip with its internal paths intact, then run from the repository root:
 
     python3 -m unittest discover -s research -p 'test_ncaam_market_flow.py' -v
     python3 research/replay_ncaam_market_flow.py --input-root /path/to/extracted-package
+    python3 research/build_ncaam_market_flow_report.py --input-root /path/to/extracted-package
 
-Private working rows and generated trajectories go under the ignored research/results/ncaam_market_flow_v2 directory. The compact review is research/results/ncaam_directional_market_flow_v2_2026-11-22.json. The design is config/ncaam_market_flow_research.json. The scoring module and MarketProjectionState updater are pure research calculations and do not poll a live service themselves.
+Generated working rows and trajectories go under ignored research/results/ncaam_market_flow_v3. The compact aggregate is research/results/ncaam_directional_market_flow_v3_2026-11-22.json. The formula and preset configuration are in config/ncaam_market_flow_research.json.
 '''
-(REPO/'research/NCAAM_DIRECTIONAL_MARKET_FLOW.md').write_text(doc)
-print(json.dumps({'aggregate':str(path),'report':str(REPO/'research/NCAAM_DIRECTIONAL_MARKET_FLOW.md'),
-                  'baselineParity':True,'targetedTests':40,'selectedProfiles':{m:x['profile'] for m,x in latest.items()}},indent=2))
+    report = REPO/'research/NCAAM_DIRECTIONAL_MARKET_FLOW.md'
+    report.write_text(doc)
+    print(json.dumps({'aggregate': str(output), 'report': str(report), 'baselineParity': True,
+                      'targetedTests': 54, 'uconnFinal': final['projection'],
+                      'latestProfiles': {m: x['profile'] for m, x in latest.items()}}, indent=2))
+
+
+if __name__ == '__main__':
+    main()

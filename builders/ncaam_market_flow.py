@@ -3,14 +3,18 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 import math
 
-POLICY = "ncaam-directional-market-flow-2026-11-22-v2"
+POLICY = "ncaam-directional-market-flow-2026-11-22-v3"
 FEATURE_NAMES = ("line_movement", "money_movement", "money_ticket_divergence",
                  "ticket_only_movement", "same_window_confirmation", "lagged_confirmation")
 HALF_LIFE_MINUTES = 120.0
 CONFIRMATION_LOOKBACK_MINUTES = 60.0
+UNCONFIRMED_SPLIT_MULTIPLIER = .25
+DIVERGENCE_SPLIT_MULTIPLIER = .75
+FULL_CONFIRMATION_POINTS = 2.0
+OPPOSING_PRICE_DAMPING_PER_POINT = .25
 PROFILES = {
     "balanced": {"weights": [1., 2., 1., .5, .5, .25], "spread_cap": 4., "total_cap": 6., "minimum_adjustment": 1.},
-    "strong": {"weights": [2., 4., 1., 1., 1., .5], "spread_cap": 5., "total_cap": 8., "minimum_adjustment": 1.},
+    "strong": {"weights": [2., 4., 2., 1., 1., .5], "spread_cap": 5., "total_cap": 8., "minimum_adjustment": 1.},
     "divergence": {"weights": [1., 2., 2., .5, 1., .5], "spread_cap": 4., "total_cap": 6., "minimum_adjustment": 1.},
 }
 
@@ -77,42 +81,66 @@ def flow_features(history, *, as_of, tipoff, market, half_life_minutes=HALF_LIFE
                      if any(before[k] is not None and after[k] is not None and before[k] != after[k]
                             for k in ("moneyPct", "betsPct"))]
     anchor = max(split_updates, default=timeline[0][0])
-    features, prior_money, intervals = [0.] * 6, [], []
+    windows = []
     for (t0, before), (t1, after) in zip(timeline, timeline[1:]):
         price = (after["line"] - before["line"]) * (-1 if market == "Spread" else 1)
         money_known = before["moneyPct"] is not None and after["moneyPct"] is not None
         bets_known = before["betsPct"] is not None and after["betsPct"] is not None
         money = (after["moneyPct"] - before["moneyPct"]) / 10 if money_known else None
         bets = (after["betsPct"] - before["betsPct"]) / 10 if bets_known else None
+        windows.append({"start": t0, "end": t1, "price": price, "money": money,
+                        "bets": bets, "split_changed": bool(money or bets)})
+    features, intervals = [0.] * 6, []
+    for i, window in enumerate(windows):
+        t0, t1, price, money, bets = (window[k] for k in ("start", "end", "price", "money", "bets"))
         recency = .5 ** (max(0., (anchor - t1).total_seconds() / 60) / half_life_minutes)
-        vector, lagged = [price, 0., 0., 0., 0., 0.], 0.
-        damping = 1 / (1 + .25 * abs(price)) if money is not None and money * price < 0 else 1.
+        vector = [price, 0., 0., 0., 0., 0.]
+        pressure = money if money else -bets if money == 0 and bets is not None else 0.
+        divergence = money is not None and bets is not None and money * bets < 0
+        response, confirmed_through = price, t1
+        # Only already-visible later price can confirm this split change.
+        # A new split change starts a new window; a preceding price move never
+        # confirms later cash. Net response lets a subsequent buyback withdraw
+        # previously earned confirmation instead of counting every tick twice.
+        if pressure:
+            deadline = t1 + timedelta(minutes=CONFIRMATION_LOOKBACK_MINUTES)
+            for later in windows[i + 1:]:
+                if later["end"] > deadline or later["split_changed"]:
+                    break
+                response += later["price"]
+                confirmed_through = later["end"]
+        aligned = sign(pressure) * response if pressure else 0.
+        base = DIVERGENCE_SPLIT_MULTIPLIER if divergence else UNCONFIRMED_SPLIT_MULTIPLIER
+        confirmation = min(1., max(0., aligned) / FULL_CONFIRMATION_POINTS)
+        multiplier = base + (1. - base) * confirmation
+        damping = 1 / (1 + OPPOSING_PRICE_DAMPING_PER_POINT * abs(response)) if aligned < 0 else 1.
         if money is not None:
-            vector[1] = recency * money * damping
-            if bets is not None and money * bets < 0:
-                vector[2] = recency * sign(money) * min(abs(money), abs(bets)) * damping
+            vector[1] = recency * money * multiplier * damping
+            if divergence:
+                vector[2] = recency * sign(money) * min(abs(money), abs(bets)) * multiplier * damping
             if money == 0 and bets is not None:
                 # Declared prior: more tickets without more money share weakens
                 # relative dollar backing for that side.
-                vector[3] = -recency * bets
-            if money * price > 0:
-                vector[4] = recency * sign(money) * min(abs(money), abs(price))
-        if money == 0 and price != 0:
-            cutoff = t1 - timedelta(minutes=CONFIRMATION_LOOKBACK_MINUTES)
-            lagged = sum(m * .5 ** ((t1 - t).total_seconds() / 60 / half_life_minutes)
-                         for t, m in prior_money if cutoff <= t <= t0)
-            if lagged * price > 0:
-                vector[5] = recency * sign(price) * min(abs(lagged), abs(price))
+                vector[3] = -recency * bets * multiplier * damping
+            if money:
+                same = min(max(0., aligned), max(0., sign(money) * price))
+                lagged = max(0., aligned - same)
+                vector[4] = recency * sign(money) * min(abs(money), same)
+                vector[5] = recency * sign(money) * min(max(0., abs(money) - same), lagged)
         for i, value in enumerate(vector):
             features[i] += value
-        if money is not None and money != 0:
-            prior_money.append((t1, money))
         intervals.append({"start": t0.isoformat(), "end": t1.isoformat(),
                           "money_share_change": None if money is None else money * 10,
                           "ticket_share_change": None if bets is None else bets * 10,
                           "signed_market_move": price, "recency_weight": recency,
                           "price_opposition_damping": damping,
-                          "prior_money_in_lag_window": lagged, "features": vector})
+                          "directional_split_pressure": pressure,
+                          "money_ticket_divergence": divergence,
+                          "signed_confirmation_response": response,
+                          "confirmation_observed_through": confirmed_through.isoformat(),
+                          "split_strength_multiplier": multiplier,
+                          "effective_split_multiplier": multiplier * damping,
+                          "features": vector})
     first, last = timeline[0][1], timeline[-1][1]
     out.update(features=features, intervals=intervals,
                history_minutes=(timeline[-1][0] - timeline[0][0]).total_seconds() / 60,

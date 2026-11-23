@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 import unittest
 from builders.ncaam_market_flow import (
-    PROFILES, adjustment, flow_features, project_with_market_history, MarketProjectionState)
+    PROFILES, adjustment, flow_features, project_with_market_history, MarketProjectionState,
+    UNCONFIRMED_SPLIT_MULTIPLIER, DIVERGENCE_SPLIT_MULTIPLIER, FULL_CONFIRMATION_POINTS,
+    OPPOSING_PRICE_DAMPING_PER_POINT, CONFIRMATION_LOOKBACK_MINUTES)
 T0="2026-11-17T12:00:00Z";T1="2026-11-17T13:00:00Z";T2="2026-11-17T14:00:00Z";TIP="2026-11-17T15:00:00Z"
 
 def history(bets,money,lines,times=None):
@@ -30,6 +32,12 @@ class AdaptiveMarketFlow(unittest.TestCase):
             self.assertEqual(p['spread_cap'],expected['spread_cap'])
             self.assertEqual(p['total_cap'],expected['total_cap'])
             self.assertEqual(p['minimum_adjustment'],spec['sizing']['minimum_nonzero_adjustment_points'])
+        for key,value in [('unconfirmed_split_multiplier',UNCONFIRMED_SPLIT_MULTIPLIER),
+                          ('divergence_split_multiplier',DIVERGENCE_SPLIT_MULTIPLIER),
+                          ('full_confirmation_points',FULL_CONFIRMATION_POINTS),
+                          ('opposing_price_damping_per_point',OPPOSING_PRICE_DAMPING_PER_POINT),
+                          ('lookback_minutes',CONFIRMATION_LOOKBACK_MINUTES)]:
+            self.assertEqual(spec['confirmation'][key],value)
 
     def test_eight_approved_examples_all_profiles(self):
         cases=[([50,26],[50,66],[151.5,149.5],"Total",1),
@@ -86,8 +94,8 @@ class AdaptiveMarketFlow(unittest.TestCase):
         self.assertEqual(values,[1,2,3])
 
     def test_degree_of_cash_movement_is_progressive(self):
-        values=[effect(history([50,50],[50,50+x],[150,150])) for x in [5,10,20]]
-        self.assertEqual(values,[1,2,4])
+        values=[effect(history([50,50],[50,50+x],[150,150])) for x in [10,30,50]]
+        self.assertEqual(values,[1,1.5,2.5])
 
     def test_tiny_active_adjustments_have_requested_one_point_floor(self):
         self.assertEqual(effect(history([50,50],[50,51],[150,150])),1)
@@ -109,7 +117,7 @@ class AdaptiveMarketFlow(unittest.TestCase):
         h=history([50,30,40],[50,20,70],[150,148,148],[T0,T1,T2])
         earlier=effect(h[:2])
         latest=effect(h,clock=T2)
-        self.assertLess(earlier,0);self.assertGreater(latest,earlier);self.assertGreater(latest,0)
+        self.assertLess(earlier,0);self.assertGreater(latest,earlier);self.assertLess(latest,0)
 
     def test_later_line_can_confirm_earlier_cash(self):
         h=history([50,50,50],[50,70,70],[150,150,152],[T0,T1,T2])
@@ -123,6 +131,104 @@ class AdaptiveMarketFlow(unittest.TestCase):
         self.assertEqual(f["features"][0],2)
         self.assertEqual(f["features"][4],0);self.assertEqual(f["features"][5],0)
         self.assertGreater(effect(h,clock=T2),0)
+
+    def test_flat_line_money_rebound_gets_quarter_cash_weight(self):
+        h=history([22,26],[31,66],[146.5,146.5])
+        f=flow(h);a=adjustment(149.1,f)
+        self.assertEqual(f['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertAlmostEqual(a['contributions']['money_movement'],1.75)
+        self.assertAlmostEqual(a['raw_adjustment'],1.75)
+
+    def test_confirmation_strength_is_continuous_with_line_degree(self):
+        for line,multiplier in [(0,.25),(.5,.4375),(1,.625),(1.5,.8125),(2,1),(3,1)]:
+            with self.subTest(line=line):
+                f=flow(history([50,55],[50,70],[150,150+line]))
+                self.assertEqual(f['intervals'][0]['split_strength_multiplier'],multiplier)
+                self.assertAlmostEqual(adjustment(150,f)['contributions']['money_movement'],4*multiplier)
+
+    def test_divergence_retains_approved_interpretation_with_reduced_weight(self):
+        for line,multiplier in [(0,.75),(1,.875),(2,1)]:
+            with self.subTest(line=line):
+                f=flow(history([50,40],[50,70],[150,150+line]))
+                self.assertEqual(f['intervals'][0]['split_strength_multiplier'],multiplier)
+        f=flow(history([50,26],[50,66],[151.5,149.5]))
+        self.assertAlmostEqual(f['intervals'][0]['effective_split_multiplier'],.5)
+        self.assertGreater(adjustment(150,f)['adjustment'],0)
+
+    def test_opposing_line_reduces_ordinary_split_strength(self):
+        flat=flow(history([50,55],[50,70],[150,150]))
+        opposed=flow(history([50,55],[50,70],[150,149]))
+        self.assertLess(opposed['intervals'][0]['effective_split_multiplier'],flat['intervals'][0]['effective_split_multiplier'])
+        self.assertLess(adjustment(150,opposed)['contributions']['money_movement'],adjustment(150,flat)['contributions']['money_movement'])
+
+    def test_confirmation_does_not_reduce_independent_line_points(self):
+        for money,bets in [(50,50),(70,55),(70,40),(None,None)]:
+            f=flow(history([50,bets],[50,money],[150,152]))
+            self.assertEqual(f['features'][0],2)
+
+    def test_later_line_upweights_earlier_cash_only_when_visible(self):
+        h=history([50,55,55],[50,70,70],[150,150,152],[T0,T1,T2])
+        before=flow(h);after=flow(h,clock=T2)
+        self.assertEqual(before['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertEqual(after['intervals'][0]['split_strength_multiplier'],1)
+        self.assertEqual(before['features'][5],0)
+        self.assertGreater(after['features'][5],0)
+        self.assertGreater(adjustment(150,after)['contributions']['money_movement'],adjustment(150,before)['contributions']['money_movement'])
+
+    def test_earlier_price_never_upweights_later_cash(self):
+        h=history([50,50,55],[50,50,70],[150,152,152],[T0,T1,T2])
+        f=flow(h,clock=T2)
+        self.assertEqual(f['intervals'][-1]['split_strength_multiplier'],.25)
+        self.assertEqual(f['features'][4:],[0,0])
+
+    def test_repeated_line_ticks_do_not_repeat_confirmation(self):
+        direct=history([50,55,55],[50,70,70],[150,150,152],[T0,T1,T2])
+        divided=history([50,55,55,55],[50,70,70,70],[150,150,151,152],
+                        [T0,T1,'2026-11-17T13:30:00Z',T2])
+        self.assertEqual(flow(direct,clock=T2)['features'],flow(divided,clock=T2)['features'])
+
+    def test_price_buyback_withdraws_previously_earned_confirmation(self):
+        h=history([50,55,55,55],[50,70,70,70],[150,150,152,150],
+                  [T0,T1,'2026-11-17T13:30:00Z',T2])
+        confirmed=flow(h[:3],clock='2026-11-17T13:30:00Z')
+        reversed_flow=flow(h,clock=T2)
+        self.assertEqual(confirmed['intervals'][0]['split_strength_multiplier'],1)
+        self.assertEqual(reversed_flow['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertEqual(reversed_flow['features'][4:],[0,0])
+        self.assertEqual(reversed_flow['features'],flow(h[:2])['features'])
+
+    def test_new_split_update_ends_previous_confirmation_window(self):
+        h=history([50,55,60],[50,70,80],[150,150,152],[T0,T1,T2])
+        f=flow(h,clock=T2)
+        self.assertEqual(f['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertEqual(f['intervals'][1]['split_strength_multiplier'],1)
+        self.assertEqual(f['features'][5],0)
+
+    def test_line_response_outside_60_minutes_is_only_independent_price(self):
+        h=history([50,55,55],[50,70,70],[150,150,152],
+                  [T0,T1,'2026-11-17T14:01:00Z'])
+        f=flow(h,clock='2026-11-17T14:01:00Z')
+        self.assertEqual(f['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertEqual(f['features'][0],2)
+        self.assertEqual(f['features'][5],0)
+
+    def test_confirmation_is_symmetric_for_total_directions(self):
+        h=history([50,55,55],[50,70,70],[150,150,152],[T0,T1,T2])
+        inverse=[{**p,'line':300-p['line'],'betsPct':100-p['betsPct'],'moneyPct':100-p['moneyPct']} for p in h]
+        self.assertEqual(flow(h,clock=T2)['features'],[-x for x in flow(inverse,clock=T2)['features']])
+
+    def test_flat_line_rebound_reduces_under_without_automatic_over_reversal(self):
+        h=history([50,45,49],[50,31,66],[150,148,148],[T0,T1,T2])
+        before=effect(h[:2]);after=effect(h,clock=T2)
+        self.assertLess(before,after)
+        self.assertLess(after,0)
+
+    def test_ticket_only_pressure_also_needs_line_confirmation_for_full_weight(self):
+        flat=flow(history([50,70],[50,50],[150,150]))
+        confirmed=flow(history([50,70],[50,50],[150,148]))
+        self.assertEqual(flat['intervals'][0]['split_strength_multiplier'],.25)
+        self.assertEqual(confirmed['intervals'][0]['split_strength_multiplier'],1)
+        self.assertLess(abs(flat['features'][3]),abs(confirmed['features'][3]))
 
     def test_size_can_resolve_conflicting_evidence(self):
         self.assertLess(effect(history([50,51],[50,51],[150,146])),0)
