@@ -90,6 +90,10 @@ def records(frame):
 def _dataset_requests(db, dataset, rows, columns, now, *, gate="1", update=False):
     """Update exact existing identities; never replace or scan a whole dataset."""
     q = db.turso._sql_text
+    insert_gate = gate
+    if dataset == "bet_tracker":
+        from shared.market_projection_grading import game_grade_gate
+        insert_gate = f"({gate}) AND ({game_grade_gate('NFL')})"
     output = []
     keys = {"daily_slate": ["Date", "Away Team", "Home Team"], "prop_projections": ["Game ID", "Player", "Market"],
         "prop_previews": ["Game ID", "Player", "Market"],
@@ -132,7 +136,7 @@ def _dataset_requests(db, dataset, rows, columns, now, *, gate="1", update=False
         output.append(req("INSERT INTO dataset_rows (sport,dataset,row_index,payload_json,source_hash,date_key,game_key,game,market,selection,result,snapshot_time,imported_at) "
             f"SELECT 'NFL',{q(dataset)},COALESCE((SELECT MAX(row_index)+1 FROM dataset_rows WHERE sport='NFL' AND dataset={q(dataset)}),1),{q(payload)},{q(digest)},"
             + ",".join(q(meta[k]) for k in ("date_key", "game_key", "game", "market", "selection", "result", "snapshot_time"))
-            + f",{q(now.isoformat())} WHERE ({gate}) AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE {where})"))
+            + f",{q(now.isoformat())} WHERE ({insert_gate}) AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE {where})"))
     if rows:
         # Adjust the existing manifest by this game's row-count delta. Both
         # counts use the game index; season-long history is never counted.

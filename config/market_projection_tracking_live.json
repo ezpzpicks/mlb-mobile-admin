@@ -1,0 +1,23 @@
+{
+  "policy": "directional-market-tracking-2026-11-23-v1",
+  "sports": ["NBA", "NFL", "NCAAF"],
+  "profile": "balanced",
+  "unit": "points",
+  "grading_status": "ungraded",
+  "historical_records_regraded": false,
+  "parameters": {
+    "flow_policy": "directional-market-tracking-2026-11-23-v1",
+    "feature_order": ["line_movement", "money_movement", "money_ticket_divergence", "ticket_only_movement", "same_window_confirmation", "lagged_confirmation"],
+    "weights": [1, 2, 1, 0.5, 0.5, 0.25],
+    "minimum_adjustment": 1,
+    "spread_cap": 4,
+    "total_cap": 6,
+    "half_life_minutes": 120,
+    "confirmation_lookback_minutes": 60,
+    "unconfirmed_split_multiplier": 0.25,
+    "divergence_split_multiplier": 0.75,
+    "full_confirmation_points": 2,
+    "opposing_price_damping_per_point": 0.25,
+    "maximum_market_age_minutes": 90
+  }
+}

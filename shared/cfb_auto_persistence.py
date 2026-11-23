@@ -114,6 +114,9 @@ def save_once_transaction(db, builder, result, market, now=None):
                            f"imported_at={q(stamp)}"]
             assignments += [f"{name}={q(value)}" for name, value in metadata.items()]
             gate = "EXISTS(SELECT 1 FROM ncaaf_builder_gate)"
+            if dataset == builder.TRACKER_TAB:
+                from shared.market_projection_grading import game_grade_gate
+                gate += f" AND ({game_grade_gate('NCAAF')})"
             requests.append(request(f"UPDATE dataset_rows SET {','.join(assignments)} WHERE {where} AND {gate}"))
             requests.append(request(
                 "INSERT INTO dataset_rows "
