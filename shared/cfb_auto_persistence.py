@@ -37,6 +37,10 @@ def save_once_transaction(db, builder, result, market, now=None, preview=False):
         guard += (f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE {game_where} "
                   "AND dataset='game_previews')")
     slate = builder.slate_row(result).copy()
+    # The legacy slate schema omits kickoff; publish the verified source clock
+    # for both previews and authoritative saves without rewriting old rows.
+    slate["Game Time"] = market.kickoff.isoformat()
+    slate["Build At"] = (now or datetime.now(timezone.utc)).isoformat()
     tracker = builder.tracker_rows(result, False).copy()
     # The unattended trial owns spreads/totals only, even if a future model
     # accidentally returns a graded moneyline when its market is unavailable.
@@ -51,7 +55,7 @@ def save_once_transaction(db, builder, result, market, now=None, preview=False):
     extension = ["Build Source", "Build Captured At", "Odds Assumption", "Market Source URL"]
     specs = []
     for dataset, frame, columns, keys in [
-        (builder.SLATE_TAB, slate, list(builder.SLATE_COLUMNS), ["Date", "Game ID"]),
+        (builder.SLATE_TAB, slate, [*builder.SLATE_COLUMNS, "Game Time", "Build At"], ["Date", "Game ID"]),
         (builder.TRACKER_TAB, tracker, list(builder.TRACKER_COLUMNS), ["Date", "Game ID", "Bet Type"]),
         *[(builder.PERSONNEL_TAB, frame, list(builder.PERSONNEL_COLUMNS), ["Season", "Game ID", "Team"]) for frame in personnel],
     ]:

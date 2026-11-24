@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run today's unsaved NCAAF games with ScoresAndOdds or fallback Covers lines.
 
-Before 9 AM Eastern, save an ungraded preview; normal saves retain their
+From 7–9 AM Eastern, save an ungraded preview; normal saves retain their
 existing 9 AM start. Default: read-only plan. --evaluate computes without saving. --commit explicitly
 enables atomic saves, and additionally requires NCAAF_AUTO_BUILDER_ENABLED=1.
 """
@@ -111,6 +111,11 @@ def compute(builder, schedule, market, ratings):
 def run(args):
     now = datetime.now(timezone.utc)
     local = now.astimezone(ET)
+    # NCAAM has no time gate. NCAAF deliberately starts at 7 AM Eastern
+    # on the existing :07/:37 cadence, avoiding overnight model preparation.
+    if local.hour < 7:
+        emit("outside_build_window", local_time=local.isoformat(), start_hour_et=7)
+        return 0
     preview = local.hour < 9
     if args.commit and os.getenv("NCAAF_AUTO_BUILDER_ENABLED", "").lower() not in {"1", "true", "yes"}:
         raise RuntimeError("Set NCAAF_AUTO_BUILDER_ENABLED=1 to enable scheduled saves.")
@@ -159,7 +164,7 @@ def run(args):
                 game = match_schedule(market, schedule)
                 if any(str(game.get(f"{side} Classification", "")).strip().lower() != "fbs"
                        for side in ("Away", "Home")):
-                    raise ValueError("requires verified FBS-vs-FBS schedule classifications")
+                    raise ValueError("requires explicit FBS-vs-FBS schedule classifications")
                 if protected_matchup(market, game, protected + previews):
                     emit("already_saved", game=market.summary()["game"])
                     continue

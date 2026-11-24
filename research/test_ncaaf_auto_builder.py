@@ -292,7 +292,7 @@ def test_preview_rejects_started_stale_and_manual_games(database):
 
 
 @pytest.mark.parametrize('hour,commit,classification,fallback', [
-    (8, True, 'fbs', False), (9, True, 'fbs', False),
+    (7, True, 'fbs', False), (8, True, 'fbs', False), (9, True, 'fbs', False),
     (8, False, 'fbs', False), (8, True, 'fcs', False),
     (8, True, 'unknown', False), (8, True, 'fbs', True),
     (8, True, 'fbs', 'unavailable'),
@@ -341,3 +341,48 @@ def test_real_entry_point_morning_and_normal_lifecycle(database, monkeypatch, ho
     written = db.rows_written
     assert runner.run(args) == 0
     assert db.rows_written == written
+
+
+@pytest.mark.parametrize('hour', [0, 3, 6])
+def test_no_overnight_database_or_model_work(monkeypatch, capsys, hour):
+    from scripts import run_ncaaf_builder as runner
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return NOW.replace(hour=hour + 5)
+    monkeypatch.setattr(runner, 'datetime', Clock)
+    monkeypatch.setattr(turso, 'is_turso_ready', lambda: pytest.fail('overnight database work'))
+    assert runner.run(SimpleNamespace(ignore_window=True, commit=True, evaluate=False, limit=8)) == 0
+    assert json.loads(capsys.readouterr().out)['event'] == 'outside_build_window'
+
+
+def test_production_slate_schema_publishes_kickoff_and_indexed_identity(database):
+    import ast
+    from pathlib import Path
+    # Use the actual production schema, which deliberately has Date but no Game Time.
+    tree = ast.parse(Path('builders/cfb_builder.py').read_text())
+    columns = next(ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
+                   and any(isinstance(t, ast.Name) and t.id == 'SLATE_COLUMNS' for t in node.targets))
+    assert 'Date' in columns and 'Game Time' not in columns
+    class ProductionShape(Builder):
+        SLATE_COLUMNS = columns
+        def slate_row(self, result):
+            row = super().slate_row(result)
+            row['Date'] = result['game']['Game Date']
+            row['Model Version'] = self.MODEL_VERSION
+            row['Projected Margin'], row['Projected Total'] = 10, 50
+            return row.reindex(columns=self.SLATE_COLUMNS).astype(object)
+    db, connection, _ = database
+    _, result, market = save_fixture()
+    result['game'].update({'Game Date': market.date, 'Game Time': market.kickoff.isoformat(),
+                          'Away Classification': 'fbs', 'Home Classification': 'fbs'})
+    for preview in [True, False]:
+        assert save_once(db, ProductionShape(), result, market, now=NOW, preview=preview)
+        dataset = 'game_previews' if preview else 'daily_slate'
+        raw, date_key, game_key = connection.execute('SELECT payload_json,date_key,game_key FROM dataset_rows WHERE dataset=?', (dataset,)).fetchone()
+        row = json.loads(raw)
+        assert date_key == row['Date'] == market.date
+        assert game_key == row['Game ID'] == '123'
+        assert timestamp(row['Game Time']) == market.kickoff
+        assert timestamp(row['Build At']) == NOW
+        assert row['Projected Home'] == '30' and row['Projected Away'] == '20'
