@@ -248,8 +248,8 @@ def protected_matchup(market, schedule, protected_rows):
     return False
 
 
-def save_once(db: Database, builder, result, market: MarketGame, now=None):
+def save_once(db: Database, builder, result, market: MarketGame, now=None, preview=False):
     """Atomically protect saved/manual games, then save only this matchup's rows."""
     from shared.cfb_auto_persistence import save_once_transaction
-    return save_once_transaction(db, builder, result, market, now=now)
+    return save_once_transaction(db, builder, result, market, now=now, preview=preview)
 

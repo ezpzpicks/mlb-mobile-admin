@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Run today's unsaved NCAAF games with ScoresAndOdds or fallback Covers lines.
 
-Default: read-only plan. --evaluate computes without saving. --commit explicitly
+From 7–9 AM Eastern, save an ungraded preview; normal saves retain their
+existing 9 AM start. Default: read-only plan. --evaluate computes without saving. --commit explicitly
 enables atomic saves, and additionally requires NCAAF_AUTO_BUILDER_ENABLED=1.
 """
 from __future__ import annotations
@@ -110,9 +111,12 @@ def compute(builder, schedule, market, ratings):
 def run(args):
     now = datetime.now(timezone.utc)
     local = now.astimezone(ET)
-    if not args.ignore_window and not (9 <= local.hour <= 23):
-        emit("outside_build_window", local_time=local.isoformat())
+    # NCAAM has no time gate. NCAAF deliberately starts at 7 AM Eastern
+    # on the existing :07/:37 cadence, avoiding overnight model preparation.
+    if local.hour < 7:
+        emit("outside_build_window", local_time=local.isoformat(), start_hour_et=7)
         return 0
+    preview = local.hour < 9
     if args.commit and os.getenv("NCAAF_AUTO_BUILDER_ENABLED", "").lower() not in {"1", "true", "yes"}:
         raise RuntimeError("Set NCAAF_AUTO_BUILDER_ENABLED=1 to enable scheduled saves.")
     from shared import turso_storage as turso
@@ -153,11 +157,15 @@ def run(args):
         if not markets:
             emit("no_eligible_markets", date=day)
             return 0
+        previews = db.rows("game_previews", day) if preview else []
         pending = []
         for market in markets:
             try:
                 game = match_schedule(market, schedule)
-                if protected_matchup(market, game, protected):
+                if any(str(game.get(f"{side} Classification", "")).strip().lower() != "fbs"
+                       for side in ("Away", "Home")):
+                    raise ValueError("requires explicit FBS-vs-FBS schedule classifications")
+                if protected_matchup(market, game, protected + previews):
                     emit("already_saved", game=market.summary()["game"])
                     continue
                 # Legacy manual saves may predate the completion marker. Match
@@ -187,11 +195,11 @@ def run(args):
                     emit("skipped", game=market.summary()["game"], reason="game started while preparing model inputs")
                     continue
                 result = compute(builder, game, market, context[key])
-                saved = save_once(db, builder, result, market) if args.commit else False
+                saved = save_once(db, builder, result, market, preview=preview) if args.commit else False
                 slate = builder.slate_row(result).iloc[0]
-                emit("built", game=market.summary()["game"], game_id=str(game["Game ID"]), saved=saved,
-                     spread=slate["Spread Pick"], spread_grade=slate["Spread Grade"],
-                     total=slate["Total Pick"], total_grade=slate["Total Grade"],
+                emit("built", phase="preview" if preview else "pregame", game=market.summary()["game"], game_id=str(game["Game ID"]), saved=saved,
+                     spread=slate["Spread Pick"], spread_grade="Ungraded preview" if preview else slate["Spread Grade"],
+                     total=slate["Total Pick"], total_grade="Ungraded preview" if preview else slate["Total Grade"],
                      projected_away=slate["Projected Away"], projected_home=slate["Projected Home"],
                      model_version=builder.MODEL_VERSION, assumed_odds=ASSUMED_ODDS,
                      line_source=market.source)
@@ -209,7 +217,7 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--evaluate", action="store_true")
     mode.add_argument("--commit", action="store_true")
-    parser.add_argument("--ignore-window", action="store_true", help="Allow a supervised trial outside 9 AM–midnight Eastern.")
+    parser.add_argument("--ignore-window", action="store_true", help="Legacy compatibility flag; early runs now produce previews automatically.")
     parser.add_argument("--limit", type=int, default=8)
     args = parser.parse_args()
     if not 1 <= args.limit <= 100:

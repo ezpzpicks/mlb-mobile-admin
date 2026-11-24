@@ -89,7 +89,7 @@ def test_pick_em_zero_spread_is_valid():
 
 def schedule(markets):
     return [{"Game ID": str(i + 1), "Season": "2026", "Week": "9", "Away Team": m.away,
-             "Home Team": m.home, "Game Time": m.kickoff.isoformat()} for i, m in enumerate(markets)]
+             "Home Team": m.home, "Away Classification": "fbs", "Home Classification": "fbs", "Game Time": m.kickoff.isoformat()} for i, m in enumerate(markets)]
 
 
 def test_fallback_only_targets_missing_unsaved_schedule_games():
