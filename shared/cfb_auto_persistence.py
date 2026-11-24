@@ -8,7 +8,7 @@ import json
 from shared.ncaaf_auto_builder import ASSUMED_ODDS, AUTO_TAB
 
 
-def save_once_transaction(db, builder, result, market, now=None):
+def save_once_transaction(db, builder, result, market, now=None, preview=False):
     from shared import turso_storage as turso
     from builders.cfb_interactive_recovery import _normalized_records, _storage_metadata
 
@@ -33,6 +33,9 @@ def save_once_transaction(db, builder, result, market, now=None):
         "AND (COALESCE(json_extract(payload_json,'$.\"Actual Away\"'),'')<>'' "
         "OR COALESCE(json_extract(payload_json,'$.\"Actual Home\"'),'')<>''))"
     )
+    if preview:
+        guard += (f" AND NOT EXISTS(SELECT 1 FROM dataset_rows WHERE {game_where} "
+                  "AND dataset='game_previews')")
     slate = builder.slate_row(result).copy()
     tracker = builder.tracker_rows(result, False).copy()
     # The unattended trial owns spreads/totals only, even if a future model
@@ -89,6 +92,27 @@ def save_once_transaction(db, builder, result, market, now=None):
         ("builder_completed", [completion], list(completion), ["Date", "Game ID"]),
         (AUTO_TAB, [audit], list(audit), ["Date", "Game ID"]),
     ])
+
+    if preview:
+        # A separate, insert-once native baseline never creates picks, personnel
+        # locks, completion markers, history, or authoritative slate rows.
+        columns = list(dict.fromkeys([*builder.SLATE_COLUMNS, *extension,
+            "Game Time", "Model Version", "Build Phase", "Build At",
+            "Spread Grade", "Total Grade", "ML Grade", "Spread Probability", "Total Probability"]))
+        slate["Game Time"] = market.kickoff.isoformat()
+        if "Model Version" not in slate:
+            slate["Model Version"] = builder.MODEL_VERSION
+        slate["Build Phase"] = "preview"
+        slate["Build At"] = (now or datetime.now(timezone.utc)).isoformat()
+        slate["Build Captured At"] = market.captured.isoformat()
+        slate["Build Source"] = build_source
+        slate["Odds Assumption"] = str(ASSUMED_ODDS)
+        slate["Market Source URL"] = market.source_url
+        for column in ("Spread Grade", "Total Grade", "ML Grade"):
+            slate[column] = "Ungraded preview"
+        for column in ("Spread Probability", "Total Probability"):
+            slate[column] = ""
+        specs = [("game_previews", _normalized_records(slate, columns), columns, ["Date", "Game ID"])]
 
     def request(sql):
         return {"type": "execute", "stmt": {"sql": sql, "args": []}}
