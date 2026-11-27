@@ -219,7 +219,7 @@ def total_confluence(
         (total_edge >= 1.75, "Model edge"),
         (((scoring_sum >= 45.0) == over_pick), "Scoring matchup"),
         (((success_sum >= 0.86) == over_pick), "Success-rate matchup"),
-        (((_num(weather_adjustment) >= -0.25) == over_pick), "Weather/environment"),
+        (weather_adjustment is not None and ((_num(weather_adjustment) >= -0.25) == over_pick), "Weather/environment"),
         (reliability >= 62, "Reliability"),
     ]
     passed = [label for ok, label in checks if ok]
