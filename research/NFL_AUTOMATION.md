@@ -42,8 +42,10 @@ Game spread/total lines still come from fresh retained ScoresAndOdds snapshots;
 their prices retain the previously approved -110 assumption. ESPN Core supplies
 current depth and player injury status, and RotoWire's public inactive lists
 confirm game-day eligibility. Being active does not assert health or a normal
-workload. Outdoor games require current Covers weather; enclosed games use the
-checked roof designation. Missing or ambiguous inputs block the affected game.
+workload. A complete Covers card fetched within 30 minutes supplies outdoor weather.
+Missing, stale or malformed weather contributes zero points and no confluence vote.
+Provenance records the reason and leaves unavailable measurements empty. Enclosed
+games use the checked schedule roof. Other required input checks still apply.
 
 `builders/nfl_production.py` loads the same complete production model used by
 the admin. Its fitted coefficients, player tiers and grades are unchanged.

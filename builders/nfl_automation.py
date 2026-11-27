@@ -248,18 +248,34 @@ def weekly_inputs(builder, db, season, week, *, now, commit, on_event):
 
 def environment(builder, game):
     from builders import nfl_covers
-    defaults = builder._schedule_defaults(pd.Series(game))
-    roof = str(defaults.get("roof", "outdoors")).lower()
+    raw_roof = str(game.get("Roof", "")).strip().lower()
+    roof = raw_roof if raw_roof in {"dome", "closed", "open", "outdoors", "outdoor"} else None
+    result = {"roof": roof, "temperature": None, "wind": None, "precipitation": None,
+        "status": "unavailable", "source": "Covers.com", "reason": None, "fetched_at": None}
     if roof in {"dome", "closed"}:
-        return {"roof": roof, "temperature": 70.0, "wind": 0.0, "precipitation": "None", "source": "Checked schedule: enclosed stadium"}
-    # The admin permits manual weather overrides. An unattended run must have a
-    # current Covers card rather than silently using the UI's 70 F / 6 mph defaults.
-    if defaults.get("weather_source") != "Covers.com":
-        raise SourceError("Current Covers weather is unavailable for this outdoor NFL game.")
-    cache = nfl_covers.CACHE_FILE
-    if not cache.is_file() or datetime.now().timestamp() - cache.stat().st_mtime > 1800:
-        raise SourceError("Covers weather cache is stale; no automatic outdoor forecast saved.")
-    return {**{k: defaults[k] for k in ("roof", "temperature", "wind", "precipitation")}, "source": "Covers.com"}
+        return {**result, "status": "enclosed", "source": "Checked schedule: enclosed stadium"}
+
+    try:
+        card = nfl_covers._match_weather(game["Away Team"], game["Home Team"])
+    except (OSError, ValueError, TypeError, AttributeError, RuntimeError):
+        return {**result, "reason": "Weather provider lookup failed"}
+    if not isinstance(card, dict) or not card:
+        return {**result, "reason": "No matching weather card"}
+    fetched = number(card.get("fetched_at"))
+    if fetched is None or not 0 <= datetime.now(timezone.utc).timestamp() - fetched <= nfl_covers.WEATHER_TTL:
+        return {**result, "reason": "Missing or stale weather fetch time"}
+    result["fetched_at"] = datetime.fromtimestamp(fetched, timezone.utc).isoformat()
+    temp, wind = number(card.get("temperature")), number(card.get("wind"))
+    precip = card.get("precipitation")
+    if temp is not None and -100 <= temp <= 140:
+        result["temperature"] = temp
+    if wind is not None and 0 <= wind <= 200:
+        result["wind"] = wind
+    if card.get("condition_supported") is True and precip in ("None", "Rain", "Heavy Rain", "Snow", "Heavy Snow"):
+        result["precipitation"] = precip
+    if any(result[key] is None for key in ("temperature", "wind", "precipitation")):
+        return {**result, "reason": "Incomplete or malformed weather card"}
+    return {**result, "status": "available"}
 
 
 def input_identity(game, market, quotes, depth, weather, inactives):
@@ -268,7 +284,7 @@ def input_identity(game, market, quotes, depth, weather, inactives):
     value = {"game": {k: game[k] for k in ("Game ID", "Game Time", "Away Team", "Home Team", "Season", "Week")},
         "market": [market.home_spread, market.total], "quotes": sorted(quotes, key=lambda q: (q["team"], q["player"], q["market"], q["book"])),
         "depth": sorted(records(depth), key=lambda r: (r["team_norm"], r["pos_norm"], r["pos_rank_num"], r["name_norm"])),
-        "weather": weather, "inactives": {t: inactives["teams"].get(t, []) for t in (game["Away Team"], game["Home Team"])} if inactives else {}}
+        "weather": {k: v for k, v in weather.items() if k != "fetched_at"}, "inactives": {t: inactives["teams"].get(t, []) for t in (game["Away Team"], game["Home Team"])} if inactives else {}}
     return hashlib.sha256(json.dumps(clean(value), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
@@ -304,7 +320,7 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         if skill["Player"].astype(str).str.upper().isin(["", "TBD", "UNKNOWN"]).any():
             raise SourceError(f"The current {team} skill-position depth is incomplete.")
     weather = environment(builder, game)
-    weather_adjustment = builder._weather_adjustment(weather["roof"], weather["temperature"], weather["wind"], weather["precipitation"])
+    weather_adjustment = builder._weather_adjustment(weather["roof"], weather["temperature"], weather["wind"], weather["precipitation"]) if weather["status"] == "available" else 0.0
     reliability, data_confidence, personnel_confidence = builder._reliability(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"], game["Week"], False)
     hfa = builder._automatic_home_field_advantage(game["Season"], game["Week"], game["Home Team"], pd.Series(game))
     projection = builder._project_matchup(ratings["Away"], ratings["Home"], summaries["Away"], summaries["Home"],
@@ -333,14 +349,14 @@ def compute(builder, game, market, weekly, depth, props, *, now, phase, depth_at
         else:
             pick = f"{'Over' if positive else 'Under'} {market.total:.1f}"
             edge = (projection["total"] - market.total) * (1 if positive else -1)
-            confluence, _ = builder._total_confluence(positive, edge, projection, ratings["Away"], ratings["Home"], weather_adjustment, reliability)
+            confluence, _ = builder._total_confluence(positive, edge, projection, ratings["Away"], ratings["Home"], None if weather["status"] == "unavailable" else weather_adjustment, reliability)
             grade = total_grade_projection(projection) if projection.get("total_component") else builder._grade_total_direction(pick, probability, edge, reliability, confluence)
         from shared.modeling import expected_value_per_unit
         if probability <= 0.5 or expected_value_per_unit(probability, -110) <= 0:
             grade = f"Non-Edge {kind}"
         selections[kind] = {"Pick": pick, "Probability": probability, "Edge": round(edge, 2), "Grade": grade, "Confluence": confluence}
     label = f"{game['Away Team']} at {game['Home Team']}"
-    note = f"{POLICY}; {phase}; ScoresAndOdds game lines, assumed -110 game prices; RotoWire actual prop prices; {weather['source']}; availability observed, workload conditional."
+    note = f"{POLICY}; {phase}; ScoresAndOdds game lines, assumed -110 game prices; RotoWire actual prop prices; {weather['source']} ({weather['reason'] or weather['status']}); availability observed, workload conditional."
     version = f"{total_storage_version(storage_version(builder.MODEL_VERSION, projection), projection)}|{POLICY}"
     slate = {"Date": game["Date"], "Season": game["Season"], "Week": game["Week"], "Game ID": game["Game ID"], "Game": label,
         "Away Team": game["Away Team"], "Home Team": game["Home Team"], "Game Time": game["Game Time"],

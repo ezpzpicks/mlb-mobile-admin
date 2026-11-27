@@ -154,8 +154,8 @@ def _parse_weather_html(html: str) -> list[dict[str, Any]]:
             continue
 
         temp_match = re.search(r"(-?\d+(?:\.\d+)?)\s*°\s*F", block, re.I)
-        wind_match = re.search(r"(\d+(?:\.\d+)?)\s*Mph\b", block, re.I)
-        pop_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", block, re.I)
+        wind_match = re.search(r"(-?\d+(?:\.\d+)?)\s*Mph\b", block, re.I)
+        pop_match = re.search(r"(-?\d+(?:\.\d+)?)\s*%\s*(?:P\s*\.?\s*O\s*\.?\s*P\.?|Precip)", block, re.I)
         temp = float(temp_match.group(1)) if temp_match else math.nan
         wind = float(wind_match.group(1)) if wind_match else math.nan
         pop = float(pop_match.group(1)) / 100.0 if pop_match else math.nan
@@ -173,6 +173,9 @@ def _parse_weather_html(html: str) -> list[dict[str, Any]]:
             "wind": wind,
             "precipitation_probability": pop,
             "precipitation": _condition(block, pop),
+            "condition_supported": bool(0 <= pop <= 1 or re.search(
+                r"\b(clear|sunny|cloudy|overcast|fair|snow|rain|showers?|flurries|sleet|drizzle|thunderstorms?)\b",
+                block, re.I)) and (not math.isfinite(pop) or 0 <= pop <= 1),
         })
 
     return output
@@ -184,7 +187,7 @@ def _read_disk_cache(now: float) -> list[dict[str, Any]]:
     try:
         payload = json.loads(CACHE_FILE.read_text())
         cards = payload.get("cards", [])
-        return cards if isinstance(cards, list) else []
+        return [{**card, "fetched_at": payload.get("fetched")} for card in cards if isinstance(card, dict)] if isinstance(cards, list) else []
     except Exception:
         return []
 
@@ -214,7 +217,7 @@ def _weather_cards() -> list[dict[str, Any]]:
         response.raise_for_status()
         if len(response.text) < 500:
             raise RuntimeError("Covers returned an unexpectedly small NFL weather page")
-        cards = _parse_weather_html(response.text)
+        cards = [{**card, "fetched_at": now} for card in _parse_weather_html(response.text)]
         if cards:
             try:
                 CACHE_FILE.write_text(json.dumps({"fetched": now, "cards": cards}))
